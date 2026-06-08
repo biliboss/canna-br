@@ -216,10 +216,18 @@ export async function seed(
       };
     }
 
-    const newConn: ToolServerConnection = {
+    const connectionId = `canna-mcp-${Date.now()}`;
+    const newConn: ToolServerConnection & { path?: string; auth_type?: string; key?: string; description?: string; config?: Record<string, unknown>; info?: Record<string, unknown> } = {
       name: config.mcpServerName,
       url: config.mcpServerUrl,
       type: config.mcpServerType,
+      // OWUI v0.9.6 schema requires `path` + `config` + `info`.
+      path: "",
+      auth_type: "none",
+      key: "",
+      description: "canna-oss MCP server (dispensations + compliance)",
+      config: { enable: true },
+      info: { id: connectionId, name: config.mcpServerName, description: "canna-oss MCP server" },
     };
     const next = [...existing, newConn];
     await postToolServers(fetchFn, config.baseUrl, token, next);

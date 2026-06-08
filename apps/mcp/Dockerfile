@@ -1,24 +1,13 @@
-# canna-oss apps/mcp — multi-stage Docker build
+# canna-oss apps/mcp — multi-stage Docker build (v0.2.1.1)
 #
-# STATUS (2026-06-08): NOT YET BUILDABLE.
-#
-# Missing prerequisites in v0.2.1:
-#   1. apps/mcp/src/server.ts exports createCannaMcpServer() but does NOT
-#      attach a transport. For Docker/Kamal we need EITHER:
-#        (a) stdio mode: a thin wrapper that
-#             `await server.connect(new StdioServerTransport())`
-#            — only useful when OWUI spawns the binary directly (sidecar).
-#        (b) HTTP/SSE mode: server.connect(new SSEServerTransport(...)) on
-#            port 3001 — required for canna-oss to expose
-#            `mcp.canna.fonsecagabriel.com.br` over the network.
-#      Pick one and add as apps/mcp/src/main.ts (or wire it into server.ts).
-#   2. Same pnpm-workspace + tsc-emit concerns as apps/api.
+# Build from monorepo ROOT context:
+#   docker buildx build --platform linux/amd64 -f apps/mcp/Dockerfile -t canna-mcp:v0.2.1.1 .
 
-FROM node:20.18-alpine AS builder
+FROM node:22.12-alpine AS builder
 
 WORKDIR /app
 
-RUN corepack enable && corepack prepare pnpm@10.29.3 --activate
+RUN npm install -g pnpm@10.29.3
 
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json tsconfig.json ./
 COPY tooling/ ./tooling/
@@ -29,15 +18,14 @@ RUN pnpm install --frozen-lockfile --filter @canna/mcp...
 
 COPY apps/mcp/ ./apps/mcp/
 
-RUN pnpm --filter @canna/mcp... build || true
-RUN pnpm prune --prod
+RUN pnpm prune --prod || true
 
 # ---- runtime ----
-FROM node:20.18-alpine AS runtime
+FROM node:22.12-alpine AS runtime
 
 ENV NODE_ENV=production \
-    MCP_PORT=3001 \
-    MCP_HOST=0.0.0.0
+    PORT=3001 \
+    HOST=0.0.0.0
 
 WORKDIR /app
 
@@ -49,8 +37,7 @@ USER canna
 
 EXPOSE 3001
 
-# Healthcheck only meaningful if MCP runs in HTTP/SSE mode.
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
   CMD wget -qO- http://127.0.0.1:3001/health || exit 1
 
-CMD ["node", "--experimental-strip-types", "apps/mcp/src/main.ts"]
+CMD ["node", "--experimental-strip-types", "--no-warnings=ExperimentalWarning", "apps/mcp/src/main.ts"]

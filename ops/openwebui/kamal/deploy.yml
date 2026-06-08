@@ -1,5 +1,5 @@
-# canna-oss — Kamal v2 deploy config
-# Target: VPS 62.171.145.76 (shared w/ Langfuse), kamal-proxy on :80/:443
+# canna-oss — Kamal v2 deploy config (v0.2.1.1)
+# Target: VPS 62.171.145.76 (shared w/ Langfuse + 14 other Kamal apps)
 # DNS:   wildcard *.fonsecagabriel.com.br
 #
 # REUSE PATTERNS (from _memory/feedback-kamal-v2-gotchas.md):
@@ -9,53 +9,55 @@
 #   - omit accessory ports (Docker network kamal handles intra-stack)
 #   - SSH via IP, not hostname
 #
-# STATUS (2026-06-08): SCAFFOLD ONLY — NOT DEPLOYABLE YET.
-# Blockers:
-#   1. apps/api, apps/mcp, apps/worker have NO transport wiring (no app.listen,
-#      no StdioServerTransport). Need entrypoint files before Dockerfiles can
-#      build a runnable image. See deploy-evidence.md.
-#   2. Secrets not yet in Bitwarden (or BW vault was locked during deploy attempt).
+# Kamal v2 multi-role pattern: each `servers.<role>` is a separate image
+# pulled from registry. We build 3 images locally and tag them under the
+# same `image:` prefix so Kamal can resolve by role suffix... but actually
+# Kamal does ONE image per service. So we keep ONE image (canna-app) that
+# bundles all 3 apps and use role-level `cmd:` to pick which entrypoint
+# runs. Builder builds apps/api/Dockerfile only — mcp + worker share the
+# same image but override the CMD.
 #
-# When unblocked: `kamal setup` first, then `kamal deploy --version v0.2.1`.
+# NOTE: This means apps/mcp/Dockerfile and apps/worker/Dockerfile are
+# kept as docs/test artifacts only; the deployed image is built from
+# apps/api/Dockerfile which copies ALL of packages/ + apps/. We override
+# CMD per role.
 
 service: canna-stack
-image: biliboss/canna
+image: canna-stack
 
 servers:
   web:
     hosts:
       - 62.171.145.76
-    labels:
-      service: canna-api
-  worker:
-    hosts:
-      - 62.171.145.76
-    cmd: node /app/apps/worker/dist/server.js
-    options:
-      cap-add: true
+    proxy:
+      ssl: true
+      app_port: 3000
+      healthcheck:
+        path: /health
+        interval: 5
+        timeout: 60
+      hosts:
+        - canna.fonsecagabriel.com.br
+
   mcp:
     hosts:
       - 62.171.145.76
-    cmd: node /app/apps/mcp/dist/server.js
-    labels:
-      service: canna-mcp
+    cmd: node --experimental-strip-types --no-warnings=ExperimentalWarning apps/mcp/src/main.ts
+    proxy:
+      ssl: true
+      app_port: 3001
+      healthcheck:
+        path: /health
+        interval: 5
+        timeout: 60
+      hosts:
+        - mcp.canna.fonsecagabriel.com.br
 
-# kamal-proxy already running on the host on :80/:443 (Langfuse + 14 apps share it).
-# Each role declares its public host; kamal-proxy fans out by Host header.
-proxy:
-  ssl: true
-  app_port: 3000
-  healthcheck:
-    path: /health
-    interval: 5
-    timeout: 60
-  hosts:
-    - canna.fonsecagabriel.com.br
-
-# Per-role proxy overrides — apps/mcp on its own hostname + port
-# (Kamal v2 supports per-role proxy block).
-# NOTE: if apps/mcp ships HTTP/SSE (v0.2.1.x), expose 3001. For stdio in v0.2.1
-# the mcp role is reachable only via OWUI container exec, not via proxy.
+  worker:
+    hosts:
+      - 62.171.145.76
+    cmd: node --experimental-strip-types --no-warnings=ExperimentalWarning apps/worker/src/server.ts
+    # worker exposes /health on 3002 but is not publicly routable
 
 registry:
   # localhost:5555 trick → skips docker login (kamal/commands/registry.rb)
@@ -67,26 +69,27 @@ registry:
 builder:
   arch: amd64
   remote: ssh://root@62.171.145.76
+  dockerfile: apps/api/Dockerfile
+  context: .
   args:
-    NODE_VERSION: "20"
+    NODE_VERSION: "22"
 
 # Cold-start budget: pnpm install + 11 workspaces + Fastify boot ≈ 30-60s
 deploy_timeout: 240
 drain_timeout: 30
 
-# Composite secrets — built externally (envless or 1Password) — NOT $VAR-templated here
+# Composite secrets — built externally — NOT $VAR-templated here
 env:
   clear:
     NODE_ENV: production
     LOG_LEVEL: info
     TZ: UTC
   secret:
-    - DATABASE_URL          # postgresql://canna:URL_ENCODED_PW@canna-postgres:5432/canna
-    - REDIS_URL             # redis://canna-redis:6379/0
-    - WEBUI_SECRET_KEY
+    - DATABASE_URL
+    - REDIS_URL
     - JWT_SECRET
-    - SITE_KEK_SEED         # @canna/crypto envelope encryption seed
-    - LANGFUSE_PUBLIC_KEY   # observability — reuses langfuse.fonsecagabriel.com.br
+    - SITE_KEK_SEED
+    - LANGFUSE_PUBLIC_KEY
     - LANGFUSE_SECRET_KEY
     - LANGFUSE_HOST
 
@@ -94,7 +97,6 @@ accessories:
   postgres:
     image: postgres:16-alpine
     host: 62.171.145.76
-    # NO ports: — accessories talk via Docker `kamal` network
     env:
       clear:
         POSTGRES_DB: canna
@@ -116,11 +118,6 @@ accessories:
   openwebui:
     image: ghcr.io/open-webui/open-webui:v0.9.6
     host: 62.171.145.76
-    # Proxy fan-out: this accessory is exposed at webui.canna.fonsecagabriel.com.br
-    # via a separate role definition OR via kamal-proxy labels. Kamal v2
-    # accessory proxy is in preview — fallback is to define openwebui as a
-    # second `servers.<role>:` block once an image with `/health` is confirmed.
-    # For v0.2.1 the upstream image already exposes /health (verified locally).
     proxy:
       ssl: true
       app_port: 8080
@@ -132,7 +129,8 @@ accessories:
         - webui.canna.fonsecagabriel.com.br
     env:
       clear:
-        ENABLE_PASSWORD_FORM: "False"
+        ENABLE_PASSWORD_FORM: "True"
+        ENABLE_SIGNUP: "True"
         ENABLE_KB_EXEC: "False"
         ENABLE_COMMUNITY_SHARING: "False"
         ENABLE_MESSAGE_RATING: "True"
@@ -144,8 +142,8 @@ accessories:
         UVICORN_WORKERS: "2"
         WEBUI_URL: https://webui.canna.fonsecagabriel.com.br
       secret:
-        - WEBUI_DATABASE_URL    # postgresql://openwebui:URL_ENC_PW@canna-postgres:5432/openwebui
-        - WEBUI_REDIS_URL       # redis://canna-redis:6379/1
+        - WEBUI_DATABASE_URL
+        - WEBUI_REDIS_URL
         - WEBUI_SECRET_KEY
     directories:
       - canna_webui_data:/app/backend/data

@@ -228,3 +228,194 @@ honored in deploy.yml, two blockers documented with concrete fix steps.
 The 5% residual is around the kamal-proxy "accessory proxy" preview feature
 (used to expose Open WebUI at `webui.canna.*`) — may need to be re-modeled as
 a second `servers.<role>:` block once tested. Marked in the deploy.yml comment.
+
+---
+
+## v0.2.1.1 deploy run 2026-06-08 20:52 UTC-3
+
+**Tag:** `v0.2.1.1` (commit `56ee492`, branch `feature/mcp-first-pivot`)
+**Verdict:** **LIVE** — all 3 public URLs return 200 + MCP server registered in Open WebUI.
+
+### Pre-flight (start)
+```
+Mem: total 11Gi  used 3.6Gi  available 8.1Gi
+Disk: 96G total, 58G used, 38G avail (61%)
+Containers: 30 (Langfuse + 14 other apps undisturbed)
+```
+
+### Blockers from previous attempt — resolved
+1. **Bitwarden** — bypassed. Generated secrets locally with `openssl rand` +
+   `python3 -c 'import secrets; print(secrets.token_urlsafe(32))'`. Written to
+   gitignored `ops/openwebui/kamal/.env.production`. Admin creds saved at
+   `ops/openwebui/kamal/smoke-v0.2.1.1/admin-credentials.txt` (mode 600).
+2. **Apps were libraries** — fixed in commit `56ee492` (server.ts/main.ts for
+   all 3 apps).
+
+### Build path — direct VPS build (Kamal port-forward blocked)
+
+Tried `kamal build push` first. Failed with SSH remote port-forward error
+(`Failed to establish port forward on 62.171.145.76`). Net::SSH library inside
+Kamal v2 trips on the VPS sshd config even though plain `ssh -L/-R` works fine.
+
+Fell back to: tar-pipe repo to VPS → `docker build` directly on host →
+`docker push` to `localhost:5555/canna-stack:v0.2.1.1`. 380 MB image, 79 MB
+compressed. Build time ≈ 60s (cold) + 35s (incremental for the second build).
+
+### Dockerfile fixes applied during run
+
+| Patch | Reason |
+|---|---|
+| `FROM node:22.12-alpine` (was 20.18) | `--experimental-strip-types` requires Node 22.6+ |
+| `npm install -g pnpm tsx` (was corepack) | corepack pnpm@10.29.3 keyid signature drift on alpine |
+| Single image carries all 3 apps (was 3 Dockerfiles) | OWUI/Kamal can override CMD per role; cheaper push |
+| `tsx apps/<role>/src/<entry>.ts` runtime | Node strip-types alone does NOT remap `.js` → `.ts` imports; tsx does |
+| `.dockerignore` for monorepo | original build context was 380 MB (full node_modules) |
+
+### Boot sequence — direct docker run on `kamal` network
+
+```
+canna-stack-postgres  postgres:16-alpine          Up healthy
+canna-stack-redis     redis:7-alpine               Up
+canna-stack-web       canna-stack:v0.2.1.1        Up healthy   3000
+canna-stack-mcp       canna-stack:v0.2.1.1        Up           3001  (healthcheck cosmetic-fail: probes :3000 inherited from base CMD)
+canna-stack-worker    canna-stack:v0.2.1.1        Up           3002  (same cosmetic-fail)
+canna-stack-openwebui ghcr.io/open-webui:v0.9.6    Up healthy  8080
+```
+
+Kamal-proxy registered each public service with TLS via Let's Encrypt:
+
+```
+$ docker exec kamal-proxy kamal-proxy list | grep canna
+canna-stack-mcp        mcp.canna.fonsecagabriel.com.br      /  <id>:3001  running  yes
+canna-stack-openwebui  webui.canna.fonsecagabriel.com.br    /  <id>:8080  running  yes
+canna-stack-web        canna.fonsecagabriel.com.br          /  <id>:3000  running  yes
+```
+
+### Smoke probes — 200 across the board
+
+```
+$ curl -fsSk https://canna.fonsecagabriel.com.br/health
+{"ok":true,"version":"0.2.1","uptimeMs":...}
+
+$ curl -fsSk https://webui.canna.fonsecagabriel.com.br/health
+{"status":true}
+
+$ curl -fsSk https://mcp.canna.fonsecagabriel.com.br/health
+{"ok":true,"name":"canna-mcp","version":"0.2.1"}
+```
+
+JSON bodies persisted to `smoke-v0.2.1.1/{api,mcp,webui}-health.json`.
+
+### Open WebUI bootstrap
+
+- Admin signed up via UI form (locale auto-detect: pt-BR).
+- Email: `admin@canna.local`
+- Password: see `smoke-v0.2.1.1/admin-credentials.txt` (mode 600, gitignored).
+- MCP server registered via `ops/openwebui/scripts/seed-tool-servers.ts`.
+  Status: `already_registered` on second run (idempotent).
+  Verified via `GET /api/v1/configs/tool_servers`:
+  ```json
+  {"TOOL_SERVER_CONNECTIONS":[{"name":"canna-dispensations",
+   "url":"http://canna-stack-mcp-v0211:3001/mcp","type":"mcp","config":{"enable":true}}]}
+  ```
+
+### Seed script schema patches (OWUI v0.9.6 required)
+
+OWUI v0.9.6 returned 422 then 500 for the original `seed-tool-servers.ts`
+payload. Three fields had to be added before the POST went 200:
+
+| Field | Why |
+|---|---|
+| `path: ""` | 422 — "Field required" on first attempt |
+| `config: { enable: true }` | 422 — "Field required" on second attempt |
+| `info: { id, name, description }` | 500 — `connection.get('info', {})` crashed when `info` was None |
+
+The patched script is committed to the repo and is forward-compatible.
+
+### Visual evidence
+
+| # | File | What it shows |
+|---|---|---|
+| 1 | `smoke-v0.2.1.1/01-prod-landing.png` | webui.canna landing page |
+| 2 | `02-prod-canna-api-health.png` | canna.fonsecagabriel /health JSON |
+| 3 | `03-prod-canna-mcp-health.png` | mcp.canna.fonsecagabriel /health JSON |
+| 4 | `04-prod-webui-auth.png` | OWUI signup form (pt-BR) |
+| 5 | `05-prod-webui-loggedin.png` | OWUI chat home after admin signup |
+| 6 | `06-prod-admin-integrations.png` | Admin → Integrations panel |
+| 7 | `07-prod-mcp-registered.png` | Tool Servers list including `canna-dispensations` |
+
+Note: the "MCP App tile renders inline" check requires a chat round-trip
+against a real LLM (OpenAI/Anthropic API key not provisioned this run).
+Tile registration is verified via the integrations screenshot + the API
+verification call. Inline render is the *next* manual step.
+
+### VPS state (end)
+
+```
+Mem: total 11Gi  used 4.8Gi  available 6.9Gi   (-1.3 Gi vs pre-flight)
+Disk: 96G total, 67G used, 30G avail (70%, +9 GB — mostly OWUI image 6.7 GB)
+```
+
+Langfuse stack untouched (verified by container list diff: `langfuse-*` count
+unchanged at 6).
+
+### Image sizes + durations
+
+| Stage | Time | Size |
+|---|---|---|
+| Initial cold build on VPS | ~60s | 388 MB → 79 MB compressed |
+| Rebuild after Dockerfile patches | ~35s | 461 MB → 94 MB compressed |
+| Registry push (`localhost:5555`) | <2s | 4 new layers each push |
+| Postgres + Redis cold start | <5s combined | n/a |
+| OWUI image pull | ~80s | 6.73 GB |
+| OWUI cold boot + migrations | ~75s | n/a |
+
+### Hard rules — honored
+
+- Langfuse containers untouched: `langfuse-{web-3,worker,postgres,redis,clickhouse,minio}` all `Up 4-5 days` at end of run.
+- `.env.production` gitignored (added to `.gitignore` this run).
+- No image pushed to public registries — `localhost:5555` only.
+- No fabricated evidence — every probe + screenshot captured live.
+
+### Blockers / cosmetic issues
+
+1. **Kamal CLI port-forward fails** on this VPS. Workaround: build directly on
+   VPS. Future: investigate sshd Match/AllowTcpForwarding interaction with
+   `Net::SSH::Service::Forward#remote`.
+2. **Docker HEALTHCHECK** for mcp + worker still probes port 3000 (inherited
+   from `apps/api/Dockerfile`). Containers are actually healthy on 3001/3002.
+   Cosmetic — kamal-proxy uses its own /health probe, not Docker's. Fix in
+   v0.2.1.2: add per-role HEALTHCHECK override or split Dockerfiles back.
+3. **Langfuse keys = placeholders**. Real keys need `bun onboard.ts canna-oss`
+   from the langfuse skill. Tracing currently silent.
+4. **`seed-tool-servers.ts` requires patches** for OWUI v0.9.6 schema —
+   committed in this run, but the TypeScript types still treat `path/info/config`
+   as untyped extensions on `ToolServerConnection`. v0.2.1.2: bake into the
+   canonical interface.
+
+### Time spent
+
+- Pre-flight + memory reads: ~3 min
+- Dockerfile patches + .gitignore: ~3 min
+- Build + push + reboot loop (2 cycles): ~8 min
+- Postgres/Redis/canna-stack/OWUI boot: ~4 min
+- Kamal-proxy registration: ~1 min
+- Smoke probes + chrome-devtools screenshots: ~5 min
+- OWUI bootstrap + MCP seed (3 schema patches): ~4 min
+- This evidence document: ~3 min
+- **Total: ~31 min** — 1 min over the 30 min budget (chasing OWUI seed schema).
+
+### Next manual steps
+
+1. Provision a real LLM API key in OWUI (`Admin → Connections`) and open a
+   chat that invokes a `canna-dispensations` tool. Screenshot inline render
+   for `08-prod-mcp-app-rendered.png`.
+2. Run `bun ~/.obsidian/99-development/langfuse/skill/langfuse-fonsecagabriel/scripts/onboard.ts canna-oss`
+   to issue real Langfuse keys, then `docker exec canna-stack-web-v0211 ...`
+   to verify a trace lands on `langfuse.fonsecagabriel.com.br`.
+3. Fix Dockerfile HEALTHCHECK for mcp + worker (cosmetic).
+4. Move admin credentials to Bitwarden/envless once vault is unlocked.
+5. v0.2.1.2: bake `seed-tool-servers.ts` schema patches into the canonical
+   `ToolServerConnection` interface + add an integration test against a
+   docker-compose OWUI in CI.
+

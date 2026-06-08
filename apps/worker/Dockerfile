@@ -1,22 +1,13 @@
-# canna-oss apps/worker — multi-stage Docker build
+# canna-oss apps/worker — multi-stage Docker build (v0.2.1.1)
 #
-# STATUS (2026-06-08): NOT YET BUILDABLE.
-#
-# Missing prerequisites in v0.2.1:
-#   1. apps/worker exports createCannaWorker() but has no src/server.ts that:
-#        - reads REDIS_URL,
-#        - instantiates BullMQ Worker(s) for sngpc-submission/dispensation-pdf/
-#          member-email queues,
-#        - keeps the process alive,
-#        - handles SIGTERM by closing the workers.
-#      → Need: apps/worker/src/server.ts wiring all 3 processors.
-#   2. Same pnpm-workspace concerns as apps/api.
+# Build from monorepo ROOT context:
+#   docker buildx build --platform linux/amd64 -f apps/worker/Dockerfile -t canna-worker:v0.2.1.1 .
 
-FROM node:20.18-alpine AS builder
+FROM node:22.12-alpine AS builder
 
 WORKDIR /app
 
-RUN corepack enable && corepack prepare pnpm@10.29.3 --activate
+RUN npm install -g pnpm@10.29.3
 
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json tsconfig.json ./
 COPY tooling/ ./tooling/
@@ -27,13 +18,14 @@ RUN pnpm install --frozen-lockfile --filter @canna/worker...
 
 COPY apps/worker/ ./apps/worker/
 
-RUN pnpm --filter @canna/worker... build || true
-RUN pnpm prune --prod
+RUN pnpm prune --prod || true
 
 # ---- runtime ----
-FROM node:20.18-alpine AS runtime
+FROM node:22.12-alpine AS runtime
 
-ENV NODE_ENV=production
+ENV NODE_ENV=production \
+    PORT=3002 \
+    HOST=0.0.0.0
 
 WORKDIR /app
 
@@ -43,8 +35,9 @@ COPY --from=builder --chown=canna:canna /app /app
 
 USER canna
 
-# Worker has no HTTP surface — no EXPOSE. Healthcheck via process liveness.
-HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
-  CMD pgrep -f "apps/worker/src/server.ts" || exit 1
+EXPOSE 3002
 
-CMD ["node", "--experimental-strip-types", "apps/worker/src/server.ts"]
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+  CMD wget -qO- http://127.0.0.1:3002/health || exit 1
+
+CMD ["node", "--experimental-strip-types", "--no-warnings=ExperimentalWarning", "apps/worker/src/server.ts"]
