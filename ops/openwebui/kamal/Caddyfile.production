@@ -1,0 +1,79 @@
+# canna-oss — Caddy production snippet
+#
+# NOTE: VPS 62.171.145.76 uses kamal-proxy on :80/:443 (not Caddy).
+# This file is here for the *alternative* path where Caddy is the edge
+# (e.g. if migrating away from kamal-proxy or for the dev VPS).
+#
+# Wildcard cert for *.fonsecagabriel.com.br assumed.
+
+canna.fonsecagabriel.com.br {
+	reverse_proxy 127.0.0.1:3000  # apps/api
+
+	encode gzip zstd
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Frame-Options "SAMEORIGIN"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+
+	log {
+		output file /var/log/caddy/canna-api.access.log {
+			roll_size 50MiB
+			roll_keep 10
+		}
+		format json
+	}
+}
+
+webui.canna.fonsecagabriel.com.br {
+	reverse_proxy 127.0.0.1:8080  # Open WebUI
+
+	encode gzip zstd
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Frame-Options "SAMEORIGIN"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+
+	# Generous upload for RAG attachments (PDFs, sheets).
+	request_body {
+		max_size 100MB
+	}
+
+	log {
+		output file /var/log/caddy/webui.canna.access.log {
+			roll_size 50MiB
+			roll_keep 10
+		}
+		format json
+	}
+}
+
+mcp.canna.fonsecagabriel.com.br {
+	reverse_proxy 127.0.0.1:3001  # apps/mcp HTTP/SSE (v0.2.1.x)
+
+	encode gzip zstd
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+
+	# MCP SSE needs no buffering and long timeouts
+	reverse_proxy /sse* 127.0.0.1:3001 {
+		flush_interval -1
+	}
+
+	log {
+		output file /var/log/caddy/mcp.canna.access.log {
+			roll_size 50MiB
+			roll_keep 10
+		}
+		format json
+	}
+}

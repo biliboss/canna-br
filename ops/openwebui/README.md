@@ -28,10 +28,22 @@ sed -i "s|replace-with-secrets-token-urlsafe-32|$(python3 -c 'import secrets; pr
 # 2. up
 docker compose up -d
 docker compose logs -f open-webui
+
+# 3. pós-deploy: registrar MCP server (idempotente, safe to re-run)
+OWUI_ADMIN_EMAIL=admin@canna.local \
+OWUI_ADMIN_PASSWORD=...           \
+MCP_SERVER_URL=http://canna-mcp:3001/sse \
+  ./scripts/seed-tool-servers.sh
 ```
 
 OWUI escuta em `127.0.0.1:8080`. TLS termina no Caddy/Traefik (ver
 `Caddyfile.example`).
+
+> **Pós-deploy seed** — `scripts/seed-tool-servers.sh` (canonical) registra o
+> MCP server `canna-dispensations` via `POST /api/v1/configs/tool_servers`.
+> Idempotente, zero third-party deps (Node 20+ fetch only). Roda como Kamal v2
+> `post-deploy` hook. Detalhes: `Kamal.deploy.notes.md` seção "Deploy seed
+> script". Testes: `pnpm --filter @canna/owui-scripts test`.
 
 ---
 

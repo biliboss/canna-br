@@ -7,7 +7,7 @@ description: "Surface pivot: primary product UI = MCP server + MCP Apps inside O
 
 | Campo | Valor |
 |---|---|
-| Status | **Accepted** (Gabriel pivot 2026-06-08) |
+| Status | **Accepted + Smoke Validated (2026-06-08)** (Gabriel pivot 2026-06-08) |
 | Data | 2026-06-08 |
 | Versão | v0.2.1+ |
 | Substitui | Parcialmente [ADR-001](/adr/0001-domain-kernel-emmett/) na **camada de interface**. Camada de domínio + event-sourcing inalterada. |
@@ -128,6 +128,102 @@ Antes de promover esta ADR para Accepted, validamos:
 8. Open WebUI sidecar docker-compose + MCP config wiring
 9. OAuth 2.1 + scope-to-role mapping
 10. Pilot deploy em 1 associação
+
+## Smoke Validation 2026-06-08
+
+Sub-agent G executou smoke end-to-end no commit `147009f` (tag `v0.2.1`, branch `feature/mcp-first-pivot`). Verdict: **PARTIAL PASS** — stack boota verde, bundles renderizam, OWUI tool-server registration exige seed script (Lane I em flight).
+
+### Stack boot
+
+- `docker compose up -d` em `ops/openwebui/` → 3 containers (OWUI v0.9.6 + Postgres 16 + Redis 7) healthy.
+- Cold start: ~44s (image pull cached). RAM steady ~3 GB combinado.
+- OWUI responde em `127.0.0.1:8080` (admin form login `ENABLE_PASSWORD_FORM=true` em smoke override).
+
+### Bundle render
+
+Os 3 MCP Apps prontos buildam para single-file HTML com inlining estático (script + style inline) via `packages/ui-apps` Vite SSG step. Servidos por um HTTP server local na porta 8081 durante smoke, todos retornam 200 e renderizam:
+
+- `MemberQuotaCardApp` ([manifest](https://github.com/canna-oss/canna-oss/blob/main/packages/ui-apps/src/member-quota-card/index.ts)) — empty state + populated state OK
+- `TraceabilityTimelineApp` ([manifest](https://github.com/canna-oss/canna-oss/blob/main/packages/ui-apps/src/traceability-timeline/index.ts)) — timeline renderiza com phases ordenadas
+- `DispensationFormApp` ([manifest](https://github.com/canna-oss/canna-oss/blob/main/packages/ui-apps/src/dispensation-form/index.ts)) — form submit dispara postMessage `ui/tools/call`
+
+### OWUI MCP registration reality
+
+GOTCHA descoberto no smoke: `ops/openwebui/mcp_config.json` é **template/seed**, NÃO arquivo carregado pelo OWUI v0.9.6 no boot. OWUI persiste tool servers no Postgres na tabela `tool_server_connection`. Registro acontece em runtime via duas vias:
+
+- **Admin UI:** Settings → Integrações → Servidores de Ferramentas → + (manual, 1× por servidor)
+- **API:** `POST /api/v1/configs/tool_servers` com bearer token de admin (idempotente; seed script em `ops/openwebui/scripts/seed-tool-servers.ts` — Lane I)
+
+Docs operacionais atualizados: [`ops/openwebui/README.md`](https://github.com/canna-oss/canna-oss/blob/main/ops/openwebui/README.md) + [`ops/openwebui/Kamal.deploy.notes.md`](https://github.com/canna-oss/canna-oss/blob/main/ops/openwebui/Kamal.deploy.notes.md) seção "MCP server registration — RUNTIME".
+
+### postMessage canonical contract
+
+Host (OWUI / Claude.ai / ChatGPT) ↔ App (iframe) usa `window.postMessage` bidirecional. Schema canônico baseado em ext-apps spec:
+
+```ts
+// Host → App (push de payload inicial / refresh)
+window.postMessage({
+  type: "ui/notifications/tool-result",
+  params: { content: [{ text: JSON.stringify(canonicalPayload) }] }
+}, "*")
+
+// App → Host (Tool L2/L3 invocation a partir de form submit, etc.)
+window.parent.postMessage({
+  type: "ui/tools/call",
+  params: { name: "request_record_dispensation", arguments: {...} }
+}, "*")
+```
+
+App-side handlers (em `main.ts` de cada bundle) ouvem `message` events e fazem `JSON.parse(content[0].text)` defensivo — tolerância a payload já-objeto ou string (patch landed pós-smoke em `member-quota-card/main.ts`).
+
+### Canonical payload shapes
+
+Cada App declara seu schema esperado no manifest `index.ts`. Resumo:
+
+- **MemberQuotaCardApp** (read-only) — espera:
+  ```ts
+  {
+    memberId: string,
+    status: "active" | "suspended" | "pending",
+    consumedG: number,
+    prescription: { monthlyQuotaG: number },
+    recent: Array<{ date: string, quantityG: number, lotId: string }>
+  }
+  ```
+- **TraceabilityTimelineApp** (read-only) — espera:
+  ```ts
+  {
+    dispensationId: string,
+    timeline: Array<{ phase: string, date: string, data: Record<string, unknown> }>
+  }
+  ```
+- **DispensationFormApp** — não recebe payload inicial (form em branco); emite Tool call `request_record_dispensation` no submit com `{ memberId, lotId, quantityG, dispensedAt }`.
+
+### Evidence
+
+9 screenshots em [`ops/openwebui/smoke/`](https://github.com/canna-oss/canna-oss/tree/main/ops/openwebui/smoke):
+
+| # | Frame | Estado |
+|---|---|---|
+| 01 | OWUI landing | sign-in pré-login |
+| 02 | Logged in + MCP servers list | conta admin criada |
+| 03 | Admin → Integrações | menu correto |
+| 04 | Tool Servers empty | confirma seed pendente |
+| 05 | MemberQuotaCardApp empty | bundle carrega antes do payload |
+| 06 | MemberQuotaCardApp rendered | postMessage payload aplicado |
+| 07 | DispensationFormApp | inputs + submit handler |
+| 08 | TraceabilityTimelineApp | timeline phases ordenadas |
+| 09 | Smoke summary | run sintético |
+
+### Verdict
+
+**PARTIAL PASS.** Stack boota verde. Bundles renderizam com postMessage contract. OWUI tool-server registration depende de seed script (Lane I em flight). Próximo gate: seed automático + Kamal deploy `canna.fonsecagabriel.com.br` (Lane H).
+
+Patches landed pós-smoke:
+
+1. `ops/openwebui/canna-mcp/.gitkeep` — garante mount path do compose
+2. `packages/ui-apps/src/member-quota-card/main.ts` — tolerância postMessage (string|object)
+3. `ops/openwebui/README.md` + `Kamal.deploy.notes.md` — clarifica que `mcp_config.json` é seed, não auto-load
 
 ## Referências
 

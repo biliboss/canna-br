@@ -1,0 +1,22 @@
+{
+  "name": "@canna/owui-scripts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Post-deploy seed scripts for Open WebUI (canna-oss MCP front-door).",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "seed": "node --experimental-strip-types --no-warnings seed-tool-servers.ts"
+  },
+  "devDependencies": {
+    "@canna/tsconfig": "workspace:*",
+    "@types/node": "^22.10.0",
+    "typescript": "^5.9.3",
+    "vitest": "^2.1.9"
+  },
+  "engines": {
+    "node": ">=20.11"
+  }
+}

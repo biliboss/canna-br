@@ -71,24 +71,62 @@ ops/openwebui/
 
 `mcp_config.json` no compose serve apenas como **template/seed** — operador copia o valor pra UI ou roda o POST manualmente.
 
-### Deploy seed script (v0.2.1.x)
+### Deploy seed script (v0.2.1.x) — SHIPPED
 
-Adicionar `ops/openwebui/scripts/seed-mcp-server.sh`:
+Canonical seeder vive em `ops/openwebui/scripts/`:
 
-```bash
-#!/bin/sh
-# Run once after first admin user is created
-ADMIN_TOKEN=$(curl -sf -X POST http://localhost:8080/api/v1/auths/signin \
-  -H "content-type: application/json" \
-  -d "{\"email\":\"$ADMIN_EMAIL\",\"password\":\"$ADMIN_PASSWORD\"}" | jq -r .token)
+- `seed-tool-servers.ts` — Node 20+ (fetch built-in) TypeScript, zero deps.
+  Lê `OWUI_BASE_URL`, `OWUI_ADMIN_EMAIL`, `OWUI_ADMIN_PASSWORD`,
+  `MCP_SERVER_URL`, `MCP_SERVER_NAME` (default `canna-dispensations`),
+  `MCP_SERVER_TYPE` (default `sse`). Idempotente: re-run após cada deploy
+  retorna `already_registered`.
+- `seed-tool-servers.sh` — POSIX wrapper que carrega `ops/openwebui/.env`
+  (ou `$ENV_FILE`) e invoca o `.ts` via Node 22.6+ `--experimental-strip-types`
+  ou `tsx` (auto-detect).
 
-curl -sf -X POST http://localhost:8080/api/v1/configs/tool_servers \
-  -H "Authorization: Bearer $ADMIN_TOKEN" \
-  -H "content-type: application/json" \
-  -d @./mcp_config.json
+Output JSON canônico em stdout:
+
+```json
+{ "status": "registered", "connectionId": "..." }
+{ "status": "already_registered", "connectionId": "..." }
+{ "status": "failed", "error": "..." }
 ```
 
-Run via `kamal hook post-deploy` ou cron one-shot. Documentar `ADMIN_EMAIL`/`ADMIN_PASSWORD` em `secrets`.
+Exit code 0 nos dois primeiros, 1 no `failed`.
+
+#### Kamal hook example
+
+```yaml
+# config/deploy.yml
+service: canna-owui
+# ...
+hooks_path: ops/openwebui/scripts
+```
+
+```sh
+# .kamal/hooks/post-deploy (symlink to seed-tool-servers.sh, OR wrapper)
+#!/bin/sh
+exec /opt/canna-oss/ops/openwebui/scripts/seed-tool-servers.sh
+```
+
+Ou ad-hoc:
+
+```sh
+cd ops/openwebui
+OWUI_ADMIN_EMAIL=admin@canna.local \
+OWUI_ADMIN_PASSWORD="$(op read 'op://canna/owui/admin')" \
+MCP_SERVER_URL=http://canna-mcp:3001/sse \
+  ./scripts/seed-tool-servers.sh
+```
+
+`ADMIN_EMAIL`/`ADMIN_PASSWORD` ficam em `kamal secrets` (envless). MCP URL é
+estável por compose service name.
+
+#### Testes
+
+`pnpm --filter @canna/owui-scripts test` — 8 specs vitest, mock OWUI via
+`node:http` server local (zero third-party HTTP libs). Cobre: registro novo,
+idempotência, signin 401, env vars ausentes, defaults.
 
 ### Workaround alternativo
 
