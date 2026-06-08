@@ -1,0 +1,31 @@
+{
+  "name": "@canna/ui-apps",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./member-quota-card": "./src/member-quota-card/index.ts",
+    "./traceability-timeline": "./src/traceability-timeline/index.ts",
+    "./dispensation-form": "./src/dispensation-form/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "build": "node scripts/build.mjs && node scripts/verify-bundles.mjs",
+    "build:apps": "node scripts/build.mjs",
+    "build:check": "node scripts/verify-bundles.mjs",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@canna/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@canna/tsconfig": "workspace:*",
+    "typescript": "^5.9.3",
+    "vite": "^6.4.3",
+    "vite-plugin-singlefile": "^2.3.3",
+    "vitest": "^2.1.9"
+  }
+}

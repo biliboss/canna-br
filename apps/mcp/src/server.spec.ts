@@ -1,0 +1,217 @@
+import { describe, it, expect } from "vitest";
+import { createInMemoryEventStore } from "@canna/event-store";
+import { Members, Lots } from "@canna/app-services";
+import { isOk, quantityGrams, type ULID } from "@canna/shared";
+import { createCannaMcpServer } from "./server.js";
+import { allTools } from "./tools/index.js";
+import type { ToolContext } from "./types.js";
+
+const ASSOC = "01HM0ASSOC0000000000000001" as ULID;
+const MEMBER = "01HM0MEMBER000000000000001" as ULID;
+const LOT = "01HM0LOT00000000000000001" as ULID;
+const DISPENSER = "01HM0DISP0R000000000000001" as ULID;
+const PHYSICIAN = "01HM0PHYS00000000000000001" as ULID;
+const PRESC = "01HM0PRESC0000000000000001" as ULID;
+const ACTOR = "01HM0ACTOR0000000000000001" as ULID;
+const NOW = new Date("2026-06-08T12:00:00Z");
+
+const grams = (n: number) => {
+  const r = quantityGrams(n);
+  if (!isOk(r)) throw new Error(String(n));
+  return r.value;
+};
+
+const setupStore = async () => {
+  const store = createInMemoryEventStore();
+  await Members.registerMember(store, {
+    type: "RegisterMember",
+    memberId: MEMBER,
+    associationId: ASSOC,
+    cpfHash: "sha256:x",
+    registeredBy: ACTOR,
+    now: NOW,
+  });
+  await Members.grantConsent(store, {
+    type: "GrantConsent",
+    memberId: MEMBER,
+    consentVersion: 1,
+    grantedBy: ACTOR,
+    now: NOW,
+  });
+  await Members.validatePrescription(store, {
+    type: "ValidatePrescription",
+    memberId: MEMBER,
+    prescriptionId: PRESC,
+    physicianCRM: "CRM/SP 123456",
+    validFrom: new Date("2026-06-01T00:00:00Z"),
+    validUntil: new Date("2026-12-01T00:00:00Z"),
+    monthlyQuotaG: grams(30),
+    validatedBy: PHYSICIAN,
+    now: NOW,
+  });
+  await Lots.createLot(store, {
+    type: "CreateLot",
+    lotId: LOT,
+    associationId: ASSOC,
+    productSku: "CBD-FS",
+    initialQuantityG: grams(100),
+    origin: "INTERNAL_CULTIVATION",
+    producedAt: new Date("2026-04-01T00:00:00Z"),
+    expiresAt: new Date("2027-04-01T00:00:00Z"),
+    createdBy: ACTOR,
+    now: NOW,
+  });
+  await Lots.releaseLot(store, {
+    type: "ReleaseLot",
+    lotId: LOT,
+    coaReference: "coa://lab/abc",
+    releasedBy: ACTOR,
+    now: NOW,
+  });
+  return store;
+};
+
+const dispenserCtx = (store: Awaited<ReturnType<typeof setupStore>>): ToolContext => ({
+  store,
+  userId: DISPENSER,
+  role: "DISPENSADOR",
+  associationId: ASSOC,
+  now: NOW,
+});
+
+describe("@canna/mcp / tool catalog", () => {
+  it("exposes 5 v0.2.1 tools (3 read + 1 draft + 1 write-with-approval)", () => {
+    expect(allTools).toHaveLength(5);
+    const byLevel = new Map<number, number>();
+    for (const t of allTools) {
+      byLevel.set(t.riskLevel, (byLevel.get(t.riskLevel) ?? 0) + 1);
+    }
+    expect(byLevel.get(1)).toBe(3);
+    expect(byLevel.get(2)).toBe(1);
+    expect(byLevel.get(3)).toBe(1);
+  });
+
+  it("every tool has uiResourceUri pointing to a packages/ui-apps app", () => {
+    for (const t of allTools) {
+      expect(t.uiResourceUri).toMatch(/^ui:\/\//);
+    }
+  });
+
+  it("Tool Level 4 commands are NOT exposed via MCP", () => {
+    const names = allTools.map((t) => t.name);
+    const forbidden = [
+      "execute_crypto_deletion",
+      "change_user_role",
+      "disable_2fa",
+      "delete_or_rotate_keys",
+      "submit_sngpc_production",
+      "change_quota",
+      "recall_lot",
+    ];
+    for (const f of forbidden) expect(names).not.toContain(f);
+  });
+});
+
+describe("@canna/mcp / get_member_quota tool", () => {
+  it("returns member state for ACTIVE member", async () => {
+    const store = await setupStore();
+    const ctx = dispenserCtx(store);
+    const tool = allTools.find((t) => t.name === "get_member_quota");
+    if (tool === undefined) throw new Error("tool not found");
+    const result = await tool.handler({ memberId: MEMBER }, ctx);
+    expect(result.isError).not.toBe(true);
+    const data = JSON.parse(result.content[0]!.text) as {
+      status: string;
+      memberId: string;
+      prescription: { monthlyQuotaG: number } | null;
+    };
+    expect(data.status).toBe("ACTIVE");
+    expect(data.memberId).toBe(MEMBER);
+    expect(data.prescription?.monthlyQuotaG).toBe(30);
+  });
+
+  it("returns MEMBER_NOT_FOUND for unknown member", async () => {
+    const store = await setupStore();
+    const ctx = dispenserCtx(store);
+    const tool = allTools.find((t) => t.name === "get_member_quota");
+    if (tool === undefined) throw new Error("tool not found");
+    const result = await tool.handler(
+      { memberId: "01HM0OTHER00000000000000XX" as ULID },
+      ctx,
+    );
+    expect(result.isError).toBe(true);
+  });
+});
+
+describe("@canna/mcp / draft_dispensation tool (Level 2)", () => {
+  it("returns preview without mutating association stream", async () => {
+    const store = await setupStore();
+    const ctx = dispenserCtx(store);
+    const tool = allTools.find((t) => t.name === "draft_dispensation");
+    if (tool === undefined) throw new Error("tool not found");
+    const result = await tool.handler(
+      {
+        associationId: ASSOC,
+        memberId: MEMBER,
+        lotId: LOT,
+        quantityG: 5,
+      },
+      ctx,
+    );
+    const data = JSON.parse(result.content[0]!.text) as {
+      dryRun: boolean;
+      preview: ReadonlyArray<{ type: string }>;
+    };
+    expect(data.dryRun).toBe(true);
+    expect(Array.isArray(data.preview)).toBe(true);
+  });
+});
+
+describe("@canna/mcp / RBAC enforcement", () => {
+  it("createCannaMcpServer rejects when role not in allowedRoles", async () => {
+    const store = await setupStore();
+    const { server, tools } = createCannaMcpServer({
+      store,
+      async resolveContext() {
+        return {
+          store,
+          userId: ACTOR,
+          role: "AUDITOR",
+          associationId: ASSOC,
+          now: NOW,
+        };
+      },
+    });
+    expect(server).toBeDefined();
+    expect(tools.size).toBe(5);
+
+    // AUDITOR cannot call draft_dispensation (DISPENSADOR + RT only)
+    const tool = tools.get("draft_dispensation");
+    if (tool === undefined) throw new Error("tool not found");
+    expect(tool.allowedRoles).not.toContain("AUDITOR");
+  });
+});
+
+describe("@canna/mcp / Nível 3 PendingAction stub", () => {
+  it("request_record_dispensation returns pendingActionId without mutating stream", async () => {
+    const store = await setupStore();
+    const ctx = dispenserCtx(store);
+    const tool = allTools.find((t) => t.name === "request_record_dispensation");
+    if (tool === undefined) throw new Error("tool not found");
+    const result = await tool.handler(
+      {
+        associationId: ASSOC,
+        memberId: MEMBER,
+        lotId: LOT,
+        quantityG: 5,
+      },
+      ctx,
+    );
+    const data = JSON.parse(result.content[0]!.text) as {
+      pendingActionId: string;
+      status: string;
+    };
+    expect(data.pendingActionId).toMatch(/^pending:/);
+    expect(data.status).toBe("PENDING_APPROVAL");
+  });
+});

@@ -7,7 +7,8 @@
   "types": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts",
-    "./in-memory": "./src/in-memory.ts"
+    "./in-memory": "./src/in-memory.ts",
+    "./postgres": "./src/postgres.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
@@ -16,10 +17,13 @@
   },
   "dependencies": {
     "@canna/shared": "workspace:*",
-    "@event-driven-io/emmett": "^0.40.0"
+    "@event-driven-io/emmett": "^0.42.3",
+    "@event-driven-io/emmett-postgresql": "^0.42.3"
   },
   "devDependencies": {
     "@canna/tsconfig": "workspace:*",
+    "@testcontainers/postgresql": "^12.0.1",
+    "testcontainers": "^12.0.1",
     "typescript": "^5.9.3",
     "vitest": "^2.1.9"
   }

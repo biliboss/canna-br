@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="pt-BR" data-app="member-quota-card">
+  <head>
+    <meta charset="utf-8" />
+    <title>Member Quota</title>
+    <style>
+      :root {
+        --bg: var(--mcp-app-bg-primary, #0c0a09);
+        --fg: var(--mcp-app-text-primary, #f5f5f4);
+        --muted: var(--mcp-app-text-muted, #a8a29e);
+        --border: var(--mcp-app-border, #292524);
+        --accent: var(--mcp-app-brand, #22c55e);
+        --warn: #f59e0b;
+        --danger: #ef4444;
+      }
+      html, body { margin: 0; padding: 0; background: var(--bg); color: var(--fg);
+        font-family: ui-sans-serif, system-ui, sans-serif; font-size: 13px; }
+      .card { padding: 14px 16px; border: 1px solid var(--border); border-radius: 10px;
+        background: #18181b; max-width: 480px; }
+      .title { font-weight: 700; font-size: 13px; margin-bottom: 6px; letter-spacing: .04em; }
+      .status { color: var(--muted); font-size: 11px; margin-bottom: 12px; }
+      .bar { background: #27272a; height: 8px; border-radius: 4px; overflow: hidden; margin-top: 8px; }
+      .fill { background: var(--accent); height: 100%; transition: width .25s ease; }
+      .fill.warn { background: var(--warn); }
+      .fill.danger { background: var(--danger); }
+      .row { display: flex; justify-content: space-between; align-items: baseline; margin-top: 4px; }
+      .meta { color: var(--muted); font-size: 11px; }
+      .recent { margin-top: 14px; }
+      .recent h3 { margin: 0 0 6px 0; font-size: 11px; color: var(--muted);
+        text-transform: uppercase; letter-spacing: .08em; font-weight: 700; }
+      .recent ul { margin: 0; padding: 0; list-style: none; }
+      .recent li { padding: 4px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+    </style>
+  </head>
+  <body>
+    <div id="root" class="card">
+      <div class="title" id="title">Loading member quota…</div>
+      <div class="status" id="status"></div>
+      <div class="bar"><div class="fill" id="fill" style="width: 0%"></div></div>
+      <div class="row">
+        <span id="consumed">— g</span>
+        <span id="cap" class="meta">of — g</span>
+      </div>
+      <div class="recent">
+        <h3>Recent dispensations</h3>
+        <ul id="recent"></ul>
+      </div>
+    </div>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

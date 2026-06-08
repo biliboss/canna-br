@@ -62,6 +62,7 @@ export default defineConfig({
           label: 'Decisões (ADR)',
           items: [
             { label: 'ADR-001 — Domain Kernel + Emmett', link: '/adr/0001-domain-kernel-emmett/' },
+            { label: 'ADR-002 — MCP-First Surface', link: '/adr/0002-mcp-first-surface/' },
           ],
         },
         { label: 'Releases', autogenerate: { directory: 'releases' } },

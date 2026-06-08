@@ -1,0 +1,36 @@
+# canna-oss Open WebUI — Caddy reverse proxy example
+#
+# Wildcard cert for *.fonsecagabriel.com.br is assumed (Let's Encrypt DNS-01
+# via Caddy's tls block, or pre-issued). Drop this snippet into the host
+# Caddyfile alongside other apps on VPS 62.171.145.76.
+#
+# Subdomain reservation: `canna.fonsecagabriel.com.br` is the production
+# canna-api host; `webui.canna.fonsecagabriel.com.br` fronts OWUI.
+
+webui.canna.fonsecagabriel.com.br {
+	reverse_proxy 127.0.0.1:8080
+
+	encode gzip zstd
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Frame-Options "SAMEORIGIN"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		# OWUI talks WebSockets for chat streams.
+		-Server
+	}
+
+	# Generous upload for RAG attachments (PDFs, sheets).
+	request_body {
+		max_size 100MB
+	}
+
+	log {
+		output file /var/log/caddy/webui.canna.access.log {
+			roll_size 50MiB
+			roll_keep 10
+		}
+		format json
+	}
+}

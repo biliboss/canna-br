@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="pt-BR" data-app="dispensation-form">
+  <head>
+    <meta charset="utf-8" />
+    <title>Record Dispensation</title>
+    <style>
+      :root {
+        --bg: var(--mcp-app-bg-primary, #0c0a09);
+        --fg: var(--mcp-app-text-primary, #f5f5f4);
+        --muted: var(--mcp-app-text-muted, #a8a29e);
+        --border: var(--mcp-app-border, #292524);
+        --accent: var(--mcp-app-brand, #22c55e);
+      }
+      body { margin: 0; padding: 14px; background: var(--bg); color: var(--fg);
+        font-family: ui-sans-serif, system-ui, sans-serif; font-size: 13px; }
+      form { display: flex; flex-direction: column; gap: 10px; max-width: 420px; }
+      label { font-size: 11px; color: var(--muted); text-transform: uppercase;
+        letter-spacing: .06em; font-weight: 700; }
+      input, select, button { background: #18181b; color: var(--fg); border: 1px solid var(--border);
+        border-radius: 6px; padding: 8px 10px; font: inherit; }
+      button { background: var(--accent); color: #052e16; font-weight: 700; cursor: pointer; }
+      button:disabled { opacity: .5; cursor: not-allowed; }
+      .preview { margin-top: 12px; padding: 10px; background: #18181b;
+        border: 1px solid var(--border); border-radius: 6px; font-family: ui-monospace, monospace;
+        font-size: 11px; white-space: pre-wrap; word-break: break-word; }
+    </style>
+  </head>
+  <body>
+    <form id="form">
+      <div>
+        <label for="memberId">Member ULID</label>
+        <input id="memberId" name="memberId" required />
+      </div>
+      <div>
+        <label for="lotId">Lot ULID (FIFO)</label>
+        <input id="lotId" name="lotId" required />
+      </div>
+      <div>
+        <label for="quantityG">Quantity (g)</label>
+        <input id="quantityG" name="quantityG" type="number" step="0.01" min="0.01" required />
+      </div>
+      <button type="button" id="previewBtn">Preview (draft)</button>
+      <button type="button" id="submitBtn" disabled>Request approval</button>
+      <pre class="preview" id="preview" hidden></pre>
+    </form>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

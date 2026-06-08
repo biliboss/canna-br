@@ -7,11 +7,11 @@ description: "Decisão arquitetural: TypeScript puro para domínio + Emmett como
 
 | Campo | Valor |
 |---|---|
-| Status | **Accepted** (sujeito a spike gate v0.2.0) |
+| Status | **Accepted** (spike gate v0.2.0a + v0.2.0b PASSED, 99+ tests green em PG real) |
 | Data | 2026-06-08 |
 | Versão | v0.2 |
 | Substitui | — |
-| Substituído por | — |
+| Camada interface substituída por | [ADR-002 — MCP-First Surface](/adr/0002-mcp-first-surface/) (camada domínio + event-sourcing **mantida** — esta ADR ainda canonical para Emmett + decide/evolve + sync vs async boundary) |
 
 ## Contexto
 

@@ -1,19 +1,19 @@
 ---
-title: "Interfaces — Human, Agent, System"
-description: "UI canônica + MCP para agentes + REST para sistemas. Todas chamam app-services; nenhuma bypassa o domain kernel. Critical commands exigem aprovação humana."
+title: "Interfaces — MCP-First Surface"
+description: "Primary surface = MCP server + MCP Apps em Open WebUI. REST/OpenAPI para sistemas + Nível-4 critical commands. Todas chamam app-services; nenhuma bypassa o domain kernel. NO admin Next.js standalone até pós-v1.0."
 ---
 
 # Interfaces
 
-> **Tese (canonical):**
+> **Tese (canonical, pós-ADR-002):**
 >
-> - The **canonical admin is minimal and regulatory** — Auth, RBAC, audit, configuration, approval, emergency, signed reports.
-> - The **agent interface is rich and contextual** — operational screens via MCP Apps, conversational via MCP Tools, opcionalmente hospedada em Open WebUI.
-> - **MCP Apps provide operational screens inside AI hosts**, but **all critical actions still flow through app-services, RBAC, PendingAction and event-sourced audit**.
-> - REST/OpenAPI is system interface for traditional integrations (and via [mcpo](https://github.com/open-webui/mcpo) bridge for OpenAPI-only hosts).
+> - **Primary product surface = MCP server + MCP Apps em Open WebUI.** Telas operacionais nascem dentro do chat host; não há admin Next.js standalone até pós-v1.0.
+> - **MCP Apps** (ext-apps spec, jan/2026) são HTML+JS inline no chat — substituem 80+ telas CRUD de ERP tradicional por ~12 components contextuais.
+> - **REST/OpenAPI** (`apps/api`) é interface para sistemas e Nível-4 critical commands (TOTP co-presence).
 > - **All interfaces call `packages/app-services`. No interface bypasses the domain kernel.**
+> - Critical commands (crypto-deletion, role change, SNGPC prod, recall, key rotation) **não são MCP tools** — vivem em `apps/api` REST com TOTP.
 
-Conversation-first, **não** ChatGPT-first. O canna-oss aceita comandos vindos de Claude, ChatGPT, Cursor, WhatsApp, agente interno ou outro cliente MCP — mas a associação precisa operar mesmo se todos os agentes externos pararem de funcionar simultaneamente.
+Conversation-first, **não** ChatGPT-first. canna-oss aceita comandos vindos de Claude, ChatGPT, Cursor, Open WebUI ou qualquer cliente MCP. Open WebUI é o sidecar default (deployed por padrão); REST permanece acessível para emergência e integrações tradicionais.
 
 ## Arquitetura de Camadas
 
@@ -24,16 +24,21 @@ Conversation-first, **não** ChatGPT-first. O canna-oss aceita comandos vindos d
                   App Services (packages/app-services)
                           ↑   loads stream → decide → append → project
                           │
-        ┌─────────────────┼─────────────────┬─────────────────┐
+        ┌─────────────────┬─────────────────┬─────────────────┐
         │                 │                 │                 │
-   Web Admin UI      MCP Server         REST API         Worker / Jobs
-   (canônica)       (agentes)         (sistemas)       (BullMQ async)
-        │                 │                 │                 │
-     Diretoria        Claude            Sistemas          SNGPC, PDF,
-     RT, DPO,         ChatGPT           externos          Email,
-     Dispensador      Cursor            (federação,       BSPO,
-     Auditor          Federation        contábil,         Reports
-                      agent             auditor)
+   MCP Server         REST/OpenAPI       Worker / Jobs       (no admin
+   (apps/mcp)         (apps/api)         (apps/worker)        Next.js —
+        │                 │                 │                 ADR-002)
+        │                 │                 │
+        ▼                 ▼                 ▼
+   MCP Apps        Federation,           SNGPC, PDF,
+   (packages/      contábil,             Email, BSPO,
+    ui-apps)       jurídico,             Reports
+        │          Nível-4 (TOTP)
+        ▼
+   Open WebUI sidecar
+   (Claude / ChatGPT /
+    Cursor consume same MCP)
 ```
 
 **Regra invariante:** toda interface chama `packages/app-services`. Nenhuma interface escreve direto no event store, no read model ou em qualquer aggregate. Se você está pensando "para esta interface vou pular o app-service", a arquitetura está errada.
@@ -48,39 +53,44 @@ Conversation-first, **não** ChatGPT-first. O canna-oss aceita comandos vindos d
 
 canna-oss é **conversation-first**. ChatGPT (ou Claude, ou Cursor) é **um dos clientes**, não a porta.
 
-## Minimum Canonical Admin — Obrigatório
+## Sem Admin Next.js (ADR-002)
 
-A UI administrativa é a interface canônica **mínima**. Em domínio regulado, não há como fugir disso: diretoria, RT, DPO e auditor precisam de tela explícita que **sempre existe, sempre funciona e é nossa** — sem dependência de host MCP externo.
+Em revisão de produto de 2026-06-08, Gabriel descartou o admin Next.js standalone. A operação de uma associação de cannabis cabe naturalmente em fluxo conversacional: "Maria pediu 10g do CBD-FS" → agente abre `DispensationFormApp` inline → dispensador confirma → PendingAction → RT aprova no chat → 3 eventos atômicos no event store. Construir esse mesmo fluxo em admin Next.js exige mais código sem entregar mais valor.
 
-Mas com MCP Apps (ver abaixo), o admin não precisa virar um ERPzão de 80 telas CRUD. Ele fica **mínimo e regulatório**; telas operacionais migram para MCP Apps.
+**Toda interação humana acontece em uma destas três superfícies:**
 
-### O que SEMPRE fica no admin
+1. **MCP Apps inline em Open WebUI** (canal default) — forms, cards, timelines, approval flows renderizados dentro do chat. Cobre dispensação, busca de membro, traceability, pendências, KPIs, BSPO/RIPD review, e tudo o que era admin operacional.
+2. **REST/OpenAPI** (`apps/api`) — Nível-4 critical commands com TOTP (crypto-deletion, role change, SNGPC prod submit, recall, key rotation) + integrações tradicionais (federation agents, contábil, jurídico).
+3. **Emergency CLI/curl** — `apps/api` REST acessível via curl/Postman caso Open WebUI saia do ar. Operações de emergência (backup, restore, recovery) ficam aqui.
 
-| Tela | Por quê |
-|---|---|
-| Login / 2FA / TOTP | Auth é first-class, sem dependência de host externo |
-| Usuários / papéis (RBAC) | Identidade é controle regulatório |
-| Configuração de tenant | Decisão estrutural, exige tela explícita |
-| Audit log oficial | Roda mesmo se agente externo falhar |
-| Pending Actions (aprovação) | Pode também aparecer no MCP App, mas sempre disponível aqui |
-| Relatórios assinados oficialmente | Carimbo cripto + responsável técnico |
-| Crypto-deletion (Art. 18 IV) | Nunca via agente — UI co-presente obrigatória |
-| Backup / restore | Operação de emergência |
-| Tela de emergência / fallback manual | Funciona se TUDO o mais cair |
+### Por papel (via Open WebUI groups + OAuth scopes → MCP tool filtering)
 
-### Views por papel (minimalistas)
+Cada role vê tools/apps filtrados pelo RBAC do `app-services`. **Não há "tela por papel" como em ERP tradicional** — há **conjunto de tools/apps disponíveis no chat por papel**:
 
-| Papel | O que a UI mostra |
-|---|---|
-| **Diretoria** | Dashboard, KPIs, relatórios, riscos, pendências de aprovação |
-| **Responsável Técnico** | Prescrições, lotes, COA, liberação de lote, SNGPC pendente, BSPO |
-| **Dispensador** | Buscar membro, ver quota, ver lote disponível, registrar dispensação, emitir comprovante |
-| **DPO / Encarregado** | Consentimentos, solicitações LGPD, crypto-deletion, audit log, RIPD |
-| **Auditor** | Read-only — rastreabilidade, event log, relatórios exportáveis |
+| Papel | MCP scope | Tools/Apps disponíveis |
+|---|---|---|
+| **Dispensador** | `canna:dispensador` | `get_member_quota`, `list_available_lots`, `draft_dispensation`, `request_record_dispensation` (cria PendingAction) → `MemberQuotaCardApp`, `DispensationFormApp` |
+| **Responsável Técnico** | `canna:rt` | + approval tools (`approve_pending_action`, `release_lot`, `quarantine_lot`), `list_sngpc_pending`, BSPO review → adicionalmente `InventoryLotPickerApp`, `BspoReviewApp` |
+| **DPO / Encarregado** | `canna:dpo` | LGPD: `list_consent_requests`, `request_crypto_delete_member` (PendingAction Nível-4 → TOTP no `apps/api`), RIPD review → `LgpdRequestsApp`, `RipdReviewApp` |
+| **Diretoria** | `canna:diretoria` | Approval Nível-3, dashboards, reports → `KpiDashboardApp`, monthly board report prompts |
+| **Auditor** | `canna:auditor` | Read-only Level 1 — `generate_traceability_report`, audit log, event search → `TraceabilityTimelineApp`, `AuditTimelineApp` |
+| **Federation** | `canna:federation` | Multi-tenant read-only com tenant switching |
 
-Cada papel é uma view sobre o mesmo domínio. RBAC do `app-services` filtra o que cada papel pode ver/fazer.
+### Critical commands fora do MCP (Nível 4)
 
-## MCP Server — Interface Agentic
+Estes **NÃO são tools MCP**. Vivem em `apps/api` REST com TOTP + DPO/Admin co-presence:
+
+- `POST /v1/admin/crypto-delete-member/:id` (LGPD Art. 18 IV)
+- `POST /v1/admin/change-user-role`
+- `POST /v1/admin/disable-2fa`
+- `POST /v1/admin/rotate-site-kek`
+- `POST /v1/admin/submit-sngpc-production`
+- `POST /v1/admin/change-quota`
+- `POST /v1/admin/recall-lot`
+
+MCP App pode **iniciar** o fluxo (criar PendingAction tipo `Nível4Request`), mas a execução final exige TOTP no endpoint REST diretamente. Sem chat-only-autonomy para essas operações.
+
+## MCP Server — Primary Product Surface
 
 [Model Context Protocol](https://modelcontextprotocol.io) é o padrão aberto para conectar aplicações de IA a sistemas externos (descrito como "USB-C para aplicações de IA"). Suporte em Claude, ChatGPT, VS Code, Cursor — build once, integrate everywhere.
 
@@ -318,23 +328,24 @@ A pergunta "quem é o IdP?" (canna-oss próprio, Open WebUI, ou IdP externo como
 
 Premissa: identidade vive no canna-oss até existir necessidade real de delegação multi-sistema.
 
-## Roadmap de Interfaces
+## Roadmap de Interfaces (pós-ADR-002)
 
 | Versão | Interface | Capability |
 |---|---|---|
-| v0.2 | Minimum Canonical Admin + REST interno | Login/TOTP, RBAC mínimo, Audit log read-only, PendingAction básico, **Dispensador + RT views apenas**. Sem MCP. **Diretoria/DPO/Auditor views adiados para v0.3**. |
-| v0.3 | Admin completo + MCP read-only + OpenAPI | Diretoria + DPO + Auditor views completas. Resources + Tools Nível 1 expostos via MCP. OpenAPI público para integradores. Open WebUI sidecar opcional consumindo via MCP/OpenAPI. |
-| v0.4 | MCP draft actions + MCP Apps básico | Tools Nível 2 (`draft_*`). Primeiros MCP Apps: `MemberQuotaCardApp`, `TraceabilityTimelineApp`, `KpiDashboardApp`. mcpo bridge para hosts OpenAPI-only. |
-| v0.5 | MCP write with approval + MCP Apps completos | Tools Nível 3 (`request_*`) com PendingAction + two-step approval. MCP Apps: `DispensationReviewApp`, `PendingActionApprovalApp`, `InventoryLotPickerApp`. REST/OpenAPI público estável (v1). |
-| v1.0 | Agent marketplace + federation + Canna Copilot embutido | Federação conecta agente próprio multi-associação. Auditor externo read-only. Contador read-only no financeiro. Jurídico read-only no dossier. Canna Copilot embutido no admin usando mesmos MCP tools/apps. |
+| v0.2.0a/b | Domain kernel + event-store | DONE — Emmett in-mem + Postgres validado, ADR-001 spike gate PASSED. Sem interface ainda. |
+| v0.2.1 | **MCP server + MCP Apps + Open WebUI + REST/OpenAPI (sem admin Next.js)** | `apps/mcp` Tools Nível 1+2+3, MCP Apps (`MemberQuotaCardApp`, `TraceabilityTimelineApp`, `DispensationFormApp`), `apps/api` Fastify (commands + Nível-4 REST com TOTP), Open WebUI sidecar OBRIGATÓRIO consumindo MCP nativo, OAuth 2.1 scopes → roles. |
+| v0.3 | Pilot expansion | LGPD hardening (crypto-deletion via Tool Nível 3 + TOTP), CSV import, MCP Apps adicionais (`InventoryLotPickerApp`, `MemberSearchApp`, `SngpcPendingApp`, `KpiDashboardApp`), Auditor + Federation read-only roles. |
+| v0.4 | Sandbox Dossier Ready | Dossier template via `draft_anvisa_dossier_section`, BSPO trimestral, RIPD via `RipdReviewApp`, DPO view completa (`LgpdRequestsApp`). |
+| v0.5 | Regulatory Adapters | SNGPC + SNCR real, retry/DLQ, `SngpcPendingApp`, REST API pública v1 estável. |
+| v1.0 | Full backend + Agent marketplace | Cultivation + Processing + Lab + CPC 29 + multi-tenant + billing. Federação multi-associação via 1 agente. Canna Copilot embutido reusando mesmos MCP tools/apps. |
 
-Tools Nível 4 (crypto-deletion, role change, recall, SNGPC prod submit, quota change, key rotation, disable 2FA) **ficam fora do MCP** no horizonte v1.0 — sempre tela humana co-presente no admin canônico.
+Tools Nível 4 (crypto-deletion, role change, recall, SNGPC prod submit, quota change, key rotation, disable 2FA) **ficam fora do MCP**. Vivem em `apps/api` REST com TOTP + DPO/Admin co-presence — nunca em admin Next.js (que não existe).
 
 ## Mensagem Comercial
 
-> "Você pode usar o canna-oss pela interface web mínima, por API/OpenAPI, ou pelo agente de IA que sua associação já usa — Claude, ChatGPT, Open WebUI ou agente próprio. Telas operacionais nascem dentro do próprio agente via MCP Apps. Ações críticas sempre passam por aprovação humana auditada."
+> "Você opera o canna-oss pelo agente de IA que sua associação já usa — Claude, ChatGPT, Open WebUI, Cursor. Telas operacionais nascem dentro do chat via MCP Apps inline; busca de membro, dispensação, traceability, KPIs, aprovação — tudo no fluxo conversacional. Ações críticas (crypto-deletion, recall de lote, submissão SNGPC produção) exigem TOTP via REST direta, com auditoria event-sourced."
 
-Isso só é verdade se a regra invariante for cumprida em código: **toda interface chama app-services; nenhuma interface bypassa o domain kernel**.
+Isso só é verdade se a regra invariante for cumprida em código: **toda interface chama `packages/app-services`; nenhuma interface bypassa o domain kernel; admin Next.js não existe.**
 
 ## Referências
 

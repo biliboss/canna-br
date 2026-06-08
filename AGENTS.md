@@ -1,24 +1,25 @@
 ---
 project: canna-oss
 repo: /Users/billiboss/.obsidian/99-development/canna-oss
-current_phase: v0.2.0-domain-kernel-spike
-current_focus: packages/domain (TypeScript-pure, no Emmett yet)
+current_phase: v0.2.1-compliance-spine-mcp-first
+current_focus: apps/mcp tools + packages/ui-apps MCP Apps + apps/api Fastify + @canna/read-models projections
+surface_pivot: MCP-first (ADR-002 — 2026-06-08). Open WebUI + MCP server + MCP Apps substitui admin Next.js. NO apps/admin no roadmap.
 do_not_start:
-  - apps/api
-  - apps/admin
-  - apps/mcp
-  - apps/worker
-  - apps/openapi-bridge
-  - open-webui sidecar
+  - apps/admin (deferred to Ideas Park; substituído por MCP Apps)
 package_manager: pnpm
+deploy_target_future: canna.fonsecagabriel.com.br (Kamal v2, VPS 62.171.145.76, wildcard DNS; reusa skill langfuse-fonsecagabriel)
 site_url: http://localhost:4335
 ---
 
 # AGENTS.md — canna-oss
 
-OSS cannabis association management system for Brazil, RDC 1.014/2026 sandbox. Self-hosted. AGPL-3.0 + CLA. DDD-designed + event-sourced kernel.
+OSS cannabis association management system for Brazil, RDC 1.014/2026 sandbox. Self-hosted. AGPL-3.0 + CLA. DDD-designed + event-sourced kernel + **MCP-first agentic surface**.
 
-**Current focus (v0.2.0 spike):** build `packages/domain` in pure TypeScript with vitest scenario coverage. **Do not** start app/api/admin/mcp/worker work until the spike gate from [ADR-001](src/content/docs/adr/0001-domain-kernel-emmett.md) passes.
+**Current focus (v0.2.1):** ship Compliance Spine MCP-first — `apps/api` (Fastify endpoints), `@canna/read-models` (Drizzle projections), `apps/mcp` (Tools L1+L2+L3 + ext-apps), `packages/ui-apps` (MCP Apps), `apps/worker` (BullMQ SNGPC/PDF), `@canna/crypto` (envelope encryption), Open WebUI sidecar wired. **No admin Next.js** — see [ADR-002](apps/docs/src/content/docs/adr/0002-mcp-first-surface.md).
+
+Previous phases:
+- v0.2.0a — Emmett in-memory ADR-001 spike gate PASSED (50 domain + 8 event-store + 6 app-services tests green)
+- v0.2.0b — Emmett Postgres adapter validated via testcontainers (6 PG specs green)
 
 ---
 
@@ -33,7 +34,7 @@ canna-oss is a complete management system for cannabis therapeutic associations 
 - **Data protection:** LGPD Art. 5 II compliance — AES-256-GCM per member, crypto-deletion Art. 18 IV
 - **Compliance:** SNGPC XML native, BSPO auto-generated, chain of custody via ULID permanent
 
-v0.1.0 Domain Blueprint shipped 2026-06-08. Project now in **v0.2.0 Domain Kernel Spike** — `packages/domain` in pure TypeScript. Application code (apps/api, apps/admin, apps/mcp, apps/worker) is **not** part of v0.2.0 — see [ADR-001 spike gate](apps/docs/src/content/docs/adr/0001-domain-kernel-emmett.md).
+v0.1.0 Domain Blueprint shipped 2026-06-08. v0.2.0a/b spike gate PASSED. Project now in **v0.2.1 Compliance Spine + MCP-first surface** — building `apps/api` + `@canna/read-models` + `apps/mcp` + `packages/ui-apps` + Open WebUI sidecar wiring. Admin Next.js was **dropped** from the plan ([ADR-002](apps/docs/src/content/docs/adr/0002-mcp-first-surface.md)).
 
 ---
 
@@ -50,7 +51,11 @@ canna-oss/
 ├── pnpm-workspace.yaml              ← apps/* + packages/* + tooling/*
 ├── tsconfig.json                    ← project references root
 ├── apps/
-│   └── docs/                        ← @canna/docs — Astro 5 + Starlight
+│   ├── docs/                        ← @canna/docs — Astro 5 + Starlight
+│   ├── mcp/                         ← @canna/mcp — MCP server (Tools L1+L2+L3 + ext-apps) ← PRIMARY SURFACE
+│   ├── api/                         ← @canna/api — Fastify thin endpoints (v0.2.1)
+│   ├── worker/                      ← @canna/worker — BullMQ (SNGPC, PDF, email) (v0.2.1)
+│   └── openapi-bridge/              ← optional mcpo wrapper for OpenAPI-only hosts (v0.2.1)
 │       ├── astro.config.mjs
 │       ├── package.json
 │       ├── tsconfig.json
@@ -146,32 +151,43 @@ Decision recorded in [ADR-001 — Domain Kernel + Emmett](apps/docs/src/content/
 
 **Every interface calls `packages/app-services`. No interface writes directly to the event store, read model, or domain aggregates.**
 
-Interfaces in the system:
+Interfaces in the system (post-pivot — see [ADR-002](apps/docs/src/content/docs/adr/0002-mcp-first-surface.md)):
 
-- **Minimum Canonical Admin** (Next.js) — Auth, RBAC, audit, configuration, approval, emergency, signed reports. Always works, no external host dependency.
-- **MCP Server** — agent interface; MCP Tools (functions) + MCP Resources (read-only data) + **MCP Apps** (interactive UI rendered inside the chat host)
-- **REST/OpenAPI** — system interface for traditional integrations; OpenAPI spec auto-generated; [mcpo](https://github.com/open-webui/mcpo) bridge exposes MCP tools as OpenAPI when host doesn't speak MCP
-- **Open WebUI** (optional sidecar) — agentic cockpit "canna-oss AI Workbench". Consumes MCP + OpenAPI. Never source of truth for RBAC, never runs business rules.
-- **Worker / Jobs** — internal, for async side effects only (SNGPC XML, PDF, email)
+- **MCP Server** (`apps/mcp`) — **primary product surface**. MCP Tools (commands) + Resources (read models) + **MCP Apps** (interactive HTML rendered inline in the chat host). Roles enforced via OAuth scope mapping (DISPENSADOR/RESPONSAVEL_TECNICO/DPO/DIRETORIA/AUDITOR/FEDERATION).
+- **Open WebUI** (sidecar, OBRIGATÓRIO em v0.2.1) — chat host that consumes `apps/mcp`. Self-hosted `ghcr.io/open-webui/open-webui:v0.9.6`. Never source of truth for RBAC. Workspace Tools (Python) disabled in prod.
+- **REST/OpenAPI** (`apps/api`) — system interface for traditional integrations + Nível-4 critical commands that require TOTP (crypto-deletion, role change, SNGPC prod submit). `mcpo` bridge available for OpenAPI-only hosts.
+- **Worker / Jobs** (`apps/worker`) — internal, async side effects only (SNGPC XML, PDF, email).
 
-If you are tempted to call Drizzle, the event store, or a decider directly from an HTTP handler, MCP tool, MCP App backend, or worker — stop and route through `app-services`. The whole point of the architecture is that the domain has exactly one entry point.
+**NO admin Next.js standalone** until post-v1.0. If you find yourself sketching a Next.js admin page, stop. Render as MCP App in `packages/ui-apps/`. If the workflow does not fit chat conversation, that is signal the workflow belongs to the Nível-4 set at `apps/api` REST + TOTP, not a new admin.
 
-MCP tools are classified by risk level. **Level 4 tools (`execute_crypto_deletion`, `change_user_role`, `disable_2fa`, `delete_or_rotate_keys`, `submit_sngpc_production`, `change_quota`, `recall_lot`) are NOT exposed via MCP** — they require human UI co-presence in the Minimum Canonical Admin. See `apps/docs/src/content/docs/architecture/interfaces.md` for the full risk matrix and two-step approval flow.
+If you are tempted to call Drizzle, the event store, or a decider directly from an HTTP handler, MCP tool, MCP App backend, or worker — stop and route through `app-services`. The domain has exactly one entry point.
 
-### Minimum Canonical Admin (not ERPzão)
+MCP tools are classified by risk level. **Level 4 tools (`execute_crypto_deletion`, `change_user_role`, `disable_2fa`, `delete_or_rotate_keys`, `submit_sngpc_production`, `change_quota`, `recall_lot`) are NOT exposed via MCP** — they live in `apps/api` REST with TOTP + DPO/Admin co-presence. See `apps/docs/src/content/docs/architecture/interfaces.md` for the full risk matrix and two-step approval flow.
 
-The admin is **deliberately minimal**: Auth, RBAC, audit log, pending actions, configuration, signed reports, emergency tools. Operational screens (dispensation review, traceability, KPI dashboard, lot picker) live as **MCP Apps** in `packages/ui-apps/` — same components rendered inside MCP hosts (Claude, Open WebUI) AND inside the admin web. One UI codebase, two delivery surfaces.
+### MCP Apps surface (substitui admin canônico)
 
-When you are about to add a screen to the admin, ask: "Is this Auth/RBAC/audit/configuration/approval/emergency/signed-report?" If no, it belongs as an MCP App in `packages/ui-apps/`, not the admin.
+Operational screens live as **MCP Apps** in `packages/ui-apps/` per ADR-002:
+
+- `MemberQuotaCardApp` (Level 1, read-only card) — `ui://member-quota-card/app.html`
+- `TraceabilityTimelineApp` (Level 1, timeline) — `ui://traceability-timeline/app.html`
+- `DispensationFormApp` (Level 3, form + PendingAction submit) — `ui://dispensation-form/app.html`
+- v0.3+: `InventoryLotPickerApp`, `MemberSearchApp`, `SngpcPendingApp`, `KpiDashboardApp`, `LgpdRequestsApp`, etc.
+
+Each app is a single-file HTML bundle (vite-plugin-singlefile, future) declared in `packages/ui-apps/src/registry.ts`. MCP tool returns JSON → host renders the app inline → user interacts → app calls back into MCP tools via `postMessage({ type: "ui/tools/call", ... })`. Servidor-side, the tool returns content + `_meta.ui.resourceUri` pointing to the app.
+
+When adding a new operational screen, ask: "Does this fit in chat conversation context?"
+- **Yes** → MCP App in `packages/ui-apps/` + MCP tool in `apps/mcp/src/tools/`.
+- **No, requires TOTP co-presence** → `apps/api` REST handler + future emergency CLI/tool. Never an admin Next.js page.
 
 ### Open WebUI Boundary
 
-If `open-webui` is deployed as a sidecar:
+Open WebUI v0.9.6+ is deployed as a sidecar in v0.2.1:
 
-- Open WebUI manages: chat UI, conversation history, model selection, RAG on association docs, tool invocation
-- canna-oss manages: identity, RBAC, audit, domain state, all writes
-- **Never** install Workspace Tools (arbitrary Python) accessible to regular operators — Open WebUI docs warn this equals arbitrary code execution on the server
-- **Never** fork/embed Open WebUI inside canna-oss — its license requires preserving branding
+- Open WebUI manages: chat UI, conversation history, model selection (Gemini Algieba via OpenRouter recommended), RAG on association docs, tool invocation, OAuth groups
+- canna-oss (`apps/mcp` + `apps/api`) manages: identity, RBAC, audit, domain state, all writes
+- **Never** install Workspace Tools (arbitrary Python) accessible to regular operators — RCE vector per Open WebUI docs. Set `ENABLE_KB_EXEC=false` in compose env.
+- **Never** fork/embed Open WebUI inside canna-oss — Open WebUI license requires preserving branding.
+- **Never** rely on Open WebUI as the only entry — `apps/api` REST stays accessible for emergency operations + Nível-4 critical commands.
 
 ### Sync vs Async (regra crítica de dispensação)
 

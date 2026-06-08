@@ -1,13 +1,13 @@
 ---
 title: "Stack Técnico"
-description: "Domain kernel (Emmett) + Minimum Admin (Next.js) + MCP Server + MCP Apps + Open WebUI sidecar + Fastify 5 + PostgreSQL 16 + MinIO + Kamal 2."
+description: "Domain kernel (Emmett) + MCP Server + MCP Apps + Open WebUI sidecar + Fastify 5 + PostgreSQL 16 + MinIO + Kamal 2. NO admin Next.js (cf. ADR-002)."
 ---
 
 ## Stack Completo
 
-> Arquitetura central: **Domain Kernel em TypeScript puro + [Emmett](https://github.com/event-driven-io/emmett) como event-sourcing kernel + raw para todo o resto**. Ver [Domain Kernel](/architecture/domain-kernel/) para o porquê e o como.
+> Arquitetura central: **Domain Kernel em TypeScript puro + [Emmett](https://github.com/event-driven-io/emmett) como event-sourcing kernel + raw para todo o resto** ([ADR-001](/adr/0001-domain-kernel-emmett/)). Ver [Domain Kernel](/architecture/domain-kernel/).
 >
-> Camada de interfaces agentic: **MCP Server + MCP Apps + OpenAPI + Open WebUI (sidecar opcional)**. Ver [Interfaces](/architecture/interfaces/).
+> Primary surface (ADR-002): **MCP Server + MCP Apps + Open WebUI sidecar OBRIGATÓRIO**. **Sem admin Next.js até pós-v1.0.** Ver [Interfaces](/architecture/interfaces/) e [ADR-002](/adr/0002-mcp-first-surface/).
 
 ### Domain Kernel (núcleo)
 
@@ -18,29 +18,21 @@ description: "Domain kernel (Emmett) + Minimum Admin (Next.js) + MCP Server + MC
 | Vitest | Testes GIVEN/WHEN/THEN, scenario coverage, watch mode |
 | ULID (`ulid` npm) | IDs lexicograficamente ordenáveis para eventos e aggregates |
 
-### Frontend — Minimum Canonical Admin
+### Primary Surface — MCP Server + MCP Apps + Open WebUI (ADR-002)
 
-> Admin **mínimo e regulatório** (Auth/RBAC/Audit/Approval/Emergency/Signed Reports). Telas operacionais migram para MCP Apps em `packages/ui-apps/`. Ver [Interfaces](/architecture/interfaces/).
-
-| Tecnologia | Papel |
-|---|---|
-| Next.js 15 App Router | Framework React com RSC — apenas para o admin canônico mínimo |
-| TypeScript (strict) | Type safety ponta a ponta |
-| shadcn/ui + Radix | Componentes acessíveis, sem vendor lock |
-| Tailwind CSS | Estilização utilitária |
-| PWA (next-pwa) | Instalável sem app store |
+> Sem admin Next.js standalone. Toda interação humana via Open WebUI + MCP Apps inline. REST `apps/api` cobre Nível-4 critical commands + integrações. Ver [Interfaces](/architecture/interfaces/).
 
 ### Agent Interface — MCP Server + MCP Apps
 
 | Tecnologia | Papel |
 |---|---|
 | MCP Server (`@modelcontextprotocol/sdk`) | Exposição de Tools (commands) + Resources (read models) + Apps (UI inline) — consumido por Claude / ChatGPT / Open WebUI |
-| [MCP Apps (`ext-apps`)](https://github.com/modelcontextprotocol/ext-apps) | Componentes UI interativos renderizados dentro do chat — `DispensationReviewApp`, `TraceabilityTimelineApp`, `KpiDashboardApp`, `PendingActionApprovalApp`, `InventoryLotPickerApp`, `MemberQuotaCardApp` |
-| `packages/ui-apps/` | Pacote compartilhado — mesmo componente renderiza em MCP host E no Minimum Admin |
+| [MCP Apps (`ext-apps`)](https://github.com/modelcontextprotocol/ext-apps) | Componentes UI interativos renderizados dentro do chat — substituem 80+ telas CRUD de ERP tradicional. v0.2.1: `MemberQuotaCardApp`, `TraceabilityTimelineApp`, `DispensationFormApp`. v0.3+: `InventoryLotPickerApp`, `MemberSearchApp`, `SngpcPendingApp`, `KpiDashboardApp`, `BspoReviewApp`, `RipdReviewApp`, `LgpdRequestsApp`, `AuditTimelineApp` |
+| `packages/ui-apps/` | Pacote canônico — manifests + HTML bundles (single-file via vite-plugin-singlefile). Registry em `src/registry.ts`. |
 | OAuth 2.1 (per MCP spec) | Autorização agente↔canna-oss; agente age em nome de usuário humano com escopo limitado |
 | OpenAPI auto-gerado | Para hosts OpenAPI-only (Open WebUI Tools, integradores tradicionais) |
 | [mcpo bridge](https://github.com/open-webui/mcpo) | MCP-to-OpenAPI proxy quando host não fala MCP nativo |
-| [Open WebUI](https://github.com/open-webui/open-webui) (sidecar opcional) | Cockpit agentic "canna-oss AI Workbench" — chat UI + RAG + multi-model. **Nunca** fonte de verdade de RBAC ou regras de negócio. |
+| [Open WebUI](https://github.com/open-webui/open-webui) v0.9.6+ (sidecar OBRIGATÓRIO) | Chat host primário — `ghcr.io/open-webui/open-webui:v0.9.6` em docker-compose. MCP server registrado via config file. OAuth 2.1 mapeando scopes para canna roles. **Workspace Tools desabilitado** (`ENABLE_KB_EXEC=false`). |
 
 ### Backend
 
