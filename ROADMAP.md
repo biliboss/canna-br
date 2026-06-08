@@ -1,6 +1,6 @@
 # Roadmap
 
-Roadmap canonical: [`src/content/docs/roadmap.md`](src/content/docs/roadmap.md) — servido em `http://localhost:4335/roadmap/`.
+Roadmap canonical: [`apps/docs/src/content/docs/roadmap.md`](apps/docs/src/content/docs/roadmap.md) — servido em `http://localhost:4335/roadmap/`.
 
 Este arquivo é apenas um resumo. Quando atualizar, edite o canonical primeiro.
 
@@ -18,4 +18,4 @@ Este arquivo é apenas um resumo. Quando atualizar, edite o canonical primeiro.
 
 Princípio: **spine-first**. Tronco = Member → Prescrição → Quota → Lote → Dispensação → Audit → Relatório. Cultivo, processing, lab, financeiro completo e managed hosting são galhos.
 
-Capabilities que dependem de premissas *Especulativas* (cf. [Premissas Regulatórias](src/content/docs/regulatory-assumptions.md)) ficam em Ideas Park, não no roadmap.
+Capabilities que dependem de premissas *Especulativas* (cf. [Premissas Regulatórias](apps/docs/src/content/docs/regulatory-assumptions.md)) ficam em Ideas Park, não no roadmap.

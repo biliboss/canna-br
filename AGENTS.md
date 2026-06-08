@@ -1,13 +1,24 @@
 ---
 project: canna-oss
 repo: /Users/billiboss/.obsidian/99-development/canna-oss
-current_version: v0.1.0
+current_phase: v0.2.0-domain-kernel-spike
+current_focus: packages/domain (TypeScript-pure, no Emmett yet)
+do_not_start:
+  - apps/api
+  - apps/admin
+  - apps/mcp
+  - apps/worker
+  - apps/openapi-bridge
+  - open-webui sidecar
+package_manager: pnpm
 site_url: http://localhost:4335
 ---
 
 # AGENTS.md — canna-oss
 
-OSS cannabis association management system for Brazil, RDC 1.014/2026 sandbox. Self-hosted. AGPL-3.0 + CLA. DDD-designed.
+OSS cannabis association management system for Brazil, RDC 1.014/2026 sandbox. Self-hosted. AGPL-3.0 + CLA. DDD-designed + event-sourced kernel.
+
+**Current focus (v0.2.0 spike):** build `packages/domain` in pure TypeScript with vitest scenario coverage. **Do not** start app/api/admin/mcp/worker work until the spike gate from [ADR-001](src/content/docs/adr/0001-domain-kernel-emmett.md) passes.
 
 ---
 
@@ -22,49 +33,51 @@ canna-oss is a complete management system for cannabis therapeutic associations 
 - **Data protection:** LGPD Art. 5 II compliance — AES-256-GCM per member, crypto-deletion Art. 18 IV
 - **Compliance:** SNGPC XML native, BSPO auto-generated, chain of custody via ULID permanent
 
-The project is currently in the **Research + Domain Model** phase (v0.1.0). The docs site (Astro 5 + Starlight) documents the domain, architecture, business model, and research. Application code (Next.js 15 + Fastify 5 + PostgreSQL 16) is planned for v0.2+.
+v0.1.0 Domain Blueprint shipped 2026-06-08. Project now in **v0.2.0 Domain Kernel Spike** — `packages/domain` in pure TypeScript. Application code (apps/api, apps/admin, apps/mcp, apps/worker) is **not** part of v0.2.0 — see [ADR-001 spike gate](apps/docs/src/content/docs/adr/0001-domain-kernel-emmett.md).
 
 ---
 
-## Directory Layout
+## Directory Layout (pnpm monorepo)
 
 ```
 canna-oss/
-├── AGENTS.md                        ← you are here (canonical spec)
+├── AGENTS.md                        ← canonical spec (you are here)
 ├── README.md                        ← quick start
-├── ROADMAP.md                       ← capability-tabled roadmap
+├── ROADMAP.md                       ← summary; canonical at apps/docs/src/content/docs/roadmap.md
 ├── CHANGELOG.md                     ← per-version changes
 ├── releases/                        ← per-version release notes
-│   └── v0.1.0.md
-├── astro.config.mjs                 ← Astro 5 + Starlight config
-├── package.json
-├── tsconfig.json
-└── src/
-    └── content/
-        └── docs/
-            ├── index.mdx            ← site home
-            ├── domain/              ← DDD domain model
-            │   ├── event-storming.md        ← CENTERPIECE — canonical domain truth
-            │   ├── bounded-contexts.md      ← context map + boundaries
-            │   ├── domain-events.md         ← event catalog
-            │   └── invariants.md            ← business rules that cannot be violated
-            ├── research/            ← background research
-            │   ├── legal-framework.md       ← STJ Tema 16, CF 196, Portarias
-            │   ├── anvisa-sandbox.md        ← RDC 1.014/2026 analysis
-            │   ├── anvisa-validation-pathway.md
-            │   ├── sngpc.md                 ← SNGPC XML schema + submission
-            │   ├── software-landscape.md    ← competitive analysis
-            │   ├── international-models.md  ← DE/ES/NL/CA/CO/UY models
-            │   └── market-size.md           ← TAM/SAM/SOM Brazil
-            ├── architecture/        ← technical design
-            │   ├── stack.md                 ← full tech stack
-            │   ├── chain-of-custody.md      ← ULID trace seed→dispensation
-            │   ├── lgpd-crypto.md           ← AES-256-GCM + crypto-deletion
-            │   └── compliance-engine.md     ← SNGPC + BSPO + KPIs + CPC 29
-            └── business/            ← business model
-                ├── oss-model.md             ← AGPL + CLA + trust moat
-                ├── revenue-model.md         ← pricing + projections + FACT deal
-                └── gtm.md                   ← GTM sequence + timeline + risks
+├── package.json                     ← workspace orchestrator (pnpm scripts)
+├── pnpm-workspace.yaml              ← apps/* + packages/* + tooling/*
+├── tsconfig.json                    ← project references root
+├── apps/
+│   └── docs/                        ← @canna/docs — Astro 5 + Starlight
+│       ├── astro.config.mjs
+│       ├── package.json
+│       ├── tsconfig.json
+│       ├── public/
+│       └── src/content/docs/
+│           ├── index.mdx            ← site home
+│           ├── regulatory-assumptions.md
+│           ├── roadmap.md           ← canonical roadmap
+│           ├── adr/0001-domain-kernel-emmett.md  ← ADR-001
+│           ├── domain/              ← DDD: event-storming, bounded-contexts, events, invariants
+│           ├── research/            ← legal/anvisa/sngpc/market research
+│           ├── architecture/        ← stack, domain-kernel, interfaces, chain-of-custody, lgpd-crypto, compliance-engine
+│           └── business/            ← oss-model, revenue-model, gtm
+├── packages/
+│   ├── domain/                      ← @canna/domain — TS puro, zero framework deps ← CURRENT FOCUS
+│   ├── shared/                      ← @canna/shared — Result, errors, ids, clock
+│   ├── event-store/                 ← @canna/event-store (v0.2.0 spike)
+│   ├── app-services/                ← @canna/app-services (post-spike)
+│   ├── read-models/                 ← @canna/read-models (post-spike)
+│   ├── crypto/                      ← @canna/crypto — LGPD envelope encryption
+│   ├── sngpc/                       ← @canna/sngpc (v0.5+)
+│   ├── reports/                     ← @canna/reports (v0.3+)
+│   └── ui-apps/                     ← @canna/ui-apps — MCP Apps + admin (v0.4+)
+└── tooling/
+    ├── tsconfig/                    ← @canna/tsconfig — shared base.json
+    ├── eslint-config/               ← (post-spike)
+    └── test-utils/                  ← (post-spike)
 ```
 
 ---
@@ -79,7 +92,7 @@ canna-oss/
 
 ### Domain Kernel Workflow (canonical)
 
-The architecture is **domain-pure TypeScript + [Emmett](https://github.com/event-driven-io/emmett) as event-sourcing kernel + raw for everything else**. See `src/content/docs/architecture/domain-kernel.md` for full rationale.
+The architecture is **domain-pure TypeScript + [Emmett](https://github.com/event-driven-io/emmett) as event-sourcing kernel + raw for everything else**. See `apps/docs/src/content/docs/architecture/domain-kernel.md` for full rationale.
 
 For every domain change, this order is fixed:
 
@@ -87,7 +100,7 @@ For every domain change, this order is fixed:
 2. Add GIVEN/WHEN/THEN tests for every scenario (success + at least one rejection + state transition + event payload assertion)
 3. Implement `evolve(state, event)` for new events
 4. Implement `decide(command, state)` for the command
-5. Run `bun test:domain` — all scenarios green
+5. Run `pnpm test:domain` — all scenarios green
 6. **Only then** update app-services, read models, or API
 
 Inverting this order is an architectural regression. Reject the work and restart at step 1.
@@ -97,12 +110,12 @@ Inverting this order is an architectural regression. Reject the work and restart
 Before declaring any coding task complete, run:
 
 ```bash
-bun verify
+pnpm verify
 ```
 
 A task is **not done** if typecheck, tests, or coverage fail.
 
-For domain-only changes, `bun test:domain` is sufficient and runs in seconds.
+For domain-only changes, `pnpm test:domain` is sufficient and runs in seconds.
 
 ### Domain Scenario Coverage
 
@@ -127,7 +140,7 @@ Mental rule: **if you cannot imagine swapping Emmett for another event-sourcing 
 
 `packages/domain` imports **zero** from Emmett. Emmett appears only in `packages/event-store/` and `packages/app-services/`. If you find yourself importing Emmett inside `packages/domain/`, stop and reconsider — the domain is the function `(command, state) → events`, not anything else.
 
-Decision recorded in [ADR-001 — Domain Kernel + Emmett](src/content/docs/adr/0001-domain-kernel-emmett.md), with a spike gate at v0.2.0.
+Decision recorded in [ADR-001 — Domain Kernel + Emmett](apps/docs/src/content/docs/adr/0001-domain-kernel-emmett.md), with a spike gate at v0.2.0.
 
 ### Interface Invariant
 
@@ -143,7 +156,7 @@ Interfaces in the system:
 
 If you are tempted to call Drizzle, the event store, or a decider directly from an HTTP handler, MCP tool, MCP App backend, or worker — stop and route through `app-services`. The whole point of the architecture is that the domain has exactly one entry point.
 
-MCP tools are classified by risk level. **Level 4 tools (`execute_crypto_deletion`, `change_user_role`, `disable_2fa`, `delete_or_rotate_keys`, `submit_sngpc_production`, `change_quota`, `recall_lot`) are NOT exposed via MCP** — they require human UI co-presence in the Minimum Canonical Admin. See `src/content/docs/architecture/interfaces.md` for the full risk matrix and two-step approval flow.
+MCP tools are classified by risk level. **Level 4 tools (`execute_crypto_deletion`, `change_user_role`, `disable_2fa`, `delete_or_rotate_keys`, `submit_sngpc_production`, `change_quota`, `recall_lot`) are NOT exposed via MCP** — they require human UI co-presence in the Minimum Canonical Admin. See `apps/docs/src/content/docs/architecture/interfaces.md` for the full risk matrix and two-step approval flow.
 
 ### Minimum Canonical Admin (not ERPzão)
 
@@ -227,13 +240,17 @@ The site (`src/`) is the v0.1 docs site; application code lands in `packages/` a
 
 ---
 
-## Dev Commands
+## Dev Commands (pnpm workspace)
 
 ```bash
-bun install        # install dependencies
-bun dev            # start Astro dev server (port 4335)
-bun build          # production build
-bun preview        # preview production build
+pnpm install         # install all workspace deps
+pnpm dev             # start Astro docs dev server (port 4335)
+pnpm test:domain     # vitest run on @canna/domain
+pnpm test:watch      # vitest watch on @canna/domain
+pnpm typecheck       # tsc --noEmit across all packages (-r --if-present)
+pnpm verify          # typecheck + test (verify gate before declaring task done)
+pnpm build           # production build all workspaces
+pnpm preview         # preview production build of docs
 ```
 
-Site runs at `http://localhost:4335`.
+Docs site runs at `http://localhost:4335`. Package manager is **pnpm** — never use `bun`/`npm`/`yarn` for dependency or script commands.

@@ -322,8 +322,8 @@ Premissa: identidade vive no canna-oss até existir necessidade real de delegaç
 
 | Versão | Interface | Capability |
 |---|---|---|
-| v0.2 | Minimum Canonical Admin + REST interno | Login/TOTP, RBAC, Audit log, Pending Actions, Diretoria + RT + Dispensador. Sem MCP ainda. |
-| v0.3 | Admin completo + MCP read-only + OpenAPI | DPO + Auditor views. Resources + Tools Nível 1 expostos via MCP. OpenAPI público para integradores. Open WebUI sidecar opcional consumindo via MCP/OpenAPI. |
+| v0.2 | Minimum Canonical Admin + REST interno | Login/TOTP, RBAC mínimo, Audit log read-only, PendingAction básico, **Dispensador + RT views apenas**. Sem MCP. **Diretoria/DPO/Auditor views adiados para v0.3**. |
+| v0.3 | Admin completo + MCP read-only + OpenAPI | Diretoria + DPO + Auditor views completas. Resources + Tools Nível 1 expostos via MCP. OpenAPI público para integradores. Open WebUI sidecar opcional consumindo via MCP/OpenAPI. |
 | v0.4 | MCP draft actions + MCP Apps básico | Tools Nível 2 (`draft_*`). Primeiros MCP Apps: `MemberQuotaCardApp`, `TraceabilityTimelineApp`, `KpiDashboardApp`. mcpo bridge para hosts OpenAPI-only. |
 | v0.5 | MCP write with approval + MCP Apps completos | Tools Nível 3 (`request_*`) com PendingAction + two-step approval. MCP Apps: `DispensationReviewApp`, `PendingActionApprovalApp`, `InventoryLotPickerApp`. REST/OpenAPI público estável (v1). |
 | v1.0 | Agent marketplace + federation + Canna Copilot embutido | Federação conecta agente próprio multi-associação. Auditor externo read-only. Contador read-only no financeiro. Jurídico read-only no dossier. Canna Copilot embutido no admin usando mesmos MCP tools/apps. |

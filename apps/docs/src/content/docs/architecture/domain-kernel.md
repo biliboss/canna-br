@@ -125,7 +125,7 @@ Para qualquer mudança de comportamento de domínio, **a ordem é fixa**:
 2. Adicionar testes GIVEN/WHEN/THEN para todos os cenários (success + rejection + state transition + event payload)
 3. Implementar `evolve()` para os eventos novos
 4. Implementar `decide()` para o comando
-5. Rodar `bun test:domain` — todos os cenários verdes
+5. Rodar `pnpm test:domain` — todos os cenários verdes
 6. **Só então** atualizar app-services, read models ou API
 
 Não há "primeiro a tabela, depois o teste". Não há "primeiro o endpoint, depois o domínio". Inversão dessa ordem é regressão de arquitetura.
@@ -165,20 +165,20 @@ A ordem abaixo é projetada para Claude Code — feedback rápido, ciclo fechado
 ### Passo 1 — Workspace + Domain Vazio
 
 ```text
-bun init
-bun add -d vitest typescript @types/node
-tsconfig strict
-packages/domain inicializado
+pnpm init
+pnpm add -D vitest typescript @types/node @vitest/coverage-v8
+tsconfig strict + project references
+packages/domain inicializado em workspace pnpm
 ```
 
 Scripts em `package.json` da raiz:
 
 ```text
-bun verify        ← typecheck + test:domain + lint
-bun test:domain   ← vitest run packages/domain
-bun test:watch    ← vitest packages/domain
-bun coverage      ← vitest run --coverage packages/domain
-bun typecheck     ← tsc --noEmit
+pnpm verify        ← typecheck + test:domain + lint
+pnpm test:domain   ← vitest run packages/domain
+pnpm test:watch    ← vitest packages/domain
+pnpm coverage      ← vitest run --coverage packages/domain
+pnpm typecheck     ← tsc --noEmit
 ```
 
 ### Passo 2 — Membership Aggregate
@@ -251,7 +251,7 @@ Side effects assíncronos: emissão de PDF, submissão SNGPC, geração de BSPO.
 ```text
 Claude Code propõe alteração
   → altera decide/evolve
-  → roda bun test:domain
+  → roda pnpm test:domain
   → falha
   → corrige
   → passa

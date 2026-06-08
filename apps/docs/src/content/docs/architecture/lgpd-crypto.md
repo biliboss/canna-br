@@ -3,15 +3,15 @@ title: "LGPD — Modelo de Criptografia"
 description: "AES-256-GCM por membro, crypto-deletion Art. 18 IV, CPF hash — dados de saúde protegidos na camada de dados."
 ---
 
-## Hierarquia de Chaves
+## Hierarquia de Chaves — Envelope Encryption
 
-A proteção criptográfica opera em três camadas, com derivação determinística que permite crypto-deletion sem precisar apagar registros físicos:
+A proteção criptográfica usa **envelope encryption** com Data Encryption Keys (DEK) **aleatórias por membro**. Derivação determinística foi descartada porque, com `site_key + member_id + salt` ainda existentes, a chave é recriável — anulando o crypto-deletion. Padrão envelope é a forma compatível com auditoria e LGPD Art. 18 IV.
 
 ```
 Master Key (HashiCorp Vault / env cifrado)
-  └── Site Key (rotação trimestral, por tenant)
-        └── Member Key = PBKDF2(site_key + member.id + salt)
-              └── AES-256-GCM(dado sensível, member_key)
+  └── Site KEK (Key Encryption Key, rotação trimestral, por tenant)
+        └── EncryptedMemberDEK (DEK aleatória, cifrada com Site KEK, armazenada por membro)
+              └── AES-256-GCM(dado sensível, MemberDEK em claro)
 ```
 
 ### Master Key
@@ -20,39 +20,62 @@ Master Key (HashiCorp Vault / env cifrado)
 - Nunca aparece no banco de dados
 - Rotação: anual ou após incidente de segurança
 
-### Site Key
+### Site KEK (Key Encryption Key)
 
-- Derivada da Master Key + `site_id`
+- Derivada da Master Key + `site_id` (HKDF, não armazenada em DB)
 - Rotação trimestral (jan / abr / jul / out)
-- Após rotação: re-criptografar Member Keys com nova Site Key (job background BullMQ)
-- Versão da Site Key armazenada junto ao dado cifrado para suportar decriptografia durante janela de rotação
+- Após rotação: re-cifrar todas as `EncryptedMemberDEK` com a nova KEK (job background BullMQ)
+- Versão da KEK armazenada junto à `EncryptedMemberDEK` para suportar janela de rotação
+- **Site KEK nunca cifra dados diretamente** — só cifra DEKs
 
-### Member Key
+### Member DEK (Data Encryption Key)
 
-Derivada deterministicamente — não é armazenada:
+- **Aleatória, 256 bits, gerada com `crypto.getRandomValues` no cadastro do membro**
+- Cifrada com Site KEK → `EncryptedMemberDEK` armazenada na tabela `members`
+- DEK em claro **nunca é persistida** — só decifrada em memória quando necessário ler/gravar dado sensível do membro
+- Não é derivável a partir de outros dados — destruir `EncryptedMemberDEK` torna a DEK irrecuperável
 
 ```typescript
-async function deriveMemberKey(
-  siteKey: Uint8Array,
-  memberId: string,
-  salt: Uint8Array
-): Promise<CryptoKey> {
-  const material = await crypto.subtle.importKey(
-    "raw",
-    siteKey,
-    { name: "PBKDF2" },
-    false,
-    ["deriveKey"]
+async function createMemberDEK(siteKEK: CryptoKey): Promise<{
+  encryptedDEK: Uint8Array;
+  iv: Uint8Array;
+  kekVersion: number;
+}> {
+  // 1. Generate random DEK
+  const dek = crypto.getRandomValues(new Uint8Array(32)); // 256 bits
+
+  // 2. Wrap DEK with Site KEK (AES-256-GCM key wrap)
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const encrypted = await crypto.subtle.encrypt(
+    { name: "AES-GCM", iv },
+    siteKEK,
+    dek
   );
 
-  return crypto.subtle.deriveKey(
-    {
-      name: "PBKDF2",
-      salt: new TextEncoder().encode(memberId + Buffer.from(salt).toString("hex")),
-      iterations: 310_000,  // NIST SP 800-132 recomendação 2023
-      hash: "SHA-256",
-    },
-    material,
+  // 3. Zero the plaintext DEK from memory
+  dek.fill(0);
+
+  return {
+    encryptedDEK: new Uint8Array(encrypted),
+    iv,
+    kekVersion: currentKEKVersion(),
+  };
+}
+
+async function unwrapMemberDEK(
+  siteKEK: CryptoKey,
+  encryptedDEK: Uint8Array,
+  iv: Uint8Array
+): Promise<CryptoKey> {
+  const dekRaw = await crypto.subtle.decrypt(
+    { name: "AES-GCM", iv },
+    siteKEK,
+    encryptedDEK
+  );
+
+  return crypto.subtle.importKey(
+    "raw",
+    dekRaw,
     { name: "AES-GCM", length: 256 },
     false,
     ["encrypt", "decrypt"]
@@ -116,24 +139,24 @@ function hashCPF(cpf: string, siteSalt: string): string {
 
 ## Crypto-Deletion — Art. 18 IV LGPD
 
-O direito de eliminação (Art. 18 IV LGPD) é implementado via **crypto-deletion**: ao invés de apagar fisicamente o registro (o que quebraria referências de auditoria e chain of custody), a Member Key é destruída.
+O direito de eliminação (Art. 18 IV LGPD) é implementado via **crypto-deletion**: ao invés de apagar fisicamente o registro (o que quebraria referências de auditoria e chain of custody), a `EncryptedMemberDEK` é destruída. **Sem a DEK, os dados cifrados se tornam ruído computacionalmente irrecuperável** — e como a DEK é aleatória (não derivável), não há caminho de reconstrução.
 
 ```typescript
 async function cryptoDeleteMember(memberId: string): Promise<void> {
-  // 1. Revogar acesso imediato
   await db.transaction(async (tx) => {
+    // 1. Destruir EncryptedMemberDEK — passo central do crypto-deletion
+    //    Sem DEK não há decriptografia possível dos campos *_encrypted.
     await tx
       .update(members)
       .set({
         status: "crypto_deleted",
         crypto_deleted_at: new Date(),
-        // Sobrescrever campos cifrados com lixo irrecuperável
-        name_encrypted: null,
-        dob_encrypted: null,
-        address_encrypted: null,
-        phone_encrypted: null,
-        email_encrypted: null,
-        cpf_hash: null,  // eliminar rastreabilidade do CPF
+        encrypted_member_dek: null,
+        encrypted_member_dek_iv: null,
+        encrypted_member_dek_kek_version: null,
+        // Campos cifrados podem ser zerados também (defesa em profundidade),
+        // mas a destruição da DEK já garante irrecuperabilidade.
+        cpf_hash: null,  // eliminar rastreabilidade de duplicidade por CPF
       })
       .where(eq(members.id, memberId));
 
@@ -148,17 +171,18 @@ async function cryptoDeleteMember(memberId: string): Promise<void> {
     });
   });
 
-  // 3. Destruir objetos cifrados no MinIO
-  await minio.deleteObjects(
-    `members/${memberId}/medical_records/`
-  );
-
-  // 4. Invalidar Member Key no Vault (se Vault for usado)
-  await vault.delete(`secret/member-keys/${memberId}`);
+  // 3. Destruir objetos cifrados no MinIO (defesa em profundidade)
+  await minio.deleteObjects(`members/${memberId}/medical_records/`);
 }
 ```
 
-**Resultado:** o registro existe no banco (preserva integridade da chain of custody e auditoria), mas todos os dados pessoais são irrecuperáveis. A Member Key não existe mais — a criptografia se torna lixo computacionalmente irrecuperável.
+**Resultado:** o registro `Member` permanece no banco com `status = crypto_deleted` (preserva integridade de chain of custody e audit log via referência ULID), mas todos os dados pessoais ficam irrecuperáveis:
+
+- `EncryptedMemberDEK` foi destruída → DEK em claro não pode ser obtida
+- DEK era **aleatória** → não pode ser re-derivada de `site_id + member_id` (diferente de PBKDF2 determinístico)
+- Site KEK rotacionada periodicamente → mesmo que KEK antiga vaze no futuro, sem `EncryptedMemberDEK` não há DEK a decifrar
+
+A criptografia se torna lixo computacionalmente irrecuperável — passa em auditoria LGPD.
 
 ---
 

@@ -72,7 +72,7 @@ Optimistic concurrency do Emmett garante consistência sem 2PC. Side effects ext
 
 ### Positivas
 
-- **Feedback rápido**: `bun test:domain` em segundos. Domínio puro = função pura = máxima testabilidade. Claude Code pode iterar `decide`/`evolve` sem subir banco ou servidor.
+- **Feedback rápido**: `pnpm test:domain` em segundos. Domínio puro = função pura = máxima testabilidade. Claude Code pode iterar `decide`/`evolve` sem subir banco ou servidor.
 - **Auditabilidade jurídica**: cada decisão de domínio é uma função pura testada com cenário explícito. O domínio **é** o teste.
 - **Portabilidade**: domínio independe de Emmett. Se a biblioteca morrer ou divergir, o kernel é substituível sem tocar regras de negócio.
 - **Chain of custody natural**: event sourcing já é a forma correta de representar trace plant → harvest → lot → dispensation. Não há impedance mismatch.
@@ -111,15 +111,33 @@ Core loop: GIVEN events → command → decide() → append em Emmett Postgres
 | **Duas `RecordDispensation` concorrentes no mesmo lote** | **Apenas uma passa.** A segunda falha por optimistic concurrency, é reavaliada contra o estado novo e emite `LotInsufficientQuantity` se estoque insuficiente — **nunca deixa estoque negativo**. |
 | Crash entre command recebido e append | Sem evento parcial — ou todos os 3 eventos foram persistidos ou nenhum |
 
-**Critério qualitativo:** Claude Code navega, testa e evolui o spike sem confusão. `bun test:domain < 5s`.
+**Critério qualitativo:** Claude Code navega, testa e evolui o spike sem confusão. `pnpm test:domain < 5s`.
 
 ### Decisão de Stream (v0.2 simplification)
 
-Para o spike, os 3 eventos (`DispensationRecorded` + `MemberQuotaConsumed` + `LotQuantityDeducted`) são appendados no **stream da Dispensation**. Read models de quota e estoque projetam a partir desse stream.
+Para o spike, `RecordDispensation` usa um **stream serializado por associação**:
 
-**Trade-off conhecido:** isso mistura facts de aggregates diferentes em um mesmo stream. Para v0.2 é aceitável (simplicidade > pureza). **Decisão revisitada em ADR futuro quando concorrência real exigir streams dedicados por aggregate ou process manager com append transacional cross-stream.**
+```text
+stream: association:{associationId}:dispensations
+```
 
-O teste de concorrência no mesmo lote (acima) é o gate técnico: se Emmett não suportar bem essa atomicidade cross-stream conceitual, a ADR-001 vira *Superseded* ou exige process manager.
+Todos os `RecordDispensation` de uma associação passam por **um único stream** de controle. Optimistic concurrency no `expectedVersion` desse stream garante serialização linear de dispensações dentro da associação.
+
+Os 3 eventos (`DispensationRecorded` + `MemberQuotaConsumed` + `LotQuantityDeducted`) são appendados juntos nesse stream. Read models de quota e estoque projetam a partir dele.
+
+**Por quê serializar por associação, não por lote:**
+- Throughput de uma associação é baixo (~1k eventos/dia). Serialização linear não é gargalo.
+- Evita race condition de duas dispensações concorrentes contra o mesmo lote — ambas avaliariam estado stale.
+- Mais simples que process manager cross-stream ou advisory locks PostgreSQL.
+- Segurança regulatória > pureza de aggregate-per-stream.
+
+**Trade-off conhecido:** não escala para milhares de dispensações/segundo por associação. Para v0.2 isso é irrelevante — volume real é dezenas de dispensações/dia. **Decisão revisitada em ADR futuro** quando alguma associação encostar no limite ou quando multi-tenant exigir reformulação:
+
+- Streams por aggregate (lot stream, member-month stream) + process manager
+- Advisory locks PostgreSQL no nível do lote
+- Append transacional cross-stream se Emmett evoluir
+
+O teste de concorrência no mesmo lote (acima) é o gate técnico: serialização por associação **deve** fazer a segunda `RecordDispensation` concorrente falhar/retry → reavaliar contra estado novo → emitir `LotInsufficientQuantity` se estoque insuficiente.
 
 **Se passa**: Emmett vira peça oficial. ADR-001 transita para *Accepted* sem ressalvas.
 

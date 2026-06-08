@@ -49,10 +49,12 @@ interface SNGPCDispensacao {
 ```
 
 **Fluxo de geração:**
-1. Dispensação registrada → evento `DispensationCreated` publicado
-2. Worker SNGPC consome evento → gera XML individual
+1. Dispensação registrada → evento `DispensationRecorded` appendado no event store (junto com `MemberQuotaConsumed` + `LotQuantityDeducted`, cf. [ADR-001](/adr/0001-domain-kernel-emmett/))
+2. Worker SNGPC (BullMQ) consome `DispensationRecorded` → gera XML individual
 3. Batch diário às 23:45h consolida XMLs do dia → envia para RNDS
 4. Resposta da RNDS armazenada no `sngpc_submissions` com status e número de protocolo
+
+Falha na geração/envio do XML **não invalida** a dispensação registrada — fluxo assíncrono separado do estado regulatório crítico.
 
 ---
 

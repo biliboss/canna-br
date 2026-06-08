@@ -96,16 +96,7 @@ interface DomainEvent {
 
 ---
 
-### `QuotaExceededAttempt`
-
-| Campo | Tipo | Descrição |
-|---|---|---|
-| `member_id` | ULID | |
-| `attempted_g` | number | Gramas tentadas |
-| `available_g` | number | Gramas disponíveis no mês |
-| `attempted_by` | ULID | user_id do dispensador |
-
-**Dispara:** bloqueio da dispensação; alerta ao `ADMIN` e `RESPONSAVEL_TECNICO`.
+> `QuotaExceededAttempt` é evento do contexto Dispensation (nasce da tentativa de dispensar), não Membership. Ver definição canônica em [Dispensation](#dispensation) abaixo.
 
 ---
 

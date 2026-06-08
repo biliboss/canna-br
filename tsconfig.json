@@ -1,6 +1,8 @@
 {
-  "extends": "astro/tsconfigs/strict",
-  "compilerOptions": {
-    "strictNullChecks": true
-  }
+  "files": [],
+  "references": [
+    { "path": "./tooling/tsconfig" },
+    { "path": "./packages/shared" },
+    { "path": "./packages/domain" }
+  ]
 }

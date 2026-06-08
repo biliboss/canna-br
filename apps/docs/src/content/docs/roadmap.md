@@ -31,7 +31,7 @@ Objetivo: provar o core loop em **uma** associação real. **Ordem fixa**: domí
 
 | Capability | Valor | Done when |
 |---|---|---|
-| `packages/domain` TS puro | Feedback rápido para Claude Code | `bun verify` em < 5s; vitest GIVEN/WHEN/THEN |
+| `packages/domain` TS puro | Feedback rápido para Claude Code | `pnpm verify` em < 5s; vitest GIVEN/WHEN/THEN |
 | Membership decider | Estado de membro auditável | 8 eventos + scenario coverage 100% (success + rejection + transitions) |
 | Inventory decider | Estado de lote auditável | 5 eventos + scenario coverage 100% |
 | Dispensation use case | Core regulatório em código puro | Cross-aggregate use case; emite Recorded / Rejected / QuotaExceededAttempt |
