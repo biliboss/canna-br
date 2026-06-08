@@ -55,6 +55,7 @@ export default defineConfig({
           ],
         },
         { label: 'Roadmap', link: '/roadmap/' },
+        { label: 'Premissas Regulatórias', link: '/regulatory-assumptions/' },
         { label: 'Releases', autogenerate: { directory: 'releases' } },
       ],
     }),

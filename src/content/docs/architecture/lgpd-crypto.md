@@ -164,13 +164,19 @@ async function cryptoDeleteMember(memberId: string): Promise<void> {
 
 ## Obrigações LGPD para Dados Sensíveis
 
-### DPO Obrigatório
+### Encarregado/DPO — Recomendação Conforme Porte
 
-Art. 41 LGPD: organizações que processam dados sensíveis em larga escala devem nomear um Encarregado (DPO). A associação deve:
+A LGPD (Art. 41) exige nomeação de Encarregado para organizações que processam dados pessoais. A **Resolução CD/ANPD nº 2/2022** dispensa agentes de tratamento de **pequeno porte** da obrigação formal — mas mantém a exigência de canal de comunicação com titulares.
 
-1. Nomear DPO formalmente (pode ser interno)
-2. Publicar contato do DPO no site da associação
-3. Registrar DPO na ANPD quando o cadastro for aberto
+Para associação de cannabis processando dados sensíveis de saúde, a recomendação prática:
+
+1. **Pequeno porte (associação inicial, < ~500 membros):** canal formal com titulares obrigatório; encarregado formal é boa prática de governança, não exigência. O sistema fornece template do canal.
+2. **Médio/grande porte:** nomear Encarregado formalmente (interno ou externo); publicar contato; registrar na ANPD quando aplicável.
+3. **Em qualquer porte:** RIPD e base legal documentada são exigência efetiva, não dispensável.
+
+A determinação de porte segue critérios da Resolução ANPD 2/2022 (faturamento, volume de tratamento, sensibilidade dos dados). Como dados de saúde são sensíveis, recomendamos avaliação jurídica caso a associação cresça acima de pequeno porte mesmo em estágio inicial.
+
+Cf. [Premissas Regulatórias](/regulatory-assumptions/) — esta premissa está em **Prováveis**: encarregado recomendado para associação de cannabis mesmo em pequeno porte, sujeito a confirmação com advogado especializado em LGPD saúde.
 
 ### RIPD Antes de Iniciar Processamento
 

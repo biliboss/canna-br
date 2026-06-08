@@ -66,12 +66,19 @@ Não aplicáveis ao mercado BR, mas são o gold standard de arquitetura:
 
 ---
 
-## Por Que SaaS é Risco Jurídico
+## Por Que Self-Hosted Reduz Risco LGPD
 
 Sob a **LGPD, Art. 5, II**, dados de saúde são **dados pessoais sensíveis** — exigem tratamento com base legal explícita e controle restrito.
 
-Em um modelo SaaS, o **controlador dos dados é o fornecedor do software**, não a associação. Isso viola:
-- O dever fiduciário da associação para com seus membros-pacientes
-- A exigência regulatória de que a associação seja responsável pela rastreabilidade e segurança das informações
+Em um modelo SaaS clássico, a associação continua sendo controladora e o fornecedor é operador — desde que o contrato e a operação estejam corretamente desenhados. Self-hosted não é a única opção juridicamente válida. **É a opção com menor superfície de risco para a diretoria da associação.**
 
-O modelo correto: **a associação é o controlador** — o software deve ser hospedado pela própria associação (self-hosted) ou em infraestrutura sob seu controle exclusivo.
+Self-hosted reduz:
+
+- **Suboperadores**: SaaS típico usa CDN, hosting, observability, email — cada um é um operador adicional com cadeia de risco
+- **Transferência internacional**: a maioria dos SaaS comerciais armazena dados fora do BR — exige BCRs ou cláusulas-padrão ANPD
+- **Lock-in de dados sensíveis**: migração de SaaS para qualquer outro provedor (ou crypto-deletion) depende de cooperação do fornecedor
+- **Superfície de vazamento**: um breach no fornecedor SaaS é breach de N associações simultaneamente — responsabilidade compartilhada com efeito sistêmico
+
+O modelo recomendado pelo canna-oss: **a associação hospeda o software em infraestrutura sob seu controle** (servidor próprio ou managed hosting com contrato explícito de operador BR-only).
+
+Cf. [Premissas Regulatórias](/regulatory-assumptions/) — esta tese está em **Prováveis**: self-hosted reduz superfície de risco LGPD para a diretoria. Não é declaração de que SaaS viola LGPD per se.
