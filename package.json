@@ -1,0 +1,17 @@
+{
+  "name": "canna-oss",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "astro": "^5.18.2",
+    "@astrojs/starlight": "^0.37.7"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

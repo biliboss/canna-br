@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>canna-oss — Event Storming Board</title>
+<style>
+:root {
+  --bg:       #09090b;
+  --surface:  #18181b;
+  --surface2: #27272a;
+  --border:   #3f3f46;
+  --text:     #f4f4f5;
+  --muted:    #a1a1aa;
+
+  /* sticky note colors */
+  --event:    #ea580c; /* 🟠 domain event */
+  --cmd:      #2563eb; /* 🔵 command */
+  --agg:      #ca8a04; /* 🟡 aggregate */
+  --policy:   #7c3aed; /* 🟣 policy */
+  --ext:      #be185d; /* 🩷 external system */
+  --rm:       #15803d; /* 🟢 read model */
+  --hot:      #b91c1c; /* 🔴 hotspot */
+
+  --event-t:  #fff7ed;
+  --cmd-t:    #eff6ff;
+  --agg-t:    #fefce8;
+  --policy-t: #faf5ff;
+  --ext-t:    #fdf2f8;
+  --rm-t:     #f0fdf4;
+  --hot-t:    #fef2f2;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ── Header ── */
+header {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  background: rgba(9,9,11,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+.logo-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 8px #22c55e;
+}
+.logo sub {
+  font-size: 10px;
+  color: var(--muted);
+  font-weight: 400;
+  margin-left: 4px;
+}
+
+/* Legend */
+.legend {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--muted);
+  cursor: default;
+}
+.legend-swatch {
+  width: 14px; height: 14px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+/* ── Board ── */
+.board {
+  padding: 28px 28px 80px;
+  overflow-x: auto;
+  min-width: 0;
+}
+
+/* ── Swimlane ── */
+.lane {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  margin-bottom: 10px;
+  min-width: max-content;
+}
+.lane-label {
+  width: 140px;
+  flex-shrink: 0;
+  padding: 10px 16px 10px 0;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding-top: 18px;
+  user-select: none;
+}
+
+.lane-body {
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  flex-wrap: nowrap;
+  padding: 6px 0;
+  min-width: 0;
+}
+
+/* ── Divider / section header ── */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0 8px;
+  min-width: max-content;
+  padding-left: 140px;
+}
+.divider-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, var(--border), transparent);
+  min-width: 200px;
+}
+.divider-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #22c55e;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* ── Sticky note base ── */
+.s {
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 112px;
+  min-height: 72px;
+  padding: 8px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  line-height: 1.35;
+  font-weight: 600;
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.15s, box-shadow 0.15s, z-index 0s;
+  flex-shrink: 0;
+  word-break: break-word;
+  border-bottom: 3px solid rgba(0,0,0,0.25);
+}
+.s:hover {
+  transform: translateY(-4px) scale(1.06) rotate(0deg) !important;
+  z-index: 50;
+  box-shadow: 0 16px 32px rgba(0,0,0,0.6) !important;
+}
+/* slight random rotation via nth-child */
+.s:nth-child(3n+1) { transform: rotate(-1deg); }
+.s:nth-child(3n+2) { transform: rotate(0.5deg); }
+.s:nth-child(3n)   { transform: rotate(-0.5deg); }
+
+/* Note type classes */
+.ev  { background: var(--event);  color: var(--event-t);  box-shadow: 4px 4px 0 rgba(0,0,0,0.4); }
+.cmd { background: var(--cmd);    color: var(--cmd-t);    box-shadow: 4px 4px 0 rgba(0,0,0,0.4); }
+.ag  { background: var(--agg);    color: #1c1917;         box-shadow: 4px 4px 0 rgba(0,0,0,0.4); border-radius: 8px; }
+.po  { background: var(--policy); color: var(--policy-t); box-shadow: 4px 4px 0 rgba(0,0,0,0.4); border-left: 4px solid rgba(255,255,255,0.3); }
+.ex  { background: var(--ext);    color: var(--ext-t);    box-shadow: 4px 4px 0 rgba(0,0,0,0.4); border: 2px dashed rgba(255,255,255,0.3); }
+.rm  { background: var(--rm);     color: var(--rm-t);     box-shadow: 4px 4px 0 rgba(0,0,0,0.4); }
+.ht  { background: var(--hot);    color: var(--hot-t);    box-shadow: 4px 4px 0 rgba(0,0,0,0.4); border: 2px solid rgba(255,255,255,0.4); }
+
+/* Note meta-label */
+.s-type {
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.65;
+  margin-bottom: 4px;
+  display: block;
+}
+
+/* Arrow between notes */
+.arr {
+  display: flex;
+  align-items: center;
+  align-self: center;
+  color: var(--muted);
+  font-size: 16px;
+  padding: 0 2px;
+  flex-shrink: 0;
+  margin-top: -8px;
+}
+
+/* Vertical group */
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+/* Policy connector */
+.then {
+  display: flex;
+  align-items: center;
+  align-self: center;
+  padding: 0 4px;
+  flex-shrink: 0;
+}
+.then-inner {
+  font-size: 9px;
+  color: #a855f7;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  writing-mode: horizontal-tb;
+  background: #2e1065;
+  border: 1px solid #7c3aed;
+  border-radius: 4px;
+  padding: 3px 6px;
+  white-space: nowrap;
+}
+
+/* ── Detail panel (tooltip) ── */
+#panel {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  width: 300px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 20px;
+  z-index: 300;
+  display: none;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+  animation: slidein 0.2s ease;
+}
+@keyframes slidein {
+  from { transform: translateY(12px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+#panel.visible { display: block; }
+#panel-close {
+  position: absolute;
+  top: 10px; right: 14px;
+  background: none; border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+}
+#panel-type {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+#panel-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: var(--text);
+}
+#panel-body {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+#panel-body strong { color: var(--text); }
+#panel-body code {
+  background: var(--surface2);
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-family: monospace;
+  font-size: 11px;
+  color: #22c55e;
+}
+#panel-body ul { padding-left: 16px; margin-top: 6px; }
+#panel-body li { margin-bottom: 3px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-dot"></div>
+    canna-oss <sub>Event Storming Board</sub>
+  </div>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--event)"></div>Domain Event</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--cmd)"></div>Command</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--agg);border-radius:4px"></div>Aggregate</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--policy)"></div>Policy</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--ext)"></div>Ext. System</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--rm)"></div>Read Model</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--hot)"></div>Hotspot</div>
+  </div>
+</header>
+
+<div class="board" id="board">
+
+<!-- ════════════════ FLOW 1: ONBOARDING ════════════════ -->
+<div class="divider">
+  <div class="divider-label">Fluxo 1 — Onboarding de Membro</div>
+  <div class="divider-line"></div>
+</div>
+
+<div class="lane">
+  <div class="lane-label">Gatilho</div>
+  <div class="lane-body">
+    <div class="s ex" data-type="Sistema Externo" data-title="Médico Prescritor" data-body="Profissional de saúde externo ao sistema. Emite prescrição médica que viabiliza o cadastro do membro na associação.<br><br><strong>Formato:</strong> Receita médica física ou digital (RDC 1.014 não especifica formato — hotspot).<br><br><strong>Integração:</strong> RT da associação valida e faz upload do documento."><span class="s-type">ext. system</span>Médico Prescritor</div>
+    <div class="arr">→</div>
+    <div class="s cmd" data-type="Command" data-title="SubmitMedicalRecord" data-body="Responsável Técnico ou membro envia documento de prescrição.<br><br><strong>Payload:</strong> member_id, doc_type, file (PDF), valid_until, crf_crm_prescriber<br><br><strong>Pré-condição:</strong> Membro já cadastrado como PENDING_CONSENT."><span class="s-type">command</span>Submit Medical Record</div>
+    <div class="arr">→</div>
+    <div class="s ag" data-type="Aggregate" data-title="Member" data-body="Root aggregate do contexto Membership.<br><br><strong>Entidades:</strong> MedicalRecord, ConsentRecord<br><strong>Value Objects:</strong> CPFHash, EncryptedPersonalData, MonthlyQuotaGrams<br><strong>Estado:</strong> PENDING_CONSENT → ACTIVE → SUSPENDED → ANONYMIZED"><span class="s-type">aggregate</span>Member</div>
+    <div class="arr">→</div>
+    <div class="s ev" data-type="Domain Event" data-title="MedicalRecordSubmitted" data-body="Prescrição médica foi submetida e aguarda aprovação do RT.<br><br><strong>Payload:</strong> member_id, record_id, doc_type, file_hash (SHA-256), valid_until<br><br><strong>Dispara:</strong> Notificação para RT aprovar; audit log entry."><span class="s-type">event</span>Medical Record Submitted</div>
+  </div>
+</div>
+
+<div class="lane">
+  <div class="lane-label">Consentimento</div>
+  <div class="lane-body">
+    <div class="s po" data-type="Policy" data-title="Quando MedicalRecordSubmitted" data-body="<strong>Regra:</strong> Quando prescrição submetida → solicitar consentimento expresso do membro.<br><br><strong>Base legal:</strong> LGPD Art. 7 IX + Art. 9 — dados sensíveis exigem consentimento específico.<br><br><strong>Implementação:</strong> Email com link para portal de consentimento (TOTP-protegido)."><span class="s-type">policy</span>→ Request Consent</div>
+    <div class="arr">→</div>
+    <div class="s cmd" data-type="Command" data-title="RecordConsent" data-body="Membro assina termo de consentimento expresso.<br><br><strong>Payload:</strong> member_id, consent_version, ip_address, signed_at, opt_in_method<br><br><strong>Termo inclui:</strong> finalidade, dados coletados, prazo retenção, direitos LGPD Art. 18."><span class="s-type">command</span>Record Consent</div>
+    <div class="arr">→</div>
+    <div class="s ag" data-type="Aggregate" data-title="Member" data-body="Mesmo aggregate — processa o consent e transita estado.<br><br><strong>Invariante:</strong> Consentimento ANTES de qualquer dispensação.<br><strong>Invariante:</strong> Consentimento opt-in afirmativo — não pré-marcado."><span class="s-type">aggregate</span>Member</div>
+    <div class="arr">→</div>
+    <div class="s ev" data-type="Domain Event" data-title="ConsentRecorded" data-body="Membro deu consentimento expresso conforme LGPD.<br><br><strong>Payload:</strong> member_id, consent_version, signed_at, ip_address<br><br><strong>Dispara:</strong> ActivateMember (se MedicalRecord também válido)."><span class="s-type">event</span>Consent Recorded</div>
+    <div class="arr">→</div>
+    <div class="s ev" data-type="Domain Event" data-title="MemberActivated" data-body="Membro está ativo e pode receber dispensações.<br><br><strong>Estado anterior:</strong> PENDING_CONSENT<br><strong>Estado novo:</strong> ACTIVE<br><br><strong>Dispara:</strong> audit log entry; email de boas-vindas com assunto neutro (discretion by design)."><span class="s-type">event</span>Member Activated</div>
+  </div>
+</div>
+
+<div class="lane">
+  <div class="lane-label">Hotspots</div>
+  <div class="lane-body">
+    <div class="s ht" data-type="Hotspot" data-title="Prescrição digital vs papel" data-body="<strong>Dúvida:</strong> RDC 1.014 não especifica se prescrição deve ser digital (ICP-Brasil) ou papel digitalizado basta.<br><br><strong>Impacto:</strong> Alto — determina fluxo de upload vs integração com prontuário eletrônico.<br><br><strong>Ação:</strong> Consultar GGMED via FALA.BR."><span class="s-type">hotspot</span>Receita digital vs papel?</div>
+    <div class="s ht" data-type="Hotspot" data-title="Prazo de validade da prescrição" data-body="<strong>Dúvida:</strong> Cannabis controlada segue prazo padrão de 30 dias ou prazo especial?<br><br><strong>Impacto:</strong> Médio — afeta a lógica de valid_until no MedicalRecord e a regra de dispensação.<br><br><strong>Ação:</strong> Verificar Portaria SVS/MS 344/98 para listagem B2 (canabinoide)."><span class="s-type">hotspot</span>Validade prescrição: 30 dias?</div>
+    <div class="s ht" data-type="Hotspot" data-title="Membro menor de idade" data-body="<strong>Dúvida:</strong> Sandbox ANVISA permite menores de idade como membros (uso pediátrico de CBD)? Quem assina o consentimento?<br><br><strong>Impacto:</strong> Médio — guardian legal como proxy + dados do menor sensíveis amplificados."><span class="s-type">hotspot</span>Menores de idade?</div>
+  </div>
+</div>
+
+<!-- ════════════════ FLOW 2: CULTIVO ════════════════ -->
+<div class="divider">
+  <div class="divider-label">Fluxo 2 — Ciclo de Cultivo</div>
+  <div class="divider-line"></div>
+</div>
+
+<div class="lane">
+  <div class="lane-label">Início</div>
+  <div class="lane-body">
+    <div class="s cmd" data-type="Command" data-title="StartCultivationBatch" data-body="Cultivador inicia novo ciclo de cultivo.<br><br><strong>Role:</strong> CULTIVADOR<br><strong>Payload:</strong> variety, geolocation_enc (RDC 1.013 obrigatório), quantity_planned, started_by<br><br><strong>Geolocalização:</strong> ST_Point cifrado via AES-256-GCM — endereço de cultivo é dado sensível."><span class="s-type">command</span>Start Cultivation Batch</div>
+    <div class="arr">→</div>
+    <div class="s ag" data-type="Aggregate" data-title="CultivationBatch" data-body="Root aggregate do contexto Cultivation.<br><br><strong>Entidades:</strong> Plant (ULID permanente), PlantStageLog (append-only)<br><strong>Value Objects:</strong> PlantULID, VarietyName, GeolocationEncrypted, PlantStage, DestroyWitness"><span class="s-type">aggregate</span>Cultivation Batch</div>
+    <div class="arr">→</div>
+    <div class="s ev" data-type="Domain Event" data-title="CultivationBatchStarted" data-body="Novo batch de cultivo iniciado e registrado.<br><br><strong>Payload:</strong> batch_id (ULID), variety, geo_enc, quantity_planned, started_by, at<br><br><strong>RDC 1.013:</strong> Geolocalização obrigatória. Coordenadas sigilosas — não publicadas em relatórios abertos."><span class="s-type">event</span>Cultivation Batch Started</div>
+    <div class="arr">→</div>
+    <div class="s cmd" data-type="Command" data-title="RegisterPlant" data-body="Registrar cada planta individualmente no sistema.<br><br><strong>Role:</strong> CULTIVADOR<br><strong>Payload:</strong> batch_id, tag_number (tag física), strain<br><br><strong>ULID gerado:</strong> Identificador permanente da planta — impresso como tag física (QR ou NFC)."><span class="s-type">command</span>Register Plant</div>
+    <div class="arr">→</div>
+    <div class="s ev" data-type="Domain Event" data-title="PlantRegistered" data-body="Planta cadastrada com ULID permanente.<br><br><strong>Payload:</strong> plant_ulid (PERMANENTE — nunca reutilizado), batch_id, tag_number, at<br><br><strong>Invariante:</strong> ULID nunca reutilizado mesmo após destruição da planta. Identidade física + digital."><span class="s-type">event</span>Plant Registered</div>
+  </div>
+</div>
+
+<div class="lane">
+  <div class="lane-label">Stage Loop</div>
+  <div class="lane-body">
+    <div class="s cmd" data-type="Command" data-title="AdvancePlantStage" data-body="Avançar estágio da planta na máquina de estados.<br><br><strong>Role:</strong> CULTIVADOR<br><strong>Stages:</strong> GERMINATING → SEEDLING → VEGETATIVE → FLOWERING<br><br><strong>Invariante:</strong> Transições só forward. DESTROYED pode ocorrer de qualquer estado. HARVESTED não pode ser revertido."><span class="s-type">command</span>Advance Plant Stage</div>
+    <div class="arr">→</div>
+    <div class="s ag" data-type="Aggregate" data-title="Plant" data-body="Entidade dentro de CultivationBatch. ULID permanente atribuído no registro.<br><br><strong>State machine:</strong><br>GERMINATING → SEEDLING → VEGETATIVE → FLOWERING → HARVESTED<br>Qualquer → DESTROYED (witness obrigatório)"><span class="s-type">aggregate</span>Plant</div>
+    <div class="arr">→</div>
+    <div class="s ev" data-type="Domain Event" data-title="PlantStageAdvanced" data-body="Planta avançou para próximo estágio do ciclo de vida.<br><br><strong>Payload:</strong> plant_ulid, from_stage, to_stage, advanced_by, at<br><br><strong>Append-only:</strong> PlantStageLog nunca atualizado — trilha completa de cada planta para auditoria ANVISA."><span class="s-type">event</span>Plant Stage Advanced</div>
+    <div class="col">
+      <div class="s cmd" data-type="Command" data-title="DestroyPlant" data-body="Destruição de planta (descarte, doença, erro).<br><br><strong>Role:</strong> CULTIVADOR + WITNESS obrigatório (segregação RDC 1.014)<br><strong>Payload:</strong> plant_ulid, reason, witness_id, destroyed_at<br><br><strong>Invariante:</strong> witness_id.role ≠ cultivador que registrou a destruição."><span class="s-type">command</span>Destroy Plant</div>
+      <div class="s ev" data-type="Domain Event" data-title="PlantDestroyed" data-body="Planta foi destruída e registrada com testemunho.<br><br><strong>Payload:</strong> plant_ulid, reason, witness_id, destroyed_at<br><br><strong>Nota:</strong> Registro permanece no sistema mesmo após destruição. ULID nunca reutilizado. Trilha ANVISA obrigatória."><span class="s-type">event</span>Plant Destroyed</div>
+    </div>
+  </div>
+</div>
+
+<div class="lane">
+  <div class="lane-label">Colheita</div>
+  <div class="lane-body">
+    <div class="s cmd" data-type="Command" data-title="RecordHarvest" data-body="Registrar colheita de um conjunto de plantas (FLOWERING).<br><br><strong>Role:</strong> CULTIVADOR<br><strong>Payload:</strong> batch_id, plant_ulids[], wet_weight_g, dry_weight_g, fair_value_brl<br><br><strong>CPC 29:</strong> fair_value_brl obrigatório — não pode ser zero. Ativo biológico para o balanço patrimonial."><span class="s-type">command</span>Record Harvest</div>
+    <div class="arr">→</div>
+    <div class="s ag" data-type="Aggregate" data-title="CultivationBatch" data-body="Batch recebe a colheita e transita plantas para HARVESTED."><span class="s-type">aggregate</span>Cultivation Batch</div>
+    <div class="arr">→</div>
+    <div class="s ev" data-type="Domain Event" data-title="HarvestRecorded" data-body="Colheita registrada com peso e fair value.<br><br><strong>Payload:</strong> harvest_id, batch_id, plant_ulids[], wet_weight_g, dry_weight_g, fair_value_brl (CPC 29)<br><br><strong>Dispara:</strong> CreateProcessingRun (→ Fluxo 3) + RecordBiologicalAsset (→ Finance)."><span class="s-type">event</span>Harvest Recorded</div>
+    <div class="col">
+      <div class="then"><div class="then-inner">Policy →</div></div>
+    </div>
+    <div class="col">
+      <div class="s po" data-type="Policy" data-title="Quando HarvestRecorded" data-body="<strong>Regra 1:</strong> CreateProcessingRun → inicia Processing context (Fluxo 3).<br><br><strong>Regra 2:</strong> RecordBiologicalAsset → Finance context registra ativo biológico CPC 29 / IAS 41 no balanço do mês."><span class="s-type">policy</span>→ Create Processing Run</div>
+      <div class="s po" data-type="Policy" data-title="Quando HarvestRecorded (Finance)" data-body="<strong>CPC 29 / IAS 41:</strong> Plantas colhidas saem da conta Ativo Biológico e entram na conta Estoque pelo fair_value_brl na data da colheita.<br><br>Variação de fair value entre períodos → resultado na DRE mensal."><span class="s-type">policy</span>→ CPC 29 Valuation</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════ FLOW 3: PROCESSAMENTO ════════════════ -->
+<div class="divider">
+  <div class="divider-label">Fluxo 3 — Processamento &amp; Laboratório</div>
+  <div class="divider-line"></div>
+</div>
+
+<div class="lane">
+  <div class="lane-label">Processamento</div>
+  <div class="lane-body">
+    <div class="s cmd" data-type="Command" data-title="CreateProcessingRun" data-body="Iniciar processamento da colheita (extração, secagem, embalagem).<br><br><strong>Role:</strong> CULTIVADOR<br><strong>Payload:</strong> harvest_batch_id, product_type (flower/extract/oil), started_by<br><br><strong>yield_pct:</strong> Campo GENERATED = processed_g / dry_g × 100 (calculado automaticamente)."><span class="s-type">command</span>Create Processing Run</div>
+    <div class="arr">→</div>
+    <div class="s ag" data-type="Aggregate" data-title="HarvestBatch" data-body="Root aggregate do contexto Processing. Criado pelo evento HarvestRecorded.<br><br><strong>Entidades:</strong> ProcessingRun, LabSample<br><strong>Value Objects:</strong> FairValueBRL, YieldPercentage (GENERATED), COAFileHash, THCPercentage, CBDPercentage"><span class="s-type">aggregate</span>Harvest Batch</div>
+    <div class="arr">→</div>
+    <div class="s ev" data-type="Domain Event" data-title="ProcessingRunCompleted" data-body="Processamento concluído, produto pronto para análise laboratorial.<br><br><strong>Payload:</strong> run_id, harvest_id, product_type, processed_g, yield_pct (GENERATED)<br><br><strong>Próximo passo:</strong> Submeter amostra ao laboratório (SubmitLabSample)."><span class="s-type">event</span>Processing Run Completed</div>
+  </div>
+</div>
+
+<div class="lane">
+  <div class="lane-label">Laboratório</div>
+  <div class="lane-body">
+    <div class="s cmd" data-type="Command" data-title="SubmitLabSample" data-body="Responsável Técnico envia amostra para análise e registra COA quando retorna.<br><br><strong>Role:</strong> RESPONSAVEL_TECNICO<br><strong>Payload:</strong> run_id, coa_file, thc_pct, cbd_pct, contaminants_result (PASS/FAIL)"><span class="s-type">command</span>Submit Lab Sample</div>
+    <div class="arr">→</div>
+    <div class="s ex" data-type="Sistema Externo" data-title="Laboratório Analítico" data-body="Laboratório credenciado que realiza análises físico-químicas e microbiológicas.<br><br><strong>Retorna:</strong> COA (Certificate of Analysis) com THC%, CBD%, contaminantes.<br><br><strong>Hotspot:</strong> ANVISA exigirá laboratório específico? Lista de labs homologados?"><span class="s-type">ext. system</span>Laboratório Analítico</div>
+    <div class="arr">→</div>
+    <div class="s ev" data-type="Domain Event" data-title="LabSampleSubmitted" data-body="Amostra registrada, aguardando decisão do RT.<br><br><strong>Payload:</strong> sample_id, run_id, coa_file_hash (SHA-256), thc_pct, cbd_pct, contaminants_pass, submitted_by"><span class="s-type">event</span>Lab Sample Submitted</div>
+    <div class="col">
+      <div class="s cmd" data-type="Command" data-title="ApproveLabSample" data-body="RT aprova o laudo laboratorial.<br><br><strong>Role:</strong> RESPONSAVEL_TECNICO apenas<br><strong>Payload:</strong> sample_id, approved_by<br><br><strong>Invariante:</strong> coa_file_hash imutável após aprovação — não pode ser substituído sem novo sample."><span class="s-type">command</span>Approve Lab Sample</div>
+      <div class="s cmd" data-type="Command" data-title="RejectLabSample" data-body="RT rejeita o laudo (contaminação, THC fora do esperado).<br><br><strong>Role:</strong> RESPONSAVEL_TECNICO<br><strong>Payload:</strong> sample_id, reason, rejected_by<br><br><strong>Consequência:</strong> Lote NÃO criado. Batch descartado ou reprocessado."><span class="s-type">command</span>Reject Lab Sample</div>
+    </div>
+    <div class="col">
+      <div class="s ev" data-type="Domain Event" data-title="LabSampleApproved" data-body="COA aprovado pelo RT. Lote pode ser criado.<br><br><strong>Payload:</strong> sample_id, coa_hash, thc_pct, cbd_pct, approved_by, at<br><br><strong>Dispara:</strong> QuarantineLot → Inventário."><span class="s-type">event</span>Lab Sample Approved</div>
+      <div class="s ev" data-type="Domain Event" data-title="LabSampleRejected" data-body="Laudo rejeitado. Produção deste batch bloqueada.<br><br><strong>Payload:</strong> sample_id, reason, rejected_by, at<br><br><strong>Dispara:</strong> Alerta RT + audit log. Sem criação de lote."><span class="s-type">event</span>Lab Sample Rejected</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════ FLOW 4: INVENTÁRIO ════════════════ -->
+<div class="divider">
+  <div class="divider-label">Fluxo 4 — Inventário</div>
+  <div class="divider-line"></div>
+</div>
+
+<div class="lane">
+  <div class="lane-label">Lote</div>
+  <div class="lane-body">
+    <div class="s po" data-type="Policy" data-title="Quando LabSampleApproved" data-body="<strong>Regra automática:</strong> LabSampleApproved → QuarantineLot<br><br>Lote entra em quarentena automaticamente. Só RT pode liberar após verificação final."><span class="s-type">policy</span>→ Quarantine Lot</div>
+    <div class="arr">→</div>
+    <div class="s ag" data-type="Aggregate" data-title="InventoryLot" data-body="Root aggregate do contexto Inventory.<br><br><strong>Value Objects:</strong> LotNumber, QuantityGrams, LotStatus<br><strong>States:</strong> QUARANTINE → AVAILABLE → EXHAUSTED ou RECALLED<br><br><strong>Invariante:</strong> QuantityGrams ≥ 0 em todos os momentos."><span class="s-type">aggregate</span>Inventory Lot</div>
+    <div class="arr">→</div>
+    <div class="s ev" data-type="Domain Event" data-title="LotQuarantined" data-body="Lote criado em estado de quarentena. Aguarda liberação do RT.<br><br><strong>Payload:</strong> lot_id, lot_number (gerado), run_id, quantity_g, status=QUARANTINE"><span class="s-type">event</span>Lot Quarantined</div>
+    <div class="arr">→</div>
+    <div class="s cmd" data-type="Command" data-title="ReleaseLot" data-body="RT libera lote para dispensação.<br><br><strong>Role:</strong> RESPONSAVEL_TECNICO<br><strong>Pré-condição:</strong> LabSampleApproved para este run_id<br><br><strong>Read Model:</strong> Sistema verifica aprovação do COA antes de permitir o release."><span class="s-type">command</span>Release Lot</div>
+    <div class="arr">→</div>
+    <div class="s rm" data-type="Read Model" data-title="COA Aprovado?" data-body="Verificação que o use case executa antes de permitir ReleaseLot.<br><br><strong>Query:</strong> lab_samples WHERE run_id = X AND approved = true AND approver_role = 'responsavel_tecnico'<br><br><strong>Se não aprovado:</strong> ReleaseLot rejeitado com erro de negócio."><span class="s-type">read model</span>COA Aprovado?</div>
+    <div class="arr">→</div>
+    <div class="s ev" data-type="Domain Event" data-title="LotReleased" data-body="Lote disponível para dispensação.<br><br><strong>Payload:</strong> lot_id, released_by, at, status=AVAILABLE<br><br><strong>Dispara:</strong> Notificação para dispensadores de que novo lote está disponível."><span class="s-type">event</span>Lot Released</div>
+  </div>
+</div>
+
+<!-- ════════════════ FLOW 5: DISPENSAÇÃO ════════════════ -->
+<div class="divider">
+  <div class="divider-label">Fluxo 5 — Dispensação</div>
+  <div class="divider-line"></div>
+</div>
+
+<div class="lane">
+  <div class="lane-label">Verificações</div>
+  <div class="lane-body">
+    <div class="s rm" data-type="Read Model" data-title="Member Quota" data-body="Saldo de quota mensal do membro.<br><br><strong>Query:</strong> quota_g_month - SUM(dispensations.quantity_g WHERE member=M AND month=NOW)<br><br><strong>Invariante crítico:</strong> new_quantity ≤ saldo disponível. Verificado no use case ANTES de criar a Dispensation."><span class="s-type">read model</span>Member Quota</div>
+    <div class="s rm" data-type="Read Model" data-title="Valid Prescription" data-body="Prescrição médica válida e não expirada.<br><br><strong>Query:</strong> medical_records WHERE member=M AND valid_until >= TODAY<br><br><strong>Sem prescrição válida:</strong> Dispensação rejeitada pelo use case."><span class="s-type">read model</span>Valid Prescription</div>
+    <div class="s rm" data-type="Read Model" data-title="Available Lots" data-body="Lotes com status AVAILABLE e quantity > 0.<br><br><strong>Query:</strong> inventory_lots WHERE status='AVAILABLE' AND quantity_g > 0<br><br><strong>Ordenação:</strong> FIFO por lot_released_at (primeiro a ser liberado, primeiro a ser usado)."><span class="s-type">read model</span>Available Lots</div>
+    <div class="arr">→</div>
+    <div class="s cmd" data-type="Command" data-title="RecordDispensation" data-body="Dispensador registra entrega do produto ao membro.<br><br><strong>Role:</strong> DISPENSADOR (≠ RT, ≠ cultivador)<br><strong>Payload:</strong> member_id, lot_id, quantity_g, member_signature (PIN ou digital)<br><br><strong>Invariante:</strong> dispenser.role ≠ responsavel_tecnico (segregação RDC 1.014)."><span class="s-type">command</span>Record Dispensation</div>
+    <div class="arr">→</div>
+    <div class="s ag" data-type="Aggregate" data-title="Dispensation" data-body="Root aggregate. Imutável após criação — sem UPDATE ou DELETE.<br><br><strong>References:</strong> MemberRef (ULID), InventoryLotRef (ULID) — cross-context, sem FK direta.<br><strong>Value Objects:</strong> DispensationId (ULID), QuantityGrams, MemberSignature, SngpcStatus"><span class="s-type">aggregate</span>Dispensation</div>
+    <div class="arr">→</div>
+    <div class="s ev" data-type="Domain Event" data-title="DispensationRecorded" data-body="Dispensação registrada. Imutável.<br><br><strong>Payload:</strong> dispensation_id, member_id, lot_id, quantity_g, recorded_by, at<br><br><strong>Dispara:</strong> DeductMemberQuota + DeductLotInventory + GenerateSngpcXml + AuditEntry (tudo assíncrono via BullMQ)."><span class="s-type">event</span>Dispensation Recorded</div>
+  </div>
+</div>
+
+<div class="lane">
+  <div class="lane-label">SNGPC</div>
+  <div class="lane-body">
+    <div class="s po" data-type="Policy" data-title="Quando DispensationRecorded" data-body="<strong>4 ações simultâneas (BullMQ):</strong><br>1. DeductMemberQuota → quota atualizada<br>2. DeductLotInventory → quantity_g decrementado<br>3. GenerateSngpcXml → XML gerado<br>4. CreateAuditEntry → trilha imutável"><span class="s-type">policy</span>→ 4 ações async</div>
+    <div class="arr">→</div>
+    <div class="s ev" data-type="Domain Event" data-title="SngpcXmlGenerated" data-body="XML no formato SNGPC gerado e pronto para envio.<br><br><strong>Payload:</strong> dispensation_id, xml_hash (SHA-256), generated_at<br><br><strong>Próximo:</strong> SendSngpcXml (BullMQ job, retry automático)."><span class="s-type">event</span>SNGPC XML Generated</div>
+    <div class="arr">→</div>
+    <div class="s ex" data-type="Sistema Externo" data-title="ANVISA SNGPC REST API" data-body="Sistema Nacional de Gerenciamento de Produtos Controlados.<br><br><strong>URL:</strong> sngpc-api.anvisa.gov.br<br><strong>Auth:</strong> Certificado ICP-Brasil A1/A3<br><strong>Swagger:</strong> /swagger/index.html<br><br><strong>Hotspot crítico:</strong> Schema XML para associações sandbox ainda não publicado."><span class="s-type">ext. system</span>ANVISA SNGPC API</div>
+    <div class="col">
+      <div class="s ev" data-type="Domain Event" data-title="SngpcXmlSent" data-body="XML enviado com sucesso para ANVISA.<br><br><strong>Payload:</strong> dispensation_id, sent_at, response_code<br><br><strong>Ação:</strong> dispensation.sngpc_sent_at = NOW()"><span class="s-type">event</span>SNGPC XML Sent ✓</div>
+      <div class="s ev" data-type="Domain Event" data-title="SngpcXmlFailed" data-body="Falha após 3 tentativas (backoff exponencial).<br><br><strong>Payload:</strong> dispensation_id, attempt_count, last_error_code<br><br><strong>Ação:</strong> Alerta para RT. Relatório de pendências para batch diário de retry."><span class="s-type">event</span>SNGPC XML Failed ✗</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════ FLOW 6: COMPLIANCE ════════════════ -->
+<div class="divider">
+  <div class="divider-label">Fluxo 6 — Compliance &amp; Relatórios</div>
+  <div class="divider-line"></div>
+</div>
+
+<div class="lane">
+  <div class="lane-label">Calendário</div>
+  <div class="lane-body">
+    <div class="col">
+      <div class="s po" data-type="Policy" data-title="Dia 1 de cada mês" data-body="<strong>Cron job:</strong> Gera relatório KPI com 7 indicadores sandbox ANVISA.<br><br>Dados vêm de projeções de todos os contextos (CQRS read model). Compliance context é read-only — nunca escreve nos aggregates."><span class="s-type">policy</span>→ Generate KPI Report</div>
+      <div class="s po" data-type="Policy" data-title="15 jan/abr/jul/out" data-body="<strong>Cron job:</strong> BSPO Trimestral obrigatório.<br><br><strong>Fórmula saldo:</strong> entradas - saídas - perdas = saldo final. Deve bater com inventory_lots.quantity_g somados — validação automática pré-geração."><span class="s-type">policy</span>→ BSPO Trimestral</div>
+      <div class="s po" data-type="Policy" data-title="31 janeiro" data-body="<strong>Cron job:</strong> BSPO Anual + DRE anual + balanço patrimonial com CPC 29.<br><br>Relatório mais completo do ano. Assinar pelo RT antes de envio."><span class="s-type">policy</span>→ BSPO Anual</div>
+    </div>
+    <div class="arr">→</div>
+    <div class="s ag" data-type="Aggregate" data-title="ComplianceReport" data-body="Value Object imutável após geração. Read-model puro.<br><br><strong>Campos:</strong> id (ULID), type, period, status (DRAFT→GENERATED→SUBMITTED), file_hash (SHA-256 do PDF), generated_by (RT)<br><br><strong>Nunca atualizado:</strong> Um relatório gerado não muda. Correções = novo relatório."><span class="s-type">aggregate</span>Compliance Report</div>
+    <div class="arr">→</div>
+    <div class="col">
+      <div class="s ev" data-type="Domain Event" data-title="KpiReportGenerated" data-body="7 KPIs gerados para o mês.<br><br><strong>Payload:</strong> report_id, month, kpi_values {custo_paciente, custo_grama, taxa_conformidade, tempo_germinacao_dispensacao, indice_rastreabilidade, taxa_retencao, dispensacoes_membro}, file_hash"><span class="s-type">event</span>KPI Report Generated</div>
+      <div class="s ev" data-type="Domain Event" data-title="BspoGenerated" data-body="BSPO trimestral ou anual gerado.<br><br><strong>Payload:</strong> report_id, period, type (TRIMESTRAL/ANUAL), file_hash, generated_by"><span class="s-type">event</span>BSPO Generated</div>
+      <div class="s ev" data-type="Domain Event" data-title="DreGenerated" data-body="DRE + Balanço mensal com CPC 29.<br><br><strong>Inclui:</strong> receitas (mensalidades), CMV proporcional às dispensações, despesas operacionais, EBITDA, variação fair value ativo biológico."><span class="s-type">event</span>DRE Generated</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════ FLOW 7: LGPD ANONIMIZAÇÃO ════════════════ -->
+<div class="divider">
+  <div class="divider-label">Fluxo 7 — LGPD: Anonimização de Membro</div>
+  <div class="divider-line"></div>
+</div>
+
+<div class="lane">
+  <div class="lane-label">Requisição</div>
+  <div class="lane-body">
+    <div class="s cmd" data-type="Command" data-title="RequestMemberAnonymization" data-body="Admin ou membro solicita exclusão (LGPD Art. 18 IV — direito à exclusão).<br><br><strong>Role:</strong> ADMIN ou MEMBRO (próprio dado)<br><strong>Payload:</strong> member_id, reason, requested_by<br><br><strong>Pré-condição:</strong> Sem dispensações ativas pendentes de SNGPC."><span class="s-type">command</span>Request Anonymization</div>
+    <div class="arr">→</div>
+    <div class="s rm" data-type="Read Model" data-title="Dispensações Pendentes?" data-body="Verificação se há dispensações com sngpc_status = PENDING antes de anonimizar.<br><br><strong>Se pendentes:</strong> Bloqueia anonimização até SNGPC ser enviado. Obrigação legal de reporte prevalece."><span class="s-type">read model</span>Dispensações Pendentes?</div>
+    <div class="arr">→</div>
+    <div class="s cmd" data-type="Command" data-title="ExecuteCryptoDeletion" data-body="Crypto-deletion via exclusão de chave (não de dado).<br><br><strong>Passos:</strong><br>1. member.anon_at = NOW()<br>2. DELETE member_key FROM Vault<br>3. CPF hash sobrescrito com zeros<br>4. Medical record file_keys deletados<br>5. Dispensações históricas: member_id = ULID anon (sem PII)<br><br>Dado permanece fisicamente — sem chave = lixo irrecuperável = equivalente à exclusão (LGPD Art. 18 IV)."><span class="s-type">command</span>Execute Crypto Deletion</div>
+    <div class="arr">→</div>
+    <div class="s ag" data-type="Aggregate" data-title="Member" data-body="Aggregate processa a anonimização.<br><br><strong>Estado antes:</strong> ACTIVE ou SUSPENDED<br><strong>Estado depois:</strong> ANONYMIZED<br><br><strong>Invariante:</strong> ANONYMIZED não pode receber dispensações — verificado no use case de dispensação."><span class="s-type">aggregate</span>Member</div>
+    <div class="arr">→</div>
+    <div class="s ev" data-type="Domain Event" data-title="MemberAnonymized" data-body="Membro anonimizado via crypto-deletion.<br><br><strong>Payload:</strong> member_id, anon_at<br><strong>Nota:</strong> Dados pessoais já inacessíveis neste momento — chave deletada antes do evento.<br><br><strong>Preservado:</strong> audit_log entry MemberAnonymized (interesse legítimo ANVISA). Dispensações históricas com member_id anon."><span class="s-type">event</span>Member Anonymized</div>
+    <div class="col">
+      <div class="then"><div class="then-inner">Policy →</div></div>
+    </div>
+    <div class="col">
+      <div class="s po" data-type="Policy" data-title="Quando MemberAnonymized" data-body="<strong>Regra 1:</strong> CreateLgpdComplianceEntry — registro de conformidade para eventual auditoria ANPD.<br><br><strong>Regra 2:</strong> NotifyMember — email de confirmação para o endereço do membro (antes de cifrar).<br><br><strong>Nota:</strong> Email enviado ANTES da crypto-deletion do email, com assunto neutro."><span class="s-type">policy</span>→ LGPD Compliance Entry</div>
+      <div class="s po" data-type="Policy" data-title="Quando MemberAnonymized (Audit)" data-body="<strong>Audit log entry:</strong> MemberAnonymized event preservado para defesa legal.<br><br>Mesmo que dados pessoais sejam inacessíveis, o registro de que a operação ocorreu deve existir para provar compliance LGPD Art. 18."><span class="s-type">policy</span>→ Audit Entry Preserved</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /board -->
+
+<!-- ── Detail Panel ── -->
+<div id="panel">
+  <button id="panel-close">×</button>
+  <div id="panel-type"></div>
+  <div id="panel-title"></div>
+  <div id="panel-body"></div>
+</div>
+
+<script>
+const panel = document.getElementById('panel');
+const panelType = document.getElementById('panel-type');
+const panelTitle = document.getElementById('panel-title');
+const panelBody = document.getElementById('panel-body');
+const panelClose = document.getElementById('panel-close');
+
+const typeColors = {
+  'Domain Event':    '#ea580c',
+  'Command':         '#2563eb',
+  'Aggregate':       '#ca8a04',
+  'Policy':          '#7c3aed',
+  'Sistema Externo': '#be185d',
+  'Read Model':      '#15803d',
+  'Hotspot':         '#b91c1c',
+};
+
+document.querySelectorAll('.s[data-type]').forEach(el => {
+  el.addEventListener('click', e => {
+    e.stopPropagation();
+    const t = el.dataset.type;
+    panelType.textContent = t;
+    panelType.style.color = typeColors[t] || '#a1a1aa';
+    panelTitle.textContent = el.dataset.title;
+    panelBody.innerHTML = el.dataset.body;
+    panel.classList.add('visible');
+  });
+});
+
+panelClose.addEventListener('click', () => panel.classList.remove('visible'));
+document.addEventListener('click', e => {
+  if (!panel.contains(e.target)) panel.classList.remove('visible');
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') panel.classList.remove('visible');
+});
+</script>
+</body>
+</html>
