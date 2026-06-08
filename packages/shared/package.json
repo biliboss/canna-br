@@ -10,10 +10,15 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "echo '@canna/shared: no tests yet'"
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "devDependencies": {
     "@canna/tsconfig": "workspace:*",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^2.1.9"
+  },
+  "dependencies": {
+    "ulid": "^3.0.2"
   }
 }

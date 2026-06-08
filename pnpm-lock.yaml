@@ -34,6 +34,9 @@ importers:
         specifier: workspace:*
         version: link:../shared
     devDependencies:
+      '@canna/test-utils':
+        specifier: workspace:*
+        version: link:../../tooling/test-utils
       '@canna/tsconfig':
         specifier: workspace:*
         version: link:../../tooling/tsconfig
@@ -48,6 +51,10 @@ importers:
         version: 2.1.9(@types/node@24.13.1)
 
   packages/shared:
+    dependencies:
+      ulid:
+        specifier: ^3.0.2
+        version: 3.0.2
     devDependencies:
       '@canna/tsconfig':
         specifier: workspace:*
@@ -55,6 +62,25 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
+      vitest:
+        specifier: ^2.1.9
+        version: 2.1.9(@types/node@24.13.1)
+
+  tooling/test-utils:
+    dependencies:
+      '@canna/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
+    devDependencies:
+      '@canna/tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.9
+        version: 2.1.9(@types/node@24.13.1)
 
   tooling/tsconfig: {}
 
@@ -2379,6 +2405,10 @@ packages:
 
   ufo@1.6.4:
     resolution: {integrity: sha512-JFNbkD1Svwe0KvGi8GOeLcP4kAWQ609twvCdcHxq1oSL8svv39ZuSvajcD8B+5D0eL4+s1Is2D/O6KN3qcTeRA==}
+
+  ulid@3.0.2:
+    resolution: {integrity: sha512-yu26mwteFYzBAot7KVMqFGCVpsF6g8wXfJzQUHvu1no3+rRRSFcSV2nKeYvNPLD2J4b08jYBDhHUjeH0ygIl9w==}
+    hasBin: true
 
   ultrahtml@1.6.0:
     resolution: {integrity: sha512-R9fBn90VTJrqqLDwyMph+HGne8eqY1iPfYhPzZrvKpIfwkWZbcYlfpsb8B9dTvBfpy1/hqAD7Wi8EKfP9e8zdw==}
@@ -5584,6 +5614,8 @@ snapshots:
   typescript@5.9.3: {}
 
   ufo@1.6.4: {}
+
+  ulid@3.0.2: {}
 
   ultrahtml@1.6.0: {}
 

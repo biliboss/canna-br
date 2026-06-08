@@ -1,4 +1,8 @@
-// v0.2.0 spike — InventoryLot aggregate to be implemented.
-// Events: LotCreated, LotQuarantined, LotReleased, LotRecalled, LotExhausted.
-// See: docs/domain/event-storming, docs/domain/domain-events, ADR-001.
-export {};
+export type { InventoryEvent } from "./events.js";
+export type * from "./events.js";
+export type { InventoryCommand } from "./commands.js";
+export type * from "./commands.js";
+export type { LotState, LotStatus } from "./state.js";
+export { emptyLotState } from "./state.js";
+export { evolve } from "./evolve.js";
+export { decide } from "./decide.js";
