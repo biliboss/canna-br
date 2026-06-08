@@ -1,29 +1,56 @@
 ---
 title: "Stack Técnico"
-description: "Next.js 15 + Fastify 5 + PostgreSQL 16 + MinIO + Kamal 2 — stack self-hosted para associações de cannabis."
+description: "Domain kernel (Emmett) + Minimum Admin (Next.js) + MCP Server + MCP Apps + Open WebUI sidecar + Fastify 5 + PostgreSQL 16 + MinIO + Kamal 2."
 ---
 
 ## Stack Completo
 
-### Frontend
+> Arquitetura central: **Domain Kernel em TypeScript puro + [Emmett](https://github.com/event-driven-io/emmett) como event-sourcing kernel + raw para todo o resto**. Ver [Domain Kernel](/architecture/domain-kernel/) para o porquê e o como.
+>
+> Camada de interfaces agentic: **MCP Server + MCP Apps + OpenAPI + Open WebUI (sidecar opcional)**. Ver [Interfaces](/architecture/interfaces/).
+
+### Domain Kernel (núcleo)
 
 | Tecnologia | Papel |
 |---|---|
-| Next.js 15 App Router | Framework React com RSC |
+| TypeScript (strict) | `packages/domain` — funções puras `decide` / `evolve` |
+| Emmett (event-driven-io) | Event store (in-memory + Postgres), command handler, optimistic concurrency, test harness |
+| Vitest | Testes GIVEN/WHEN/THEN, scenario coverage, watch mode |
+| ULID (`ulid` npm) | IDs lexicograficamente ordenáveis para eventos e aggregates |
+
+### Frontend — Minimum Canonical Admin
+
+> Admin **mínimo e regulatório** (Auth/RBAC/Audit/Approval/Emergency/Signed Reports). Telas operacionais migram para MCP Apps em `packages/ui-apps/`. Ver [Interfaces](/architecture/interfaces/).
+
+| Tecnologia | Papel |
+|---|---|
+| Next.js 15 App Router | Framework React com RSC — apenas para o admin canônico mínimo |
 | TypeScript (strict) | Type safety ponta a ponta |
 | shadcn/ui + Radix | Componentes acessíveis, sem vendor lock |
 | Tailwind CSS | Estilização utilitária |
 | PWA (next-pwa) | Instalável sem app store |
 
+### Agent Interface — MCP Server + MCP Apps
+
+| Tecnologia | Papel |
+|---|---|
+| MCP Server (`@modelcontextprotocol/sdk`) | Exposição de Tools (commands) + Resources (read models) + Apps (UI inline) — consumido por Claude / ChatGPT / Open WebUI |
+| [MCP Apps (`ext-apps`)](https://github.com/modelcontextprotocol/ext-apps) | Componentes UI interativos renderizados dentro do chat — `DispensationReviewApp`, `TraceabilityTimelineApp`, `KpiDashboardApp`, `PendingActionApprovalApp`, `InventoryLotPickerApp`, `MemberQuotaCardApp` |
+| `packages/ui-apps/` | Pacote compartilhado — mesmo componente renderiza em MCP host E no Minimum Admin |
+| OAuth 2.1 (per MCP spec) | Autorização agente↔canna-oss; agente age em nome de usuário humano com escopo limitado |
+| OpenAPI auto-gerado | Para hosts OpenAPI-only (Open WebUI Tools, integradores tradicionais) |
+| [mcpo bridge](https://github.com/open-webui/mcpo) | MCP-to-OpenAPI proxy quando host não fala MCP nativo |
+| [Open WebUI](https://github.com/open-webui/open-webui) (sidecar opcional) | Cockpit agentic "canna-oss AI Workbench" — chat UI + RAG + multi-model. **Nunca** fonte de verdade de RBAC ou regras de negócio. |
+
 ### Backend
 
 | Tecnologia | Papel |
 |---|---|
-| Fastify 5 | HTTP server de alta performance |
-| Drizzle ORM | Type-safe SQL, migrations versionadas |
-| Zod | Validação de schema em runtime |
-| BullMQ | Filas de jobs (relatórios, SNGPC batch) |
-| Redis | Cache + pub/sub + BullMQ broker |
+| Fastify 5 | HTTP server fino — chama `app-services`, sem regra de negócio |
+| Drizzle ORM | **Apenas read models** — schema explícito, SQL legível. Event store é Emmett, não Drizzle. |
+| Zod | Validação de schema HTTP em runtime |
+| BullMQ | Side effects assíncronos (PDFs, SNGPC, BSPO) |
+| Redis | BullMQ broker + cache de read model |
 
 ### Database
 

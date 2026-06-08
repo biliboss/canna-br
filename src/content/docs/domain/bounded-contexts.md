@@ -128,15 +128,22 @@ QUARANTINE → AVAILABLE → EXHAUSTED
 | `member_ref` | ULID | Membership context |
 | `inventory_lot_ref` | ULID | Inventory context |
 
-Sem FK direta entre contextos — consistência eventual por eventos.
+Referências cross-context permanecem por ULID — sem FK direta. **Atomicidade vs consistência eventual** depende do tipo de fato:
+
+- **Estado regulatório crítico (quota + estoque)** é atômico — emitido no mesmo append que `DispensationRecorded`. Optimistic concurrency garante consistência sem 2PC.
+- **Integrações externas (SNGPC, PDF, email)** são eventualmente consistentes via BullMQ — falhas não invalidam a dispensação.
+- **Read models cross-context** convergem a partir dos eventos — consistência eventual aceitável para queries de UI.
+
+Cf. [ADR-001](/adr/0001-domain-kernel-emmett/) para o boundary sync vs async completo.
 
 ### Invariantes
 
-1. `Dispensation` é imutável após criação — sem UPDATE, sem cancelamento por UI
-2. Verificação de quota executada no use case antes de criar o aggregate
-3. `inventory_lot_ref` deve apontar para lote em estado `AVAILABLE`
-4. XML SNGPC gerado assincronamente após `DispensationRecorded`
-5. Dispensador (`DISPENSADOR`) ≠ aprovador de COA (`RESPONSAVEL_TECNICO`) — segregação
+1. `Dispensation` é imutável após criação — sem UPDATE, sem cancelamento por UI. Estorno é dispensação compensatória nova.
+2. `decide()` rejeita comando se quota OU estoque insuficiente — emite `QuotaExceededAttempt` ou `LotInsufficientQuantity`, não `DispensationRecorded`.
+3. `inventory_lot_ref` deve apontar para lote em estado `AVAILABLE` no momento do `decide()`.
+4. `DispensationRecorded` + `MemberQuotaConsumed` + `LotQuantityDeducted` emitidos em **um único append** no event store.
+5. XML SNGPC gerado **assincronamente** via BullMQ após `DispensationRecorded` — sua falha não invalida o fato regulatório.
+6. Dispensador (`DISPENSADOR`) ≠ aprovador de COA (`RESPONSAVEL_TECNICO`) — segregação RDC 1.014.
 
 ---
 

@@ -25,7 +25,7 @@ description: Mapeamento completo de domain events, commands, aggregates e polici
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:28px;">
 
   <div style="background:#18181b;border:1px solid #3f3f46;border-radius:10px;padding:16px;">
-    <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#22c55e;margin-bottom:10px;">Fluxo 1 — Onboarding</div>
+    <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#22c55e;margin-bottom:10px;">Fluxo 1 — Onboarding<span style="background:#052e16;color:#86efac;border:1px solid #166534;font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px;margin-left:8px;letter-spacing:.05em;">CORE SPINE</span></div>
     <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
       <span style="background:#500724;color:#fbcfe8;font-size:10px;font-weight:600;padding:3px 8px;border-radius:4px;">Médico Prescritor</span>
       <span style="color:#52525b;font-size:12px;">→</span>
@@ -45,7 +45,7 @@ description: Mapeamento completo de domain events, commands, aggregates e polici
   </div>
 
   <div style="background:#18181b;border:1px solid #3f3f46;border-radius:10px;padding:16px;">
-    <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#22c55e;margin-bottom:10px;">Fluxo 2 — Cultivo</div>
+    <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#22c55e;margin-bottom:10px;">Fluxo 2 — Cultivo<span style="background:#1c1917;color:#a8a29e;border:1px solid #44403c;font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px;margin-left:8px;letter-spacing:.05em;">LATER MODULE</span></div>
     <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
       <span style="background:#1e3a8a;color:#bfdbfe;font-size:10px;font-weight:600;padding:3px 8px;border-radius:4px;">StartBatch</span>
       <span style="color:#52525b;font-size:12px;">→</span>
@@ -66,7 +66,7 @@ description: Mapeamento completo de domain events, commands, aggregates e polici
   </div>
 
   <div style="background:#18181b;border:1px solid #3f3f46;border-radius:10px;padding:16px;">
-    <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#22c55e;margin-bottom:10px;">Fluxo 3 — Processamento & Lab</div>
+    <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#22c55e;margin-bottom:10px;">Fluxo 3 — Processamento & Lab<span style="background:#1c1917;color:#a8a29e;border:1px solid #44403c;font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px;margin-left:8px;letter-spacing:.05em;">LATER MODULE</span></div>
     <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
       <span style="background:#1e3a8a;color:#bfdbfe;font-size:10px;font-weight:600;padding:3px 8px;border-radius:4px;">CreateProcessingRun</span>
       <span style="color:#52525b;font-size:12px;">→</span>
@@ -85,7 +85,7 @@ description: Mapeamento completo de domain events, commands, aggregates e polici
   </div>
 
   <div style="background:#18181b;border:1px solid #3f3f46;border-radius:10px;padding:16px;">
-    <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#22c55e;margin-bottom:10px;">Fluxo 4 — Inventário</div>
+    <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#22c55e;margin-bottom:10px;">Fluxo 4 — Inventário<span style="background:#052e16;color:#86efac;border:1px solid #166534;font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px;margin-left:8px;letter-spacing:.05em;">CORE SPINE</span><span style="background:#27272a;color:#71717a;font-size:9px;font-weight:600;padding:2px 6px;border-radius:3px;margin-left:4px;">lote manual</span></div>
     <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
       <span style="background:#2e1065;color:#e9d5ff;font-size:10px;font-weight:600;padding:3px 8px;border-radius:4px;">→ QuarantineLot</span>
       <span style="color:#52525b;font-size:12px;">→</span>
@@ -104,15 +104,24 @@ description: Mapeamento completo de domain events, commands, aggregates e polici
   </div>
 
   <div style="background:#18181b;border:1px solid #3f3f46;border-radius:10px;padding:16px;">
-    <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#22c55e;margin-bottom:10px;">Fluxo 5 — Dispensação</div>
+    <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#22c55e;margin-bottom:10px;">Fluxo 5 — Dispensação<span style="background:#052e16;color:#86efac;border:1px solid #166534;font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px;margin-left:8px;letter-spacing:.05em;">CORE SPINE</span></div>
     <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
       <span style="background:#052e16;color:#bbf7d0;font-size:10px;font-weight:600;padding:3px 8px;border-radius:4px;">Quota · Receita · Lote</span>
       <span style="color:#52525b;font-size:12px;">→</span>
       <span style="background:#1e3a8a;color:#bfdbfe;font-size:10px;font-weight:600;padding:3px 8px;border-radius:4px;">RecordDispensation</span>
       <span style="color:#52525b;font-size:12px;">→</span>
       <span style="background:#431407;color:#fed7aa;font-size:10px;font-weight:600;padding:3px 8px;border-radius:4px;">DispensationRecorded</span>
-      <span style="color:#52525b;font-size:12px;">→</span>
-      <span style="background:#500724;color:#fbcfe8;font-size:10px;font-weight:600;padding:3px 8px;border-radius:4px;">ANVISA SNGPC</span>
+      <span style="background:#431407;color:#fed7aa;font-size:10px;font-weight:600;padding:3px 8px;border-radius:4px;">+ MemberQuotaConsumed</span>
+      <span style="background:#431407;color:#fed7aa;font-size:10px;font-weight:600;padding:3px 8px;border-radius:4px;">+ LotQuantityDeducted</span>
+    </div>
+    <div style="margin-top:6px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:10px;color:#a1a1aa;">
+      <span style="background:#1c1917;color:#a8a29e;border:1px solid #44403c;font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px;letter-spacing:.05em;">ASYNC →</span>
+      <span style="background:#500724;color:#fbcfe8;font-size:10px;font-weight:600;padding:3px 8px;border-radius:4px;">SNGPC XML (BullMQ)</span>
+      <span style="background:#500724;color:#fbcfe8;font-size:10px;font-weight:600;padding:3px 8px;border-radius:4px;">PDF recibo</span>
+      <span style="background:#500724;color:#fbcfe8;font-size:10px;font-weight:600;padding:3px 8px;border-radius:4px;">Email</span>
+    </div>
+    <div style="margin-top:10px;background:#0c0a09;border-left:3px solid #166534;padding:8px 12px;border-radius:4px;font-size:11px;color:#a1a1aa;line-height:1.5;">
+      <strong style="color:#86efac;">Atomicidade:</strong> <code>decide()</code> retorna os 3 eventos em um único append no stream da Dispensation. Optimistic concurrency garante consistência sem 2PC. Side effects externos vão para fila — falha de SNGPC não invalida dispensação.
     </div>
     <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;">
       <span style="background:#450a0a;color:#fca5a5;font-size:10px;padding:2px 8px;border-radius:4px;border:1px solid #b91c1c;">⚠ PIN ou ICP-Brasil?</span>
@@ -122,7 +131,7 @@ description: Mapeamento completo de domain events, commands, aggregates e polici
   </div>
 
   <div style="background:#18181b;border:1px solid #3f3f46;border-radius:10px;padding:16px;">
-    <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#22c55e;margin-bottom:10px;">Fluxo 6 — Compliance</div>
+    <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#22c55e;margin-bottom:10px;">Fluxo 6 — Compliance<span style="background:#1c1917;color:#a8a29e;border:1px solid #44403c;font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px;margin-left:8px;letter-spacing:.05em;">LATER MODULE</span><span style="background:#27272a;color:#71717a;font-size:9px;font-weight:600;padding:2px 6px;border-radius:3px;margin-left:4px;">KPI básico = core</span></div>
     <div style="display:flex;flex-wrap:wrap;gap:6px;">
       <span style="background:#2e1065;color:#e9d5ff;font-size:10px;font-weight:600;padding:3px 8px;border-radius:4px;">Dia 1/mês → KPI Report</span>
       <span style="background:#2e1065;color:#e9d5ff;font-size:10px;font-weight:600;padding:3px 8px;border-radius:4px;">15 jan/abr/jul/out → BSPO Trim</span>
@@ -133,7 +142,7 @@ description: Mapeamento completo de domain events, commands, aggregates e polici
   </div>
 
   <div style="background:#18181b;border:1px solid #3f3f46;border-radius:10px;padding:16px;grid-column:1/-1;">
-    <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#22c55e;margin-bottom:10px;">Fluxo 7 — LGPD Anonimização</div>
+    <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#22c55e;margin-bottom:10px;">Fluxo 7 — LGPD Anonimização<span style="background:#052e16;color:#86efac;border:1px solid #166534;font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px;margin-left:8px;letter-spacing:.05em;">CORE SPINE</span></div>
     <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
       <span style="background:#1e3a8a;color:#bfdbfe;font-size:10px;font-weight:600;padding:3px 8px;border-radius:4px;">RequestAnonymization</span>
       <span style="color:#52525b;font-size:12px;">→</span>
@@ -211,9 +220,9 @@ description: Mapeamento completo de domain events, commands, aggregates e polici
     <div style="font-size:11px;color:#a1a1aa;line-height:1.5;">Nunca escreve nos aggregates. Lê projeções de todos os contextos.</div>
   </div>
   <div style="background:#18181b;border:1px solid #3f3f46;border-radius:10px;padding:16px;">
-    <div style="font-size:20px;margin-bottom:8px;">📡</div>
-    <div style="font-size:12px;font-weight:700;color:#f4f4f5;margin-bottom:4px;">SNGPC é assíncrono</div>
-    <div style="font-size:11px;color:#a1a1aa;line-height:1.5;">Dispensação registra. XML enviado em BullMQ background com retry 3×.</div>
+    <div style="font-size:20px;margin-bottom:8px;">⚖️</div>
+    <div style="font-size:12px;font-weight:700;color:#f4f4f5;margin-bottom:4px;">Estado regulatório é síncrono</div>
+    <div style="font-size:11px;color:#a1a1aa;line-height:1.5;">Quota e estoque deduzem no MESMO append do <code>DispensationRecorded</code>. Side effects externos (SNGPC, PDF, email) vão para BullMQ — falha não compromete dispensação.</div>
   </div>
   <div style="background:#18181b;border:1px solid #3f3f46;border-radius:10px;padding:16px;">
     <div style="font-size:20px;margin-bottom:8px;">🛡️</div>

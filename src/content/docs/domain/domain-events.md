@@ -296,6 +296,8 @@ interface DomainEvent {
 
 ### `DispensationRecorded`
 
+Fato da entrega — emitido no **mesmo append** de `MemberQuotaConsumed` + `LotQuantityDeducted`. Cf. [ADR-001](/adr/0001-domain-kernel-emmett/).
+
 | Campo | Tipo | Descrição |
 |---|---|---|
 | `dispensation_id` | ULID | |
@@ -304,8 +306,76 @@ interface DomainEvent {
 | `quantity_g` | number | |
 | `dispensed_by` | ULID | user_id `DISPENSADOR` |
 | `dispensed_at` | Date | UTC |
+| `prescription_ref` | ULID | Prescrição vigente no momento da dispensação |
+| `approved_by` | ULID \| null | Approver (preenchido se via MCP two-step approval) |
 
-**Dispara:** dedução atômica da quota mensal do membro; geração assíncrona do XML SNGPC.
+**Dispara (síncrono, mesmo append):** `MemberQuotaConsumed` + `LotQuantityDeducted`.
+**Dispara (BullMQ async):** geração de XML SNGPC, PDF recibo, email notificação.
+
+---
+
+### `MemberQuotaConsumed`
+
+Fato da quota — projetado pelo read model `member_quota`. Emitido **junto** com `DispensationRecorded` em um único append.
+
+| Campo | Tipo | Descrição |
+|---|---|---|
+| `member_id` | ULID | |
+| `dispensation_id` | ULID | Evento que originou o consumo |
+| `month` | string | `YYYY-MM` — janela de quota |
+| `quantity_g` | number | Quantidade consumida |
+| `quota_before_g` | number | Saldo antes da consumação |
+| `quota_after_g` | number | Saldo após — invariante: ≥ 0 |
+| `consumed_by` | ULID | user_id `DISPENSADOR` |
+| `occurred_at` | Date | UTC |
+
+**Invariante:** `quota_after_g === quota_before_g - quantity_g` e `quota_after_g ≥ 0`. Violado → `decide()` rejeita com `QuotaExceededAttempt`.
+
+---
+
+### `LotQuantityDeducted`
+
+Fato do estoque — projetado pelo read model `inventory_lot`. Emitido **junto** com `DispensationRecorded`.
+
+| Campo | Tipo | Descrição |
+|---|---|---|
+| `lot_id` | ULID | |
+| `dispensation_id` | ULID | Evento que originou a dedução |
+| `quantity_g` | number | Quantidade deduzida |
+| `quantity_before_g` | number | Saldo antes |
+| `quantity_after_g` | number | Saldo após — invariante: ≥ 0 |
+| `deducted_by` | ULID | user_id `DISPENSADOR` |
+| `occurred_at` | Date | UTC |
+
+**Invariante:** `quantity_after_g === quantity_before_g - quantity_g` e `quantity_after_g ≥ 0`. Violado → `decide()` rejeita com `LotInsufficientQuantity`. Concorrência protegida por optimistic concurrency no stream do lote (ver ADR-001 spike gate).
+
+---
+
+### `QuotaExceededAttempt`
+
+Tentativa registrada de dispensar acima da quota. **Não** altera estado — serve como evidência de bloqueio para auditoria + alerta DPO/RT.
+
+| Campo | Tipo | Descrição |
+|---|---|---|
+| `member_id` | ULID | |
+| `attempted_quantity_g` | number | |
+| `quota_remaining_g` | number | |
+| `attempted_by` | ULID | user_id `DISPENSADOR` |
+| `attempted_at` | Date | UTC |
+
+---
+
+### `LotInsufficientQuantity`
+
+Tentativa registrada de dispensar acima do estoque disponível do lote.
+
+| Campo | Tipo | Descrição |
+|---|---|---|
+| `lot_id` | ULID | |
+| `attempted_quantity_g` | number | |
+| `lot_remaining_g` | number | |
+| `attempted_by` | ULID | user_id `DISPENSADOR` |
+| `attempted_at` | Date | UTC |
 
 ---
 

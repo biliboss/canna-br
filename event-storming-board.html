@@ -502,14 +502,14 @@ header {
     <div class="arr">→</div>
     <div class="s ag" data-type="Aggregate" data-title="Dispensation" data-body="Root aggregate. Imutável após criação — sem UPDATE ou DELETE.<br><br><strong>References:</strong> MemberRef (ULID), InventoryLotRef (ULID) — cross-context, sem FK direta.<br><strong>Value Objects:</strong> DispensationId (ULID), QuantityGrams, MemberSignature, SngpcStatus"><span class="s-type">aggregate</span>Dispensation</div>
     <div class="arr">→</div>
-    <div class="s ev" data-type="Domain Event" data-title="DispensationRecorded" data-body="Dispensação registrada. Imutável.<br><br><strong>Payload:</strong> dispensation_id, member_id, lot_id, quantity_g, recorded_by, at<br><br><strong>Dispara:</strong> DeductMemberQuota + DeductLotInventory + GenerateSngpcXml + AuditEntry (tudo assíncrono via BullMQ)."><span class="s-type">event</span>Dispensation Recorded</div>
+    <div class="s ev" data-type="Domain Event" data-title="DispensationRecorded" data-body="Dispensação registrada — evento atômico que CARREGA dedução de quota + estoque.<br><br><strong>Payload:</strong> dispensation_id, member_id, lot_id, quantity_g, quota_before, quota_after, lot_quantity_before, lot_quantity_after, recorded_by, at<br><br><strong>decide() emite em UM append (mesmo stream, optimistic concurrency):</strong> DispensationRecorded + MemberQuotaConsumed + LotQuantityDeducted.<br><br><strong>Side effects assíncronos (BullMQ):</strong> SNGPC XML, PDF recibo, email — nunca alteram estado regulatório.<br><br><strong>Audit:</strong> projeção do próprio evento, não job separado."><span class="s-type">event</span>Dispensation Recorded</div>
   </div>
 </div>
 
 <div class="lane">
   <div class="lane-label">SNGPC</div>
   <div class="lane-body">
-    <div class="s po" data-type="Policy" data-title="Quando DispensationRecorded" data-body="<strong>4 ações simultâneas (BullMQ):</strong><br>1. DeductMemberQuota → quota atualizada<br>2. DeductLotInventory → quantity_g decrementado<br>3. GenerateSngpcXml → XML gerado<br>4. CreateAuditEntry → trilha imutável"><span class="s-type">policy</span>→ 4 ações async</div>
+    <div class="s po" data-type="Policy" data-title="Quando DispensationRecorded — sync vs async" data-body="<strong>SÍNCRONO (mesmo append no event store):</strong><br>• MemberQuotaConsumed → projeção atualiza saldo<br>• LotQuantityDeducted → projeção atualiza estoque<br>• Audit entry = projeção dos eventos (não job)<br><br><strong>ASSÍNCRONO (BullMQ, falha não compromete dispensação):</strong><br>• GenerateSngpcXml → submissão ANVISA com retry 3×<br>• PDF recibo<br>• Email notificação<br><br><strong>Regra:</strong> estado regulatório crítico é síncrono/transacional. Integração externa é assíncrona."><span class="s-type">policy</span>→ Sync vs Async</div>
     <div class="arr">→</div>
     <div class="s ev" data-type="Domain Event" data-title="SngpcXmlGenerated" data-body="XML no formato SNGPC gerado e pronto para envio.<br><br><strong>Payload:</strong> dispensation_id, xml_hash (SHA-256), generated_at<br><br><strong>Próximo:</strong> SendSngpcXml (BullMQ job, retry automático)."><span class="s-type">event</span>SNGPC XML Generated</div>
     <div class="arr">→</div>

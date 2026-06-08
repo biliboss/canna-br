@@ -40,6 +40,8 @@ export default defineConfig({
         {
           label: 'Arquitetura',
           items: [
+            { label: 'Domain Kernel (Emmett)', link: '/architecture/domain-kernel/' },
+            { label: 'Interfaces (UI · MCP · REST)', link: '/architecture/interfaces/' },
             { label: 'Stack', link: '/architecture/stack/' },
             { label: 'Chain of Custody', link: '/architecture/chain-of-custody/' },
             { label: 'LGPD & Crypto', link: '/architecture/lgpd-crypto/' },
@@ -56,6 +58,12 @@ export default defineConfig({
         },
         { label: 'Roadmap', link: '/roadmap/' },
         { label: 'Premissas Regulatórias', link: '/regulatory-assumptions/' },
+        {
+          label: 'Decisões (ADR)',
+          items: [
+            { label: 'ADR-001 — Domain Kernel + Emmett', link: '/adr/0001-domain-kernel-emmett/' },
+          ],
+        },
         { label: 'Releases', autogenerate: { directory: 'releases' } },
       ],
     }),

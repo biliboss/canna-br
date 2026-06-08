@@ -1,48 +1,21 @@
----
-title: Roadmap
----
+# Roadmap
 
-# canna-oss Roadmap
+Roadmap canonical: [`src/content/docs/roadmap.md`](src/content/docs/roadmap.md) — servido em `http://localhost:4335/roadmap/`.
 
-## v0.1 — Validação (now → ago/2026)
+Este arquivo é apenas um resumo. Quando atualizar, edite o canonical primeiro.
 
-| Capability | Valor | Done when |
+## Resumo
+
+| Fase | Janela | Foco |
 |---|---|---|
-| Domain Model + Event Storming | Blueprint DDD completo | Docs site com event storming mapeado |
-| Entrevistas com associações | Validação de hipóteses | 5+ entrevistas documentadas |
-| MVP Dispensação | Core loop funcional | Dispensação → audit log → quota check |
-| SNGPC homologação | Integração real | XML enviado no ambiente de teste ANVISA |
+| v0.1 — Domain Blueprint | DONE (2026-06-08) | Docs site + DDD + Event Storming + ADR-001 + Premissas Regulatórias |
+| v0.2 — Domain Kernel + Compliance Spine | now → ago/2026 | `packages/domain` TS puro + Emmett spike + HTTP fino + relatório de rastreabilidade |
+| v0.3 — Pilot Ready | set/2026 → dez/2026 | RBAC, TOTP, LGPD consent versionado, crypto-deletion, CSV import |
+| v0.4 — Sandbox Dossier Ready | jan/2027 → mai/2027 | Dossier template, KPI dashboard, BSPO trimestral, RIPD |
+| v0.5 — Regulatory Adapters | jun/2027 → dez/2027 | SNGPC adapter (mock → prod), SNCR adapter, schema versioning |
+| v1.0 — Full Association ERP | 2028 | Cultivo, processing, lab, CPC 29, multi-tenant, managed hosting |
+| v2.0 — Scale | 2029+ | LATAM, módulo clínico, B2G analytics |
 
-## v0.2 — Sandbox Ready (ago/2026 → mar/2027)
+Princípio: **spine-first**. Tronco = Member → Prescrição → Quota → Lote → Dispensação → Audit → Relatório. Cultivo, processing, lab, financeiro completo e managed hosting são galhos.
 
-| Capability | Valor | Done when |
-|---|---|---|
-| Compliance Engine | Relatórios automáticos | BSPO + KPI + DRE gerados sem intervenção manual |
-| Dossier Template | Reduz barreira candidatura | Template Plano de Capacidade Técnico-Operacional pronto |
-| RBAC + Segregação | RDC 1.014 compliance | Testes de segregação de funções passando |
-| LGPD Crypto-deletion | Compliance LGPD Art. 18 | Crypto-deletion testado end-to-end |
-
-## v0.3 — Managed Hosting (Q2 2027)
-
-| Capability | Valor | Done when |
-|---|---|---|
-| Multi-tenant | Schema isolation + RLS | 5+ tenants isolados em staging |
-| Self-serve onboarding | Sem intervenção manual | Associação cria conta + configura em < 30min |
-| Billing | Revenue real | Stripe + NF-e integrado |
-| Kamal deploy | Deploy sem downtime | `kamal deploy` em < 5min |
-
-## v0.4 — Scale (2028+)
-
-| Capability | Valor | Done when |
-|---|---|---|
-| LATAM expansion | CO / MX / AR | Adapter de compliance por país |
-| Módulo clínico (SaMD?) | Acompanhamento paciente | Avaliação RDC 657 Classe I concluída |
-| B2G analytics | ANVISA dashboard | Contrato piloto ANVISA |
-| R$1.87M ARR | Sustentabilidade | 120 associações pagantes |
-
-## Ideas Park
-
-- App mobile PWA para membros (dispensação self-service com assinatura digital)
-- IoT integration para cultivo (sensores temperatura/umidade)
-- AI Hanna-like para compliance KPI alertas (análogo ao Cannanas DE)
-- Federação LATAM: schema adapter por jurisdição
+Capabilities que dependem de premissas *Especulativas* (cf. [Premissas Regulatórias](src/content/docs/regulatory-assumptions.md)) ficam em Ideas Park, não no roadmap.

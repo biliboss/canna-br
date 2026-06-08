@@ -105,8 +105,17 @@ Após `LabSampleApproved`, o campo `coa_file_hash` é marcado como `immutable: t
 **INV-D1 — Imutabilidade Após Criação**
 `Dispensation` não possui métodos mutantes após `DispensationRecorded`. Sem cancel, sem update. Correções são feitas por nova dispensação compensatória com quantidade negativa (estorno), rastreada no audit log.
 
-**INV-D2 — Dedução Atômica de Quota**
-Quota mensal e estoque do lote são decrementados na mesma transação de banco de dados. Sem two-phase commit — consistência garantida dentro do mesmo contexto transacional PostgreSQL.
+**INV-D2 — Consumo Atômico de Quota e Estoque**
+
+`RecordDispensation` só é aceito se, no momento do `decide()`, o membro tem quota suficiente E o lote tem quantidade suficiente. O **mesmo append** no event store registra os três eventos:
+
+- `DispensationRecorded`
+- `MemberQuotaConsumed`
+- `LotQuantityDeducted`
+
+Read models de quota e estoque são projeções desses eventos. **Nenhum job assíncrono pode alterar estado regulatório crítico** — side effects externos (SNGPC XML, PDF, email) vão para BullMQ e sua falha não invalida a dispensação. Cf. [ADR-001](/adr/0001-domain-kernel-emmett/).
+
+Concorrência entre dispensações no mesmo lote é protegida por **optimistic concurrency** no stream do lote: dois `RecordDispensation` paralelos no mesmo `inventory_lot_ref` não podem ambos passar — o segundo append falha por versão divergente e é re-validado contra o estado atualizado.
 
 ---
 

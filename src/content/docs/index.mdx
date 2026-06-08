@@ -22,9 +22,17 @@ Nenhum produto existente cobre simultaneamente:
 - **Self-hosted** — associação é controladora única
 - **OSS auditável** — código aberto = trust moat para dados de saúde em setor cinzento
 
+## Arquitetura em Uma Frase
+
+**Domain Kernel em TypeScript puro + [Emmett](https://github.com/event-driven-io/emmett) como event-sourcing kernel + raw para todo o resto.**
+
+Domínio é função pura (`decide` / `evolve`). Emmett fornece event store, command handler e optimistic concurrency. HTTP/UI/DB schema ficam explícitos. Decisão em [ADR-001](/adr/0001-domain-kernel-emmett/).
+
 ## Stack
 
-`Next.js 15` · `Fastify 5` · `PostgreSQL 16` · `MinIO` · `Kamal 2` · `Redis + BullMQ` · `Drizzle ORM` · `TOTP sem SaaS auth`
+**Domain Kernel:** `TypeScript strict` · `Emmett` · `Vitest scenario coverage` · `ULID`
+
+**Application:** `Fastify 5` · `Drizzle (read models)` · `BullMQ workers` · `PostgreSQL 16` · `Redis` · `MinIO` · `Kamal 2` · `TOTP sem SaaS auth`
 
 ## Contexto de Mercado
 
@@ -34,20 +42,20 @@ Nenhum produto existente cobre simultaneamente:
 - TAM R$130M → SAM R$47M → SOM R$27M (2030)
 
 <CardGrid>
+  <Card title="Domain Kernel" icon="seti:typescript">
+    TypeScript puro + Emmett event store + scenario coverage. Domínio executável primeiro, banco/HTTP depois.
+    [Ver Domain Kernel](/architecture/domain-kernel/)
+  </Card>
   <Card title="Event Storming" icon="puzzle">
-    Mapeamento completo de domain events, commands, aggregates e policies.
+    Mapeamento completo de domain events, commands, aggregates e policies. Core Spine vs Later Module marcado.
     [Ver Event Storming](/domain/event-storming/)
   </Card>
-  <Card title="Bounded Contexts" icon="seti:config">
-    8 contextos: Membership, Cultivation, Processing, Inventory, Dispensation, Compliance, Finance, Identity.
-    [Ver Bounded Contexts](/domain/bounded-contexts/)
+  <Card title="Premissas Regulatórias" icon="warning">
+    Confirmadas / Prováveis / Especulativas. Aposta especulativa não vira arquitetura.
+    [Ver Premissas](/regulatory-assumptions/)
   </Card>
   <Card title="ANVISA Sandbox" icon="document">
     RDC 1.014/2026: o que exige, como entrar, linha do tempo.
     [Ver ANVISA Sandbox](/research/anvisa-sandbox/)
-  </Card>
-  <Card title="OSS Business Model" icon="open-book">
-    AGPL-3 + managed hosting. Plausible como proxy. R$1.87M ARR M36.
-    [Ver Business Model](/business/oss-model/)
   </Card>
 </CardGrid>
