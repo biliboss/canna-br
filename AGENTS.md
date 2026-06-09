@@ -1,13 +1,21 @@
 ---
 project: canna-oss
 repo: /Users/billiboss/.obsidian/99-development/canna-oss
-current_phase: v0.2.1-compliance-spine-mcp-first
-current_focus: apps/mcp tools + packages/ui-apps MCP Apps + apps/api Fastify + @canna/read-models projections
+current_phase: v0.2.1.2-LIVE
+current_focus: post-deploy polish + LLM API key wiring no OWUI + MCP App inline render validation
 surface_pivot: MCP-first (ADR-002 — 2026-06-08). Open WebUI + MCP server + MCP Apps substitui admin Next.js. NO apps/admin no roadmap.
 do_not_start:
-  - apps/admin (deferred to Ideas Park; substituído por MCP Apps)
+  - apps/admin (Ideas Park; substituído por MCP Apps)
 package_manager: pnpm
-deploy_target_future: canna.fonsecagabriel.com.br (Kamal v2, VPS 62.171.145.76, wildcard DNS; reusa skill langfuse-fonsecagabriel)
+branch: feature/mcp-first-pivot (NÃO merged main per Mission Mode directive)
+tags: [v0.1.0, v0.2.1, v0.2.1.1, v0.2.1.2]
+production_urls:
+  api: https://canna.fonsecagabriel.com.br
+  webui: https://webui.canna.fonsecagabriel.com.br
+  mcp: https://mcp.canna.fonsecagabriel.com.br
+deploy_target: canna.fonsecagabriel.com.br (Kamal v2 LIVE 2026-06-08, VPS 62.171.145.76 shared c/ Langfuse, wildcard DNS)
+deploy_evidence: ops/openwebui/kamal/smoke-v0.2.1.1/ (7 screenshots + 3 health JSONs + admin-credentials.txt gitignored)
+admin_credentials: ops/openwebui/kamal/smoke-v0.2.1.1/admin-credentials.txt (gitignored, mode 600 — admin@canna.local)
 site_url: http://localhost:4335
 ---
 
@@ -15,11 +23,26 @@ site_url: http://localhost:4335
 
 OSS cannabis association management system for Brazil, RDC 1.014/2026 sandbox. Self-hosted. AGPL-3.0 + CLA. DDD-designed + event-sourced kernel + **MCP-first agentic surface**.
 
-**Current focus (v0.2.1):** ship Compliance Spine MCP-first — `apps/api` (Fastify endpoints), `@canna/read-models` (Drizzle projections), `apps/mcp` (Tools L1+L2+L3 + ext-apps), `packages/ui-apps` (MCP Apps), `apps/worker` (BullMQ SNGPC/PDF), `@canna/crypto` (envelope encryption), Open WebUI sidecar wired. **No admin Next.js** — see [ADR-002](apps/docs/src/content/docs/adr/0002-mcp-first-surface.md).
+**Current status (v0.2.1.2 LIVE 2026-06-08):** 3 production URLs serving 200 via Kamal v2 on VPS 62.171.145.76:
+- `canna.fonsecagabriel.com.br/health` → apps/api Fastify
+- `webui.canna.fonsecagabriel.com.br/health` → Open WebUI v0.9.6 (MCP server `canna-dispensations` registered)
+- `mcp.canna.fonsecagabriel.com.br/health` → apps/mcp StreamableHTTP
+
+12 workspaces, 154/154 tests green. Branch `feature/mcp-first-pivot` + tags pushed origin; **NOT merged main** per Mission Mode directive — Gabriel revisa em batch antes do merge.
+
+**Next session priorities:**
+1. Wire LLM API key no OWUI admin (chave OpenRouter ou Anthropic direct) → invoke `canna-dispensations` tool from chat → capture screenshot `08-prod-mcp-app-rendered.png` (last evidence missing for full v1.0.0)
+2. Run `langfuse-fonsecagabriel/onboard.ts canna-oss` to populate LANGFUSE_* env (currently placeholders em `.env.production`)
+3. v0.2.1.3 cosmetic: Docker HEALTHCHECK per-role override (mcp/worker inherit api :3000)
+4. ADR-002 add "## Live Deployment 2026-06-08" section linking deploy-evidence.md
+5. Consider merge to main when Gabriel approves the batch
 
 Previous phases:
 - v0.2.0a — Emmett in-memory ADR-001 spike gate PASSED (50 domain + 8 event-store + 6 app-services tests green)
 - v0.2.0b — Emmett Postgres adapter validated via testcontainers (6 PG specs green)
+- v0.2.1 — 7 sub-agent fanout (apps/api + read-models + crypto + ops/openwebui + worker+sngpc + ui-apps singlefile + OWUI smoke) tagged 2026-06-08
+- v0.2.1.1 — server.ts entrypoints + Kamal scaffold + OWUI seed script + ADR-002 smoke + RELEASE_NOTES, tagged 2026-06-08
+- v0.2.1.2 — DEPLOY LIVE on canna.fonsecagabriel.com.br, tagged 2026-06-08
 
 ---
 

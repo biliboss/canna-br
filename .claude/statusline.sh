@@ -1,0 +1,1 @@
+/Users/billiboss/.obsidian/99-development/statusline/statusline.sh
