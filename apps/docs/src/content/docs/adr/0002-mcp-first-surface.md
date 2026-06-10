@@ -201,7 +201,7 @@ Cada App declara seu schema esperado no manifest `index.ts`. Resumo:
 
 ### Evidence
 
-9 screenshots em [`ops/openwebui/smoke/`](https://github.com/canna-oss/canna-oss/tree/main/ops/openwebui/smoke):
+9 screenshots em [`apps/docs/public/screenshots/owui/`](https://github.com/canna-oss/canna-oss/tree/main/apps/docs/public/screenshots/owui):
 
 | # | Frame | Estado |
 |---|---|---|
