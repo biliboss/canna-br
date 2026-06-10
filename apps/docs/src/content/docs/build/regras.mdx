@@ -1,0 +1,167 @@
+---
+title: Regras e Invariantes
+description: Invariantes de dominio, regras regulatorias RDC 1.014 e restricoes de sistema. Todas testadas em GIVEN/WHEN/THEN. Links para ADRs correspondentes.
+---
+
+## Premissa
+
+Regras de negocio vivem na **domain layer** (TypeScript puro) — nao no banco, nao no middleware. O banco adiciona guardioes de segunda linha (`RULE no_update`, column triggers), mas a primeira validacao e sempre o aggregate.
+
+Cf. [ADR-001](/adr/0001-domain-kernel-emmett/) para o pattern de enforcement em camadas.
+
+---
+
+## RN-01 — Quota Mensal Obrigatoria
+
+**Tipo:** invariante de dispensacao
+**Testavel:** sim
+
+Nenhuma dispensacao pode ser registrada se `member.quota_remaining < dispensation.quantity`. Verificado em `decide()` antes de qualquer append no event stream.
+
+**Acionador:** `RecordDispensation`
+**Resultado esperado:**
+```
+quota_remaining >= quantity  →  DispensationRecorded appended
+quota_remaining < quantity   →  QuotaExceededAttempt appended; command rejeitado
+```
+
+---
+
+## RN-02 — Prescricao Vigente Obrigatoria
+
+**Tipo:** pre-condicao de dispensacao
+**Testavel:** sim
+
+Dispensacao requer prescricao medica com `valid_until >= today`. Prescricao expirada = `MedicalRecordExpired` emitido automaticamente; dispensacao bloqueada.
+
+**Acionador:** `RecordDispensation`
+
+---
+
+## RN-03 — Lote Deve Estar AVAILABLE
+
+**Tipo:** invariante de inventario
+**Testavel:** sim
+
+Apenas lotes com status `AVAILABLE` podem ser consumidos em dispensacoes. `QUARANTINED`, `RECALLED` e `EXHAUSTED` sao terminais para dispensacao.
+
+**Acionador:** `RecordDispensation`
+**Resultado esperado:**
+```
+lot.status == AVAILABLE  →  LotQuantityDeducted appended
+lot.status != AVAILABLE  →  command rejeitado; nenhum append
+```
+
+---
+
+## RN-04 — Liberacao de Lote Requer Lab Aprovado
+
+**Tipo:** invariante cross-context (Processing x Inventory)
+**Testavel:** sim
+
+Um lote nao pode transitar de `QUARANTINED` para `AVAILABLE` sem `LabSampleApproved` correspondente. Enforced por event handler — nao por trust na camada de aplicacao.
+
+**Acionador:** evento `LabSampleApproved`
+
+---
+
+## RN-05 — COA Hash Imutavel Apos Aprovacao
+
+**Tipo:** invariante de integridade regulatoria
+**Testavel:** sim (trigger PostgreSQL como segunda linha)
+
+O hash do Certificate of Analysis (COA) gravado em `LabSampleApproved` nao pode ser alterado. Column-level trigger no PostgreSQL bloqueia qualquer `UPDATE` nessa coluna apos o primeiro write.
+
+**Acionador:** `ApproveLabSample`
+
+---
+
+## RN-06 — Progressao de Estagio Forward-Only
+
+**Tipo:** invariante de cultivo
+**Testavel:** sim
+
+Plantas progridem de `SEEDLING → VEGETATIVE → FLOWERING → HARVEST → DESTROYED`. Nenhuma transicao regressiva e permitida. `DESTROYED` e terminal — planta nao pode retornar a nenhum estado.
+
+**Acionador:** `AdvancePlantStage`
+
+---
+
+## RN-07 — Anonimizacao Irreversivel
+
+**Tipo:** invariante LGPD
+**Testavel:** sim
+
+`MemberAnonymized` e terminal. Apos emissao: nome, CPF, email, endereco substituidos por hashes anonimos; prescription links removidos. Impossivel reverter via qualquer command.
+
+**Acionador:** `AnonymizeMember` (requer `ADMIN` + TOTP)
+
+---
+
+## RN-08 — Segregacao RBAC RDC 1.014
+
+**Tipo:** restricao regulatoria
+**Testavel:** sim (middleware + testes de integracao)
+
+Tres segregacoes obrigatorias pela RDC 1.014:
+- `DISPENSADOR` nao pode aprovar COA (`RESPONSAVEL_TECNICO`)
+- `RESPONSAVEL_TECNICO` nao pode registrar cultivo (`CULTIVADOR`)
+- Nenhum role unico pode executar os tres
+
+Enforced em dois niveis: middleware HTTP (`requireRole()`) e pre-condicao no use case.
+
+---
+
+## RN-09 — Append Atomico na Dispensacao
+
+**Tipo:** invariante de consistencia
+**Testavel:** sim
+
+`RecordDispensation` deve produzir exatamente tres eventos em um unico append: `DispensationRecorded + MemberQuotaConsumed + LotQuantityDeducted`. Se qualquer evento falhar, o append inteiro e revertido (Emmett optimistic concurrency).
+
+Optimistic concurrency no stream do lote: dois `RecordDispensation` paralelos no mesmo lote — o segundo falha por versao divergente e e re-validado. Sem 2PC.
+
+---
+
+## RN-10 — RECALLED e Terminal
+
+**Tipo:** invariante de inventario
+**Testavel:** sim
+
+`RECALLED` e o estado mais restritivo de um lote — irreversivel. Nenhum command pode transitar `RECALLED → *`. Criado apenas por `ADMIN` via REST TOTP (nivel 4).
+
+---
+
+## RN-11 — Audit Log Imutavel
+
+**Tipo:** restricao de banco
+**Testavel:** sim (RULE PostgreSQL)
+
+A tabela `event_log` tem `RULE no_update` e `RULE no_delete` — nenhuma camada de aplicacao pode alterar ou excluir eventos gravados. Independente de permissao de role.
+
+---
+
+## Matriz de Cobertura
+
+| Regra | Camada primaria | Segunda linha |
+|---|---|---|
+| RN-01 Quota | Domain (`decide()`) | — |
+| RN-02 Prescricao | Application (pre-condicao use case) | — |
+| RN-03 Lote AVAILABLE | Domain (`decide()`) | — |
+| RN-04 Lab aprovado | Event handler | — |
+| RN-05 COA hash | Domain + Application | Column trigger PostgreSQL |
+| RN-06 Estagio forward | Domain aggregate | — |
+| RN-07 Anonimizacao | Domain (`decide()`) | — |
+| RN-08 Segregacao RBAC | Middleware HTTP | Pre-condicao use case |
+| RN-09 Append atomico | Emmett optimistic concurrency | — |
+| RN-10 RECALLED terminal | Domain aggregate | — |
+| RN-11 Audit log | `RULE` PostgreSQL | Sem bypass via aplicacao |
+
+## Regras Dependentes de Decisao Pendente
+
+| Regra | Abertura relacionada | Impacto |
+|---|---|---|
+| Politica de recall de lote | Criterio de N falhas de entrega | Define quando `LotRecalled` e emitido automaticamente |
+| Multa comodato (eventual) | Modelo de hardware/comodato futuro | Novo aggregate `EquipmentLoan` (v1.0+) |
+
+Para decisoes em aberto: [Abertas](/build/abertas/).

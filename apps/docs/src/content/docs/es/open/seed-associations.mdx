@@ -1,0 +1,103 @@
+---
+title: "Asociaciones Seed"
+description: "Buscamos 5 asociaciones de pacientes para un período inicial de prueba. Sin costo, con soporte directo. Inscripciones abiertas hasta el 30/09/2026."
+---
+
+import ApplyVideoModal from '../../../../components/ApplyVideoModal.astro';
+
+## Buscamos 5 asociaciones para un período inicial de prueba.
+
+Esto no es una venta. Es una invitación para co-construir un sistema junto con quienes lo van a usar.
+
+canna-br está funcional — LGPD, trazabilidad, dispensación, SNGPC en desarrollo (mock actual; aguarda XSD ANVISA) — pero no ha sido usado en producción real aún. Buscamos asociaciones seed (entidades sin fines de lucro brasileñas, licenciadas para importar/cultivar/dispensar cannabis medicinal) que estén dispuestas a ser las primeras, sabiendo esto, y que nos ayuden a afinar el producto antes de abrirlo al mercado amplio.
+
+---
+
+## A quién buscamos
+
+- Asociación ya operante, con dispensación activa de pacientes-miembros
+- Responsable Técnico (farmacéutico) identificado en la operación
+- Directiva dispuesta a participar en co-diseño: dar retroalimentación real, no validar lo que ya está listo
+- Cómoda con software en fase alpha — los bugs ocurren, y el compromiso es reportarlos, no quejarse
+- OK con el modelo OSS (AGPL-3.0): el código es público y auditable por cualquier persona
+
+---
+
+## Lo que se obtiene
+
+- Sistema completo sin costo durante el período seed: miembros, prescripciones, dispensación, trazabilidad, audit trail · cultivo + financiero + lab en roadmap v1.0 (2028)
+- Soporte directo con Gabriel — sin ticket, sin fila, contacto por Discord o email
+- [LGPD by design](/build/compliance/): cifrado AES-256-GCM por miembro, crypto-deletion Art. 18 IV garantizada
+- [SNGPC mock — listo para integración cuando ANVISA publique XSD](/idea/regulation/): adaptador XML implementado, aguarda schema oficial ANVISA
+- Elección entre self-host (control propio del servidor) o hosted en `canna-br.fonsecagabriel.com.br`
+- Exportación completa de los datos en cualquier momento, sin costo, sin burocracia
+- Mención pública como asociación fundadora cuando el proyecto se abra al mercado
+
+---
+
+## Lo que se solicita
+
+- Retroalimentación semanal: un mensaje corto sobre qué funcionó, qué no funcionó, qué falta
+- Reportar bugs en GitHub Issues al encontrarlos (con contexto suficiente para reproducirlos)
+- Aceptar que no todo estará listo: algunas pantallas existen, otras son mocks
+- Participar en una videollamada mensual de 30 min con Gabriel (opcional, pero valorada)
+- Mención como asociación fundadora en `/community` cuando el proyecto sea público (acordado antes)
+
+---
+
+## Compromisos de soberanía de datos
+
+Los datos de sus miembros son suyos. Esto no es retórica — es arquitectura.
+
+- Cifrado por miembro: cada miembro tiene su propia clave de cifrado (DEK aleatoria). Vea el modelo en [LGPD — Cifrado](/build/compliance/).
+- Crypto-deletion real: cuando un miembro solicita eliminación (Art. 18 IV LGPD), la clave se destruye. Los datos cifrados se vuelven ruido irrecuperable. El sistema no almacena CPF en claro en ningún momento.
+- Self-host disponible: si prefiere ejecutarlo en el servidor de la asociación, el sistema es integralmente self-hosteable. Sin dependencia de nuestra infraestructura.
+- Sin lock-in: exportación completa en formatos abiertos en cualquier momento.
+- Código auditable: cualquier abogado, técnico o miembro puede revisar el código que procesa los datos. Repositorio público en GitHub.
+
+---
+
+## Plazas y plazo
+
+<strong>5 plazas.</strong> No más que eso en este ciclo.
+
+Inscripciones abiertas hasta el <strong>30/09/2026</strong>.
+
+Decisión comunicada individualmente en hasta 15 días tras la candidatura.
+
+---
+
+## Cómo aplicar
+
+Envíe un email a <strong>gabriel@devmagic.com.br</strong> con el asunto `[canna-br seed]` e incluya:
+
+1. Nombre de la asociación y ciudad
+2. Número aproximado de pacientes activos
+3. Sistema actual (planilla, otro software, proceso manual)
+4. Por qué tiene interés en participar en este momento
+
+No hay formulario. No hay proceso de selección formal. Respondo todos los emails.
+
+O envíe un video de hasta 3 minutos directamente por el botón de abajo — el guión se muestra en el momento.
+
+<div class="mt-6 flex justify-center">
+  <button id="open-apply-modal" type="button" class="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold transition shadow-lg shadow-emerald-500/30 focus-visible:ring-4 ring-emerald-400">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+    </svg>
+    Enviar video de candidatura
+  </button>
+</div>
+
+---
+
+<div class="max-w-3xl mx-auto my-12 p-5 rounded-xl border border-amber-500/30 bg-amber-950/20 text-amber-100/80 text-sm">
+  <p class="font-semibold text-amber-300 mb-2">Aviso técnico-jurídico</p>
+  <p>canna-br es una herramienta de software. El cumplimiento legal (LGPD, RDC 1.014, Portaria 344/98) es responsabilidad integral de la asociación adoptante y sus abogados/DPO. Ningún mecanismo técnico sustituye el dictamen jurídico propio ni la designación formal del Responsable Técnico farmacéutico y DPO conforme exige la ley. <a href="/trust/">Ver /trust/ — Política de Privacidad, Términos y DPO</a>.</p>
+</div>
+
+<ApplyVideoModal />
+
+---
+
+> **Traducción automática v1** — versión en español generada por LLM, pulido humano en curso. Reporta errores a gabriel@devmagic.com.br.

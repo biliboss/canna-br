@@ -1,0 +1,116 @@
+---
+// IntroVideoModal — botão + dialog nativo HTML5
+// Props: videoSrc (arquivo local) OU youtubeId (embed YT)
+const { videoSrc = '/intro-placeholder.mp4', youtubeId = '' } = Astro.props;
+---
+
+<button
+  id="open-intro-video"
+  type="button"
+  class="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-emerald-500/10 border border-emerald-400/40 text-emerald-300 text-sm font-semibold hover:bg-emerald-500/20 transition focus-visible:ring-2 ring-emerald-400"
+  aria-label="Ver vídeo de apresentação"
+>
+  <span aria-hidden="true">▶</span>
+  Ver apresentação · 2 min
+</button>
+
+<dialog
+  id="intro-video-dialog"
+  class="backdrop:bg-slate-950/80 backdrop:backdrop-blur-sm bg-transparent p-0 m-auto max-w-4xl w-[92vw] rounded-2xl border border-emerald-700/30 overflow-hidden"
+  aria-labelledby="intro-video-title"
+>
+  <div class="bg-slate-950 p-1 rounded-2xl">
+    <div class="flex items-center justify-between p-3 bg-slate-950">
+      <p id="intro-video-title" class="text-emerald-300 font-mono text-xs uppercase tracking-widest">Apresentação canna-br</p>
+      <button
+        id="close-intro-video"
+        type="button"
+        class="text-slate-400 hover:text-white p-1 rounded transition focus-visible:ring-2 ring-emerald-400"
+        aria-label="Fechar vídeo"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+    <div class="aspect-video bg-black">
+      {youtubeId ? (
+        <iframe
+          id="intro-video-iframe"
+          src={`https://www.youtube.com/embed/${youtubeId}?autoplay=0&rel=0`}
+          class="w-full h-full"
+          frameborder="0"
+          allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen
+        ></iframe>
+      ) : (
+        <video
+          id="intro-video-player"
+          src={videoSrc}
+          controls
+          autoplay
+          muted
+          playsinline
+          preload="auto"
+          class="w-full h-full"
+        >
+          Seu navegador não suporta vídeo HTML5.
+        </video>
+      )}
+    </div>
+  </div>
+</dialog>
+
+<script is:inline>
+  (function () {
+    const STORAGE_KEY = 'canna-br-intro-video-seen-v4';
+    const dialog = document.getElementById('intro-video-dialog');
+    const openBtn = document.getElementById('open-intro-video');
+    const closeBtn = document.getElementById('close-intro-video');
+    const video = document.getElementById('intro-video-player');
+
+    if (!dialog) return;
+
+    const open = () => {
+      try { dialog.showModal(); } catch (e) { dialog.setAttribute('open', ''); }
+      if (video) {
+        try { video.muted = true; video.currentTime = 0; } catch (e) {}
+        if (video.play) video.play().catch(function() {});
+      }
+    };
+
+    const close = () => {
+      if (video) video.pause();
+      var iframe = document.getElementById('intro-video-iframe');
+      if (iframe) {
+        var src = iframe.src;
+        iframe.src = '';
+        iframe.src = src;
+      }
+      try { dialog.close(); } catch (e) { dialog.removeAttribute('open'); }
+    };
+
+    if (openBtn) openBtn.addEventListener('click', open);
+    if (closeBtn) closeBtn.addEventListener('click', close);
+
+    dialog.addEventListener('click', function(e) {
+      if (e.target === dialog) close();
+    });
+
+    // ESC nativo já fecha <dialog> — reforça pause do vídeo
+    dialog.addEventListener('close', function() {
+      if (video) video.pause();
+    });
+
+    // Auto-open na primeira visita
+    try {
+      var seen = localStorage.getItem(STORAGE_KEY);
+      if (!seen) {
+        setTimeout(function() {
+          open();
+          localStorage.setItem(STORAGE_KEY, String(Date.now()));
+        }, 800);
+      }
+    } catch (e) { /* localStorage pode estar bloqueado */ }
+  })();
+</script>

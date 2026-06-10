@@ -1,0 +1,116 @@
+---
+title: "Como funciona o programa seed"
+description: "Timeline, modelo de suporte, soberania de dados, SNGPC durante o seed, critério de saída e riscos honestos."
+---
+
+O programa seed tem duração de 14 semanas. O objetivo é colocar o sistema em uso real, identificar o que quebra, e consolidar o produto antes de abrir para o mercado amplo.
+
+---
+
+## Timeline
+
+### Semanas 1–2 — Onboarding
+
+- Chamada de 1h para entender o fluxo atual da associação
+- Configuração do ambiente (self-host ou hosted)
+- Importação de dados de membros existentes (se houver)
+- Treinamento básico com quem vai operar dia a dia
+- Validação de que o sistema está funcional para a realidade da associação
+
+### Semanas 3–10 — Produção assistida
+
+- Associação opera o sistema para fluxos reais: cadastro de membros, dispensação, controle de cultivo
+- Gabriel disponível por Discord/email para dúvidas e problemas
+- Bugs reportados via GitHub Issues — resposta em até 48h em dias úteis
+- Sincronização semanal curta (assíncrona, via texto) sobre o que está funcionando e o que não está
+- Possíveis deploys de correção sem interrupção do serviço
+
+### Semanas 11–14 — Consolidação
+
+- Revisão conjunta do que foi aprendido
+- Documentação dos fluxos específicos da associação
+- Decisão sobre continuidade: managed hosting, self-host, ou encerramento
+- Se continuar: transição para os termos pós-seed (ver critério de saída abaixo)
+
+---
+
+## Modelo de suporte
+
+Durante o seed, o suporte é direto — sem tier, sem ticket:
+
+- <strong>Discord</strong>: canal privado com Gabriel e a associação. Resposta em até 4h em dias úteis.
+- <strong>Email</strong>: gabriel@devmagic.com.br. Para questões que precisam de contexto mais longo.
+- <strong>Videochamada mensal</strong>: 30 min opcionais para revisão mais estruturada.
+- <strong>On-call</strong>: se algo crítico cair (sistema fora, dados inacessíveis), contato direto pelo WhatsApp +55 13 98803-2053 (Gabriel). Não é SLA formal — é compromisso pessoal. Horário comercial BR; escalation 24/7 nos 14 primeiros dias de produção assistida.
+
+Esse modelo de suporte não escala. É o ponto. O seed existe precisamente porque precisamos entender os problemas reais antes de construir uma camada de suporte que escale.
+
+---
+
+## Soberania de dados
+
+### Onde os dados rodam
+
+Duas opções:
+
+- <strong>Self-host</strong>: você provisiona um servidor (VPS, máquina própria), nós fornecemos o Docker Compose e documentação de deploy. Você é a controladora exclusiva dos dados.
+- <strong>Hosted</strong>: dados rodam em <a href="https://canna-br.fonsecagabriel.com.br">canna-br.fonsecagabriel.com.br</a> — instância oficial multi-tenant com schema PostgreSQL isolado por associação. Infraestrutura na Hetzner (Alemanha), backups diários cifrados.
+
+Em ambos os casos, o modelo de criptografia é idêntico: DEK aleatória por membro, AES-256-GCM, crypto-deletion real. Detalhes técnicos em [LGPD — Criptografia](/build/compliance/).
+
+### Backup e exportação
+
+- Backups diários com Restic → S3 cifrado (modo hosted)
+- Exportação completa em qualquer momento: CSV, JSON, formatos abertos
+- Sem taxa de saída, sem processo burocrático
+
+### Crypto-deletion
+
+A eliminação de dados de membros (Art. 18 IV LGPD) é implementada como destruição de chave criptográfica: a DEK do membro é removida, tornando os dados cifrados computacionalmente irrecuperáveis. O registro permanece no audit log para integridade de cadeia de custódia, mas sem nenhum dado pessoal recuperável.
+
+---
+
+## SNGPC durante o seed
+
+O [SNGPC](/idea/regulation/) é obrigatório para substâncias controladas sob a RDC 1.014/2026. Durante o seed:
+
+- O sistema está preparado para gerar o XML de dispensação conforme o schema ANVISA
+- O schema específico para associações (sandbox RDC 1.014) ainda não foi publicado pela ANVISA (Jun 2026) — o adapter atual usa a referência de farmácias como base
+- <strong>Mock mode</strong>: por padrão durante o seed, os envios SNGPC são simulados localmente — nenhum envio real para a ANVISA
+- <strong>Real mode</strong>: disponível se a associação já tiver credenciais SNGPC e quiser testar integração real em sandbox ANVISA
+
+Quando a ANVISA publicar o schema oficial para associações, atualizo o adapter e comunico as associações seed antes de qualquer migração.
+
+---
+
+## Critério de saída
+
+O seed termina nas semanas 13–14. O que acontece depois:
+
+### Se quiser continuar
+
+Transição para os planos de managed hosting publicados em [Revenue Model](/roadmap/): Starter (R$297/mês, até 50 membros), Standard (R$597/mês, até 200 membros), ou Enterprise (R$1.197/mês, ilimitado).
+
+Sem lock-in: se depois de alguns meses o hosted não fizer sentido, você pode migrar para self-host a qualquer momento — gratuito pela natureza AGPL da licença.
+
+### Se preferir self-host após o seed
+
+O código é AGPL-3.0. Você pode rodar para sempre sem pagar nada. Atualizações e documentação continuam públicas no GitHub.
+
+### Se quiser encerrar completamente
+
+Exportação completa dos dados, crypto-deletion de tudo que estiver no servidor hosted (se aplicável), e encerramento limpo. Sem obrigação de continuidade.
+
+---
+
+## Riscos honestos
+
+O canna-br é software em fase alpha. Isso significa:
+
+- <strong>Bugs existem</strong>. Alguns vão aparecer só em uso real. O combinado é reportar, não sofrer em silêncio.
+- <strong>Downtime é possível</strong>. Sem SLA formal durante o seed. Incidentes críticos têm resposta rápida — mas não há garantia de uptime percentual.
+- <strong>A API do SNGPC pode mudar</strong>. A ANVISA ainda não publicou o schema específico para associações no sandbox. Pode haver retrabalho quando publicar.
+- <strong>Pivot de produto é possível</strong>. Se o feedback das associações seed indicar que algum módulo precisa ser repensado estruturalmente, pode haver quebra de compatibilidade com avisos.
+- <strong>Projeto pessoal</strong>. O canna-br é uma iniciativa pessoal de Gabriel, não uma empresa constituída. Não há equipe, não há investimento, não há garantia de continuidade além do compromisso pessoal e do fato de o código ser AGPL (ou seja, mesmo que o projeto pare, o código permanece público e usável).
+
+Se esses riscos forem inaceitáveis para a situação atual da sua associação, o seed pode não ser o momento certo. Isso é honesto, não um descarte — pode fazer sentido entrar em um ciclo futuro quando o software estiver mais maduro.

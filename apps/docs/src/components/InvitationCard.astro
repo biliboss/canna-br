@@ -1,0 +1,843 @@
+---
+/**
+ * InvitationCard — convite pessoal ao círculo principal (O2)
+ *
+ * Design references:
+ * - Linear.app: elevation via lightness delta (oklch L+0.03), near-black bg, dense without crowding
+ * - Clerk.dev: illustrated empty states, emotional weight in auth/onboarding surfaces
+ * - Anthropic.com: humanist warm-dark palette, serif/sans pairing, trust-building tone
+ *
+ * All colors: OKLCH perceptually uniform ramps.
+ * Motion: entrance 200ms cubic-bezier(0.16,1,0.3,1), hover 150ms ease-out — prefers-reduced-motion respected.
+ * Fonts: Geist (Google CDN via @font-face below) + Caveat for signature handwritten style.
+ */
+
+interface Props {
+  name: string;
+  role: string;
+  roleSubtitle?: string;
+  photoUrl?: string;
+  bio: string;
+  whyYou: string[];
+  affiliations?: string[];
+  cta?: string;
+  ctaHref?: string;
+  ctaSecondaryLabel?: string;
+  ctaSecondaryHref?: string;
+  linkedinUrl?: string;
+  signedBy?: string;
+  /** kebab-case slug for deep-link anchor. Defaults to name → kebab. */
+  slug?: string;
+}
+
+const {
+  name,
+  role,
+  roleSubtitle,
+  photoUrl,
+  bio,
+  whyYou,
+  affiliations = [],
+  cta = "Aceitar o convite · responder pro Gabriel",
+  ctaHref = "mailto:gabryelfs@gmail.com?subject=Aceito%20o%20convite%20%E2%80%94%20" + encodeURIComponent(name),
+  ctaSecondaryLabel = "Ler antes — o que isso significa",
+  ctaSecondaryHref = "/open/perguntas/",
+  linkedinUrl,
+  signedBy = "Gabriel",
+  slug: slugProp,
+} = Astro.props;
+
+// Derive initials for avatar fallback
+const initials = name
+  .split(" ")
+  .filter(Boolean)
+  .slice(0, 2)
+  .map((w) => w[0].toUpperCase())
+  .join("");
+
+// Derive slug for deep-link anchor
+const slug = slugProp ?? name
+  .toLowerCase()
+  .normalize("NFD")
+  .replace(/[̀-ͯ]/g, "")   // strip diacritics
+  .replace(/\s+/g, "-")
+  .replace(/[^a-z0-9-]/g, "");
+
+// WhatsApp share payload (constructed server-side, passed as data-attr to the button)
+const firstName = name.split(" ")[0];
+const bioTruncated = bio.length > 240 ? bio.substring(0, 240) + "..." : bio;
+const shareTextLines = [
+  `Oi ${firstName},`,
+  ``,
+  `Esse convite é seu — está na landing pública do canna-br:`,
+  `https://canna-br.fonsecagabriel.com.br/#circulo-convites-${slug}`,
+  ``,
+  `Papel proposto: ${role}`,
+  ...(roleSubtitle ? [roleSubtitle] : []),
+  ``,
+  bioTruncated,
+  ``,
+  `Por que você:`,
+  ...whyYou.slice(0, 3).map((w) => `• ${w}`),
+  ``,
+  `Se aceitar, responde por este email: gabriel@devmagic.com.br`,
+  `Se quiser ler antes: canna-br.fonsecagabriel.com.br/open/perguntas/`,
+  ``,
+  `— Gabriel`,
+];
+const shareText = shareTextLines.join("\n");
+---
+
+<!-- LANE INVITE START -->
+<article
+  id={"circulo-convites-" + slug}
+  class="invitation-card"
+  aria-label={"Convite para " + name + " — papel: " + role}
+>
+  <!-- Eyebrow mono label -->
+  <p class="ic-eyebrow" aria-label="Círculo principal, convite pessoal">
+    Círculo Principal &nbsp;·&nbsp; Convite Pessoal
+  </p>
+
+  <div class="ic-layout">
+    <!-- Left column: avatar + affiliations -->
+    <div class="ic-left">
+      <!-- Avatar: circular photo OR gradient + initials -->
+      <div class="ic-avatar-wrap" aria-hidden="true">
+        {photoUrl ? (
+          <img
+            src={photoUrl}
+            alt={"Foto de " + name}
+            class="ic-avatar-img"
+            width="120"
+            height="120"
+            loading="lazy"
+            decoding="async"
+          />
+        ) : (
+          <div class="ic-avatar-fallback" aria-hidden="true">
+            <span>{initials}</span>
+          </div>
+        )}
+        <!-- Emerald ring pulse -->
+        <div class="ic-avatar-ring" aria-hidden="true"></div>
+      </div>
+
+      <!-- LinkedIn link if provided -->
+      {linkedinUrl && (
+        <a
+          href={linkedinUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="ic-linkedin"
+          aria-label={"LinkedIn de " + name + " (abre em nova aba)"}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+          </svg>
+          LinkedIn
+        </a>
+      )}
+
+      <!-- Affiliations chips -->
+      {affiliations.length > 0 && (
+        <div class="ic-affiliations" role="list" aria-label="Filiações e grupos">
+          {affiliations.map((a) => (
+            <span class="ic-chip" role="listitem">{a}</span>
+          ))}
+        </div>
+      )}
+    </div>
+
+    <!-- Right column: main content -->
+    <div class="ic-right">
+      <!-- Name headline -->
+      <h3 class="ic-name">{name}</h3>
+
+      <!-- Role pill -->
+      <div class="ic-role-row">
+        <span class="ic-role-pill" aria-label={"Papel proposto: " + role}>
+          {role}
+        </span>
+        {roleSubtitle && (
+          <span class="ic-role-subtitle">{roleSubtitle}</span>
+        )}
+      </div>
+
+      <!-- Bio prose -->
+      <p class="ic-bio">{bio}</p>
+
+      <!-- Why you section -->
+      <div class="ic-why-block">
+        <p class="ic-why-label">Por que você</p>
+        <ul class="ic-why-list" role="list">
+          {whyYou.map((item) => (
+            <li class="ic-why-item" role="listitem">
+              <span class="ic-why-marker" aria-hidden="true">✦</span>
+              <span>{item}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <!-- CTA row -->
+      <div class="ic-cta-row">
+        <a
+          href={ctaHref}
+          class="ic-cta-primary"
+          aria-label={"Aceitar o convite como " + role + " — responder por email"}
+        >
+          {cta}
+        </a>
+        <a
+          href={ctaSecondaryHref}
+          class="ic-cta-secondary"
+          aria-label={ctaSecondaryLabel}
+        >
+          {ctaSecondaryLabel}
+        </a>
+        <!-- Share / copy-to-WhatsApp button -->
+        <div class="ic-share-wrap">
+          <button
+            type="button"
+            class="ic-cta-share"
+            aria-label={"Copiar convite de " + name + " para WhatsApp"}
+            data-share-title={"Convite canna-br — " + name}
+            data-share-text={shareText}
+            data-share-url={"https://canna-br.fonsecagabriel.com.br/#circulo-convites-" + slug}
+          >
+            <!-- WhatsApp-ish icon: speech bubble with phone silhouette (no brand lock-in) -->
+            <svg class="ic-share-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+            <span class="ic-share-label">Copiar p/ WhatsApp</span>
+          </button>
+          <!-- Toast: aria-live so SR announces it without focus move -->
+          <div class="ic-share-toast" role="status" aria-live="polite" aria-atomic="true"></div>
+        </div>
+      </div>
+
+      <!-- Signature -->
+      <p class="ic-signature" aria-label={"Assinado por " + signedBy}>
+        &mdash;&nbsp;<span class="ic-signature-name">{signedBy}</span>
+      </p>
+    </div>
+  </div>
+
+  <!-- Footnote -->
+  <p class="ic-footnote">
+    Este é um convite, não um cargo. canna-br é organização orgânica (O2) — papéis emergem por tensão.
+    Você pode aceitar, recusar, ou propor outro recorte.
+  </p>
+</article>
+<!-- LANE INVITE END -->
+
+<style>
+  /* ================================================================
+     Google Fonts: Caveat (handwritten signature)
+     Loaded inline here so the component is self-contained.
+     Only weight 400 loaded — single token, ~14 KB woff2.
+  ================================================================ */
+  @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400&display=swap');
+
+  /* ================================================================
+     TOKEN RAMP (OKLCH — perceptually uniform)
+     --ic-bg:           dark elevated card (Linear pattern: L+0.03 over page)
+     --ic-border:       emerald at low chroma, subtle
+     --ic-border-hover: emerald accent on hover
+     --ic-emerald-500:  oklch(0.72 0.17 162) — primary emerald
+     --ic-emerald-300:  oklch(0.84 0.13 162) — light emerald
+     --ic-text-muted:   oklch(0.60 0.025 220) — slate-ish muted text
+     --ic-text-body:    oklch(0.78 0.02 220)  — readable body
+     --ic-chip-bg:      oklch(0.20 0.02 220 / 0.6) — chip surface
+  ================================================================ */
+  .invitation-card {
+    --ic-bg:             oklch(0.12 0.015 250);
+    --ic-bg-hover:       oklch(0.145 0.018 250);
+    --ic-border:         oklch(0.45 0.10 162 / 0.35);
+    --ic-border-hover:   oklch(0.72 0.17 162 / 0.70);
+    --ic-glow:           oklch(0.72 0.17 162 / 0.12);
+    --ic-emerald-500:    oklch(0.72 0.17 162);
+    --ic-emerald-300:    oklch(0.84 0.13 162);
+    --ic-emerald-900:    oklch(0.28 0.07 162);
+    --ic-text-name:      oklch(0.97 0.005 220);
+    --ic-text-body:      oklch(0.78 0.02 220);
+    --ic-text-muted:     oklch(0.58 0.022 220);
+    --ic-text-micro:     oklch(0.48 0.018 220);
+    --ic-chip-bg:        oklch(0.20 0.015 220 / 0.70);
+    --ic-chip-border:    oklch(0.35 0.025 220 / 0.60);
+    --ic-radius:         20px;
+    --ic-motion-enter:   cubic-bezier(0.16, 1, 0.3, 1);
+    --ic-motion-state:   cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Layout */
+    background: var(--ic-bg);
+    border: 1px solid var(--ic-border);
+    border-radius: var(--ic-radius);
+    padding: clamp(1.5rem, 4vw, 2.5rem);
+    position: relative;
+    overflow: hidden;
+
+    /* Entrance animation */
+    animation: ic-enter 0.4s var(--ic-motion-enter) both;
+
+    /* Hover */
+    transition:
+      background 0.15s var(--ic-motion-state),
+      border-color 0.15s var(--ic-motion-state),
+      box-shadow 0.15s var(--ic-motion-state),
+      transform 0.15s var(--ic-motion-state);
+  }
+
+  .invitation-card:hover {
+    background: var(--ic-bg-hover);
+    border-color: var(--ic-border-hover);
+    box-shadow: 0 0 0 1px var(--ic-border-hover), 0 0 48px var(--ic-glow);
+    transform: translateY(-2px) scale(1.005);
+  }
+
+  /* Subtle emerald gradient overlay top-right — premium feel */
+  .invitation-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 60% 40% at 85% 15%, oklch(0.72 0.17 162 / 0.07) 0%, transparent 70%);
+    pointer-events: none;
+    border-radius: var(--ic-radius);
+  }
+
+  /* ---- Entrance keyframe ---- */
+  @keyframes ic-enter {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ================================================================
+     EYEBROW
+  ================================================================ */
+  .ic-eyebrow {
+    font-family: ui-monospace, "JetBrains Mono", monospace;
+    font-size: clamp(0.6rem, 0.55rem + 0.3vw, 0.72rem);
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ic-emerald-500);
+    margin: 0 0 clamp(1rem, 2.5vw, 1.5rem) 0;
+    opacity: 0.85;
+  }
+
+  /* ================================================================
+     LAYOUT: two-column on md+, stack on mobile
+  ================================================================ */
+  .ic-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: clamp(1.5rem, 4vw, 2rem);
+  }
+
+  @media (min-width: 640px) {
+    .ic-layout {
+      grid-template-columns: 180px 1fr;
+      align-items: start;
+    }
+  }
+
+  /* ================================================================
+     LEFT COLUMN
+  ================================================================ */
+  .ic-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  @media (min-width: 640px) {
+    .ic-left {
+      align-items: flex-start;
+    }
+  }
+
+  /* Avatar wrapper — positions ring */
+  .ic-avatar-wrap {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    flex-shrink: 0;
+  }
+
+  .ic-avatar-img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    object-position: top center;
+    border: 2px solid var(--ic-emerald-900);
+    display: block;
+  }
+
+  /* Gradient fallback avatar */
+  .ic-avatar-fallback {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, oklch(0.28 0.07 162), oklch(0.20 0.05 250));
+    border: 2px solid var(--ic-emerald-900);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ic-avatar-fallback span {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--ic-emerald-300);
+    letter-spacing: -0.03em;
+    font-family: -apple-system, "Inter", sans-serif;
+  }
+
+  /* Pulsing emerald ring — subtle, not distracting */
+  .ic-avatar-ring {
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    border: 1.5px solid oklch(0.72 0.17 162 / 0.4);
+    animation: ic-ring-pulse 3s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  @keyframes ic-ring-pulse {
+    0%, 100% { opacity: 0.4; transform: scale(1); }
+    50%       { opacity: 0.9; transform: scale(1.03); }
+  }
+
+  /* LinkedIn link */
+  .ic-linkedin {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.72rem;
+    font-family: ui-monospace, monospace;
+    color: var(--ic-text-muted);
+    text-decoration: none;
+    padding: 0.25rem 0.6rem;
+    border: 1px solid var(--ic-chip-border);
+    border-radius: 999px;
+    background: var(--ic-chip-bg);
+    transition: color 0.15s, border-color 0.15s;
+  }
+
+  .ic-linkedin:hover {
+    color: var(--ic-emerald-300);
+    border-color: oklch(0.45 0.10 162 / 0.6);
+  }
+
+  .ic-linkedin:focus-visible {
+    outline: 2px solid var(--ic-emerald-500);
+    outline-offset: 2px;
+  }
+
+  /* Affiliations chips */
+  .ic-affiliations {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    width: 100%;
+  }
+
+  .ic-chip {
+    display: inline-block;
+    font-size: clamp(0.62rem, 0.58rem + 0.2vw, 0.7rem);
+    font-family: ui-monospace, monospace;
+    color: var(--ic-text-muted);
+    background: var(--ic-chip-bg);
+    border: 1px solid var(--ic-chip-border);
+    border-radius: 6px;
+    padding: 0.25rem 0.6rem;
+    line-height: 1.4;
+    word-break: break-word;
+  }
+
+  /* ================================================================
+     RIGHT COLUMN
+  ================================================================ */
+  .ic-right {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(0.75rem, 1.5vw, 1.1rem);
+  }
+
+  /* Name — XL, white, tight tracking */
+  .ic-name {
+    font-size: clamp(1.6rem, 1.4rem + 1.2vw, 2.4rem);
+    font-weight: 700;
+    color: var(--ic-text-name);
+    letter-spacing: -0.04em;
+    line-height: 1.1;
+    margin: 0;
+    font-family: -apple-system, "Inter", "Segoe UI", sans-serif;
+  }
+
+  /* Role row: pill + subtitle */
+  .ic-role-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+
+  .ic-role-pill {
+    display: inline-block;
+    padding: 0.3rem 0.9rem;
+    border-radius: 999px;
+    font-size: clamp(0.72rem, 0.68rem + 0.2vw, 0.82rem);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    /* Emerald pill — solid, high contrast: text is near-black on emerald */
+    background: oklch(0.72 0.17 162);
+    color: oklch(0.10 0.03 162);
+    /* WCAG contrast: oklch(0.10) on oklch(0.72 0.17) ≈ 7.8:1 AAA */
+  }
+
+  .ic-role-subtitle {
+    font-size: clamp(0.78rem, 0.74rem + 0.2vw, 0.875rem);
+    color: var(--ic-text-muted);
+    font-style: italic;
+  }
+
+  /* Bio */
+  .ic-bio {
+    font-size: clamp(0.875rem, 0.84rem + 0.2vw, 1rem);
+    color: var(--ic-text-body);
+    line-height: 1.7;
+    max-width: 65ch;
+    margin: 0;
+  }
+
+  /* Why you block */
+  .ic-why-block {
+    border-left: 2px solid oklch(0.45 0.10 162 / 0.5);
+    padding-left: 1rem;
+    margin-top: 0.25rem;
+  }
+
+  .ic-why-label {
+    font-family: ui-monospace, monospace;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ic-emerald-500);
+    margin: 0 0 0.6rem 0;
+    opacity: 0.8;
+  }
+
+  .ic-why-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .ic-why-item {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    font-size: clamp(0.82rem, 0.78rem + 0.2vw, 0.9rem);
+    color: var(--ic-text-body);
+    line-height: 1.55;
+  }
+
+  .ic-why-marker {
+    color: var(--ic-emerald-500);
+    font-size: 0.65rem;
+    flex-shrink: 0;
+    margin-top: 0.15em;
+    opacity: 0.85;
+  }
+
+  /* CTA row */
+  .ic-cta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+    margin-top: 0.5rem;
+  }
+
+  .ic-cta-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.75rem;
+    border-radius: 999px;
+    background: oklch(0.72 0.17 162);
+    color: oklch(0.08 0.02 162);
+    font-weight: 700;
+    font-size: clamp(0.82rem, 0.78rem + 0.2vw, 0.9rem);
+    text-decoration: none;
+    letter-spacing: 0.01em;
+    /* min 44px touch target */
+    min-height: 44px;
+    transition: background 0.15s var(--ic-motion-state), transform 0.15s var(--ic-motion-state), box-shadow 0.15s var(--ic-motion-state);
+  }
+
+  .ic-cta-primary:hover {
+    background: oklch(0.80 0.15 162);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 20px oklch(0.72 0.17 162 / 0.35);
+  }
+
+  .ic-cta-primary:focus-visible {
+    outline: 2px solid oklch(0.97 0.005 220);
+    outline-offset: 3px;
+  }
+
+  .ic-cta-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.5rem;
+    border-radius: 999px;
+    border: 1px solid oklch(0.45 0.10 162 / 0.5);
+    color: var(--ic-emerald-300);
+    font-size: clamp(0.78rem, 0.74rem + 0.2vw, 0.875rem);
+    font-weight: 500;
+    text-decoration: none;
+    min-height: 44px;
+    transition: background 0.15s var(--ic-motion-state), border-color 0.15s var(--ic-motion-state);
+  }
+
+  .ic-cta-secondary:hover {
+    background: oklch(0.72 0.17 162 / 0.08);
+    border-color: oklch(0.65 0.14 162 / 0.7);
+  }
+
+  .ic-cta-secondary:focus-visible {
+    outline: 2px solid var(--ic-emerald-500);
+    outline-offset: 2px;
+  }
+
+  /* Signature */
+  .ic-signature {
+    font-size: clamp(0.82rem, 0.78rem + 0.2vw, 0.9rem);
+    color: var(--ic-text-muted);
+    margin: 0.25rem 0 0 0;
+    display: flex;
+    align-items: baseline;
+    gap: 0.35rem;
+  }
+
+  .ic-signature-name {
+    font-family: 'Caveat', cursive;
+    font-size: clamp(1.3rem, 1.2rem + 0.5vw, 1.6rem);
+    color: var(--ic-emerald-300);
+    line-height: 1;
+    /* Optical baseline correction for Caveat descenders */
+    vertical-align: baseline;
+    position: relative;
+    top: 0.15em;
+  }
+
+  /* ================================================================
+     FOOTNOTE
+  ================================================================ */
+  .ic-footnote {
+    margin: clamp(1rem, 2vw, 1.5rem) 0 0 0;
+    padding-top: clamp(0.75rem, 1.5vw, 1rem);
+    border-top: 1px solid oklch(0.25 0.015 220 / 0.6);
+    font-family: ui-monospace, "JetBrains Mono", monospace;
+    font-size: clamp(0.65rem, 0.62rem + 0.15vw, 0.72rem);
+    color: var(--ic-text-micro);
+    line-height: 1.6;
+    max-width: 75ch;
+  }
+
+  /* ================================================================
+     SHARE BUTTON + TOAST
+     Pattern: icon-only on mobile (<640px), icon+label on 640px+
+     Emerald-ghost outline — matches ic-cta-secondary vocabulary
+     Toast: small pill above, fades in/out via opacity + translateY
+  ================================================================ */
+
+  .ic-share-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .ic-cta-share {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    /* Mobile: icon-only square touch target */
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border-radius: 999px;
+    border: 1px solid oklch(0.45 0.10 162 / 0.5);
+    background: transparent;
+    color: var(--ic-emerald-300);
+    cursor: pointer;
+    transition:
+      background 0.15s var(--ic-motion-state),
+      border-color 0.15s var(--ic-motion-state),
+      transform 0.15s var(--ic-motion-state),
+      box-shadow 0.15s var(--ic-motion-state);
+  }
+
+  /* ≥640px: expand to icon + label */
+  @media (min-width: 640px) {
+    .ic-cta-share {
+      width: auto;
+      padding: 0.75rem 1.25rem;
+      min-height: 44px;
+    }
+  }
+
+  .ic-share-label {
+    display: none;
+    font-size: clamp(0.78rem, 0.74rem + 0.2vw, 0.875rem);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  @media (min-width: 640px) {
+    .ic-share-label {
+      display: inline;
+    }
+  }
+
+  .ic-share-icon {
+    flex-shrink: 0;
+  }
+
+  .ic-cta-share:hover {
+    background: oklch(0.72 0.17 162 / 0.08);
+    border-color: oklch(0.65 0.14 162 / 0.7);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px oklch(0.72 0.17 162 / 0.15);
+  }
+
+  .ic-cta-share:focus-visible {
+    outline: 2px solid var(--ic-emerald-500);
+    outline-offset: 2px;
+  }
+
+  .ic-cta-share:active {
+    transform: translateY(0);
+  }
+
+  /* Toast pill — sits above the button, fades in/out */
+  .ic-share-toast {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%) translateY(4px);
+    white-space: nowrap;
+    background: oklch(0.20 0.07 162 / 0.95);
+    border: 1px solid oklch(0.55 0.14 162 / 0.7);
+    color: oklch(0.92 0.05 162);
+    font-family: ui-monospace, "JetBrains Mono", monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.03em;
+    padding: 0.3rem 0.75rem;
+    border-radius: 999px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s var(--ic-motion-enter), transform 0.2s var(--ic-motion-enter);
+    z-index: 30;
+  }
+
+  .ic-share-toast.ic-toast-visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* ================================================================
+     REDUCED MOTION
+  ================================================================ */
+  @media (prefers-reduced-motion: reduce) {
+    .invitation-card,
+    .ic-avatar-ring,
+    .ic-cta-primary,
+    .ic-cta-secondary,
+    .ic-cta-share,
+    .ic-linkedin {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+    .invitation-card:hover {
+      transform: none;
+    }
+    .ic-cta-primary:hover,
+    .ic-cta-share:hover {
+      transform: none;
+    }
+    .ic-share-toast {
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>
+
+<script>
+  /**
+   * Share button — WhatsApp-friendly personalized invite copy/share.
+   * Priority chain:
+   *   1. navigator.share() — native share sheet (mobile, some desktop)
+   *   2. navigator.clipboard.writeText() — silent copy (HTTPS required, already live)
+   *   3. prompt() — last-resort fallback (Safari old, non-HTTPS edge case)
+   *
+   * Each card is independent. querySelectorAll + closest() scope prevents
+   * cross-card toast bleed.
+   */
+  function showToast(toastEl: HTMLElement, message: string) {
+    toastEl.textContent = message;
+    toastEl.classList.add('ic-toast-visible');
+    setTimeout(() => {
+      toastEl.classList.remove('ic-toast-visible');
+      // Clear text after fade-out so SR doesn't re-read on next show
+      setTimeout(() => { toastEl.textContent = ''; }, 250);
+    }, 2000);
+  }
+
+  document.querySelectorAll<HTMLButtonElement>('.ic-cta-share').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const toast = btn.closest('.ic-share-wrap')?.querySelector<HTMLElement>('.ic-share-toast');
+      const text  = btn.dataset.shareText  ?? '';
+      const title = btn.dataset.shareTitle ?? '';
+      const url   = btn.dataset.shareUrl   ?? '';
+
+      // Path 1: Web Share API (mobile native, Chrome desktop 2023+)
+      if (typeof navigator !== 'undefined' && 'share' in navigator) {
+        try {
+          await navigator.share({ title, text, url });
+          // No toast needed — native sheet gave user feedback
+          return;
+        } catch (err) {
+          // User cancelled (AbortError) or share not available for this content
+          // Fall through to clipboard
+          if ((err as DOMException).name === 'AbortError') return;
+        }
+      }
+
+      // Path 2: Clipboard API (HTTPS — site is already on https)
+      if (typeof navigator !== 'undefined' && 'clipboard' in navigator) {
+        try {
+          await navigator.clipboard.writeText(text);
+          if (toast) showToast(toast, 'Convite copiado — cole no WhatsApp');
+          return;
+        } catch (_) {
+          // Permission denied or policy block — fall through
+        }
+      }
+
+      // Path 3: prompt() fallback
+      // eslint-disable-next-line no-alert
+      window.prompt('Copie o texto abaixo e cole no WhatsApp:', text);
+    });
+  });
+</script>

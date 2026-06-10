@@ -1,0 +1,105 @@
+---
+title: "Seed Pilot Associations"
+description: "We are looking for 5 patient associations for an initial testing period. No cost, direct support. Applications open until 30/09/2026."
+---
+
+import ApplyVideoModal from '../../../../components/ApplyVideoModal.astro';
+
+## We are looking for 5 associations for a seed pilot period.
+
+This is not a sale. It is an invitation to co-build a system alongside the people who will use it.
+
+A patient association (Brazilian regulatory entity — non-profit licensed to import, cultivate, or dispense medical cannabis to its members) is the core operational unit that canna-br is built for. Brazil currently has ~315 active associations operating under judicial habeas corpus, with RDC 1.014/2026 (the first formal administrative regime for these entities) coming into force August 2026.
+
+canna-br is functional — LGPD-by-design, traceability, dispensation, SNGPC in development (mock currently; awaiting ANVISA XSD schema) — but has not been used in real production yet. We want associations willing to go first, knowing that, and help us sharpen the product before we open to the broader market.
+
+---
+
+## Who we are looking for
+
+- Association already operating, with active dispensation to patient-members
+- Identified licensed pharmacist Technical Supervisor (RT — Responsável Técnico farmacêutico) in the operation
+- Board willing to participate in co-design: give real feedback, not just validate what is already built
+- Comfortable with alpha-stage software — bugs happen, and the agreement is to report them, not just complain
+- OK with the OSS model (AGPL-3.0): the code is public and auditable by anyone
+
+---
+
+## What you get
+
+- Full system at no cost during the seed period: members, prescriptions, dispensation, traceability, audit trail · cultivation + financials + lab on the v1.0 roadmap (2028)
+- Direct support with Gabriel — no ticket system, no queue, contact via Discord or email
+- [LGPD by design](/build/compliance/): AES-256-GCM per-member encryption, crypto-deletion Art. 18 IV guaranteed
+- [SNGPC mock — ready for integration when ANVISA publishes XSD](/idea/regulation/): XML adapter implemented, awaiting official ANVISA schema
+- Choice between self-host (you control the server) or hosted at `canna-br.fonsecagabriel.com.br`
+- Full data export at any time, at no cost, no bureaucracy
+- Public citation as founding partner when the project opens to the market
+
+---
+
+## What we ask
+
+- Weekly feedback: one short message about what worked, what didn't, what is missing
+- Report bugs on GitHub Issues when found (with enough context to reproduce)
+- Accept that not everything will be ready: some screens exist, others are mocks
+- Join a monthly 30-min video call with Gabriel (optional, but valued)
+- Citation as founding partner in `/community` when the project goes public (agreed before)
+
+---
+
+## Data sovereignty commitments
+
+Your members' data is yours. This is not rhetoric — it is architecture.
+
+- Per-member encryption: each member has their own encryption key (random DEK). See the model at [LGPD — Encryption](/build/compliance/).
+- Real crypto-deletion: when a member requests deletion (Art. 18 IV LGPD), the key is destroyed. Encrypted data becomes unrecoverable noise. The system never stores CPF (Brazilian tax ID) in plaintext.
+- Self-host available: if you prefer running on the association's own server, the system is fully self-hostable. No dependency on our infrastructure.
+- No lock-in: full export in open formats at any time.
+- Auditable code: any lawyer, technician, or member can review the code that processes data. Public repository on GitHub.
+
+---
+
+## Slots and deadline
+
+<strong>5 slots.</strong> No more than that in this cycle.
+
+Applications open until <strong>30/09/2026</strong>.
+
+Decision communicated individually within 15 days of application.
+
+---
+
+## How to apply
+
+Send an email to <strong>gabriel@devmagic.com.br</strong> with subject `[canna-br seed]` and include:
+
+1. Association name and city
+2. Approximate number of active patients
+3. Current system (spreadsheet, other software, manual process)
+4. Why you are interested in participating at this stage
+
+No form. No formal selection process. I respond to all emails.
+
+Or send a video up to 3 minutes via the button below — the script is shown on screen.
+
+<div class="mt-6 flex justify-center">
+  <button id="open-apply-modal" type="button" class="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold transition shadow-lg shadow-emerald-500/30 focus-visible:ring-4 ring-emerald-400">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+    </svg>
+    Submit video application
+  </button>
+</div>
+
+---
+
+<div class="max-w-3xl mx-auto my-12 p-5 rounded-xl border border-amber-500/30 bg-amber-950/20 text-amber-100/80 text-sm">
+  <p class="font-semibold text-amber-300 mb-2">Technical-legal disclaimer</p>
+  <p>canna-br is a software tool. Legal compliance (LGPD, RDC 1.014, Portaria 344/98) is the sole responsibility of the adopting association and its lawyers/DPO. No technical mechanism substitutes for independent legal counsel or the formal designation of a licensed pharmacist Technical Supervisor (RT farmacêutica) and DPO as required by law. <a href="/trust/">See /trust/ — Privacy Policy, Terms, and DPO</a>.</p>
+</div>
+
+<ApplyVideoModal />
+
+---
+
+> **Machine-translated v1** — English version generated by LLM, human polish in progress. Report translation errors to gabriel@devmagic.com.br.

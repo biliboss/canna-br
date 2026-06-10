@@ -1,0 +1,124 @@
+---
+title: Questoes Abertas
+description: Gaps, decisoes pendentes e riscos do stack pivot. 3 riscos criticos Lane H (NATS/DBOS/Emmett), Emmett license gap, SurrealDB BSL guard e questoes de infraestrutura.
+---
+
+## ⚠️ Action item crítico: Emmett license
+
+A biblioteca event-sourcing Emmett (v0.42.3) não possui LICENSE publicado no GitHub. Implicação: cópia atual está sob direitos de autor padrão (todos reservados). Antes de qualquer deploy em produção real com tráfego pago, este item deve ser resolvido.
+
+Status: AÇÃO ABERTA. Tracking: [ADR-001](/adr/0001-domain-kernel-emmett/).
+
+---
+
+## TL;DR — Postura de Time Senior
+
+Cada gap tem **default proposto** e **custo de reverter**. So os itens marcados **Bloqueia** exigem decisao antes de avancar. Os outros procedem por default a menos que sejam vetados.
+
+---
+
+## Decisoes que Bloqueiam
+
+### AB-01 — VPS Dedicada para Dados de Saude
+
+**Status:** pendente Gabriel
+
+**Gap:** canna-br esta em VPS compartilhada (62.171.145.76 com Langfuse). Dados de saude (LGPD Art. 5 II) em ambiente compartilhado nao e producao viavel.
+
+**Default recomendado:** Hetzner Frankfurt CX32 (~€15/mes) — GDPR Art. 46 sem transferencia internacional, isolamento total.
+
+**Reversibilidade:** media — migracao de dados requer dump/restore do event store; procedimento ja documentado no pattern Kamal.
+
+**Bloqueia:** Fase 1 do cronograma; qualquer operacao com dados reais de membros.
+
+---
+
+### AB-02 — Credenciais SNGPC (ANVISA)
+
+**Status:** pendente — sem prazo
+
+**Gap:** SNGPC XML esta implementado (C6) mas sem credenciais reais do sistema BNAFAR/ANVISA para envio. Sandbox SNGPC existe mas requer cadastro de estabelecimento.
+
+**Default recomendado:** operar em modo dry-run (XML gerado, nao enviado) ate credenciais; log de XMLs para auditoria manual.
+
+**Bloqueia:** C6 em producao real; Fase 3 do cronograma.
+
+---
+
+## Riscos Criticos — Stack Pivot Lane H
+
+Os tres itens abaixo sao riscos do pivot futuro (NATS + DBOS + Emmett avancado). Nao bloqueiam a simulacao atual mas devem ser enderecos antes de Fase 3.
+
+### R-01 — NATS Optimistic Concurrency
+
+**Risco:** NATS JetStream nao tem semantica de versao de stream nativa equivalente ao Emmett `expectedVersion`. Implementar optimistic concurrency sobre NATS requer camada custom (last-event-id check + atomic compare-and-publish) ou aceitacao de janela de race condition estreita.
+
+**Mitigacao proposta:** manter Emmett + PostgreSQL como event store autoritativo; NATS como barramento de pub/sub entre contextos (nao como store). Decidir antes de iniciar Fase 3.
+
+**Reversibilidade:** alta — NATS permanece opcional se decidirmos manter PostgreSQL como store.
+
+---
+
+### R-02 — DBOS Postgres Compatibility
+
+**Risco:** DBOS (Durable Objects / transactional workflows) tem dependencias especificas de versao de PostgreSQL e extensoes. Conflito potencial com pgAudit e as `RULE no_update` / `RULE no_delete` que implementam RN-11.
+
+**Mitigacao proposta:** testar DBOS em schema separado antes de integrar ao event store principal. Nao habilitar ate validacao em ambiente identico ao de producao.
+
+**Reversibilidade:** alta — DBOS e opcional; BullMQ cobre o mesmo espaco hoje.
+
+---
+
+### R-03 — Emmett Projection Ordering
+
+**Risco:** Emmett projections sao eventual-consistent por design. Em fluxos de leitura imediata apos escrita (ex: consultar quota logo apos dispensar), o read model pode estar atrasado por uma janela de milissegundos.
+
+**Mitigacao atual:** `get_member_quota_summary` soma diretamente do event stream quando consistencia imediata e critica (nao do read model Drizzle).
+
+**Bloqueia:** nenhum bloqueio agora; monitorar em carga real na Fase 1.
+
+---
+
+## License e Compliance de Dependencias
+
+### L-01 — Emmett License Gap
+
+**Status:** investigar antes da Fase 2
+
+`event-driven-io/emmett` esta sob licenca MIT mas o repositorio tem itens de roadmap que mencionam modelo de suporte comercial. Verificar: (a) se a licenca MIT e definitiva para todos os modulos usados; (b) se ha restricoes de uso em sistema de saude regulado.
+
+**Acao:** abrir issue no repo perguntando sobre uso em SaaS regulado LGPD/RDC; documentar resposta.
+
+---
+
+### L-02 — SurrealDB BSL DBaaS Guard
+
+**Status:** nao aplicavel hoje; monitorar
+
+SurrealDB esta sob BSL 1.1 (Business Source License). A restricao especifica: proibido usar SurrealDB para oferecer **DBaaS** (Database as a Service) para terceiros. O canna-br nao oferece DBaaS — usa SurrealDB como banco proprio. A restricao nao se aplica.
+
+**Monitorar:** se o modelo de negocio evoluir para multi-tenant com instancias SurrealDB por tenant como servico gerenciado, revisar esta analise.
+
+**Hoje:** SurrealDB fonsecagabriel esta na VPS compartilhada (62.171.145.76) para uso interno da fleet de agentes — nao para canna-br producao. Canna-oss usa PostgreSQL 16.
+
+---
+
+## Questoes de Produto (Menor Urgencia)
+
+| ID | Questao | Default | Bloqueia |
+|---|---|---|---|
+| AB-03 | Modelo de hardware/comodato para associacoes (maquinas, dispensadores) | Fora de escopo v1.0 | Nao |
+| AB-04 | Multi-tenant billing: mensalidade por associacao ou por membro | Mensalidade fixa por associacao (v1.0) | Fase 4 |
+| AB-05 | Integracao com sistemas de prescricao medica (CFM / SCTIE) | API publica CFM quando disponivel; manual por ora | Nao |
+| AB-06 | App mobile para membros | PWA do Open WebUI como primeira iteracao | Nao |
+| AB-07 | Relatorio BSPO assinado digitalmente (ICP-Brasil) | Assinatura manual RT + PDF; ICP-Brasil deferred | Fase 2 parcial |
+
+---
+
+## Proximos Passos para Fechar os Gaps
+
+1. **[IMEDIATO]** Decidir VPS dedicada — desbloqueia Fase 1 e operacao com dados reais.
+2. **[ANTES DA FASE 2]** Iniciar cadastro BNAFAR/ANVISA para credenciais SNGPC.
+3. **[ANTES DA FASE 2]** Verificar licenca Emmett para uso em sistema regulado LGPD.
+4. **[ANTES DA FASE 3]** Definir arquitetura NATS (barramento vs store) e validar DBOS em sandbox isolado.
+5. **[FASE 4]** Definir modelo de pricing multi-tenant antes de iniciar billing.

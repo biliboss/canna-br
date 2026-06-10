@@ -1,0 +1,134 @@
+---
+title: "Política de Privacidade"
+description: "Tratamento de dados pessoais sensíveis no canna-br: bases legais LGPD, transferência internacional, direitos do titular."
+---
+
+**Versão:** v0.1 — 2026-06-09
+
+---
+
+## Quem somos
+
+Gabriel Fonseca (CPF omitido), iniciativa pessoal sem CNPJ constituído até a data desta política. Operador dos serviços canna-br durante o período piloto.
+
+**Contato:** gabriel@devmagic.com.br | WhatsApp +55 13 98803-2053
+
+**Canal exclusivo LGPD:** email com assunto `[LGPD]` ou `[DPO]` → gabriel@devmagic.com.br
+
+---
+
+## Dados que tratamos
+
+Durante o programa piloto, os dados tratados pela canna-br (na posição de operador/controlador do formulário de candidatura) são limitados a:
+
+| Dado | Finalidade | Base legal LGPD |
+|---|---|---|
+| Vídeo de candidatura (imagem, voz, conteúdo declarado) | Avaliar candidatura de associação ao programa piloto | Art. 7 V (legítimo interesse) + Art. 11 II a (consentimento opt-in público) |
+| Nome completo | Identificação do candidato | Art. 7 V (legítimo interesse) |
+| Email | Comunicação de retorno sobre candidatura | Art. 7 V (legítimo interesse) |
+| Nome da associação | Identificação da entidade candidata | Art. 7 V (legítimo interesse) |
+| Consentimento de publicação pública | Publicação opcional na página /open/candidaturas/ | Art. 7 I (consentimento expresso) |
+
+**Nota sobre dados dos membros das associações:** os dados de saúde de membros-pacientes processados pelo sistema canna-br instalado em cada associação estão sujeitos ao contrato de processamento entre a associação (controladora) e canna-br (operadora). Esta política cobre apenas os dados do processo de candidatura.
+
+---
+
+## Onde armazenamos
+
+- **Vídeos de candidatura:** Cloudflare R2 — Estados Unidos.
+- **Metadados e formulário:** Cloudflare Workers — Estados Unidos.
+- **Email de retorno e comunicações:** servidor de email do operador (Gmail/Google Workspace).
+
+### Transferência internacional (Art. 33 LGPD)
+
+Os dados são transferidos para servidores nos Estados Unidos (Cloudflare Inc., sede em San Francisco, CA). Esta transferência é fundamentada no **Art. 33 VII LGPD — consentimento específico e em destaque do titular**, explicitado no modal de candidatura antes da gravação.
+
+A adequação formal dos EUA pela ANPD está pendente. Durante esse vácuo regulatório, a base jurídica aplicada é o consentimento expresso (Art. 33 VII). O titular pode revogar esse consentimento a qualquer momento por meio do canal LGPD — o que acionará a crypto-deletion (ver abaixo).
+
+---
+
+## Por quanto tempo retemos
+
+| Dado | Prazo de retenção | Fundamento |
+|---|---|---|
+| Vídeo de candidatura | 12 meses após decisão sobre a candidatura (ou imediato mediante pedido Art. 18 IV) | Finalidade encerrada após processo seletivo |
+| Email + metadados da candidatura | 5 anos a partir da coleta | Defesa em processo administrativo; prazo prescricional LGPD Art. 52 |
+| Comunicações de suporte (piloto aceito) | Durante o período de piloto + 2 anos | Obrigação contratual e defesa |
+
+---
+
+## Crypto-deletion garantida (Art. 18 IV LGPD)
+
+Os vídeos de candidatura são armazenados com criptografia AES-256-GCM, com chave individual por candidato. Ao receber um pedido de eliminação (Art. 18 IV LGPD):
+
+1. A chave de criptografia individual é destruída irreversivelmente no Cloudflare KV.
+2. O objeto cifrado no R2, sem a chave, torna-se computacionalmente irrecuperável.
+3. A eliminação é concluída em até 7 dias úteis após o pedido.
+
+Para arquitetura técnica detalhada: [/build/compliance/](/build/compliance/).
+
+---
+
+## Seus direitos (Art. 18 LGPD)
+
+Você tem os seguintes direitos sobre seus dados:
+
+- **Acesso** — confirmar se tratamos seus dados e obter cópia.
+- **Correção** — corrigir dados incompletos, inexatos ou desatualizados.
+- **Anonimização ou bloqueio** — de dados desnecessários, excessivos ou tratados em desconformidade.
+- **Portabilidade** — receber seus dados em formato estruturado.
+- **Eliminação** — deletar dados tratados com base em consentimento (Art. 18 IV).
+- **Revogação do consentimento** — a qualquer tempo, sem prejuízo da licitude do tratamento anterior.
+- **Oposição** — se discordar de tratamento baseado em legítimo interesse.
+
+**Como exercer:** email para gabriel@devmagic.com.br com assunto `[LGPD]` + descrição do pedido. Resposta em até **15 dias úteis**.
+
+---
+
+## DPO — Encarregado de Proteção de Dados
+
+Gabriel Fonseca atua como ponto de contato LGPD e Encarregado interino durante o período piloto. Designação formal disponível sob solicitação.
+
+Detalhes sobre a designação, limitações e roadmap: [/trust/dpo/](/trust/dpo/).
+
+**Importante:** Gabriel não é RT farmacêutica. A designação de Responsável Técnico farmacêutico é obrigação da associação adotante, não do canna-br.
+
+---
+
+## Cookies e tracking
+
+- A landing page canna-br usa **LocalStorage** apenas (flag de "intro vídeo visto" para UX).
+- **Zero cookies de tracking.**
+- **Zero analytics de terceiros** (sem Google Analytics, sem Hotjar, sem PostHog).
+- O sistema canna-br instalado em cada associação pode usar cookies de sessão — sujeito à política de privacidade daquela instância.
+
+---
+
+## Segurança
+
+Medidas técnicas aplicadas aos dados de candidatura:
+
+- Criptografia em trânsito (TLS 1.3 via Cloudflare).
+- Criptografia em repouso (AES-256-GCM por candidato no R2).
+- Acesso restrito a Gabriel Fonseca via autenticação de dois fatores na Cloudflare.
+- Sem compartilhamento com terceiros além da infraestrutura necessária (Cloudflare).
+
+---
+
+## Reclamação à ANPD
+
+Se sua solicitação não for respondida satisfatoriamente em 30 dias, você pode apresentar reclamação diretamente à **Autoridade Nacional de Proteção de Dados** em [gov.br/anpd](https://www.gov.br/anpd).
+
+---
+
+## Mudanças nesta política
+
+- **Versão atual:** v0.1 (2026-06-09).
+- Mudanças relevantes serão notificadas em canna-br.fonsecagabriel.com.br/trust/.
+- Versões anteriores preservadas sob solicitação.
+
+---
+
+## Disclaimer
+
+Esta política foi elaborada por Gabriel Fonseca sem assessoria jurídica contratada na data de publicação. Estamos em fase piloto pré-seed. Recomendamos que associações adotantes consultem seus próprios advogados antes de enviar dados de saúde para qualquer sistema, incluindo o canna-br.

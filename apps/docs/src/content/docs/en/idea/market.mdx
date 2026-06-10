@@ -1,0 +1,106 @@
+---
+title: Market & Unit Economics
+description: Brazilian medical cannabis association SaaS — TAM, SAM, SOM, unit economics for the canna-br pilot
+---
+
+## Context
+
+873k patients projected by ANVISA for 2026. 315 active patient associations (Brazilian regulatory entities — non-profit licensed to import/cultivate/dispense medical cannabis) operating under judicial habeas corpus. The RDC 1.014/2026 regulatory sandbox (Brazil's first administrative regime for patient associations, replacing case-by-case HC from STJ Tema 16 IAC, 2023) comes into force August 2026 — a window that legitimizes and expands the associative sector.
+
+The primary market does not depend on the sandbox: 315 associations operate today, ~40% without adequate systems, running on Excel and WhatsApp. Mandatory compliance under any regulatory regime forces software adoption.
+
+## TAM / SAM / SOM
+
+| Level | 2026 | 2028 | 2030 | Definition |
+|---|---|---|---|---|
+| **TAM** | R$25M | R$65M | R$130M | All cannabis software in Brazil |
+| **SAM** | R$9M | R$22M | R$47M | Software for associations (315 → ~800 projected) |
+| **SOM** | R$1.8M | R$8M | R$27M | OSS managed hosting ~57% penetration by 2030 |
+
+> **Prudence note (Jun/2026)**: The SOM 2030 figure above represents the theoretical ceiling of the model. An adversarial design review (2026-06-09) flagged that 57% SAM penetration is optimistic for nascent regulated B2B SaaS. Conservative working model divides by 2.5 — internal adjusted SOM = ~R$11M (2030). Table preserved for historical audit of original reasoning.
+
+Comparable: **Cannanas** (Germany, KCanG 2024) — 600+ CSC (Cannabis Social Clubs), €1/member/month, ARR ~€7.2M (≈ US$7.8M). Growth directly correlated with regulatory pressure — exactly the pattern RDC 1.014 will replicate in Brazil.
+
+EU framing for global investors: Germany legalized adult cannabis cultivation via KCanG in April 2024, spawning a wave of licensed Cannabis Social Clubs. Cannanas became the compliance software of record. Brazil follows the same arc one cycle later, with medical-only associations as the vehicle rather than recreational clubs.
+
+## Business Model
+
+Self-host (AGPL) is free. Managed hosting is paid. No dependency on external SaaS — association data stays on their server.
+
+| Plan | Price/mo | Members | Gross Margin |
+|---|---|---|---|
+| Starter | R$297 (≈ US$59) | Up to 50 | 73% |
+| Standard | R$597 (≈ US$119) | Up to 200 | 83% |
+| Enterprise | R$1,197 (≈ US$239) | Unlimited | 90% |
+
+Infra cost per tenant: R$60–85/mo (PostgreSQL isolated schema + MinIO + Redis + Caddy). Weighted average: ~80% gross margin.
+
+## ARR Projections
+
+| Milestone | ARR | Associations | Catalyst |
+|---|---|---|---|
+| M12 | R$107k (≈ US$21k) | ~20 | FACT federation deal (36 associations via 1 contract) |
+| M24 | R$604k (≈ US$120k) | ~80 | First sandbox approvals (Mar/27) |
+| M36 | R$1.87M (≈ US$374k) | ~120 | 38% of SAM — self-sustaining product |
+
+At 120 associations, 4–6 person team (benchmark: Plausible, 8 people / $3.1M ARR).
+
+## Go-to-Market
+
+**1 — FACT First.** 36 associations via 1 federation contract. Validated pain: spreadsheets and WhatsApp. Preferred Model B: R$1,500/mo (≈ US$300/mo) flat + R$8/member/mo (potential ARR: R$156k).
+
+> **FACT status (Jun/2026)**: zero LOI signed. Initial conversations NOT started. "Likely (Medium)" premise reflects OPS probability assessment — not confirmed commitment. If FACT channel fails, M12 model (R$107k conservative ARR) needs direct seed → expansion alternative (~10 associations × R$1.5k × 12 = R$180k covers it).
+
+**2 — Sandbox Timing.** System ready before the sandbox call for proposals = first-mover. SNGPC homologated before competitors = 12–18 month technical moat.
+
+**3 — Dossier Template.** canna-br auto-documents the traceability and LGPD sections of the ANVISA dossier. Associations using the system have a demonstrable advantage in candidacy.
+
+**4 — HC Judicial Base.** 279 associations outside FACT accessed via SEO, GitHub community, ExpoCannabis/ABRACANN events, NPS from month 3.
+
+## Growth Drivers
+
+1. Sandbox creates legitimacy — easier to recruit members without criminal risk
+2. Mandatory compliance → software adoption (today ~40% without adequate systems)
+3. 315 → 600 (2028) → 800 (2030) new associations via sandbox
+4. OSS self-hosted removes barrier #1: fear of third-party data custody
+5. Global regulatory trend — Uruguay, Spain, Germany, Netherlands already regulated; Brazil following European pattern
+
+## Unit Economics (v0.1 assumptions)
+
+| Metric | Conservative | Optimistic | Source/derivation |
+|---|---|---|---|
+| Monthly ARPU | R$1,500 (≈ US$300) | R$4,500 (≈ US$900) | Cannanas DE €1,000/mo × 0.5 BR adjustment + 3× range for tiers |
+| CAC (seed period) | R$0 | R$0 | Seed = direct outreach Gabriel, no ad spend |
+| CAC (post-pilot) | R$4,000 (≈ US$800) | R$12,000 (≈ US$2.4k) | Consultative sales BR healthtech median ticket R$2k–8k/mo |
+| Payback period | 3 months | 8 months | CAC ÷ monthly ARPU |
+| Gross margin | 80% | 85% | Software + minimal hosting (R2 + nginx VPS €40/mo serves 50 associations) |
+| Annual churn | 8% | 3% | Regulated B2B healthtech benchmark — high ANVISA switching cost |
+| LTV (LTV = ARPU × 12 ÷ churn) | R$225k | R$1.8M | Conservative R$1,500 × 12 ÷ 0.08 |
+| LTV/CAC | 56× | 150× | Healthy if assumptions hold (>3× is minimum threshold) |
+
+**Critical assumptions that invalidate the model**:
+1. 8%/yr churn assumes switching a regulated system is expensive — if ANVISA mandates total interoperability, switching cost drops and churn doubles
+2. Conservative R$1,500 ARPU assumes association pays (not via sponsor) — market may push free tiers with paid upgrades
+3. R$4k post-pilot CAC assumes direct Gabriel channel — if contracted SDR needed, rises to R$15k+
+
+## Sensitivity — 24m Conservative
+
+- Base case: 62 associations × R$1,500 × 12 = R$1.12M ARR (= landing)
+- If ARPU drops 30%: 62 × R$1,050 × 12 = R$781k (−30%)
+- If association adoption drops 30%: 43 × R$1,500 × 12 = R$774k (−31%)
+- Combined −30/−30: R$542k (−52%, worse than pessimistic)
+
+The conservative model does NOT survive 2 simultaneous assumption errors. Reporting this is honesty, not weakness.
+
+## Primary Risks
+
+| Risk | Probability | Mitigation |
+|---|---|---|
+| Sandbox delayed | Medium | HC judicial base exists independent of sandbox |
+| SNGPC schema incompatible | High | Decoupled engine (plugin); versioned schema |
+| SaaS competitor post-sandbox | High | FACT deal closes market; OSS = structural moat |
+| Political rollback | Low | STJ Tema 16 (2024) consolidated HC judicial — does not depend on executive regulation |
+
+---
+
+> **Machine-translated v1** — English version generated by LLM, human polish in progress. Report translation errors to gabriel@devmagic.com.br.

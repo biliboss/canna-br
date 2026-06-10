@@ -1,0 +1,100 @@
+---
+title: Mapa de Interfaces
+description: Surface map do canna-br — MCP Tools, MCP Apps, REST endpoints e Open WebUI. Sem admin Next.js standalone ate pos-v1.0.
+---
+
+## Premissa: Tool = Tela
+
+No canna-br a surface primaria nao e uma aplicacao web standalone — e o chat Open WebUI com ferramentas MCP e MCP Apps inline. Uma "tela" tradicional de CRUD vira:
+
+- **MCP Tool** (nivel 1-3): acao com ou sem confirmacao humana
+- **MCP App** (`ext-apps`): componente UI interativo inline no chat (React/Svelte compilado, sem deploy separado)
+- **MCP Resource**: dados read-only consultados pelo agente
+
+Isso elimina 80+ telas CRUD sem perder capacidade operacional.
+
+## Open WebUI — Chat Host Primario
+
+| Rota / Chat Context | Acesso | Capacidades cobertas |
+|---|---|---|
+| Chat aberto (agente livre) | Todos os roles autenticados | Consultas C2, C5, C9 via Resources |
+| Dispensation flow | `DISPENSADOR` | Tool C4 nivel 3 → DispensationFormApp |
+| Quota card inline | `MEMBRO`, `DISPENSADOR` | MCP App MemberQuotaCardApp |
+| Traceability timeline | `AUDITOR`, `RT` | MCP App TraceabilityTimelineApp |
+| Compliance review | `RT`, `ADMIN` | MCP App RipdReviewApp |
+
+## MCP Apps (UI Inline no Chat)
+
+Cada MCP App e um componente autonomo sem pagina propria:
+
+| App | Capability | Status |
+|---|---|---|
+| `MemberQuotaCardApp` | Exibe quota restante + proxima renovacao + prescricoes vigentes | v0.2.1 parcial |
+| `DispensationFormApp` | Formulario de dispensacao com confirmacao em 2 passos | v0.2.1 parcial |
+| `TraceabilityTimelineApp` | Timeline visual cultivation → dispensation para um lote ou membro | v0.3 |
+| `RipdReviewApp` | Revisao e assinatura de BSPO / RIPD pelo RT | v0.4 |
+| `InventoryDashboardApp` | Visao de lotes AVAILABLE / QUARANTINED / RECALLED | v0.5 |
+
+## MCP Tools por Nivel
+
+### Nivel 1 — Read-only (disponivel agora)
+
+| Tool | Descricao |
+|---|---|
+| `get_member_quota_summary` | Retorna quota restante e prescricoes vigentes de um membro |
+| `get_inventory_summary` | Resume lotes por status (AVAILABLE, QUARANTINED, RECALLED) |
+| `get_dispensation_history` | Historico de dispensacoes por membro ou lote com filtros de data |
+
+### Nivel 2 — Draft (prepara sem executar)
+
+| Tool | Descricao |
+|---|---|
+| `draft_dispensation` | Prepara dispensacao, calcula quota consumida, retorna preview para confirmacao humana |
+
+### Nivel 3 — Escrita Operacional (requer RBAC + confirmacao)
+
+| Tool | Descricao |
+|---|---|
+| `request_record_dispensation` | Cria `PendingAction`; confirmacao via DispensationFormApp |
+| `register_member` | Cria membro com consentimento + prescricao |
+| `advance_plant_stage` | Avanca estagio de planta (forward-only) |
+
+### Nivel 4 — Alto Risco (REST TOTP direto — fora do MCP)
+
+| Endpoint | Descricao |
+|---|---|
+| `POST /api/lab-samples/:id/approve` | RT aprova laudo COA; hash gravado imutavelmente |
+| `POST /api/members/:id/anonymize` | Anonimizacao LGPD Art. 18 |
+| `POST /api/roles` | Criacao e atribuicao de roles |
+| `POST /api/crypto/delete` | Destruicao de chave (recall de lote) |
+
+## REST/OpenAPI
+
+Camada HTTP Fastify 5 — usada por integradores, automacoes e endpoints nivel 4. Nenhuma regra de negocio aqui; tudo passa por `app-services`.
+
+Documentacao: `GET /api/docs` (Swagger UI gerado por Zod schemas).
+
+## Simulador VPS (Desenvolvimento)
+
+Em modo dev o stack completo roda localmente:
+
+| Servico | Porta | Descricao |
+|---|---|---|
+| Open WebUI | 3000 | Chat host com MCP sidecar |
+| MCP Server | 3001 | Tools + Resources + Apps |
+| API REST | 3002 | Fastify 5 |
+| Worker | — | BullMQ consumer (background) |
+| PostgreSQL | 5432 | Event store + projections |
+| Redis | 6379 | Cache + filas |
+| MinIO | 9000 | Object storage (laudos, PDFs) |
+
+Para producao via Kamal: [Stack e Interfaces](/build/stack/#opcoes-de-deploy).
+
+## Roadmap de Interfaces
+
+| Versao | Novidade de superficie |
+|---|---|
+| v0.3 | LGPD hardening; CSV import via MCP App; Auditor + Federation roles |
+| v0.4 | RipdReviewApp; DPO view completa; BSPO assinado |
+| v0.5 | SNGPC + SNCR real; REST API publica v1 |
+| v1.0 | Cultivation + Processing + Lab completos; multi-tenant; billing |

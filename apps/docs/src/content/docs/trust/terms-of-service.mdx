@@ -1,0 +1,114 @@
+---
+title: "Termos de Uso"
+description: "Condições para participação no programa piloto canna-br + uso do código OSS."
+---
+
+**Versão:** v0.1 — 2026-06-09
+
+---
+
+## Quem opera o serviço
+
+**Gabriel Fonseca** (pessoa física, CPF omitido), sem CNPJ constituído até a data destes termos.
+
+Implicação direta: os contratos atuais são com pessoa física. A migração para CNPJ e a formalização de contratos mais robustos (DPA, SLA, ToS detalhado) estão no roadmap v0.3. Associações que exijam contraparte jurídica formal devem aguardar essa constituição ou negociar individualmente.
+
+**Contato:** gabriel@devmagic.com.br | WhatsApp +55 13 98803-2053
+
+---
+
+## Programa Piloto Seed
+
+- **5 vagas** máximo neste ciclo.
+- **Prazo:** até 30 de setembro de 2026.
+- **Custo:** gratuito durante o período piloto (sujeito a alteração para versões subsequentes).
+- **Suporte:** direto com Gabriel via WhatsApp e email. Sem ticket, sem SLA formal, best-effort.
+
+---
+
+## O que canna-br entrega
+
+- Software OSS sob licença **AGPL-3.0**, disponível publicamente no GitHub.
+- Instância hosted opcional em canna-br.fonsecagabriel.com.br durante o piloto.
+- Suporte direto best-effort durante o período piloto.
+- Atualizações de software sem custo adicional no período piloto.
+- Exportação completa de dados em formatos abertos a qualquer momento.
+
+---
+
+## O que canna-br NÃO entrega
+
+Esta lista é deliberadamente explícita para proteger ambas as partes:
+
+- **Sem SLA.** Nenhuma garantia de disponibilidade ou tempo de resposta.
+- **Sem indenização por downtime.** Falhas de infraestrutura são cobertas pela política da Cloudflare e do VPS; não há compensação financeira.
+- **Sem garantia de homologação SNGPC.** O adapter XML está implementado em mock. A homologação real depende da ANVISA publicar o schema XSD específico para associações, o que não ocorreu até jun/2026. Prazo fora do controle do canna-br.
+- **Sem parecer jurídico.** O canna-br não fornece nem substitui consultoria jurídica sobre LGPD, RDC 1.014, Portaria 344/98 ou qualquer outra norma.
+- **Sem RT farmacêutica.** A designação de Responsável Técnico farmacêutico é obrigação da associação adotante perante a ANVISA, não do canna-br.
+- **Sem DPO independente.** O DPO interino é o próprio Gabriel Fonseca (ver [/trust/dpo/](/trust/dpo/)).
+- **Sem garantia de não-interrupção.** O serviço pode ser suspenso por decisão do operador com aviso de 30 dias, ou imediatamente em caso de força maior.
+
+---
+
+## Limitações de responsabilidade
+
+O software é fornecido **"AS IS"** (tal como está), sem garantias expressas ou implícitas de qualquer tipo.
+
+Fundamentos:
+
+- **CC Art. 393** — caso fortuito e força maior excluem responsabilidade por danos decorrentes de falhas de infraestrutura, ataques, interrupções de serviços terceiros ou eventos fora do controle do operador.
+- **AGPL-3.0 Disclaimer** — a licença AGPL-3.0 incluída no repositório exclui expressamente garantias e limita responsabilidade a danos diretos.
+
+O canna-br não se responsabiliza por:
+
+- Decisões regulatórias tomadas pela associação adotante com base em informações do sistema.
+- Multas, autos de infração ou sanções da ANVISA decorrentes de não-conformidade da associação.
+- Processos judiciais de terceiros (membros, ANPD, Ministério Público) contra a associação.
+- Perda de dados durante migração não validada ou não assistida.
+- Consequências de uso do software por usuários não autorizados dentro da associação.
+
+---
+
+## Direitos de propriedade intelectual
+
+- **Código-fonte:** AGPL-3.0. Livre para usar, modificar e redistribuir conforme a licença. Forks comerciais permitidos sob AGPL (obrigação de manter AGPL e disponibilizar código-fonte).
+- **Branding "canna-br":** trademark de Gabriel Fonseca. Uso do nome e logo em materiais próprios da associação requer autorização.
+- **Contribuições ao repositório:** sujeitas ao CLA (Contributor License Agreement) quando implementado; até lá, contribuições assumem licença AGPL-3.0 compatível.
+- **Biblioteca Emmett (event-driven-io/emmett):** ver [ADR-001](/adr/0001-domain-kernel-emmett/#risco-de-licenca-emmett-2026-06-09) para status de licença. Action item crítico antes de produção com tráfego pago.
+
+---
+
+## Dados e privacidade
+
+O tratamento de dados pessoais durante o processo de candidatura está detalhado na [Política de Privacidade](/trust/privacy-policy/).
+
+Para dados de membros-pacientes processados pelo sistema instalado na associação: a associação é a controladora LGPD; o canna-br atua como operadora. O DPA (Data Processing Agreement) formal entre as partes está previsto para v0.3.
+
+---
+
+## Encerramento do piloto
+
+Qualquer das partes pode encerrar a participação no piloto com **aviso de 30 dias**.
+
+Ao encerrar:
+
+1. Gabriel notifica por email e WhatsApp com data de desligamento.
+2. A associação tem 30 dias para exportar todos os dados em formato aberto.
+3. Crypto-deletion de todos os dados da associação executada em até **7 dias** após encerramento confirmado.
+4. Confirmação escrita de conclusão da crypto-deletion enviada por email.
+
+---
+
+## Lei aplicável e foro
+
+- **Lei aplicável:** Brasil — LGPD, CC, CDC onde aplicável.
+- **Foro:** Comarca de Praia Grande, SP.
+- **Arbitragem:** para disputas acima de R$ 10.000, as partes comprometem-se a tentar mediação prévia (câmara a ser acordada) antes de litígio judicial.
+
+---
+
+## Aceite
+
+O uso do serviço ou a participação no programa piloto implica aceite integral destes termos.
+
+**Versão atual:** v0.1 (2026-06-09). Mudanças notificadas por email com antecedência mínima de 15 dias.

@@ -1,0 +1,104 @@
+---
+title: Mercado y Unit Economics
+description: SaaS para asociaciones de cannabis medicinal en Brasil — TAM, SAM, SOM, unit economics del piloto canna-br
+---
+
+## Contexto
+
+873 mil pacientes estimados por ANVISA para 2026. 315 asociaciones activas operando bajo habeas corpus judicial. Sandbox RDC 1.014 (primer régimen administrativo formal para asociaciones de pacientes en Brasil, reemplaza habeas corpus caso-por-caso del STJ Tema 16 IAC, 2023) vigente desde agosto/2026 — ventana que legitima y expande el sector asociativo.
+
+El mercado primario no depende del sandbox: 315 asociaciones operan hoy, ~40% sin sistema adecuado, con planillas Excel y WhatsApp. El cumplimiento obligatorio bajo cualquier régimen fuerza la adopción de software.
+
+## TAM / SAM / SOM
+
+| Nivel | 2026 | 2028 | 2030 | Definición |
+|---|---|---|---|---|
+| **TAM** | R$25M | R$65M | R$130M | Todo software cannabis BR |
+| **SAM** | R$9M | R$22M | R$47M | Software para asociaciones (315 → ~800 proyección) |
+| **SOM** | R$1.8M | R$8M | R$27M | OSS managed hosting ~57% penetración hasta 2030 |
+
+> **Nota de prudencia (jun/2026)**: El número SOM 2030 arriba representa el techo teórico del modelo. El diseñador B (revisión adversarial 2026-06-09) señaló que 57% de penetración del SAM es optimista para SaaS B2B regulado naciente. El modelo de trabajo conservador interno divide por 2.5 — SOM ajustado interno = ~R$11M (2030). La tabla anterior se preserva para auditoría histórica del razonamiento original.
+
+Comparable: **Cannanas** (Alemania, KCanG 2024; ~€7.2M ARR, comparable europeo de clubes de cannabis) — 600+ CSC, €1/miembro/mes, ARR ~€7.2M. El crecimiento está correlacionado con la presión regulatoria — exactamente el patrón que RDC 1.014 replicará en BR.
+
+## Modelo de Negocio
+
+Self-host (AGPL) gratuito. Managed hosting de pago. Sin dependencia de SaaS externo — los datos de la asociación quedan en su propio servidor.
+
+| Plan | Precio/mes | Miembros | Gross Margin |
+|---|---|---|---|
+| Starter | R$297 | Hasta 50 | 73% |
+| Standard | R$597 | Hasta 200 | 83% |
+| Enterprise | R$1.197 | Ilimitado | 90% |
+
+Costo de infraestructura por tenant: R$60–85/mes (PostgreSQL schema aislado + MinIO + Redis + Caddy). Promedio ponderado: ~80% gross margin.
+
+## Proyecciones ARR
+
+| Hito | ARR | Asociaciones | Catalizador |
+|---|---|---|---|
+| M12 | R$107k | ~20 | FACT deal (36 asociaciones vía 1 contrato) |
+| M24 | R$604k | ~80 | Primeras aprobaciones sandbox (mar/27) |
+| M36 | R$1.87M | ~120 | 38% del SAM — producto autosustentable |
+
+A 120 asociaciones, equipo de 4–6 personas (benchmark: Plausible, 8 personas / $3.1M ARR).
+
+## Go-to-Market
+
+**1 — FACT First.** 36 asociaciones vía 1 contrato federación. Dolor validado: planillas y WhatsApp. Modelo B preferido: R$1.500/mes fijo + R$8/miembro/mes (≈ US$300/mes + US$1.6/miembro/mes; ARR potencial: R$156k).
+
+> **Estado FACT (jun/2026)**: cero LOI firmada. Conversaciones iniciales NO iniciadas. La premisa "Probable (Media)" refleja evaluación OPS de probabilidad — no compromiso confirmado. Si el canal FACT falla, el modelo M12 (R$107k ARR conservador) requiere ruta alternativa directa seed → expansion (~10 asoc × R$1.5k × 12 = R$180k cubre).
+
+**2 — Sandbox Timing.** Sistema listo antes del edital = first-mover. SNGPC homologado antes que competidores = moat técnico 12–18 meses.
+
+**3 — Dossier Template.** canna-br auto-documenta las secciones de trazabilidad y LGPD del dossier ANVISA. La asociación que usa el sistema tiene ventaja comprobable en la candidatura.
+
+**4 — Base HC Judicial.** 279 asociaciones fuera de FACT accesadas vía SEO, comunidad GitHub, eventos ExpoCannabis/ABRACANN, NPS desde mes 3.
+
+## Drivers de Crecimiento
+
+1. Sandbox crea legitimidad — más fácil reclutar miembros sin riesgo penal
+2. Cumplimiento obligatorio → adopción de software (hoy ~40% sin sistema adecuado)
+3. 315 → 600 (2028) → 800 (2030) nuevas asociaciones vía sandbox
+4. OSS self-hosted elimina la barrera #1: temor de datos en manos de terceros
+5. Tendencia regulatoria global — UY, ES, DE, NL ya regulados; BR siguiendo el patrón europeo
+
+## Unit Economics (premisas v0.1)
+
+| Métrica | Conservador | Optimista | Fuente/derivación |
+|---|---|---|---|
+| ARPU mensual | R$ 1.500 (≈ US$300) | R$ 4.500 (≈ US$900) | Cannanas DE €1.000/mes × 0.5 ajuste BR + rango 3× para tiers |
+| CAC (período seed) | R$ 0 | R$ 0 | Seed = outreach directo Gabriel, sin ad spend |
+| CAC (post-piloto) | R$ 4.000 | R$ 12.000 | Ventas consultivas BR healthtech ticket medio R$2k-8k/mes |
+| Payback period | 3 meses | 8 meses | CAC ÷ ARPU mensual |
+| Gross margin | 80% | 85% | Software + mínimo hosting (R2 + nginx VPS €40/mes cubren 50 asoc) |
+| Churn anual | 8% | 3% | Healthtech B2B regulado benchmark — alto switching cost ANVISA |
+| LTV (LTV = ARPU × 12 ÷ churn) | R$ 225k | R$ 1.8M | Conservador R$1500 × 12 ÷ 0.08 |
+| LTV/CAC | 56× | 150× | Saludable si premisas válidas (>3× es umbral mínimo) |
+
+**Premisas críticas que invalidan el modelo**:
+1. Churn 8%/año asume que cambiar de sistema regulado es costoso — si ANVISA manda interoperabilidad total, el switching cost cae y el churn se duplica
+2. ARPU R$1.500 conservador asume asociación que paga (no vía patrocinador) — el mercado puede presionar tiers gratuitos con upgrades pagos
+3. CAC R$4k post-piloto asume canal directo Gabriel — si se necesita SDR contratado, sube a R$15k+
+
+## Sensibilidad — 24m conservador
+
+- Escenario base: 62 asoc × R$ 1.500 × 12 = R$ 1.12M ARR (= landing)
+- Si ARPU cae 30%: 62 × R$ 1.050 × 12 = R$ 781k (-30%)
+- Si adoción asoc cae 30%: 43 × R$ 1.500 × 12 = R$ 774k (-31%)
+- Combinado -30/-30: R$ 542k (-52%, peor que pesimista)
+
+El modelo conservador NO sobrevive a 2 errores simultáneos de premisa. Reportar esto es honestidad, no debilidad.
+
+## Riesgos Principales
+
+| Riesgo | Probabilidad | Mitigación |
+|---|---|---|
+| Sandbox se atrasa | Media | Base HC judicial existe independientemente del sandbox |
+| Schema SNGPC incompatible | Alta | Engine desacoplada (plugin); schema versionado |
+| Competidor SaaS post-sandbox | Alta | FACT deal cierra mercado; OSS = moat estructural |
+| Rollback político | Baja | STJ Tema 16 (2024) consolidó HC judicial — no depende de regulación ejecutiva |
+
+---
+
+> **Traducción automática v1** — versión en español generada por LLM, pulido humano en curso. Reporta errores a gabriel@devmagic.com.br.

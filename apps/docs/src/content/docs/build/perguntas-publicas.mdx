@@ -1,0 +1,144 @@
+---
+title: "Perguntas Públicas + Candidatura Vídeo"
+description: "Arquitetura do inbound engine de vídeo: candidatura piloto privada + Q&A público moderado."
+---
+
+## Tese
+
+Vídeo substitui form longo. Presença e clareza de propósito — dimensões que texto não captura — são decisivas para avaliar fit de uma associação candidata ao piloto. Do mesmo modo, FAQ estática envelhece: uma FAQ pública vivenciada, construída de perguntas reais respondidas em vídeo, gera confiança progressiva e serve como inbound SEO long-tail. Dois jobs distintos, dois modos com privacidade e moderação completamente separadas.
+
+---
+
+## 2 Modos
+
+| | Modo 1 — Candidatura | Modo 2 — Perguntas Públicas |
+|---|---|---|
+| Entrada | `/open/aplicar-video/` | `/open/perguntas/nova/` |
+| Audiência | Diretoria/RT de associação | Visitante curioso |
+| Duração | até 5 min | até 3 min |
+| Privacidade | Privado por construção | Público por consent opt-in |
+| Output | Inbox + reply pessoal Gabriel | Página `/open/perguntas/[slug]/` |
+| Indexável | Nunca | Sim (SEO + sitemap) |
+| Transcrição | Opcional, só para Gabriel | Obrigatória, revisada antes de publish |
+
+---
+
+## Arquitetura
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  BROWSER                                                                    │
+│                                                                             │
+│  getUserMedia()  →  MediaRecorder  →  Blob                                  │
+│       └── @canna/video-capture (wrapper: permission, countdown, preview)    │
+│                                  │                                          │
+│                    @canna/video-upload (signed POST helper)                 │
+│                                  │                                          │
+└──────────────────────────────────┼──────────────────────────────────────────┘
+                                   │ signed POST (sem creds client-side)
+                                   ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  apps/api  →  GET /api/video/presigned-url                                  │
+│                    │ gera signed POST válido por 10min                      │
+│                    ▼                                                        │
+│             MinIO / Cloudflare R2                                           │
+│               ├── bucket: candidaturas/  (ACL: privado permanente)          │
+│               └── bucket: perguntas/     (ACL: privado → público no publish)│
+│                                                                             │
+│  POST /api/video/notify  →  SurrealDB: video_submission INSERT              │
+│                          └► Groq Whisper API (async, webhook callback)      │
+│                          └► Resend email → gabriel@devmagic.com.br          │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                   │
+                           [Groq Whisper callback]
+                                   │ UPDATE video_submission.transcript
+                                   ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  MODERATION (somente Modo 2)                                                │
+│                                                                             │
+│  bun scripts/perguntas-mod.ts list pending                                  │
+│  bun scripts/perguntas-mod.ts review <id>  →  signed URL temporária        │
+│  [Gabriel edita resumo + grava vídeo resposta via UI autenticada]           │
+│  bun scripts/perguntas-mod.ts publish <id>                                  │
+│       ├── UPDATE video_submission {status: published, slug: ...}            │
+│       ├── MinIO/R2 ACL → público                                            │
+│       ├── gera apps/docs/src/content/docs/open/perguntas/<slug>.mdx        │
+│       └── git add + commit + push                                           │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                   │
+                           [git push trigger]
+                                   ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  Astro rebuild  →  content collection `perguntas/` processada               │
+│  Nova rota: /open/perguntas/<slug>/                                          │
+│       ├── H1: resumo pergunta                                               │
+│       ├── 3 bullets pergunta + player vídeo pergunta + transcrição          │
+│       ├── 3 bullets resposta + player vídeo resposta + transcrição          │
+│       └── CTA → /open/seed-associations/                                    │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Componentes
+
+| Workspace | Responsabilidade |
+|---|---|
+| `@canna/video-capture` | Browser wrapper: `getUserMedia` constraints, countdown, preview, retake, error states (permission denied, device not found) |
+| `@canna/video-upload` | Signed POST helper: presigned URL request, multipart upload, progress events, retry com backoff |
+| `@canna/perguntas-mod` | CLI scripts: `list`, `review`, `approve`, `reject`, `publish`, `delete`. Runner: `bun`. Pattern já estabelecido em `/scripts/` |
+| `apps/docs` `perguntas/` | Content collection MDX: gerada pelo publish pipeline, nunca editada manualmente |
+| `apps/api` `/api/video/*` | Endpoints: presigned-url, notify, webhook Whisper callback, moderação REST autenticada |
+
+---
+
+## Stack — Reuso do Existente
+
+| Componente | Provider | Justificativa |
+|---|---|---|
+| Storage | MinIO (Langfuse VPS, `62.171.145.76`) ou Cloudflare R2 free tier (10 GB) | MinIO já instalado. R2 free tier suficiente para fase seed. **Decisao pendente Gabriel** (ver Open Questions) |
+| Transcrição | Groq Whisper API, free tier (10h/dia) | Zero custo fase seed. Accuracy pt-BR ≥ 90% em condições normais. Alternativa: whisper.cpp local na VPS. **Decisao pendente Gabriel** |
+| DB | SurrealDB `62.171.145.76`, tabela `video_submission` | Instância já operacional (cf. ADR-004). Padrão de acesso via SSH tunnel ou network interna |
+| Email notify | Resend | Já referenciado no ops-stack. Zero config pra volume seed (menos de 100 emails/mês) |
+| CLI runner | `bun scripts/` | Padrão estabelecido no monorepo |
+| Publish pipeline | git commit + push (via CLI) | Sem webhook server extra. Astro rebuild manual ou CI/CD existente |
+
+---
+
+## Invariantes de Privacidade
+
+1. **Credenciais de storage nunca chegam ao cliente.** Signed POST gerado server-side, válido por 10 minutos, scoped ao bucket e prefixo corretos. Sem CORS wildcard.
+2. **Modo 1 nunca produz URL pública.** Bucket de candidaturas: ACL block-public-access obrigatório, sem exception. Signed URLs de review expiram em 1h.
+3. **Modo 2 sem consent = bloqueio duplo.** Client-side: botão de upload disabled até ambos checkboxes marcados. Server-side: `POST /api/video/notify` rejeita se `consent_public !== true` com HTTP 422.
+4. **Direito ao apagamento Art. 18 IV:** `delete [id]` destrói vídeo do bucket, MDX da content collection e executa crypto-deletion do registro SurrealDB (DEK destruction, cf. [Compliance & Crypto](/build/compliance/)). Prazo: 72h úteis.
+5. **Sem analytics de terceiros nas páginas de pergunta.** Logs apenas server-side (nginx), retenção 30 dias.
+
+---
+
+## Roadmap — Milestones
+
+| Milestone | Escopo | Done-When |
+|---|---|---|
+| M1 — Spec | ADR-005 + build doc + placeholder open page + sidebar | Páginas 200 OK, spec revisada por Gabriel |
+| M2 — UI Capture | `@canna/video-capture` + `@canna/video-upload` + páginas `/aplicar-video/` e `/perguntas/nova/` | MediaRecorder funciona Chrome/Firefox/Safari macOS+iOS |
+| M3 — Upload + Storage | `apps/api` endpoints presigned-url + notify + Whisper webhook | Upload via signed POST, DB row criado, email Gabriel em menos de 30s |
+| M4 — Moderation CLI | `@canna/perguntas-mod` scripts completos | `list/review/approve/reject/publish/delete` funcionais |
+| M5 — Publish Pipeline | MDX gerado + content collection + página `/open/perguntas/[slug]/` | Página publicada com player, transcrição e CTA |
+
+---
+
+## Open Questions
+
+1. **Storage: MinIO vs R2?** MinIO já instalado mas compartilha disco com Langfuse na VPS atual. R2 free tier (10 GB) isola storage em Cloudflare, sem custo até escala. Decisão: Gabriel define antes de M3.
+2. **Whisper provider: Groq free tier vs whisper.cpp local?** Groq = zero esforço de infra, sujeito a rate limit (10h/dia). whisper.cpp local na VPS nova (ADR-004) = sem rate limit mas requer GPU ou latência maior em CPU. Decisão: Gabriel define antes de M3.
+3. **Consent UI copy:** texto exato dos checkboxes de consentimento precisa revisão legal informal antes de publicar. Rascunho funcional, mas framing jurídico (LGPD art. 7 VI + art. 11 II-a) merece validação.
+4. **Abuse handling:** se alguém submete 50 perguntas spam em 1h, rate limiting por IP bloqueia — mas se o abuso vier de IPs distribuídos? Política de moderação e possível captcha silencioso (Turnstile Cloudflare) a definir antes de M2.
+
+---
+
+## Links
+
+- [ADR-005 — Decisão de Arquitetura](/adr/0005-video-candidatura-perguntas-publicas/)
+- [Perguntas Públicas (Open)](/open/perguntas/) — placeholder live
+- [Compliance & Crypto](/build/compliance/) — crypto-deletion referenciado nas invariantes
+- [Seed Associations](/open/seed-associations/) — destino do CTA nas páginas de pergunta

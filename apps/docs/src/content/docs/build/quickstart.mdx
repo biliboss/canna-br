@@ -1,0 +1,66 @@
+---
+title: Quickstart (alpha)
+description: Subir canna-br localmente para experimentação. NÃO use em produção.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+<Aside type="caution" title="Alpha — não-produção">
+Este quickstart serve para experimentação local (associações seed avaliando o sistema, devs avaliando arquitetura). NÃO inicialize com dados reais de membros sem o trust kit completo (ver `/trust/`).
+</Aside>
+
+## Pré-requisitos
+
+- Docker + Docker Compose (Docker Desktop ou colima/orbstack)
+- Bun >= 1.1 ou Node 22
+- Conta Open WebUI local (criada no primeiro acesso)
+
+## Passos
+
+1. Clone o repo público:
+   ```bash
+   git clone https://github.com/biliboss/canna-br.git
+   cd canna-br
+   ```
+   (Pre-v0.3: repo público é scaffold mínimo. Código completo vive no vault de desenvolvimento até v0.3 jul/2026.)
+
+2. Configurar envs:
+   ```bash
+   cp .env.example .env
+   # edita variáveis: POSTGRES_PASSWORD, REDIS_URL, OWUI_PORT
+   ```
+
+3. Subir stack:
+   ```bash
+   docker compose up -d
+   ```
+   Sobe Postgres 16 + Redis 7 + Open WebUI v0.9.6 + canna-br MCP server. Cold start ~44s.
+
+4. Registrar MCP server no Open WebUI:
+   - http://localhost:3000 → Settings → Integrações → Tool Servers
+   - Add: `http://canna-mcp:8765/sse`
+
+5. Validar:
+   ```bash
+   curl http://localhost:8765/health
+   # esperado: {"ok": true, "version": "v0.2.1.2"}
+   ```
+
+## Smoke test (3 MCP Apps)
+
+Ver `/releases/v021/` para o relato técnico do smoke 2026-06-08.
+
+## Limites do quickstart
+
+- Sem TLS (apenas localhost)
+- Sem backup automatizado
+- Sem audit log externo (vive no Postgres local)
+- Sem integração SNGPC real (mock)
+
+Para produção: aguardar v0.3 (jul/2026) + roadmap self-hosting completo.
+
+## Próximos passos
+
+- Aplicar como associação seed: `/open/seed-associations/`
+- Arquitetura: `/build/big-picture/`
+- Compliance: `/build/compliance/`

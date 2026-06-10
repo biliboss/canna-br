@@ -1,0 +1,169 @@
+---
+title: "Confiança & Transparência"
+description: "Termos do programa piloto, licença AGPL-3.0 + CLA, parecer regulatório embrionário, LGPD architecture, security posture. Para quem quer due diligence antes de usar."
+template: splash
+---
+
+{/* Item #8 do review — trust markers consolidados em uma página. */}
+
+<section class="bg-gradient-to-b from-emerald-950 to-slate-950 text-white py-16 px-6 -mx-4 sm:-mx-6 lg:-mx-8 xl:-mx-12 mb-0 not-content">
+  <div class="max-w-3xl mx-auto text-center">
+    <p class="text-xs font-mono font-bold text-emerald-300 uppercase tracking-widest mb-4">Confiança · Transparência · Due diligence</p>
+    <h1 class="text-3xl md:text-5xl font-bold tracking-tight leading-tight">
+      Tudo que sustenta a tese, em links públicos.
+    </h1>
+    <p class="text-lg text-emerald-100/80 mt-6 max-w-2xl mx-auto">
+      Esta página agrupa termos, licença, posicionamento jurídico, arquitetura de segurança e LGPD. Quem está fazendo due diligence — advogado, diretoria, comitê de risco — começa aqui.
+    </p>
+  </div>
+</section>
+
+{/* LICENÇA + AGPL */}
+<section class="py-16 px-6 -mx-4 sm:-mx-6 lg:-mx-8 xl:-mx-12 not-content" style="background: rgba(15,23,42,0.85)">
+  <div class="max-w-4xl mx-auto">
+    <p class="text-xs font-mono font-bold text-emerald-400 uppercase tracking-widest text-center mb-4">Licença & código</p>
+    <h2 class="text-2xl md:text-3xl font-bold text-white text-center mb-8 leading-tight">
+      AGPL-3.0 + CLA. Sem caixa preta, sem lock-in.
+    </h2>
+
+    <div class="grid md:grid-cols-2 gap-4">
+      <div class="bg-slate-900/60 border border-emerald-900/40 rounded-xl p-5">
+        <p class="text-emerald-300 font-mono text-xs uppercase mb-2">Licença</p>
+        <p class="text-white font-semibold mb-2">AGPL-3.0-or-later</p>
+        <p class="text-slate-400 text-sm">Você pode usar, modificar, distribuir. Forks devem manter a mesma licença. SaaS sobre canna-br deve abrir as modificações — copyleft forte protege contra capture de empresa fechada.</p>
+        <a href="https://github.com/biliboss/obsidian/blob/main/99-development/canna-br/LICENSE" target="_blank" rel="noopener noreferrer" class="text-emerald-300 text-xs font-mono underline mt-3 inline-block">Ver LICENSE no GitHub →</a>
+      </div>
+      <div class="bg-slate-900/60 border border-emerald-900/40 rounded-xl p-5">
+        <p class="text-emerald-300 font-mono text-xs uppercase mb-2">CLA</p>
+        <p class="text-white font-semibold mb-2">Contributor License Agreement</p>
+        <p class="text-slate-400 text-sm">Contribuidores assinam CLA permitindo relicenciamento futuro (ex: dual-license comercial). Protege o projeto contra fragmentação se houver pressão para mudar termos.</p>
+        <a href="https://github.com/biliboss/obsidian/blob/main/99-development/canna-br/CONTRIBUTING.md" target="_blank" rel="noopener noreferrer" class="text-emerald-300 text-xs font-mono underline mt-3 inline-block">Ver CONTRIBUTING →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+{/* LGPD + SECURITY */}
+<section class="py-16 px-6 -mx-4 sm:-mx-6 lg:-mx-8 xl:-mx-12 not-content" style="background: rgba(2,6,23,0.92)">
+  <div class="max-w-4xl mx-auto">
+    <p class="text-xs font-mono font-bold text-emerald-400 uppercase tracking-widest text-center mb-4">LGPD & arquitetura de segurança</p>
+    <h2 class="text-2xl md:text-3xl font-bold text-white text-center mb-8 leading-tight">
+      Mapeamento artigo-por-artigo da LGPD vs implementação.
+    </h2>
+
+    <div class="overflow-x-auto">
+      <table class="w-full border-collapse text-sm">
+        <thead>
+          <tr>
+            <th class="text-left p-3 bg-slate-900 text-emerald-300 font-semibold rounded-tl-xl">Artigo LGPD</th>
+            <th class="text-left p-3 bg-slate-900 text-emerald-300 font-semibold">Obrigação</th>
+            <th class="text-left p-3 bg-slate-900 text-emerald-300 font-semibold rounded-tr-xl">Implementação canna-br</th>
+          </tr>
+        </thead>
+        <tbody class="text-slate-300">
+          <tr>
+            <td class="p-3 border-b border-slate-800 font-mono text-emerald-300">Art. 5, II</td>
+            <td class="p-3 border-b border-slate-800">Dado pessoal sensível (saúde)</td>
+            <td class="p-3 border-b border-slate-800">Envelope AES-256-GCM por membro; DEK random + Site KEK</td>
+          </tr>
+          <tr>
+            <td class="p-3 border-b border-slate-800 font-mono text-emerald-300">Art. 11</td>
+            <td class="p-3 border-b border-slate-800">Tratamento de dado sensível requer base legal explícita</td>
+            <td class="p-3 border-b border-slate-800">Consentimento versionado em evento <code class="text-emerald-300">ConsentGranted</code></td>
+          </tr>
+          <tr>
+            <td class="p-3 border-b border-slate-800 font-mono text-emerald-300">Art. 18, IV</td>
+            <td class="p-3 border-b border-slate-800">Crypto-deletion (eliminação efetiva)</td>
+            <td class="p-3 border-b border-slate-800">Descarte da DEK = dado inacessível para sempre, audit trail preservado</td>
+          </tr>
+          <tr>
+            <td class="p-3 border-b border-slate-800 font-mono text-emerald-300">Art. 38</td>
+            <td class="p-3 border-b border-slate-800">RIPD (relatório de impacto)</td>
+            <td class="p-3 border-b border-slate-800">RipdReviewApp MCP gera RIPD auto-documentado por evento (v0.4)</td>
+          </tr>
+          <tr>
+            <td class="p-3 font-mono text-emerald-300">Art. 46</td>
+            <td class="p-3">Medidas técnicas de segurança</td>
+            <td class="p-3">RBAC com segregação, TOTP para nível-4, audit imutável, encryption at rest</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="mt-6 flex flex-wrap gap-3 justify-center">
+      <a href="/build/compliance/" class="text-emerald-300 underline hover:text-emerald-200 text-sm">Compliance & crypto completo →</a>
+      <a href="/build/stack/" class="text-emerald-300 underline hover:text-emerald-200 text-sm">Stack de segurança →</a>
+      <a href="/idea/regulation/" class="text-emerald-300 underline hover:text-emerald-200 text-sm">Marco regulatório →</a>
+    </div>
+  </div>
+</section>
+
+{/* PARECER + TERMOS */}
+<section class="py-16 px-6 -mx-4 sm:-mx-6 lg:-mx-8 xl:-mx-12 not-content" style="background: rgba(15,23,42,0.85)">
+  <div class="max-w-4xl mx-auto">
+    <p class="text-xs font-mono font-bold text-emerald-400 uppercase tracking-widest text-center mb-4">Parecer & termos</p>
+    <h2 class="text-2xl md:text-3xl font-bold text-white text-center mb-8 leading-tight">
+      O que é firme. O que é embrionário. O que ainda não existe.
+    </h2>
+
+    <div class="space-y-4">
+      <div class="bg-slate-900/60 border border-emerald-900/40 rounded-xl p-5">
+        <div class="flex items-center gap-3 mb-2">
+          <span class="px-2 py-1 bg-emerald-950 text-emerald-300 text-xs font-mono rounded">FIRME</span>
+          <p class="text-white font-semibold">Licença AGPL-3.0 + CLA</p>
+        </div>
+        <p class="text-slate-400 text-sm">Compromisso público. Não vai mudar sem aviso prévio + opção de fork.</p>
+      </div>
+      <div class="bg-slate-900/60 border border-emerald-900/40 rounded-xl p-5">
+        <div class="flex items-center gap-3 mb-2">
+          <span class="px-2 py-1 bg-emerald-950 text-emerald-300 text-xs font-mono rounded">FIRME</span>
+          <p class="text-white font-semibold">Arquitetura LGPD-by-design</p>
+        </div>
+        <p class="text-slate-400 text-sm">Documentada em <a href="/build/compliance/" class="text-emerald-300 underline">/build/compliance</a>, mapeada artigo-por-artigo, código auditável.</p>
+      </div>
+      <div class="bg-slate-900/60 border border-amber-900/40 rounded-xl p-5">
+        <div class="flex items-center gap-3 mb-2">
+          <span class="px-2 py-1 bg-amber-950 text-amber-300 text-xs font-mono rounded">EMBRIONÁRIO</span>
+          <p class="text-white font-semibold">Parecer regulatório (RDC 1.014)</p>
+        </div>
+        <p class="text-slate-400 text-sm">Estudo técnico em <a href="/idea/regulation/" class="text-emerald-300 underline">/idea/regulation</a> = melhor entendimento técnico do equipo. NÃO substitui parecer jurídico próprio da associação. Procuramos parceria com escritório especializado.</p>
+      </div>
+      <div class="bg-slate-900/60 border border-amber-900/40 rounded-xl p-5">
+        <div class="flex items-center gap-3 mb-2">
+          <span class="px-2 py-1 bg-amber-950 text-amber-300 text-xs font-mono rounded">EMBRIONÁRIO</span>
+          <p class="text-white font-semibold">Termos de uso do programa piloto</p>
+        </div>
+        <p class="text-slate-400 text-sm">Combinado pessoa-a-pessoa via WhatsApp/email durante seed. Formal terms-of-service publicado quando sair do alpha (v0.3+).</p>
+      </div>
+      <div class="bg-slate-900/60 border border-red-900/40 rounded-xl p-5">
+        <div class="flex items-center gap-3 mb-2">
+          <span class="px-2 py-1 bg-red-950 text-red-300 text-xs font-mono rounded">NÃO EXISTE</span>
+          <p class="text-white font-semibold">Auditoria de segurança por terceiro</p>
+        </div>
+        <p class="text-slate-400 text-sm">Código é auditável, mas não foi auditado externamente ainda. Promessa: transparência, não certificação. Auditoria formal entra em v1.0 GA com receita pra cobrir custo.</p>
+      </div>
+      <div class="bg-slate-900/60 border border-red-900/40 rounded-xl p-5">
+        <div class="flex items-center gap-3 mb-2">
+          <span class="px-2 py-1 bg-red-950 text-red-300 text-xs font-mono rounded">NÃO EXISTE</span>
+          <p class="text-white font-semibold">Certificação SOC2 / ISO 27001</p>
+        </div>
+        <p class="text-slate-400 text-sm">Roadmap pós-v1.0. Não pretendemos blefar com selo nominal sem trabalho real por trás.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+{/* CONTATO */}
+<section class="py-16 px-6 -mx-4 sm:-mx-6 lg:-mx-8 xl:-mx-12 not-content" style="background: rgba(2,6,23,0.95)">
+  <div class="max-w-3xl mx-auto text-center">
+    <p class="text-xs font-mono font-bold text-emerald-400 uppercase tracking-widest mb-4">Contato direto</p>
+    <h2 class="text-2xl md:text-3xl font-bold text-white mb-6 leading-tight">
+      Tem questão jurídica, security disclosure, ou parceria? Falar com Gabriel direto.
+    </h2>
+    <div class="flex flex-col sm:flex-row gap-3 justify-center text-sm font-mono">
+      <a href="mailto:gabriel@devmagic.com.br" class="px-5 py-3 rounded-full border-2 border-emerald-400 text-emerald-300 hover:bg-emerald-400/10 transition">gabriel@devmagic.com.br</a>
+      <a href="https://wa.me/5513988032053" class="px-5 py-3 rounded-full border-2 border-emerald-400 text-emerald-300 hover:bg-emerald-400/10 transition">WhatsApp +55 13 98803-2053</a>
+    </div>
+    <p class="text-slate-500 text-xs mt-6">Security disclosure responsável: GPG key publicada em github.com/biliboss (em v0.3).</p>
+  </div>
+</section>

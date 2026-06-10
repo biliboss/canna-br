@@ -1,0 +1,93 @@
+---
+title: Domain Model
+description: 8 bounded contexts, event storming, catálogo de domain events e invariantes críticos — o núcleo regulatório do canna-br.
+---
+
+## Tese
+
+O domínio canna-br é organizado em 8 bounded contexts com fronteiras explícitas. Comunicação entre contextos ocorre exclusivamente por domain events e referências por ULID — nunca por FK direta entre contextos. Cf. [ADR-001](/adr/0001-domain-kernel-emmett/).
+
+## 8 Bounded Contexts
+
+| Contexto | Aggregate Root | Core Invariante |
+|---|---|---|
+| **Membership** | `Member` | Consentimento + prescrição válidos antes de qualquer dispensação; quota mensal enforced |
+| **Cultivation** | `CultivationBatch` | Plant ULID permanente; progressão de estágio forward-only; destruição requer testemunha |
+| **Processing** | `HarvestBatch` | Apenas `RESPONSAVEL_TECNICO` aprova lab; COA hash imutável pós-aprovação |
+| **Inventory** | `InventoryLot` | Liberação requer `LabSampleApproved`; `RECALLED` é terminal e irreversível |
+| **Dispensation** | `Dispensation` | Imutável após criação; `DispensationRecorded + MemberQuotaConsumed + LotQuantityDeducted` em 1 append atômico |
+| **Compliance** | Read model somente | Nunca emite commands; lê projeções; relatórios são value objects imutáveis |
+| **Finance** | `FinancialStatement` | Valores como `Decimal(15,2)`; `BiologicalAssetValuation` (CPC 29) criado automaticamente por `HarvestRecorded` |
+| **Identity & Access** | `User` | TOTP obrigatório para roles críticos; segregação RDC 1.014: dispensador ≠ aprovador COA ≠ cultivador |
+
+## Chain of Custody
+
+```
+cultivation_batch (ULID)
+  └── plants[] (ULID permanente — tag física QR)
+        └── harvest_batches (ULID)
+              └── processing_runs (ULID)
+                    └── lab_samples (ULID) → laudo PDF MinIO
+                          └── inventory_lots (ULID)
+                                └── dispensations (ULID)
+                                      └── SNGPC XML (batch diário)
+```
+
+Cada seta é uma relação auditável. Nenhum material entra no estoque sem `inventory_lot` ligado a `harvest_batch`, que por sua vez está ligado a `plants` com ULIDs permanentes.
+
+## Fluxo de Dispensação (Core Spine)
+
+```
+Quota válida + Receita vigente + Lote AVAILABLE
+  → RecordDispensation
+  → decide() verifica quota E estoque
+  → append único: DispensationRecorded
+                  + MemberQuotaConsumed
+                  + LotQuantityDeducted
+  → BullMQ async: SNGPC XML, PDF recibo, email
+```
+
+Optimistic concurrency no stream do lote: dois `RecordDispensation` paralelos no mesmo lote — o segundo falha por versão divergente e é re-validado. Sem 2PC.
+
+## Eventos Críticos por Contexto
+
+**Membership:** `MemberRegistered`, `ConsentRevoked`, `MedicalRecordExpired`, `QuotaUpdated`, `MemberAnonymized`
+
+**Cultivation:** `CultivationBatchStarted`, `PlantRegistered`, `PlantStageAdvanced`, `PlantDestroyed`, `HarvestRecorded`
+
+**Processing:** `ProcessingRunCompleted`, `LabSampleSubmitted`, `LabSampleApproved`, `LabSampleRejected`
+
+**Inventory:** `LotQuarantined`, `LotReleased`, `LotExhausted`, `LotRecalled`
+
+**Dispensation:** `DispensationRecorded`, `MemberQuotaConsumed`, `LotQuantityDeducted`, `QuotaExceededAttempt`, `SngpcXmlGenerated`, `SngpcXmlSent`
+
+**Finance:** `BiologicalAssetValued`, `DreGenerated`, `MensalidadeRecorded`
+
+## Invariantes Cross-Context
+
+| Invariante | Enforcement |
+|---|---|
+| Quota mensal (Membership × Dispensation) | Use case `RecordDispensation` verifica antes de criar aggregate |
+| Liberação de lote requer lab aprovado (Processing × Inventory) | Event handler de `LabSampleApproved` |
+| Audit log imutável (todos os contextos) | PostgreSQL `RULE` bloqueia `UPDATE`/`DELETE` em `event_log` — independente de app layer |
+| Segregação RBAC (RDC 1.014) | Middleware HTTP antes de cada use case; não bypassável via API direta |
+| COA hash imutável pós-aprovação | PostgreSQL column-level trigger como segunda linha de defesa |
+
+## Camadas de Enforcement
+
+1. **Domain Layer (TypeScript)** — guards dentro dos aggregates antes de emitir qualquer event
+2. **Application Layer** — pré-condições cross-context nos use cases (role, estado de entidades em outros contextos)
+3. **Database Layer** — `UNIQUE` constraints, `CHECK` clauses, `RULE no_update/no_delete`, column triggers
+4. **RBAC Layer** — middleware `requireRole()` antes de qualquer handler; nenhum bypass possível via REST direta
+
+## RBAC — Roles Disponíveis
+
+| Role | Permissões principais |
+|---|---|
+| `ADMIN` | Gestão de usuários, configuração do tenant |
+| `RESPONSAVEL_TECNICO` | Aprovação de COA, assinatura BSPO |
+| `DISPENSADOR` | Registrar dispensações |
+| `CULTIVADOR` | Registrar plantas, avançar estágios |
+| `FINANCEIRO` | Visualizar/gerar DRE e financeiro |
+| `AUDITOR` | Leitura completa, sem escrita |
+| `MEMBRO` | Acesso ao próprio prontuário |

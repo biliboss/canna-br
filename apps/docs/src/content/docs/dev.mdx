@@ -1,0 +1,248 @@
+---
+title: "/dev — Developer Experience"
+description: "Arquitetura MCP-first, exemplo de tool call, eventos canonical do domain kernel, setup local, contribuição."
+template: splash
+---
+
+{/* DX landing — para a persona TI/Engenharia. Item #4 do review. */}
+
+<section class="bg-gradient-to-b from-emerald-950 to-slate-950 text-white py-16 px-6 -mx-4 sm:-mx-6 lg:-mx-8 xl:-mx-12 mb-0 not-content">
+  <div class="max-w-3xl mx-auto text-center">
+    <p class="text-xs font-mono font-bold text-emerald-300 uppercase tracking-widest mb-4">Developer Experience</p>
+    <h1 class="text-3xl md:text-5xl font-bold tracking-tight leading-tight">
+      Domain kernel puro. Event sourcing. MCP como única surface até v1.0.
+    </h1>
+    <p class="text-lg text-emerald-100/80 mt-6 max-w-2xl mx-auto">
+      Se você é dev e quer entender como o sistema é desenhado antes de cogitar contribuir ou self-host: esta página é o ponto de entrada.
+    </p>
+    <div class="flex flex-col sm:flex-row gap-3 mt-8 justify-center">
+      <a href="https://github.com/biliboss/obsidian/tree/main/99-development/canna-oss" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center px-6 py-3 rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold transition">
+        Ver código no GitHub
+      </a>
+      <a href="/open/contribute/" class="inline-flex items-center justify-center px-6 py-3 rounded-full border-2 border-emerald-400 text-emerald-300 hover:bg-emerald-400/10 font-semibold transition">
+        Como contribuir
+      </a>
+    </div>
+  </div>
+</section>
+
+{/* ARQUITETURA */}
+<section class="py-20 px-6 -mx-4 sm:-mx-6 lg:-mx-8 xl:-mx-12 not-content" style="background: rgba(15,23,42,0.85)">
+  <div class="max-w-5xl mx-auto">
+    <p class="text-xs font-mono font-bold text-emerald-400 uppercase tracking-widest text-center mb-4">Arquitetura em uma tela</p>
+    <h2 class="text-3xl md:text-4xl font-bold text-white text-center mb-12 leading-tight">
+      Capability vira surface, não o contrário.
+    </h2>
+
+    <div class="bg-slate-900/60 border border-emerald-900/40 rounded-2xl p-6 mb-8 font-mono text-xs md:text-sm overflow-x-auto">
+      <pre class="text-slate-300 leading-relaxed"><code>{`┌─────────────────────────────────────────────────────────────────┐
+│  SURFACES (humano + IA falam aqui)                              │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌────────────────┐   │
+│  │ Open WebUI chat │  │   MCP server    │  │  REST Fastify  │   │
+│  │  + MCP Apps     │  │  (níveis 1-3)   │  │ (nível 4 TOTP) │   │
+│  └────────┬────────┘  └────────┬────────┘  └────────┬───────┘   │
+│           │                    │                    │           │
+└───────────┼────────────────────┼────────────────────┼───────────┘
+            ▼                    ▼                    ▼
+       ┌──────────────────────────────────────────────────┐
+       │  APPLICATION LAYER  (@canna/app-services)        │
+       │  Orquestra comandos → domain → projections → fx  │
+       └────────────────────────┬─────────────────────────┘
+                                ▼
+       ┌──────────────────────────────────────────────────┐
+       │  DOMAIN KERNEL  (@canna/domain — TS puro)        │
+       │   decide() · evolve() — zero side effects        │
+       │   Bounded contexts: membership · inventory ·     │
+       │   dispensation · compliance · cultivation        │
+       └────────────────────────┬─────────────────────────┘
+                                ▼
+       ┌──────────────────────────────────────────────────┐
+       │  EVENT STORE  (Emmett + Postgres)                │
+       │   Append-only. Source of truth. Audit por design.│
+       └────────────────────────┬─────────────────────────┘
+                                ▼
+       ┌──────────────────────────────────────────────────┐
+       │  PROJECTIONS  (Drizzle read models)              │
+       │  member-quota · inventory-lot · dispensation-hist│
+       └──────────────────────────────────────────────────┘
+
+       Background: @canna/worker (BullMQ)
+         → SNGPC XML, PDF render, email`}</code></pre>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-4">
+      <a href="/adr/0001-domain-kernel-emmett/" class="bg-slate-900/60 border border-emerald-900/40 rounded-xl p-5 hover:border-emerald-500/60 transition">
+        <p class="text-emerald-300 text-xs font-mono uppercase mb-2">ADR-001</p>
+        <p class="text-white font-semibold mb-1">Domain Kernel + Emmett</p>
+        <p class="text-slate-400 text-xs">Por que TypeScript puro + Emmett event-sourcing kernel.</p>
+      </a>
+      <a href="/adr/0002-mcp-first-surface/" class="bg-slate-900/60 border border-emerald-900/40 rounded-xl p-5 hover:border-emerald-500/60 transition">
+        <p class="text-emerald-300 text-xs font-mono uppercase mb-2">ADR-002</p>
+        <p class="text-white font-semibold mb-1">MCP-first surface</p>
+        <p class="text-slate-400 text-xs">Por que cancelamos o admin Next.js standalone até pós-v1.0.</p>
+      </a>
+      <a href="/build/stack/" class="bg-slate-900/60 border border-emerald-900/40 rounded-xl p-5 hover:border-emerald-500/60 transition">
+        <p class="text-emerald-300 text-xs font-mono uppercase mb-2">Stack</p>
+        <p class="text-white font-semibold mb-1">Lista completa</p>
+        <p class="text-slate-400 text-xs">12 workspaces, dependencies, libs externas.</p>
+      </a>
+    </div>
+  </div>
+</section>
+
+{/* MCP CALL EXEMPLO */}
+<section class="py-20 px-6 -mx-4 sm:-mx-6 lg:-mx-8 xl:-mx-12 not-content" style="background: rgba(2,6,23,0.92)">
+  <div class="max-w-4xl mx-auto">
+    <p class="text-xs font-mono font-bold text-emerald-400 uppercase tracking-widest text-center mb-4">Exemplo MCP call</p>
+    <h2 class="text-3xl md:text-4xl font-bold text-white text-center mb-12 leading-tight">
+      Registrar uma dispensação = um tool call.
+    </h2>
+
+    <div class="grid md:grid-cols-2 gap-6">
+      <div>
+        <p class="text-emerald-300 text-xs font-mono uppercase mb-3">Request — MCP tool call</p>
+        <pre class="bg-slate-900/80 border border-emerald-900/40 rounded-xl p-5 text-xs text-slate-200 overflow-x-auto leading-relaxed"><code>{`{
+  "jsonrpc": "2.0",
+  "method": "tools/call",
+  "params": {
+    "name": "request_record_dispensation",
+    "arguments": {
+      "memberId": "MBR-01HXX...",
+      "lotId":    "LOT-01HXY...",
+      "quantityG": 30,
+      "dispenserId": "USR-01HXZ...",
+      "prescriptionId": "RX-01HX0..."
+    }
+  },
+  "id": "call-42"
+}`}</code></pre>
+      </div>
+      <div>
+        <p class="text-emerald-300 text-xs font-mono uppercase mb-3">Response — eventos emitidos atomicamente</p>
+        <pre class="bg-slate-900/80 border border-emerald-900/40 rounded-xl p-5 text-xs text-slate-200 overflow-x-auto leading-relaxed"><code>{`{
+  "jsonrpc": "2.0",
+  "result": {
+    "content": [{
+      "type": "resource",
+      "resource": {
+        "uri": "canna://dispensation/DSP-01HY0",
+        "mimeType": "application/json",
+        "text": "{\\n  \\"events\\": [\\n    \\"DispensationRecorded\\",\\n    \\"LotQuantityDeducted\\",\\n    \\"MemberQuotaConsumed\\"\\n  ]\\n}"
+      }
+    }],
+    "structuredContent": {
+      "dispensationId": "DSP-01HY0...",
+      "remainingQuotaG": 0,
+      "lotRemainingG": 1450
+    }
+  },
+  "id": "call-42"
+}`}</code></pre>
+      </div>
+    </div>
+
+    <div class="mt-8 bg-slate-900/40 border border-slate-800 rounded-xl p-5">
+      <p class="text-slate-300 text-sm leading-relaxed">
+        <strong class="text-emerald-300">O que aconteceu por baixo:</strong> Domain kernel valida invariantes (quota suficiente? lote liberado? prescrição vigente?), produz 3 eventos atômicos (<code class="text-emerald-300">DispensationRecorded</code> + <code class="text-emerald-300">LotQuantityDeducted</code> + <code class="text-emerald-300">MemberQuotaConsumed</code>), Emmett persiste no Postgres event store, projections atualizam read models (quota restante, histórico). Se algo falhar, nada é gravado — atomicidade event-sourced. Mesma capability é alcançável via REST `/api/dispensations` quando o caller é máquina não-conversacional.
+      </p>
+    </div>
+  </div>
+</section>
+
+{/* EVENTOS CANONICAL */}
+<section class="py-20 px-6 -mx-4 sm:-mx-6 lg:-mx-8 xl:-mx-12 not-content" style="background: rgba(15,23,42,0.85)">
+  <div class="max-w-5xl mx-auto">
+    <p class="text-xs font-mono font-bold text-emerald-400 uppercase tracking-widest text-center mb-4">Eventos canonical (do código)</p>
+    <h2 class="text-3xl md:text-4xl font-bold text-white text-center mb-4 leading-tight">
+      20 eventos no domain kernel — fonte: <code class="text-emerald-300 text-2xl">packages/domain</code>
+    </h2>
+    <p class="text-slate-400 text-center mb-12 max-w-3xl mx-auto">
+      Lista extraída automaticamente da <code class="text-emerald-300">@canna/domain</code>. Cada evento é imutável, append-only, e participa do audit trail seed-to-dispensação.
+    </p>
+
+    <div class="grid md:grid-cols-3 gap-4">
+      <div class="bg-slate-900/60 border border-emerald-900/40 rounded-xl p-5">
+        <p class="text-emerald-400 font-mono text-xs uppercase mb-3">Membership</p>
+        <ul class="space-y-1 text-sm text-slate-300 font-mono">
+          <li><code>MemberRegistered</code></li>
+          <li><code>ConsentGranted</code></li>
+          <li><code>ConsentRevoked</code></li>
+          <li><code>PrescriptionValidated</code></li>
+          <li><code>QuotaUpdated</code></li>
+          <li><code>MemberQuotaConsumed</code></li>
+          <li><code>QuotaExceededAttempt</code></li>
+          <li><code>MemberSuspended</code></li>
+          <li><code>MemberReinstated</code></li>
+          <li><code>MemberAnonymized</code></li>
+        </ul>
+      </div>
+      <div class="bg-slate-900/60 border border-emerald-900/40 rounded-xl p-5">
+        <p class="text-emerald-400 font-mono text-xs uppercase mb-3">Inventory (lote)</p>
+        <ul class="space-y-1 text-sm text-slate-300 font-mono">
+          <li><code>LotCreated</code></li>
+          <li><code>LotQuarantined</code></li>
+          <li><code>LotReleased</code></li>
+          <li><code>LotQuantityDeducted</code></li>
+          <li><code>LotQuantityDeductedByDispensation</code></li>
+          <li><code>LotRecalled</code></li>
+          <li><code>LotExhausted</code></li>
+          <li><code>LotInsufficientQuantity</code></li>
+          <li><code>LotInsufficientForDispensation</code></li>
+        </ul>
+      </div>
+      <div class="bg-slate-900/60 border border-emerald-900/40 rounded-xl p-5">
+        <p class="text-emerald-400 font-mono text-xs uppercase mb-3">Dispensation</p>
+        <ul class="space-y-1 text-sm text-slate-300 font-mono">
+          <li><code>DispensationRecorded</code></li>
+        </ul>
+        <p class="text-slate-500 text-xs mt-3 font-sans leading-relaxed">
+          Dispensation triggers compound transaction: append <code class="text-emerald-300">DispensationRecorded</code> + <code class="text-emerald-300">LotQuantityDeducted</code> + <code class="text-emerald-300">MemberQuotaConsumed</code> atomicamente. Falha de qualquer invariant → 0 eventos persistidos.
+        </p>
+      </div>
+    </div>
+
+    <div class="mt-8 bg-slate-950/40 border border-slate-800 rounded-xl p-5">
+      <p class="text-slate-400 text-sm">
+        Próximos bounded contexts (v0.5+): <code class="text-emerald-300">Cultivation</code> (PlantRegistered, StageAdvanced, HarvestRecorded), <code class="text-emerald-300">Processing</code> (BatchProcessed, COASubmitted, COAApproved), <code class="text-emerald-300">Compliance</code> (SngpcXmlSubmitted, BspoSigned, RipdGenerated). Veja <a href="/build/domain/" class="text-emerald-300 underline">/build/domain</a> para o modelo completo.
+      </p>
+    </div>
+  </div>
+</section>
+
+{/* SETUP LOCAL */}
+<section class="py-20 px-6 -mx-4 sm:-mx-6 lg:-mx-8 xl:-mx-12 not-content" style="background: rgba(2,6,23,0.92)">
+  <div class="max-w-3xl mx-auto">
+    <p class="text-xs font-mono font-bold text-emerald-400 uppercase tracking-widest text-center mb-4">Setup local · 60s</p>
+    <h2 class="text-3xl md:text-4xl font-bold text-white text-center mb-10 leading-tight">
+      Rode tudo em <code class="text-emerald-300">pnpm dev</code>.
+    </h2>
+
+    <pre class="bg-slate-900/80 border border-emerald-900/40 rounded-xl p-5 text-xs md:text-sm text-slate-200 overflow-x-auto leading-relaxed mb-6"><code>{`# Pré-requisitos: Node 22+, pnpm, Docker (para Postgres testcontainers)
+git clone https://github.com/biliboss/obsidian.git
+cd obsidian/99-development/canna-oss
+
+pnpm install
+pnpm verify          # typecheck + tests (154 specs) across all workspaces
+pnpm test:domain     # @canna/domain vitest scenario coverage
+pnpm dev             # docs site em http://localhost:4335
+
+# MCP server stdio
+pnpm --filter @canna/mcp dev
+
+# Open WebUI sidecar end-to-end (Docker Compose)
+cd ops/openwebui && docker compose up -d`}</code></pre>
+
+    <div class="grid sm:grid-cols-2 gap-4">
+      <a href="/open/contribute/" class="bg-slate-900/60 border border-emerald-900/40 rounded-xl p-5 hover:border-emerald-500/60 transition">
+        <p class="text-emerald-300 text-xs font-mono uppercase mb-2">Próximo</p>
+        <p class="text-white font-semibold mb-1">Como contribuir →</p>
+        <p class="text-slate-400 text-xs">Guidelines, PR convention, área de scope.</p>
+      </a>
+      <a href="/build/capacidades/" class="bg-slate-900/60 border border-emerald-900/40 rounded-xl p-5 hover:border-emerald-500/60 transition">
+        <p class="text-emerald-300 text-xs font-mono uppercase mb-2">Próximo</p>
+        <p class="text-white font-semibold mb-1">12 Capacidades →</p>
+        <p class="text-slate-400 text-xs">Mapa capability × surface × versão.</p>
+      </a>
+    </div>
+  </div>
+</section>

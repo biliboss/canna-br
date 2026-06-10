@@ -1,0 +1,108 @@
+---
+title: "Associações Seed"
+description: "Procuramos 5 associações de pacientes para um período inicial de teste. Sem custo, com suporte direto. Inscrições abertas até 30/09/2026."
+head:
+  - tag: link
+    attrs: { rel: alternate, hreflang: pt-BR, href: 'https://canna-br.fonsecagabriel.com.br/open/seed-associations/' }
+  - tag: link
+    attrs: { rel: alternate, hreflang: en, href: 'https://canna-br.fonsecagabriel.com.br/en/open/seed-associations/' }
+  - tag: link
+    attrs: { rel: alternate, hreflang: es, href: 'https://canna-br.fonsecagabriel.com.br/es/open/seed-associations/' }
+  - tag: link
+    attrs: { rel: alternate, hreflang: 'x-default', href: 'https://canna-br.fonsecagabriel.com.br/open/seed-associations/' }
+---
+
+import ApplyVideoModal from '../../../components/ApplyVideoModal.astro';
+
+## Procuramos 5 associações para um período inicial de teste.
+
+Isso não é uma venda. É um convite para co-construir um sistema junto com quem vai usá-lo.
+
+O canna-br está funcional — LGPD, rastreabilidade, dispensação, SNGPC em desenvolvimento (mock atual; aguarda XSD ANVISA) — mas não foi usado em produção real ainda. Queremos associações que topem ser as primeiras, sabendo disso, e que nos ajudem a afinar o produto antes de abrirmos para o mercado amplo.
+
+---
+
+## Quem buscamos
+
+- Associação já operante, com dispensação ativa de membros-pacientes
+- Responsável Técnico (farmacêutico) identificado na operação
+- Diretoria disposta a participar de co-design: dar feedback real, não validar o que já está pronto
+- Confortável com software em fase alpha — bugs acontecem, e o combinado é reportar, não reclamar
+- OK com o modelo OSS (AGPL-3.0): o código é público e auditável por qualquer pessoa
+
+---
+
+## O que você ganha
+
+- Sistema completo sem custo durante o período seed: membros, prescrições, dispensação, rastreabilidade, audit trail · cultivo + financeiro + lab no roadmap v1.0 (2028)
+- Suporte direto com Gabriel — sem ticket, sem fila, contato pelo Discord ou email
+- [LGPD by design](/build/compliance/): criptografia AES-256-GCM por membro, crypto-deletion Art. 18 IV garantida
+- [SNGPC mock — pronto para integração quando ANVISA publicar XSD](/idea/regulation/): adapter XML implementado, aguarda schema oficial ANVISA
+- Escolha entre self-host (você controla o servidor) ou hosted em `canna-br.fonsecagabriel.com.br`
+- Exportação completa dos seus dados a qualquer momento, sem custo, sem burocracia
+- Citação pública como parceira fundadora quando o projeto abrir para o mercado
+
+---
+
+## O que pedimos
+
+- Feedback semanal: uma mensagem curta sobre o que funcionou, o que não funcionou, o que está faltando
+- Reportar bugs no GitHub Issues quando encontrar (com contexto suficiente para reproduzir)
+- Aceitar que nem tudo estará pronto: algumas telas existem, outras são mocks
+- Participar de uma videochamada mensal de 30 min com Gabriel (opcional, mas valorizado)
+- Citação como parceira fundadora no `/community` quando o projeto for público (combinado antes)
+
+---
+
+## Compromissos de soberania
+
+Os dados dos seus membros são seus. Isso não é retórica — é arquitetura.
+
+- Criptografia por membro: cada membro tem sua própria chave de criptografia (DEK aleatória). Veja o modelo em [LGPD — Criptografia](/build/compliance/).
+- Crypto-deletion real: quando um membro solicita eliminação (Art. 18 IV LGPD), a chave é destruída. Os dados cifrados se tornam ruído irrecuperável. O sistema não guarda CPF em claro em nenhum momento.
+- Self-host disponível: se preferir rodar no servidor da associação, o sistema é integralmente self-hostável. Sem dependência de infraestrutura nossa.
+- Sem lock-in: exportação completa em formatos abertos a qualquer momento.
+- Código auditável: qualquer advogado, técnico ou membro pode revisar o código que processa os dados. Repositório público no GitHub.
+
+---
+
+## Vagas e prazo
+
+<strong>5 vagas.</strong> Não mais que isso neste ciclo.
+
+Inscrições abertas até <strong>30/09/2026</strong>.
+
+Decisão comunicada individualmente em até 15 dias após candidatura.
+
+---
+
+## Como aplicar
+
+Envie um email para <strong>gabriel@devmagic.com.br</strong> com o assunto `[canna-br seed]` e inclua:
+
+1. Nome da associação e cidade
+2. Número aproximado de pacientes ativos
+3. Sistema atual (planilha, outro software, processo manual)
+4. Por que tem interesse em participar neste momento
+
+Não há formulário. Não há processo seletivo formal. Respondo todos os emails.
+
+Ou envie um vídeo de até 3 minutos direto pelo botão abaixo — o roteiro é mostrado na hora.
+
+<div class="mt-6 flex justify-center">
+  <button id="open-apply-modal" type="button" class="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold transition shadow-lg shadow-emerald-500/30 focus-visible:ring-4 ring-emerald-400">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+    </svg>
+    Enviar vídeo candidatura
+  </button>
+</div>
+
+---
+
+<div class="max-w-3xl mx-auto my-12 p-5 rounded-xl border border-amber-500/30 bg-amber-950/20 text-amber-100/80 text-sm">
+  <p class="font-semibold text-amber-300 mb-2">Disclaimer técnico-jurídico</p>
+  <p>canna-br é ferramenta de software. Conformidade legal (LGPD, RDC 1.014, Portaria 344/98) é responsabilidade integral da associação adotante e seus advogados/DPO. Nenhum mecanismo técnico substitui parecer jurídico próprio ou designação formal de RT farmacêutica e DPO conforme exigido em lei. <a href="/trust/">Ver /trust/ — Política de Privacidade, Termos e DPO</a>.</p>
+</div>
+
+<ApplyVideoModal />

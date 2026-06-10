@@ -1,0 +1,43 @@
+---
+title: "Sobre canna-br"
+description: Contexto pessoal, origem do projeto e o que canna-br não é.
+head:
+  - tag: link
+    attrs: { rel: alternate, hreflang: pt-BR, href: 'https://canna-br.fonsecagabriel.com.br/about/' }
+  - tag: link
+    attrs: { rel: alternate, hreflang: en, href: 'https://canna-br.fonsecagabriel.com.br/en/about/' }
+  - tag: link
+    attrs: { rel: alternate, hreflang: es, href: 'https://canna-br.fonsecagabriel.com.br/es/about/' }
+  - tag: link
+    attrs: { rel: alternate, hreflang: 'x-default', href: 'https://canna-br.fonsecagabriel.com.br/about/' }
+---
+
+# Sobre canna-br
+
+## O círculo
+
+canna-br é uma iniciativa pessoal pré-CNPJ de Gabriel — engenheiro de software e paciente + builder cannabis medicinal. Não é uma empresa, não tem CNPJ, não tem investidor. É software que deveria existir e não existia.
+
+A motivação é dupla: interesse direto no tema (paciente, não só desenvolvedor) e convicção de que o gap técnico identificado — nenhuma solução OSS séria em PT-BR cobrindo os requisitos do sandbox ANVISA — é real e vale ser preenchido.
+
+O projeto é AGPL-3.0 porque auditabilidade não é feature opcional quando o software processa dados de saúde de associados. Qualquer associação que usar canna-br pode (e deve) pedir para seu advogado revisar cada linha do código. Nenhum SaaS fechado consegue oferecer isso.
+
+## Origem do projeto
+
+A RDC 1.014/2026 foi publicada em abril de 2026. Ao ler os requisitos técnicos — audit trail imutável, SNGPC, RBAC com segregação de funções, 7 KPIs reportáveis — ficou claro que nenhuma solução existente cobria o conjunto completo. As alternativas OSS disponíveis no GitHub são todas focadas em regulação americana. Os SaaS brasileiros são caixa preta com dados de saúde em servidor de terceiros.
+
+A janela de candidaturas estimada para o sandbox é setembro–outubro de 2026. Isso deixa menos de seis meses para construir, testar e documentar. O código existe desde 2025. Faz sentido abrir agora.
+
+## O que canna-br não é
+
+- <strong>Não é SaaS pronto para produção.</strong> É alpha. Está em produção como demo/piloto, não como sistema de gestão de uma associação real com membros ativos.
+- <strong>Não é entidade comercial.</strong> Não há empresa por trás, não há equipe contratada, não há suporte SLA.
+- <strong>Não substitui assessoria jurídica.</strong> A documentação cobre o marco regulatório brasileiro como melhor entendimento técnico. Cada associação deve validar com advogado especializado antes de usar como base para candidatura ANVISA.
+- <strong>Não é replacement para sistemas legais existentes em produção.</strong> Se sua associação já tem um sistema funcionando, migrar para alpha software antes do sandbox é risco desnecessário.
+- <strong>O código é auditável, mas não foi auditado por terceiros.</strong> A promessa é transparência, não certificação.
+
+## Contato
+
+Gabriel — [gabriel@devmagic.com.br](mailto:gabriel@devmagic.com.br) · WhatsApp [+55 13 98803-2053](https://wa.me/5513988032053)
+
+Para questões técnicas, abra uma issue no repositório. Para interesse em parceria piloto, use o [formulário de vagas](/open/seed-associations/).

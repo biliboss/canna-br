@@ -1,0 +1,47 @@
+---
+title: Contribuir (devs)
+description: canna-br é AGPL-3.0. Sistema de gestão para associações de cannabis — event sourcing, MCP-first, compliance nativo. Veja como contribuir.
+---
+
+## O Que É
+
+canna-br é um sistema OSS de gestão para associações de cannabis terapêutica no Brasil. Event-sourced, MCP-first, com compliance ANVISA (SNGPC + BSPO) e LGPD nativos.
+
+Código: [github.com/fonsecagabriella/canna-br](https://github.com/fonsecagabriella/canna-br) — AGPL-3.0.
+
+## Stack
+
+TypeScript (strict) + Emmett (event sourcing) + Fastify 5 + PostgreSQL 16 + MCP Server + Open WebUI. Monorepo pnpm. Testes Vitest GIVEN/WHEN/THEN.
+
+Sem admin Next.js — toda interação humana via MCP Apps inline no chat (cf. [ADR-002](/adr/0002-mcp-first-surface/)).
+
+## Onde Contribuir
+
+| Área | O que precisa |
+|---|---|
+| **Domain kernel** | Novos bounded contexts (Cultivation, Processing), invariantes, testes cenário |
+| **MCP Apps** | Componentes UI `ext-apps` — `InventoryLotPickerApp`, `KpiDashboardApp`, `SngpcPendingApp` |
+| **SNGPC adapter** | Schema XML para associações (ainda não publicado pela ANVISA) |
+| **Compliance reports** | BSPO template, relatório judicial, farmacovigilância |
+| **Docs e testes** | E2E Playwright, documentação técnica |
+
+## Como Começar
+
+```bash
+git clone https://github.com/fonsecagabriella/canna-br
+cd canna-br
+pnpm install
+pnpm test          # Vitest (domain + app-services)
+pnpm dev           # Astro docs em localhost:4335, api em :3000, mcp em :3001
+```
+
+Leia `AGENTS.md` na raiz — regras operacionais, convenções de commits e limites de cada bounded context.
+
+## Regras
+
+- Toda interface chama `packages/app-services`. Nenhuma interface escreve direto no event store ou chama Drizzle para mutação.
+- Domain events são imutáveis após emissão. Sem UPDATE/DELETE no `event_log`.
+- Tools MCP Nível 4 (crypto-deletion, role change, recall) **nunca** via MCP — ficam em `apps/api` REST com TOTP.
+- LGPD: dados de saúde sempre cifrados. CPF nunca em claro.
+
+Dúvidas: abra uma issue. PRs bem-vindos via fork + branch topic.

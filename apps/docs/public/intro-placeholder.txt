@@ -1,0 +1,3 @@
+Video pendente. Upload R2 quando file fornecido.
+Bucket sugerido: canna-br-marketing (novo) ou canna-br-application-videos (existente).
+Substitua videoSrc="/intro-placeholder.mp4" em index.mdx com a URL pública do arquivo.

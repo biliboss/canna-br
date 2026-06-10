@@ -1,0 +1,104 @@
+---
+title: Compliance e Criptografia
+description: LGPD envelope encryption, crypto-deletion Art. 18 IV, chain of custody ULID, SNGPC XML automático, BSPO, KPI dashboard — conformidade regulatória nativa.
+---
+
+## Tese
+
+Compliance não é camada adicional — é propriedade emergente do event sourcing. Cada dispensação, movimento de lote e evento de membro gera automaticamente os artefatos regulatórios exigidos pela ANVISA e LGPD.
+
+## Modelo de Criptografia (LGPD)
+
+**Envelope Encryption** com Data Encryption Keys aleatórias por membro. Derivação determinística foi descartada: com `site_key + member_id + salt`, a chave seria recriável, anulando o crypto-deletion.
+
+```
+Master Key (Vault / env cifrado)
+  └── Site KEK (rotação trimestral, por tenant)
+        └── EncryptedMemberDEK (aleatória, 256 bits, por membro)
+              └── AES-256-GCM(campo sensível, DEK em claro)
+```
+
+**O que é cifrado:** `name`, `dob`, `address`, `phone`, `email`, `medical_condition`, `prescription_text`, `physician_notes`, `medical_record_pdf` (MinIO server-side).
+
+**CPF:** nunca em claro. `SHA-256(cpf_normalizado + site_salt)` — site_salt diferente por tenant (mesmo CPF não correlacionável entre associações).
+
+## Crypto-Deletion (Art. 18 IV LGPD)
+
+Ao invés de deletar fisicamente (quebraria chain of custody), a `EncryptedMemberDEK` é destruída. Sem DEK, dados cifrados tornam-se ruído computacionalmente irrecuperável.
+
+O registro `Member` permanece com `status = crypto_deleted` (preserva integridade de auditoria via ULID), mas todos os dados pessoais são irrecuperáveis:
+
+- `EncryptedMemberDEK` destruída → DEK em claro não pode ser obtida
+- DEK era aleatória → não pode ser re-derivada
+- Site KEK rotaciona periodicamente → mesmo KEK antiga vazada, sem DEK não há decriptografia
+
+**Fluxo:** `RequestAnonymization` → verifica dispensações pendentes → `ExecuteCryptoDeletion` → `MemberAnonymized` → LGPD entry + notificação.
+
+## Audit Log Imutável
+
+```sql
+-- PostgreSQL RULE bloqueia UPDATE e DELETE na tabela event_log
+CREATE RULE no_update_event_log AS ON UPDATE TO event_log DO INSTEAD NOTHING;
+CREATE RULE no_delete_event_log AS ON DELETE TO event_log DO INSTEAD NOTHING;
+```
+
+pgAudit registra eventos DDL diretamente nos logs do PostgreSQL — segunda camada fora do alcance da aplicação.
+
+## Relatórios Regulatórios
+
+| Relatório | Periodicidade | Prazo | Destinatário |
+|---|---|---|---|
+| SNGPC XML | Por dispensação + batch diário | Até 24h após dispensação | ANVISA (RNDS) |
+| BSPO Trimestral | Trimestral | 15 jan / 15 abr / 15 jul / 15 out | ANVISA |
+| BSPO Anual | Anual | 31 janeiro | ANVISA |
+| KPI Dashboard | Mensal | Último dia do mês | Diretoria |
+| DRE + Balanço (CPC 29) | Mensal | Até dia 10 do mês seguinte | Tesouraria / Contador |
+| Rastreabilidade Full | Sob demanda | Imediato (síncrono) | Auditoria / Fiscalização |
+
+## SNGPC — Fluxo Automático
+
+1. `DispensationRecorded` appendado (junto com `MemberQuotaConsumed` + `LotQuantityDeducted`)
+2. Worker SNGPC (BullMQ) consome `DispensationRecorded` → gera XML individual
+3. Batch diário às 23:45h consolida XMLs → envia à RNDS
+4. Resposta armazenada em `sngpc_submissions`; falha aciona retry 3× + DLQ + alerta ao RT
+
+Falha de envio **não invalida** a dispensação — fluxo assíncrono separado do estado regulatório crítico.
+
+## BSPO — Verificação de Saldo
+
+Fórmula: `Saldo Final = Saldo Inicial + Entradas − Saídas − Perdas Documentadas`
+
+O saldo deve bater com `SUM(inventory_lots.quantity_g)` por produto ativo. Divergência > 0 gera alerta automático para DPO e responsável técnico.
+
+## 7 KPIs do Dashboard
+
+| KPI | Fonte |
+|---|---|
+| Membros Ativos | `members WHERE status = 'active'` |
+| Dispensações no Mês | `dispensations WHERE dispensed_at >= início_do_mês` |
+| Estoque Disponível por tipo | `inventory_lots WHERE status = 'active'` |
+| Taxa de Ocupação Cultivo | `plantas_ativas / capacidade_total` |
+| Colheitas no Trimestre | `harvest_batches.dry_weight_g` |
+| Laudos Pendentes | `lab_samples WHERE result_received_at IS NULL AND > 14 dias` |
+| Receita Operacional | `financial_transactions WHERE type IN ('membership_fee', 'dispensation_fee')` |
+
+## CPC 29 — Ativos Biológicos
+
+Plantas vivas em cultivo classificadas como ativo biológico (CPC 29 / IAS 41). `fair_value_brl` calculado no harvest: estimativa de produção × preço médio CBD/THC. Obrigatório no evento `HarvestRecorded` — guard no aggregate rejeita harvest sem fair value.
+
+## RBAC por Relatório
+
+| Relatório | Diretoria | Tesoureiro | RT | DPO | Auditor |
+|---|---|---|---|---|---|
+| SNGPC XML | Ver | — | Gerar + Ver | Ver | Ver |
+| BSPO | Ver | — | Gerar + Ver | Ver | Ver |
+| KPI Dashboard | Ver | Ver | Ver | Ver | Ver |
+| DRE + Balanço | Ver | Gerar + Ver | — | — | Ver |
+| Rastreabilidade Full | — | — | Gerar + Ver | Gerar + Ver | Ver |
+
+---
+
+<div class="max-w-3xl mx-auto my-12 p-5 rounded-xl border border-amber-500/30 bg-amber-950/20 text-amber-100/80 text-sm">
+  <p class="font-semibold text-amber-300 mb-2">Disclaimer técnico-jurídico</p>
+  <p>canna-br é ferramenta de software. Conformidade legal (LGPD, RDC 1.014, Portaria 344/98) é responsabilidade integral da associação adotante e seus advogados/DPO. Nenhum mecanismo técnico substitui parecer jurídico próprio ou designação formal de RT farmacêutica e DPO conforme exigido em lei. <a href="/trust/">Ver /trust/ — Política de Privacidade, Termos e DPO</a>.</p>
+</div>

@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+/* starlight-theme-nova ships Astro components with Tailwind v4 classes
+   (e.g. PageFrame.astro: `fixed invisible md:visible md:w-(--sl-sidebar-width)`).
+   `@tailwindcss/vite` only scans the project's own sources by default and
+   tree-shakes those utilities out, breaking the mobile sidebar (it falls back
+   to `position: static; visibility: visible`, pushing content below a 1484px
+   inline block). Tell Tailwind to also scan the nova package. */
+@source "../../node_modules/starlight-theme-nova/src/**/*.{astro,ts,tsx,js,jsx,html}";
+
+/* Ensure Tailwind utilities coexist with starlight-theme-nova dark background */
+:root {
+  --sl-content-width: 100%;
+}
+
+/* Nova theme uses dark bg by default; our hero sections override locally */
+.sl-markdown-content {
+  max-width: 100%;
+}
+
+/* ============================================================
+   Chromeless landing — esconde chrome Starlight/Nova na home
+   ============================================================ */
+body.landing-chromeless {
+  /* Esconde header, sidebar esquerda, TOC direita */
+  & .page > header,
+  & header[role="banner"],
+  & .sl-page-header,
+  & nav.sidebar,
+  & aside.sidebar,
+  & .right-sidebar,
+  & .toc,
+  & sl-toc,
+  & nav[aria-label*="Sumário"],
+  & nav[aria-label*="On this page"],
+  & nav[aria-label*="Table of Contents"],
+  & starlight-toc {
+    display: none !important;
+  }
+
+  /* Conteúdo principal full-bleed */
+  & .main-frame,
+  & .content-panel,
+  & main {
+    grid-column: 1 / -1 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  & .sl-container {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Remove colunas de grid (sidebar + content + toc) */
+  & .page {
+    grid-template-columns: 1fr !important;
+    grid-template-areas: "main" !important;
+  }
+
+  /* Remove padding-top que o header normalmente empurra */
+  & main,
+  & .main-frame {
+    padding-top: 0 !important;
+  }
+}

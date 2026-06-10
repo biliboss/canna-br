@@ -1,0 +1,76 @@
+---
+title: Big Picture
+description: Visao sistemica do canna-br — tese, atores, fluxo principal, MCP-first surface e posicionamento regulatorio.
+---
+
+## Tese
+
+O canna-br e um sistema de gestao para associacoes canabicas brasileiras operando sob a RDC 1.014/2023. O nucleo nao e uma plataforma SaaS — e um Domain Kernel auditavel que expoe capacidades via MCP Server, colocando o agente de IA como surface primaria em vez de um admin Next.js.
+
+A decisao arquitetural central (cf. [ADR-002](/adr/0002-mcp-first-surface/)): **ferramenta MCP = tela**. Cada capability que seria uma tela CRUD vira um MCP Tool + MCP App — UI inline no chat, sem deploy de frontend separado.
+
+## Atores
+
+| Ator | Papel | Surface primaria |
+|---|---|---|
+| Membro | Recebe dispensacoes; consulta quota e prontuario | MCP App via Open WebUI |
+| Dispensador | Registra dispensacoes no balcao | MCP Tool (nivel 3) |
+| Responsavel Tecnico | Aprova laudos COA; assina BSPO | MCP Tool (nivel 4 → REST TOTP) |
+| Cultivador | Registra plantas, avanca estagios | MCP Tool |
+| Auditor | Leitura completa, zero escrita | Resources MCP (read-only) |
+| Admin | Gestao de usuarios e configuracao do tenant | REST direto (TOTP) |
+| Agente IA (coordenador) | Orquestra flows multi-step, interpreta regulacao | Ferramenta MCP |
+
+## Fluxo Principal — Core Spine
+
+```
+Membro valido + Receita vigente + Lote AVAILABLE
+  → RecordDispensation (MCP Tool nivel 3)
+  → decide() verifica quota + estoque
+  → append atomico: DispensationRecorded
+                    + MemberQuotaConsumed
+                    + LotQuantityDeducted
+  → BullMQ async: SNGPC XML + PDF recibo + email
+```
+
+Optimistic concurrency no stream do lote impede duplo gasto sem 2PC.
+
+## Cadeia de Custodia
+
+```
+cultivation_batch
+  └── plants[] (ULID permanente — tag fisica QR)
+        └── harvest_batches
+              └── processing_runs
+                    └── lab_samples → laudo PDF MinIO
+                          └── inventory_lots
+                                └── dispensations
+                                      └── SNGPC XML (batch diario)
+```
+
+Cada vinculo e auditavel. Nenhum material entra no estoque sem `inventory_lot` ligado a `harvest_batch` ligado a `plants`.
+
+## 8 Bounded Contexts
+
+| Contexto | Aggregate Root | Nucleo |
+|---|---|---|
+| Membership | `Member` | Consentimento + prescricao validos antes de dispensar |
+| Cultivation | `CultivationBatch` | Progressao de estagio forward-only |
+| Processing | `HarvestBatch` | Aprovacao COA pelo RT; hash imutavel |
+| Inventory | `InventoryLot` | Liberacao requer `LabSampleApproved` |
+| Dispensation | `Dispensation` | Imutavel apos criacao |
+| Compliance | Read model | Zero commands; so projections |
+| Finance | `FinancialStatement` | CPC 29 valoracao biologica automatica |
+| Identity & Access | `User` | TOTP para roles criticos; segregacao RDC 1.014 |
+
+Para detalhe completo: [Domain Model](/build/domain/).
+
+## Por Que Self-Hosted e Nao-Negociavel
+
+Dados de saude (LGPD Art. 5 II) em SaaS multi-tenant exigem RIPD, contratos com sub-processadores e clausulas BCR para transferencia internacional — responsabilidade solidaria da diretoria em caso de vazamento. Self-hosted elimina todos esses vetores.
+
+## Estado Atual
+
+**v0.2.1.2 LIVE** (branch `feature/mcp-first-pivot`) — 154/154 testes, 12 workspaces ativos, MCP Server operacional com Tools nivel 1-3, Open WebUI sidecar em `webui.fonsecagabriel.com.br`.
+
+Proximas fases: [Cronograma](/build/cronograma/) | Questoes em aberto: [Abertas](/build/abertas/).

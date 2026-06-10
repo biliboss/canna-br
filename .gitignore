@@ -12,3 +12,25 @@ dist
 coverage
 .vitest-cache
 .pnpm-store
+
+# Dev screenshots (root + apps/docs)
+canna-landing-*.png
+canna-pt-*.png
+canna-br-circulo-*.png
+qa-landing-*.png
+qa-modal-*.png
+apps/docs/canna-*.png
+apps/docs/canna-pt-*.png
+
+# Backup files
+*.bak
+*.PRE-EXTRACT.bak
+
+# Local wrangler state
+.wrangler/
+
+# Apple metadata
+._*
+marketing/
+*.mp4
+*.mov

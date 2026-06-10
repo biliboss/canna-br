@@ -1,0 +1,60 @@
+---
+title: "Confiança · Compliance · LGPD"
+description: "Documentos canônicos de confiança canna-br: política de privacidade, termos de uso, DPO, RIPD — o que existe e o que ainda falta."
+head:
+  - tag: link
+    attrs: { rel: alternate, hreflang: pt-BR, href: 'https://canna-br.fonsecagabriel.com.br/trust/' }
+  - tag: link
+    attrs: { rel: alternate, hreflang: en, href: 'https://canna-br.fonsecagabriel.com.br/en/trust/' }
+  - tag: link
+    attrs: { rel: alternate, hreflang: es, href: 'https://canna-br.fonsecagabriel.com.br/es/trust/' }
+  - tag: link
+    attrs: { rel: alternate, hreflang: 'x-default', href: 'https://canna-br.fonsecagabriel.com.br/trust/' }
+---
+
+Esta seção reúne os documentos legais operativos do canna-br. Diretoria, advogados e comitês de risco: comecem aqui.
+
+## Documentos publicados
+
+| Documento | Versão | Status |
+|---|---|---|
+| [Política de Privacidade](/trust/privacy-policy/) | v0.1 (2026-06-09) | Ativo |
+| [Termos de Uso](/trust/terms-of-service/) | v0.1 (2026-06-09) | Ativo |
+| [DPO — Encarregado de Proteção de Dados](/trust/dpo/) | v0.1 interino (2026-06-09) | Ativo |
+
+## Documentos pendentes (roadmap)
+
+| Documento | Versão prevista | Notas |
+|---|---|---|
+| DPA — Data Processing Agreement template | v0.3 | Template para associações adotantes assinarem com canna-br |
+| RIPD — Relatório de Impacto à Proteção de Dados (Art. 38 LGPD) | v0.4 | Obrigatório antes de processar dados de saúde em produção real |
+| ToS detalhado pós-piloto | v0.3 | Contrato formal com CNPJ quando constituído |
+| Relatório anual de transparência | Anual a partir de 2027 | Publicação voluntária das estatísticas de tratamento |
+| Auditoria de segurança independente | v1.0 | Terceira parte; nenhuma contratada ainda |
+| SOC 2 Type II | Sem prazo | Fora de escopo v1.0 |
+| ISO 27001 | Sem prazo | Fora de escopo v1.0 |
+
+## O que NÃO existe ainda — honestidade ante a diretoria
+
+Esta lista é deliberadamente explícita. Uma associação que adotar canna-br precisa saber:
+
+- **Sem auditoria de segurança independente** — o código é público (AGPL-3.0) mas nenhum terceiro auditou formalmente até a data desta publicação.
+- **Sem SOC 2 nem ISO 27001** — canna-br é pré-seed e pessoa física; certificações dessas normas requerem empresa constituída e investimento significativo.
+- **Sem DPO independente** — Gabriel Fonseca acumula papéis técnicos e DPO durante o piloto. Conflito de interesse documentado em [/trust/dpo/](/trust/dpo/).
+- **Sem DPA formalizado** — o contrato de processamento de dados entre canna-br e cada associação adotante ainda não tem template assinável. Previsto v0.3.
+- **Sem RIPD** — o Relatório de Impacto à Proteção de Dados (Art. 38 LGPD) para dados de saúde ainda não foi elaborado. Previsto v0.4.
+- **SNGPC em mock** — o adapter XML está implementado mas o schema XSD específico para associações ainda não foi publicado pela ANVISA (jun/2026). Homologação real pendente.
+- **Infra dev/sim compartilhada sem DPA** — instância atual é uma VPS EU (Contabo) compartilhada com outros serviços do mantenedor (Langfuse, SurrealDB, NATS). Não recomendada para produção com dados de membros. Estado alvo: self-host na infra da própria associação (Docker Compose) ou hosting gerenciado em provedor EU/BR sob contrato DPA — ver [/trust/dpo/](/trust/dpo/) e roadmap de documentos acima.
+
+## Disclaimer técnico-jurídico
+
+<div class="max-w-3xl mx-auto my-8 p-5 rounded-xl border border-amber-500/30 bg-amber-950/20 text-amber-100/80 text-sm">
+  <p class="font-semibold text-amber-300 mb-2">Aviso importante</p>
+  <p>canna-br é ferramenta de software. Conformidade legal (LGPD, RDC 1.014, Portaria 344/98) é responsabilidade integral da associação adotante e seus advogados/DPO. Nenhum mecanismo técnico substitui parecer jurídico próprio ou designação formal de RT farmacêutica e DPO conforme exigido em lei.</p>
+</div>
+
+## Contato LGPD
+
+Canal exclusivo: **gabriel@devmagic.com.br** com assunto `[LGPD]` ou `[DPO]`.
+
+Resposta em 15 dias úteis. Reclamações não resolvidas em 30 dias: escaladas à [ANPD — gov.br/anpd](https://www.gov.br/anpd).

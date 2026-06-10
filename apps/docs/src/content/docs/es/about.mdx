@@ -1,0 +1,49 @@
+---
+title: "Sobre canna-br"
+description: Contexto personal, origen del proyecto y lo que canna-br no es.
+---
+
+# Sobre canna-br
+
+## El círculo
+
+canna-br es una iniciativa personal pre-CNPJ de Gabriel — ingeniero de software, paciente y builder de cannabis medicinal. No es una empresa, no tiene CNPJ, no tiene inversor. Es software que debería existir y no existía.
+
+La motivación es doble: interés directo en el tema (paciente, no solo desarrollador) y la convicción de que el gap técnico identificado — ninguna solución OSS seria en PT-BR que cubra los requisitos del sandbox ANVISA — es real y vale la pena cubrir.
+
+El proyecto es AGPL-3.0 porque la auditabilidad no es una característica opcional cuando el software procesa datos de salud de asociados. Cualquier asociación (entidad sin fines de lucro brasileña, licenciada para importar/cultivar/dispensar cannabis medicinal) que use canna-br puede — y debe — pedir a su abogado que revise cada línea del código. Ningún SaaS cerrado puede ofrecer eso.
+
+## Origen del proyecto
+
+La RDC 1.014/2026 fue publicada en abril de 2026. Al leer los requisitos técnicos — audit trail inmutable, SNGPC, RBAC con segregación de funciones, 7 KPIs reportables — quedó claro que ninguna solución existente cubría el conjunto completo. Las alternativas OSS disponibles en GitHub están todas enfocadas en regulación estadounidense. Los SaaS brasileños son caja negra con datos de salud en servidores de terceros.
+
+La ventana de candidaturas estimada para el sandbox es septiembre–octubre de 2026. Eso deja menos de seis meses para construir, probar y documentar. El código existe desde 2025. Tiene sentido abrirlo ahora.
+
+## Lo que canna-br no es
+
+- <strong>No es SaaS listo para producción.</strong> Es alpha. Está en producción como demo/piloto, no como sistema de gestión de una asociación real con miembros activos.
+- <strong>No es una entidad comercial.</strong> No hay empresa detrás, no hay equipo contratado, no hay soporte SLA.
+- <strong>No sustituye asesoría jurídica.</strong> La documentación cubre el marco regulatorio brasileño como mejor entendimiento técnico. Cada asociación debe validar con abogado especializado antes de usarlo como base para candidatura ANVISA.
+- <strong>No es reemplazo para sistemas legales existentes en producción.</strong> Si su asociación ya tiene un sistema funcionando, migrar a software alpha antes del sandbox es riesgo innecesario.
+- <strong>El código es auditable, pero no ha sido auditado por terceros.</strong> La promesa es transparencia, no certificación.
+
+## Responsabilidades actuales del fundador
+
+- **Propósito del círculo** — sostiene el aim hasta que nuevos roles anclen
+- **Domain modeling** — Emmett-pure, Event Sourcing, ADRs versionados
+- **Infra ops** — VPS, Kamal, hosted canna-br.fonsecagabriel.com.br
+- **MCP-first surface** — gate de UX awesome production polish
+- **On-call piloto** — WhatsApp directo durante seed
+- **Seed recruiter** — 5 plazas asociaciones, curaduría + onboarding
+- **Compliance liaison** — RDC 1.014, LGPD, SNGPC tracking
+- **Cuidador (Modo O2)** — espacio tribal del círculo
+
+## Contacto
+
+Gabriel — [gabriel@devmagic.com.br](mailto:gabriel@devmagic.com.br) · WhatsApp [+55 13 98803-2053](https://wa.me/5513988032053)
+
+Para cuestiones técnicas, abra un issue en el repositorio. Para interés en asociación piloto, use el [formulario de plazas](/open/seed-associations/).
+
+---
+
+> **Traducción automática v1** — versión en español generada por LLM, pulido humano en curso. Reporta errores a gabriel@devmagic.com.br.

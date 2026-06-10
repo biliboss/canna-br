@@ -1,0 +1,55 @@
+---
+title: "Confianza · Cumplimiento · LGPD"
+description: "Documentos canónicos de confianza canna-br: política de privacidad, términos de uso, DPO, RIPD — lo que existe y lo que aún falta."
+---
+
+Esta sección reúne los documentos legales operativos de canna-br. Directiva, abogados y comités de riesgo: comiencen aquí.
+
+## Documentos publicados
+
+| Documento | Versión | Estado |
+|---|---|---|
+| [Política de Privacidad](/trust/privacy-policy/) | v0.1 (2026-06-09) | Activo |
+| [Términos de Uso](/trust/terms-of-service/) | v0.1 (2026-06-09) | Activo |
+| [DPO — Encargado de Protección de Datos](/trust/dpo/) | v0.1 interino (2026-06-09) | Activo |
+
+## Documentos pendientes (roadmap)
+
+| Documento | Versión prevista | Notas |
+|---|---|---|
+| DPA — Data Processing Agreement template | v0.3 | Template para que las asociaciones adoptantes firmen con canna-br |
+| RIPD — Relatório de Impacto à Proteção de Dados (Art. 38 LGPD) | v0.4 | Obligatorio antes de procesar datos de salud en producción real |
+| ToS detallado post-piloto | v0.3 | Contrato formal con CNPJ cuando se constituya |
+| Informe anual de transparencia | Anual a partir de 2027 | Publicación voluntaria de estadísticas de tratamiento de datos |
+| Auditoría de seguridad independiente | v1.0 | Tercero; ninguno contratado aún |
+| SOC 2 Type II | Sin plazo | Fuera de alcance v1.0 |
+| ISO 27001 | Sin plazo | Fuera de alcance v1.0 |
+
+## Lo que aún no existe — honestidad ante la directiva
+
+Esta lista es deliberadamente explícita. Una asociación (entidad sin fines de lucro brasileña, licenciada para importar/cultivar/dispensar cannabis medicinal) que adopte canna-br necesita saber:
+
+- **Sin auditoría de seguridad independiente** — el código es público (AGPL-3.0) pero ningún tercero lo ha auditado formalmente hasta la fecha de esta publicación.
+- **Sin SOC 2 ni ISO 27001** — canna-br es pre-seed y persona física; las certificaciones de estas normas requieren empresa constituida e inversión significativa.
+- **Sin DPO independiente** — Gabriel Fonseca acumula roles técnicos y de DPO durante el piloto. Conflicto de interés documentado en [/trust/dpo/](/trust/dpo/).
+- **Sin DPA formalizado** — el contrato de procesamiento de datos entre canna-br y cada asociación adoptante aún no tiene template firmable. Previsto v0.3.
+- **Sin RIPD** — el Relatório de Impacto à Proteção de Dados (Art. 38 LGPD) para datos de salud aún no ha sido elaborado. Previsto v0.4.
+- **SNGPC en mock** — el adaptador XML está implementado pero el schema XSD específico para asociaciones aún no fue publicado por ANVISA (jun/2026). Homologación real pendiente.
+- **Infraestructura dev/sim compartida sin DPA** — la instancia actual es una VPS EU (Contabo) compartida con otros servicios del mantenedor (Langfuse, SurrealDB, NATS). No recomendada para producción con datos de miembros. Estado objetivo: self-host en la infraestructura propia de la asociación (Docker Compose) o hosting gestionado en proveedor EU/BR bajo contrato DPA — ver [/trust/dpo/](/trust/dpo/) y roadmap de documentos arriba.
+
+## Aviso técnico-jurídico
+
+<div class="max-w-3xl mx-auto my-8 p-5 rounded-xl border border-amber-500/30 bg-amber-950/20 text-amber-100/80 text-sm">
+  <p class="font-semibold text-amber-300 mb-2">Aviso importante</p>
+  <p>canna-br es una herramienta de software. El cumplimiento legal (LGPD, RDC 1.014, Portaria 344/98) es responsabilidad integral de la asociación adoptante y sus abogados/DPO. Ningún mecanismo técnico sustituye el dictamen jurídico propio ni la designación formal del Responsable Técnico farmacéutico y DPO conforme exige la ley.</p>
+</div>
+
+## Contacto LGPD
+
+Canal exclusivo: **gabriel@devmagic.com.br** con asunto `[LGPD]` o `[DPO]`.
+
+Respuesta en 15 días hábiles. Reclamaciones no resueltas en 30 días: escaladas a la [ANPD — gov.br/anpd](https://www.gov.br/anpd).
+
+---
+
+> **Traducción automática v1** — versión en español generada por LLM, pulido humano en curso. Reporta errores a gabriel@devmagic.com.br.

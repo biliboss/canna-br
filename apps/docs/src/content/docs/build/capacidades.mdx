@@ -1,0 +1,82 @@
+---
+title: Capacidades
+description: 12 workspaces x capability-first — verbo + outcome + atores + surfaces (MCP Tool, MCP App, REST, Background). Mapa de interfaces por versao.
+---
+
+## Por que capability-first
+
+Cada capability e um verbo + outcome testavel, executavel em qualquer surface — MCP Tool, MCP App, REST, job background. A mesma capability "Registrar dispensacao" se manifesta como ferramenta MCP no chat, endpoint REST para integracoes e job SNGPC em batch. Modelar por capability e futureproof: a surface vira uma manifestacao, nao o unit de escopo.
+
+## 12 Workspaces
+
+Os 12 workspaces do monorepo mapeiam diretamente para bounded contexts e camadas de infraestrutura:
+
+| Workspace | Tipo | Responsabilidade |
+|---|---|---|
+| `packages/domain` | Domain Kernel | Funcoes puras `decide`/`evolve` — zero side effects |
+| `packages/app-services` | Application Layer | Orquestra domain + projections + side effects |
+| `packages/ui-apps` | MCP Apps Registry | Componentes UI inline (MemberQuotaCardApp, TraceabilityTimelineApp, DispensationFormApp) |
+| `apps/mcp` | Interface MCP | Tools + Resources + Apps — surface primaria |
+| `apps/api` | Interface REST | Fastify 5; chama app-services; niveis 4 via TOTP |
+| `apps/worker` | Background Jobs | SNGPC XML, PDF, email via BullMQ |
+| `apps/docs` | Documentacao | Este site Starlight |
+| `packages/shared` | Utils | Tipos compartilhados, validadores Zod |
+| `packages/crypto` | Crypto | LGPD anonimizacao, hash imutavel COA |
+| `packages/fixtures` | Test Fixtures | Dados de teste por contexto |
+| `packages/projections` | Projections | Read models Drizzle (zero mutacao) |
+| `packages/compliance` | Compliance | Relatorios SNGPC, BSPO, RIPD como value objects |
+
+## Grupos de Capacidades
+
+### G1 — Membership (Membro / Dispensador)
+
+| ID | Capability | Outcome | Surface |
+|---|---|---|---|
+| C1 | Registrar membro | Membro com consentimento + prescricao validos criado | MCP Tool nivel 3 |
+| C2 | Consultar quota e prontuario | Membro ve quota restante, historico de dispensacoes, prescricoes vigentes | MCP App (MemberQuotaCardApp) |
+| C3 | Revogar consentimento / anonimizar | LGPD Art. 18: dados pessoais anonimizados; evento `MemberAnonymized` imutavel | REST TOTP (nivel 4) |
+
+### G2 — Dispensation (Dispensador / Sistema)
+
+| ID | Capability | Outcome | Surface |
+|---|---|---|---|
+| C4 | Registrar dispensacao | Append atomico: DispensationRecorded + QuotaConsumed + LotDeducted | MCP Tool nivel 3 |
+| C5 | Consultar historico de dispensacoes | Auditor / RT ve trilha completa por membro, lote, data | MCP Resource (nivel 1) |
+| C6 | Gerar SNGPC XML | XML batch diario para ANVISA; retry automatico; log de envio | Background job (BullMQ) |
+
+### G3 — Cultivo e Processamento (Cultivador / RT)
+
+| ID | Capability | Outcome | Surface |
+|---|---|---|---|
+| C7 | Registrar planta e avancao de estagio | ULID permanente por planta; QR tag fisica; progressao forward-only | MCP Tool nivel 3 |
+| C8 | Submeter e aprovar laudo COA | RT aprova; hash imutavel gravado; lote liberado automaticamente | REST TOTP (nivel 4) |
+| C9 | Rastrear cadeia de custodia | Trilha completa cultivation → dispensation em um recurso MCP | MCP Resource (nivel 1) |
+
+### G4 — Compliance e Financeiro (RT / Financeiro / Admin)
+
+| ID | Capability | Outcome | Surface |
+|---|---|---|---|
+| C10 | Gerar BSPO trimestral | Relatorio assinado pelo RT; PDF MinIO; hash registrado em evento | MCP App (RipdReviewApp) |
+| C11 | Valorizacao biologica CPC 29 | `BiologicalAssetValuation` criado automaticamente por `HarvestRecorded`; DRE disponivel | Background job |
+| C12 | Configurar tenant e RBAC | Criar usuarios; atribuir roles; TOTP obrigatorio para roles criticos | REST TOTP (nivel 4) |
+
+## Niveis de Risco MCP
+
+| Nivel | Descricao | Capacidades |
+|---|---|---|
+| 1 — Read-only | Consulta sem efeito colateral | C2, C5, C9 |
+| 2 — Draft | Prepara sem executar; humano confirma | — |
+| 3 — Escrita operacional | Requer RBAC + confirmacao | C1, C4, C7 |
+| 4 — Alto risco | Nunca via MCP — REST TOTP direto | C3, C8, C10, C12 |
+
+## Roadmap de Surfaces por Versao
+
+| Versao | Capacidades ativadas |
+|---|---|
+| v0.2.1 (atual) | C4, C5 parcial — Tools nivel 1-3 operacionais |
+| v0.3 | C1, C2 completo — LGPD hardening, MemberQuotaCardApp |
+| v0.4 | C10 — BSPO + RIPD via MCP App; DPO view |
+| v0.5 | C6 real (SNGPC + SNCR), C11 — retry/DLQ |
+| v1.0 | C7-C9 completo — Cultivation + Processing + Lab; multi-tenant |
+
+Para detalhe de stack e interfaces: [Stack e Interfaces](/build/stack/).

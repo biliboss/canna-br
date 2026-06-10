@@ -1,0 +1,1518 @@
+---
+import IntroVideoModal from '../../components/IntroVideoModal.astro';
+import ApplyVideoModal from '../../components/ApplyVideoModal.astro';
+import Lightbox from '../../components/Lightbox.astro';
+import InvitationCard from '../../components/InvitationCard.astro';
+import LangSwitcher from '../../components/LangSwitcher.astro';
+import '../../styles/global.css';
+
+const title = "canna-br — OSS for Cannabis Patient Associations";
+const description = "OSS management platform for Brazilian medical cannabis patient associations. LGPD by design. SNGPC integration in development (mock today, ANVISA XSD pending). Compliance spine for RDC 1.014/2026.";
+---
+
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content={description} />
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://canna-br.fonsecagabriel.com.br/en/" />
+  <title>{title}</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="canonical" href="https://canna-br.fonsecagabriel.com.br/en/" />
+  <link rel="alternate" hreflang="pt-BR" href="https://canna-br.fonsecagabriel.com.br/" />
+  <link rel="alternate" hreflang="en" href="https://canna-br.fonsecagabriel.com.br/en/" />
+  <link rel="alternate" hreflang="es" href="https://canna-br.fonsecagabriel.com.br/es/" />
+  <link rel="alternate" hreflang="x-default" href="https://canna-br.fonsecagabriel.com.br/" />
+  <style>
+    :root { color-scheme: dark; }
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #020617;
+      color: #e2e8f0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ---- Floating pill nav ---- */
+    .floating-nav {
+      position: fixed;
+      top: 1.25rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 50;
+      backdrop-filter: blur(12px) saturate(180%);
+      background: rgba(15, 23, 42, 0.72);
+      border: 1px solid rgba(16, 185, 129, 0.22);
+      border-radius: 999px;
+      padding: 0.5rem 0.75rem 0.5rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      font-size: 0.875rem;
+      white-space: nowrap;
+    }
+    .floating-nav a { color: #94a3b8; text-decoration: none; transition: color 0.2s; }
+    .floating-nav a:hover { color: #6ee7b7; }
+    .floating-nav .brand { color: white; font-weight: 700; letter-spacing: -0.03em; font-size: 1rem; }
+    .floating-nav .docs-cta {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #6ee7b7;
+      padding: 0.375rem 1rem;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+    .floating-nav .docs-cta:hover { background: rgba(16, 185, 129, 0.28); color: white; }
+    @media (max-width: 640px) {
+      .floating-nav .link-secondary { display: none; }
+      .floating-nav .link-tertiary { display: none; }
+    }
+    @media (max-width: 860px) {
+      .floating-nav .link-tertiary { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Floating pill nav -->
+  <nav class="floating-nav" aria-label="Main navigation">
+    <a href="/en/" class="brand">canna-br</a>
+    <a href="/build/big-picture/" class="link-secondary">Big Picture</a>
+    <a href="/idea/regulation/" class="link-secondary" hreflang="pt-BR">Regulation</a>
+    <a href="/en/open/seed-associations/" class="link-secondary">Pilot</a>
+    <a href="/en/#circulo-convites" class="link-secondary">Invites</a>
+    <a href="/en/trust/" class="link-tertiary">Trust</a>
+    <a href="/en/idea/market/" class="link-tertiary">Market</a>
+    <a href="/build/stack/" class="docs-cta">Docs →</a>
+    <LangSwitcher />
+  </nav>
+
+  <!-- ============================================================
+       HERO
+       ============================================================ -->
+  <section class="bg-gradient-to-b from-emerald-950 to-slate-950 text-white py-36 px-6">
+    <div class="max-w-3xl mx-auto text-center">
+      <h1 class="text-5xl md:text-7xl font-bold tracking-tight leading-tight">
+        RDC 1.014 compliance with immutable traceability — and open-source code your board can audit.
+      </h1>
+      <p class="text-xl md:text-2xl text-emerald-100/80 mt-8 max-w-2xl mx-auto">
+        Operational compliance spine for Brazilian medical cannabis patient associations (regulated non-profits licensed to import/cultivate/dispense medical cannabis) — dispensation, traceability, and audit trail. LGPD-by-design. SNGPC integration in development (mock today; ANVISA XSD schema pending Jun/2026). Cultivation and financials on the v1.0 roadmap (2028). Self-hosted or managed — your data stays with you.
+      </p>
+
+      <div class="flex flex-col sm:flex-row gap-4 mt-12 justify-center items-center">
+        <button
+          type="button"
+          id="open-apply-modal"
+          class="inline-flex items-center justify-center gap-2 px-10 py-5 rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xl transition shadow-2xl shadow-emerald-500/40 focus-visible:ring-4 ring-emerald-400"
+          aria-label="Apply as a pilot association"
+        >
+          Apply as pilot →
+        </button>
+        <a
+          href="https://github.com/biliboss/canna-br"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center justify-center px-6 py-3 rounded-full border border-emerald-400/40 text-emerald-300/80 hover:bg-emerald-400/10 font-medium text-base transition focus-visible:ring-2 ring-emerald-400"
+          aria-label="View canna-br source code (repo moving to org v0.3)"
+        >
+          Explore the Code
+        </a>
+        <p class="text-xs font-mono text-emerald-200/40 mt-3">Dedicated repo being organized — v0.3 (Jul 2026). Today: development vault.</p>
+      </div>
+
+      <div class="mt-4 text-center">
+        <a
+          href="/en/about/"
+          class="font-mono uppercase tracking-widest text-xs text-emerald-200/40 hover:text-emerald-200/70 transition"
+          aria-label="Learn who is behind this project"
+        >
+          Who is behind this
+        </a>
+      </div>
+
+      <div class="text-sm text-emerald-200/60 mt-6 flex flex-wrap gap-x-4 gap-y-1 justify-center">
+        <span>v0.2.1.2 LIVE</span>
+        <span>·</span>
+        <span>154/154 tests</span>
+        <span>·</span>
+        <a href="https://canna-br.fonsecagabriel.com.br" target="_blank" rel="noopener" class="underline underline-offset-2 hover:text-emerald-200 transition">canna-br.fonsecagabriel.com.br</a>
+      </div>
+
+      <div class="mt-8 flex justify-center">
+        <IntroVideoModal videoSrc="https://canna-br-apply.gabrielfonseca.workers.dev/api/intro" />
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       URGENCY & GAP
+       ============================================================ -->
+  <section class="bg-red-950/30 border-l-4 border-red-500 py-16 px-6">
+    <div class="max-w-3xl mx-auto">
+      <p class="text-xs font-mono font-bold text-red-400 uppercase tracking-widest mb-4">Regulatory alert</p>
+      <h2 class="text-2xl md:text-3xl font-bold text-red-200 mb-6 leading-snug">
+        August 4, 2026 — the window closes. Associations without a compliant system are increasing their regulatory exposure.
+      </h2>
+      <p class="text-red-100/70 text-lg mb-8 leading-relaxed">
+        RDC 1.014/2026 is Brazil's first formal administrative regime for patient associations (replaces case-by-case habeas corpus from STJ Tema 16 IAC, 2023). From August onward, direct ANVISA (Brazil's FDA equivalent) inspection requires an immutable audit trail, integrated SNGPC (Brazil's controlled-substances tracking system), RBAC with segregation of duties, and full seed-to-dispensation traceability.
+      </p>
+
+      <div class="grid md:grid-cols-3 gap-4">
+        <div class="bg-red-950/40 border border-red-800/50 rounded-xl p-5">
+          <div class="flex items-center gap-2 mb-2">
+            <span aria-hidden="true" class="text-red-300 text-xl">⚖️</span>
+            <p class="font-bold text-red-200">LGPD personal liability</p>
+          </div>
+          <p class="text-red-100/60 text-sm mb-3">Health data in a closed SaaS without a DPA and designated DPO exposes board members to personal liability (LGPD Art. 5 II — Brazil's GDPR equivalent personal liability clause). Mitigation: self-host + DPO + contracts.</p>
+          <a href="/build/compliance/" class="text-red-300/80 hover:text-red-200 text-xs font-mono underline">see legal details →</a>
+        </div>
+        <div class="bg-red-950/40 border border-red-800/50 rounded-xl p-5">
+          <div class="flex items-center gap-2 mb-2">
+            <span aria-hidden="true" class="text-red-300 text-xl">📋</span>
+            <p class="font-bold text-red-200">ANVISA fine + license revocation</p>
+          </div>
+          <p class="text-red-100/60 text-sm mb-3">Absence of audit trail and compliant SNGPC reporting results in infraction notices, suspension, and revocation of operating authorization.</p>
+          <a href="/idea/regulation/" class="text-red-300/80 hover:text-red-200 text-xs font-mono underline">see legal details →</a>
+        </div>
+        <div class="bg-red-950/40 border border-red-800/50 rounded-xl p-5">
+          <div class="flex items-center gap-2 mb-2">
+            <span aria-hidden="true" class="text-red-300 text-xl">🔐</span>
+            <p class="font-bold text-red-200">LGPD regulatory exposure (Art. 5 II)</p>
+          </div>
+          <p class="text-red-100/60 text-sm mb-3">Software without crypto-deletion (Art. 18 IV) prevents effective erasure of sensitive health data — a non-waivable legal obligation.</p>
+          <a href="/build/compliance/" class="text-red-300/80 hover:text-red-200 text-xs font-mono underline">see legal details →</a>
+        </div>
+      </div>
+
+      <p class="text-red-200/50 text-sm mt-8">
+        <strong class="text-red-300">Confirmed gap:</strong> no solution covers LGPD + SNGPC + self-hosted + auditable code simultaneously. openthc/pos, cannlytics, XURU, BudApp — none of them.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       3 PILLARS
+       ============================================================ -->
+  <section class="py-24 px-6" style="background: rgba(15,23,42,0.8)">
+    <div class="max-w-4xl mx-auto">
+      <p class="text-xs font-mono font-bold text-emerald-400 uppercase tracking-widest text-center mb-4">Why canna-br</p>
+      <h2 class="text-3xl md:text-4xl font-bold text-white text-center mb-12 leading-tight">
+        Three pillars that don't exist together in any other system
+      </h2>
+
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="bg-slate-900/60 border border-emerald-900/40 rounded-2xl p-8 hover:border-emerald-500/50 transition">
+          <div class="w-10 h-10 rounded-xl bg-emerald-900/60 flex items-center justify-center mb-5">
+            <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-3">LGPD-by-design</h3>
+          <p class="text-slate-300 text-sm leading-relaxed mb-4">
+            Technical control of health data (LGPD-by-design) — mitigates technical risk (full elimination still requires more than software: designated DPO, pharmaceutical technical officer, documented RIPD, contracts). Per-member AES-256-GCM cryptographic envelope. Crypto-deletion guaranteed (Art. 18 IV LGPD). Optional self-host. Each association owns its own data.
+          </p>
+          <p class="text-emerald-400/70 text-xs font-mono">Per-member crypto · Self-hosted · LGPD Art. 18 IV</p>
+        </div>
+
+        <div class="bg-slate-900/60 border border-emerald-900/40 rounded-2xl p-8 hover:border-emerald-500/50 transition">
+          <div class="w-10 h-10 rounded-xl bg-emerald-900/60 flex items-center justify-center mb-5">
+            <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-3">SNGPC in development</h3>
+          <p class="text-slate-300 text-sm leading-relaxed mb-4">
+            Architecture ready for RDC 1.014 (SNGPC homologation pending). XML conforming to the regulation implemented in mock — the specific XSD schema for associations has not yet been published by ANVISA (Jun/2026). Durable retry with BullMQ. Immutable audit log via event sourcing. Complete seed-to-dispensation traceability.
+          </p>
+          <p class="text-amber-400/70 text-xs font-mono">SNGPC mock — ready to integrate when ANVISA publishes XSD</p>
+          <p class="text-emerald-400/70 text-xs font-mono">RDC 1.014 · SNGPC mock · 7 ANVISA KPIs</p>
+        </div>
+
+        <div class="bg-slate-900/60 border border-emerald-900/40 rounded-2xl p-8 hover:border-emerald-500/50 transition">
+          <div class="w-10 h-10 rounded-xl bg-emerald-900/60 flex items-center justify-center mb-5">
+            <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-3">Auditable OSS</h3>
+          <p class="text-slate-300 text-sm leading-relaxed mb-4">
+            Immutable and audit-proof traceability. AGPL-3.0 — open source, no lock-in, forks permitted. Any association lawyer can review every line that processes member data. 100% verifiable ledger.
+          </p>
+          <p class="text-emerald-400/70 text-xs font-mono">AGPL-3.0 · Event Sourcing · Audit trail</p>
+        </div>
+      </div>
+
+      <div class="mt-10 bg-slate-900/40 border border-slate-800 rounded-xl p-6 text-center">
+        <p class="text-emerald-300/80 text-sm leading-relaxed">
+          <strong class="text-emerald-300">AI and government automation ready</strong> — every business operation exposed as an MCP tool before any UI. Integrates with agents, external automations, and ANVISA pipelines without scraping or workarounds.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       HOW IT WORKS IN 4 STEPS
+       ============================================================ -->
+  <section class="py-24 px-6" style="background: rgba(15,23,42,0.6)">
+    <div class="max-w-5xl mx-auto">
+      <p class="text-xs font-mono font-bold text-emerald-400 uppercase tracking-widest text-center mb-4">How it works</p>
+      <h2 class="text-3xl md:text-4xl font-bold text-white text-center mb-4 leading-tight">
+        From onboarding to audit in 4 steps.
+      </h2>
+      <p class="text-slate-400 text-center mb-12 max-w-2xl mx-auto">
+        Built for small teams: you don't need dedicated IT. Operations happen in chat.
+      </p>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-5 mb-12">
+        <div class="bg-slate-900/60 border border-emerald-900/40 rounded-2xl p-6 hover:border-emerald-500/50 transition relative">
+          <div class="absolute -top-3 -left-3 w-10 h-10 rounded-full bg-emerald-500 text-slate-950 font-extrabold text-lg flex items-center justify-center shadow-lg shadow-emerald-500/40">01</div>
+          <h3 class="text-lg font-bold text-white mb-3 mt-2">Diagnosis</h3>
+          <p class="text-slate-300 text-sm leading-relaxed mb-3">Onboarding call (1h). We map your current legal structure (habeas corpus vs. RDC), dispensation workflow, SNGPC integration status (or absence).</p>
+          <p class="text-emerald-300/70 text-xs font-mono">Output: current-state dossier + RDC 1.014 adoption roadmap.</p>
+        </div>
+        <div class="bg-slate-900/60 border border-emerald-900/40 rounded-2xl p-6 hover:border-emerald-500/50 transition relative">
+          <div class="absolute -top-3 -left-3 w-10 h-10 rounded-full bg-emerald-500 text-slate-950 font-extrabold text-lg flex items-center justify-center shadow-lg shadow-emerald-500/40">02</div>
+          <h3 class="text-lg font-bold text-white mb-3 mt-2">Secure setup</h3>
+          <p class="text-slate-300 text-sm leading-relaxed mb-3">We provision your instance (self-host or canna-br.fonsecagabriel.com.br). Import member registry, batches, prescriptions. Crypto keys generated locally.</p>
+          <p class="text-emerald-300/70 text-xs font-mono">Output: isolated environment + migrated data + trained technical officer.</p>
+        </div>
+        <div class="bg-slate-900/60 border border-emerald-900/40 rounded-2xl p-6 hover:border-emerald-500/50 transition relative">
+          <div class="absolute -top-3 -left-3 w-10 h-10 rounded-full bg-emerald-500 text-slate-950 font-extrabold text-lg flex items-center justify-center shadow-lg shadow-emerald-500/40">03</div>
+          <h3 class="text-lg font-bold text-white mb-3 mt-2">Operations in chat</h3>
+          <p class="text-slate-300 text-sm leading-relaxed mb-3">Pharmacist dispenses via Open WebUI: "Record dispensation 5g patient X batch Y". System validates quota, deducts inventory, generates SNGPC, records immutable event.</p>
+          <p class="text-emerald-300/70 text-xs font-mono">Output: dispensation without parallel spreadsheets, zero-friction SNGPC.</p>
+        </div>
+        <div class="bg-slate-900/60 border border-emerald-900/40 rounded-2xl p-6 hover:border-emerald-500/50 transition relative">
+          <div class="absolute -top-3 -left-3 w-10 h-10 rounded-full bg-emerald-500 text-slate-950 font-extrabold text-lg flex items-center justify-center shadow-lg shadow-emerald-500/40">04</div>
+          <h3 class="text-lg font-bold text-white mb-3 mt-2">Automatic audit</h3>
+          <p class="text-slate-300 text-sm leading-relaxed mb-3">ANVISA inspector arrives? Board opens dashboard, generates signed quarterly report, exports immutable seed-to-dispensation trail. No spreadsheet treasure hunt.</p>
+          <p class="text-emerald-300/70 text-xs font-mono">Output: auditable dossier in minutes, not days.</p>
+        </div>
+      </div>
+
+      <div class="bg-slate-950/70 border border-emerald-700/30 rounded-2xl p-8 max-w-3xl mx-auto text-center">
+        <div class="flex items-center justify-center gap-3 mb-4">
+          <p class="text-xs font-mono font-bold text-emerald-400 uppercase tracking-widest">Recorded demo</p>
+        </div>
+        <p class="text-slate-300 text-base font-semibold mb-3">Walkthrough: pharmacist + auditor + RDC report — recording scheduled for Q3 2026.</p>
+        <p class="text-slate-400 text-sm mb-6 leading-relaxed">
+          Walkthrough of pharmacist dispensing + auditor tracing a batch + board generating RDC report. Will be recorded on the first pilot association's instance after onboarding.
+        </p>
+        <span class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-slate-800/60 border border-emerald-900/40 text-emerald-300/60 text-sm font-mono" aria-label="Recorded demo scheduled for Q3 2026">
+          <span>Recorded demo · Q3 2026</span>
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       PRODUCT IN PRACTICE (screenshots OWUI + MCP Apps)
+       ============================================================ -->
+  <section id="produto-na-pratica" class="py-24 px-6" style="background: rgba(2,6,23,0.92)">
+    <div class="max-w-6xl mx-auto">
+      <p class="text-xs font-mono font-bold text-emerald-400 uppercase tracking-widest text-center mb-4">Product in practice</p>
+      <h2 class="text-3xl md:text-4xl font-bold text-white text-center mb-4 leading-tight">
+        Not a deck. Here's the system running in smoke validation.
+      </h2>
+      <p class="text-slate-400 text-center mb-12 max-w-3xl mx-auto">
+        Real captures of <strong class="text-emerald-300">Open WebUI v0.9.6 + canna-br MCP server</strong> on 2026-06-08. There is no separate Next.js admin — operations happen inside the chat with inline MCP Apps. What you see below is what your team uses.
+      </p>
+
+      <!-- Gallery hint: click any card thumbnail to open fullscreen (PhotoSwipe v5) -->
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+        <!-- Card 1 -->
+        <div class="screenshot-card">
+          <div class="screenshot-thumb-wrap">
+            <Lightbox
+              src="/screenshots/owui/06-member-quota-rendered.png"
+              alt="MemberQuotaCardApp rendered inside chat — monthly quota, used dispensations, history"
+              width={1280}
+              height={800}
+            />
+            <span class="screenshot-zoom-hint" aria-hidden="true">click to expand</span>
+          </div>
+          <div class="screenshot-meta">
+            <p class="screenshot-eyebrow">MCP App · Member</p>
+            <p class="screenshot-title">Member quota and history</p>
+            <p class="screenshot-desc">Dispenser asks "what's João's quota?" — inline app shows active prescription, monthly quota, used dispensations. Zero CRUD screen.</p>
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="screenshot-card">
+          <div class="screenshot-thumb-wrap">
+            <Lightbox
+              src="/screenshots/owui/07-dispensation-form.png"
+              alt="DispensationFormApp — inline form with batch selection, quantity, dispenser, approval gate"
+              width={1280}
+              height={800}
+            />
+            <span class="screenshot-zoom-hint" aria-hidden="true">click to expand</span>
+          </div>
+          <div class="screenshot-meta">
+            <p class="screenshot-eyebrow">MCP App · Dispensation</p>
+            <p class="screenshot-title">Inline dispensation recording</p>
+            <p class="screenshot-desc">Form rendered in chat with approval gate. Commit generates atomic <code class="code-inline">DispensationRecorded</code> + <code class="code-inline">LotQuantityDeducted</code> events in the ledger.</p>
+          </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="screenshot-card">
+          <div class="screenshot-thumb-wrap">
+            <Lightbox
+              src="/screenshots/owui/08-traceability-timeline.png"
+              alt="TraceabilityTimelineApp — seed-to-dispensation timeline with event hashes"
+              width={1280}
+              height={800}
+            />
+            <span class="screenshot-zoom-hint" aria-hidden="true">click to expand</span>
+          </div>
+          <div class="screenshot-meta">
+            <p class="screenshot-eyebrow">MCP App · Traceability</p>
+            <p class="screenshot-title">Seed-to-dispensation chain of custody</p>
+            <p class="screenshot-desc">Auditor asks "trace batch LT-001" — timeline with cultivation, harvest, approved COA report, dispensations. Immutable trail.</p>
+          </div>
+        </div>
+
+        <!-- Card 4 -->
+        <div class="screenshot-card">
+          <div class="screenshot-thumb-wrap">
+            <Lightbox
+              src="/screenshots/owui/02-mcp-servers.png"
+              alt="List of MCP servers connected to Open WebUI showing canna-br"
+              width={1280}
+              height={800}
+            />
+            <span class="screenshot-zoom-hint" aria-hidden="true">click to expand</span>
+          </div>
+          <div class="screenshot-meta">
+            <p class="screenshot-eyebrow">Admin · Integrations</p>
+            <p class="screenshot-title">canna-br MCP server connected</p>
+            <p class="screenshot-desc">Open WebUI Admin → Settings → Integrations. canna-br MCP server registered, tools enumerated, healthcheck green.</p>
+          </div>
+        </div>
+
+        <!-- Card 5 -->
+        <div class="screenshot-card">
+          <div class="screenshot-thumb-wrap">
+            <Lightbox
+              src="/screenshots/owui/02-logged-in.png"
+              alt="Open WebUI logged in showing main interface with models and MCP enabled"
+              width={1280}
+              height={800}
+            />
+            <span class="screenshot-zoom-hint" aria-hidden="true">click to expand</span>
+          </div>
+          <div class="screenshot-meta">
+            <p class="screenshot-eyebrow">Operations · Chat</p>
+            <p class="screenshot-title">Your team uses the OWUI chat</p>
+            <p class="screenshot-desc">Open WebUI v0.9.6 — chat with AI model + canna-br tools available. Same UX as ChatGPT/Claude, with the full operational power of the association.</p>
+          </div>
+        </div>
+
+        <!-- Card 6 -->
+        <div class="screenshot-card">
+          <div class="screenshot-thumb-wrap">
+            <Lightbox
+              src="/screenshots/owui/09-summary.png"
+              alt="Smoke test summary showing 3 MCP Apps validated end-to-end"
+              width={1280}
+              height={800}
+            />
+            <span class="screenshot-zoom-hint" aria-hidden="true">click to expand</span>
+          </div>
+          <div class="screenshot-meta">
+            <p class="screenshot-eyebrow">Smoke 2026-06-08</p>
+            <p class="screenshot-title">3 MCP Apps validated end-to-end</p>
+            <p class="screenshot-desc">Stack: Postgres 16 + Redis 7 + OWUI v0.9.6 + canna-br MCP. Cold start 44s, 3 GB RAM steady. postMessage contract OK.</p>
+          </div>
+        </div>
+
+      </div>
+
+      <style>
+        /* Screenshot card — Linear-style elevation: lighter bg, inner border, no box-shadow */
+        .screenshot-card {
+          background: oklch(0.15 0.015 250);
+          border: 1px solid oklch(0.28 0.04 162 / 0.45);
+          border-radius: 16px;
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
+          transition: border-color 0.15s ease-out, background 0.15s ease-out;
+        }
+        .screenshot-card:hover {
+          background: oklch(0.17 0.015 250);
+          border-color: oklch(0.55 0.12 162 / 0.7);
+        }
+
+        /* Thumbnail wrapper — natural 16:10 aspect (1280×800) via padding trick */
+        .screenshot-thumb-wrap {
+          position: relative;
+          width: 100%;
+          /* 800/1280 = 62.5% — locks the container to the image aspect before load */
+          padding-top: 62.5%;
+          overflow: hidden;
+          background: oklch(0.11 0.01 250);
+          border-bottom: 1px solid oklch(0.25 0.03 250);
+        }
+        .screenshot-thumb-wrap > .lightbox-figure {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+        }
+        .screenshot-thumb-wrap > .lightbox-figure .lightbox-link,
+        .screenshot-thumb-wrap > .lightbox-figure .lightbox-thumb {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: top;
+        }
+
+        /* Zoom hint badge — appears on card hover */
+        .screenshot-zoom-hint {
+          position: absolute;
+          bottom: 8px;
+          right: 10px;
+          background: oklch(0.08 0.01 250 / 0.82);
+          border: 1px solid oklch(0.72 0.17 162 / 0.5);
+          color: oklch(0.72 0.17 162);
+          font-size: 0.65rem;
+          font-family: ui-monospace, monospace;
+          letter-spacing: 0.04em;
+          padding: 2px 7px;
+          border-radius: 999px;
+          pointer-events: none;
+          opacity: 0;
+          transform: translateY(4px);
+          transition: opacity 0.15s ease-out, transform 0.15s ease-out;
+        }
+        .screenshot-card:hover .screenshot-zoom-hint {
+          opacity: 1;
+          transform: translateY(0);
+        }
+
+        /* Meta block */
+        .screenshot-meta {
+          padding: 16px;
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+          flex: 1;
+        }
+        .screenshot-eyebrow {
+          color: oklch(0.72 0.17 162);
+          font-size: 0.7rem;
+          font-family: ui-monospace, "JetBrains Mono", monospace;
+          font-weight: 700;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          margin: 0;
+        }
+        .screenshot-title {
+          color: #fff;
+          font-size: 0.9rem;
+          font-weight: 600;
+          margin: 0;
+          line-height: 1.4;
+        }
+        .screenshot-desc {
+          color: oklch(0.6 0.025 220);
+          font-size: 0.78rem;
+          line-height: 1.55;
+          margin: 4px 0 0;
+        }
+        .code-inline {
+          color: oklch(0.72 0.17 162);
+          font-family: ui-monospace, "JetBrains Mono", monospace;
+          font-size: 0.75rem;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .screenshot-card,
+          .screenshot-zoom-hint {
+            transition-duration: 0.01ms !important;
+          }
+        }
+      </style>
+
+      <div class="mt-10 bg-amber-950/20 border border-amber-700/30 rounded-xl p-5 max-w-3xl mx-auto">
+        <p class="text-amber-200/90 text-sm leading-relaxed text-center">
+          <strong class="text-amber-300">Alpha honesty:</strong> these are real MCP Apps running against the domain kernel. Not Figma mockups. But it is alpha — aesthetics and internal copy will be polished by v1.0 (gate: <em>"awesome UX polished"</em>). See the technical write-up in <a href="/releases/v021/" class="text-amber-300 underline">release v0.2.1</a>.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       MAIN CIRCLE · INVITATIONS (LANE INVITE START)
+       ============================================================ -->
+  <section
+    id="circulo-convites"
+    class="py-24"
+    style="background: linear-gradient(180deg, rgba(2,6,23,0.98) 0%, rgba(4,20,18,0.95) 100%)"
+    aria-labelledby="circulo-convites-heading"
+  >
+    <div class="max-w-6xl mx-auto px-6">
+
+      <!-- Section header -->
+      <p class="text-xs font-mono font-bold text-emerald-400 uppercase tracking-widest text-center mb-4">
+        Main circle · open invitations
+      </p>
+      <h2 id="circulo-convites-heading" class="text-3xl md:text-4xl font-bold text-white text-center mb-5 leading-tight">
+        The team being built.
+      </h2>
+      <p class="text-slate-400 text-center mb-10 max-w-2xl mx-auto leading-relaxed">
+        This is not an institutional team page. These are people being invited — one by one,
+        with real names, proposed roles, and the why. Each card is a live invitation. If you're here and
+        want to propose a different framing,
+        <a href="mailto:gabriel@devmagic.com.br" class="text-emerald-300 underline hover:text-emerald-200 transition">
+          write to Gabriel
+        </a>.
+      </p>
+
+    </div>
+
+    <!-- ── CAROUSEL WRAPPER (full-bleed, no px-6 constraint) ── -->
+    <div class="convites-carousel-outer" aria-label="Main circle invitations">
+
+      <!-- Prev / Next arrows -->
+      <button
+        class="carousel-arrow carousel-prev"
+        aria-label="Previous card"
+        data-dir="-1"
+        disabled
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+
+      <!-- Scrollable track -->
+      <div
+        class="carousel-track"
+        id="convites-track"
+        role="list"
+        aria-label="Main circle invitations"
+        tabindex="0"
+      >
+
+        <div role="listitem" class="snap-card">
+          <InvitationCard
+            name="Adriany Eizo"
+            photoUrl="/people/adriany.png"
+            role="Legal Guardian Angel"
+            roleSubtitle="legal defender of the circle"
+            bio="Lawyer and speaker specializing in Human Rights and Social Responsibility — focusing on harm reduction, mental health, and cannabis legalization. Collaborator at Associação Casa da Mata in São Vicente, SP (founded by Thiago Félix), where she acts as lawyer and educator in the context of cannabis activism. Member of Div3rso group (UNIFESP/Baixada Santista)."
+            whyYou={[
+              "Legal defense of cannabis associations requires someone who has lived the regulatory tension from the inside — not from a corporate law office.",
+              '"Legal Guardian Angel" because the role is to protect the OSS+auditable thesis against pressure from boards spooked by RDC 1.014.',
+              "Casa da Mata = confirmed grassroots legitimacy. Adriany is not a SaaS lawyer; she is an association lawyer with history in the movement.",
+              "Calibrates the regulatory tone of canna-br: every public release passes through her filter before going out.",
+              "Opens the network with other association lawyers — OAB Santos, Baixada Santista and beyond. [network to confirm with Adriany]",
+            ]}
+            affiliations={[
+              "Associação Casa da Mata · São Vicente SP",
+              "Div3rso · UNIFESP/Baixada Santista",
+              "OAB Santos · Human Rights Commission [to confirm]",
+            ]}
+            linkedinUrl="https://www.linkedin.com/in/adriany-eizo-054980a0/"
+            cta="Accept the invitation · reply to Gabriel"
+            ctaHref={"mailto:gabriel@devmagic.com.br?subject=" + encodeURIComponent("I accept the invitation — Adriany Eizo") + "&body=" + encodeURIComponent("Gabriel, I received the invitation for the Legal Guardian Angel role at canna-br.\n\n")}
+            ctaSecondaryLabel="Read first — what this means"
+            ctaSecondaryHref="/open/perguntas/"
+            signedBy="Gabriel"
+          />
+        </div>
+
+        <div role="listitem" class="snap-card">
+          <InvitationCard
+            name="Ana Júlia Bravo"
+            photoUrl="/people/ana-julia.png"
+            role="Manager Humans"
+            roleSubtitle="human coordinator of the circle"
+            bio="Project manager and coordinator with experience in operations that depend on people more than systems. Knows that technical products stall when human dynamics stall — and acts before that happens. [experiences to detail with Ana Júlia]"
+            whyYou={[
+              "The circle needs someone who takes care of rhythm, not just deliverables — Ana Júlia makes that distinction.",
+              "Project coordination is the role most easily underdeveloped in technical teams. Having someone with explicit focus on this is a differentiator.",
+              "Interpersonal tensions between members are usually the first silent failure point in organic organizations — 'Manager Humans' exists to prevent buildup.",
+              "While Gabriel handles technical operations, Ana Júlia holds human operations — complementary roles, not overlapping.",
+              "Legitimacy comes from having already coordinated projects with multiple stakeholders and finishing with the whole team intact. [experiences to detail with Ana Júlia]",
+            ]}
+            affiliations={[
+              "Project Management [to confirm]",
+            ]}
+            linkedinUrl="https://www.linkedin.com/in/ana-julia-bravo/"
+            cta="Accept the invitation · reply to Gabriel"
+            ctaHref={"mailto:gabriel@devmagic.com.br?subject=" + encodeURIComponent("I accept the invitation — Ana Júlia Bravo") + "&body=" + encodeURIComponent("Gabriel, I received the invitation for the Manager Humans role at canna-br.\n\n")}
+            ctaSecondaryLabel="Read first — what this means"
+            ctaSecondaryHref="/open/perguntas/"
+            signedBy="Gabriel"
+          />
+        </div>
+
+        <div role="listitem" class="snap-card">
+          <InvitationCard
+            name="Luiz Ribeiro"
+            photoUrl="/people/luiz.png"
+            role="Product Cartographer"
+            roleSubtitle="vision compass of the circle"
+            bio="Product-minded professional — the ability to see what the product should be before anyone can articulate the problem. Navigates between what users ask for, what the business needs, and what is technically possible, and comes back with a map. [details to confirm with Luiz]"
+            whyYou={[
+              "Every mission-driven software carries the risk of building the right thing the wrong way. Luiz is the antidote.",
+              "'Cartographer' because the role is not just to prioritize the backlog — it's to map the territory before the team gets lost in it.",
+              "Product vision without a technical anchor becomes PowerPoint; with a technical anchor it becomes a roadmap. Luiz understands both sides.",
+              "canna-br will have hard fork moments — regulatory vs. growth, OSS vs. commercial. We need someone who thinks product clearly in those moments.",
+              "Complements the circle: Adriany holds legal, Ana Júlia holds people, Gabriel holds tech — Luiz holds direction. [to confirm with Luiz]",
+            ]}
+            affiliations={[
+              "Digital Product [to confirm]",
+            ]}
+            linkedinUrl="https://www.linkedin.com/in/luizferibeiro/"
+            cta="Accept the invitation · reply to Gabriel"
+            ctaHref={"mailto:gabriel@devmagic.com.br?subject=" + encodeURIComponent("I accept the invitation — Luiz Ribeiro") + "&body=" + encodeURIComponent("Gabriel, I received the invitation for the Product Cartographer role at canna-br.\n\n")}
+            ctaSecondaryLabel="Read first — what this means"
+            ctaSecondaryHref="/open/perguntas/"
+            signedBy="Gabriel"
+          />
+        </div>
+
+        <div role="listitem" class="snap-card">
+          <InvitationCard
+            name="Eduardo Yoshimura"
+            photoUrl="/people/eduardo.png"
+            role="Security Guardian"
+            roleSubtitle="data and infrastructure sentinel"
+            bio="Security specialist with experience at Creditas, Itaú Unibanco, and Módulo Security Solutions, currently at Nodex Consulting — specialized in Cybersecurity, GRC, and AI-driven automation. Activist at the Associação Cannábica de Jundiaí (ACM Jundiaí), where public utility was recognized by the City Council in 2026."
+            whyYou={[
+              "Cannabis associations are real targets for data leaks, surveillance, and institutional pressure — having a security specialist inside the circle is non-negotiable.",
+              "Eduardo lives both realities: the technical rigor of protecting critical infrastructure (pentest, GRC, LGPD) and the grassroots activism that gives context to what is being protected.",
+              "Nodex = 15+ years in enterprise cybersecurity. This is not a junior profile with a certification; it's market-validated seniority.",
+              "LGPD in cannabis associations is one of the most tensioned compliance zones in Brazil. Eduardo already navigates this terrain.",
+              "The Jundiaí–canna-br bridge opens the network to one of the associations that just gained formal recognition — geographic expansion and regional legitimacy.",
+            ]}
+            affiliations={[
+              "Nodex Consulting · Cybersecurity & GRC",
+              "Associação Cannábica de Jundiaí · ACM Jundiaí",
+            ]}
+            linkedinUrl="https://www.linkedin.com/in/jeycorp/"
+            cta="Accept the invitation · reply to Gabriel"
+            ctaHref={"mailto:gabriel@devmagic.com.br?subject=" + encodeURIComponent("I accept the invitation — Eduardo Yoshimura") + "&body=" + encodeURIComponent("Gabriel, I received the invitation for the Security Guardian role at canna-br.\n\n")}
+            ctaSecondaryLabel="Read first — what this means"
+            ctaSecondaryHref="/open/perguntas/"
+            signedBy="Gabriel"
+          />
+        </div>
+
+        <div role="listitem" class="snap-card">
+          <InvitationCard
+            name="Thiago Félix"
+            photoUrl="/people/thiago.png"
+            role="Bridge Director · Pilot Front"
+            roleSubtitle="voice of associations in the circle"
+            bio="Founder and President of Associação Casa da Mata (São Vicente, SP) — one of the pioneers in medical cannabis activism in the Baixada Santista region. Created Casa da Mata with a focus on art, sustainability, and healing, integrating therapeutic cultivation with harm reduction and community education. He is the living memory of how a real association is born, operates, and survives."
+            whyYou={[
+              "canna-br cannot be built by someone who has never operated an association. Thiago founded, directs, and survives the operational reality that the system resolves.",
+              "Casa da Mata is a grassroots reference: real multidisciplinary structure (pharmacist, doctor, psychiatrist, biologist, lawyer) — not a PowerPoint.",
+              "As 'Bridge Director', Thiago does not represent canna-br to associations — he represents associations to canna-br. That direction matters.",
+              "Baixada Santista concentrates some of the most active associations in the state of São Paulo interior. Thiago's network is the product's network.",
+              "Legitimacy that cannot be hired: whoever founded an association with real recognition knows where the system will fail before any beta tester does.",
+            ]}
+            affiliations={[
+              "Associação Casa da Mata · São Vicente SP · Founder & President",
+            ]}
+            cta="Accept the invitation · reply to Gabriel"
+            ctaHref={"mailto:gabriel@devmagic.com.br?subject=" + encodeURIComponent("I accept the invitation — Thiago Félix") + "&body=" + encodeURIComponent("Gabriel, I received the invitation for the Bridge Director · Pilot Front role at canna-br.\n\n")}
+            ctaSecondaryLabel="Read first — what this means"
+            ctaSecondaryHref="/open/perguntas/"
+            signedBy="Gabriel"
+          />
+        </div>
+
+        <div role="listitem" class="snap-card">
+          <InvitationCard
+            name="Caroline Campagnone"
+            photoUrl="/people/caroline.png"
+            role="Bridge Director · Pilot Front"
+            roleSubtitle="voice of associations in the circle"
+            bio="Veterinary doctor, President of AME-C (Associação Medicinal Canábica, Bertioga/SP), and Director of Plantando Conhecimento. Creator of Cannaderno — a treatment control app for cannabis patients. Member of the CFMV (Brazil's Federal Council of Veterinary Medicine) Working Group on cannabinoid regulation in veterinary medicine. Judicial habeas corpus for home cultivation of cannabis for her husband's neurological treatment."
+            whyYou={[
+              "Caroline does not study medical cannabis — she operates an association, creates patient tools, and sits on the group that will regulate the veterinary sector.",
+              "AME-C Bertioga covers humans AND animals: it is one of the few associations with dual habeas corpus — regulatory complexity that stress-tests any management system.",
+              "Cannaderno = she already attempted to solve the treatment control problem with software. She knows exactly where a management solution loosens and where it tightens.",
+              "CFMV + CFMV cannabinoid GT: Caroline is at the table where veterinary regulation is being written. Regulatory anticipation in the circle.",
+              "Bertioga → São Paulo coast: diversifies the geographic network beyond Baixada Santista, opening access to another cluster of associations.",
+            ]}
+            affiliations={[
+              "AME-C · Associação Medicinal Canábica · Bertioga SP · President",
+              "Plantando Conhecimento · Director",
+              "CFMV · GT Cannabinoids in Veterinary Medicine",
+              "Cannaderno · Creator",
+            ]}
+            linkedinUrl="https://www.linkedin.com/in/caroline-campagnone-450889b5/"
+            cta="Accept the invitation · reply to Gabriel"
+            ctaHref={"mailto:gabriel@devmagic.com.br?subject=" + encodeURIComponent("I accept the invitation — Caroline Campagnone") + "&body=" + encodeURIComponent("Gabriel, I received the invitation for the Bridge Director · Pilot Front role at canna-br.\n\n")}
+            ctaSecondaryLabel="Read first — what this means"
+            ctaSecondaryHref="/open/perguntas/"
+            signedBy="Gabriel"
+          />
+        </div>
+
+        <div role="listitem" class="snap-card">
+          <InvitationCard
+            name="Ricardo Caspirro"
+            photoUrl="/people/caspirro.png"
+            role="Strategic Antenna"
+            roleSubtitle="Gabriel's first startup mentor"
+            bio="CEO and founder of Vanhall (Santos/SP), with stints at Startup Studio Brasil and Novos Fundadores — two of the rare Brazilian projects focused on founder formation before the product exists. Ricardo was Gabriel's first startup mentor: the person who taught how to think about market, timing, and category before any line of code. Not an association manager, not a lawyer, not a product manager — he is the macro eye. The bet on canna-br makes sense to him because he recognizes the mechanics of an emerging category before the market notices it exists. [passage through the Santos and Baixada Santista ecosystem to confirm with Ricardo]"
+            whyYou={[
+              "Category timing: RDC 1.014/2026 opens an 18–24-month window where the first solution to consolidate compliance + OSS sets the standard. Ricardo recognizes this pattern before any pitch deck.",
+              "Confirmed mentor track record — Startup Studio Brasil + Novos Fundadores are founder formation projects, not product projects. Those who came through there know where founders break before they break. [details to confirm with Ricardo]",
+              "The circle does not need another operational person — it needs someone who looks from the outside and asks 'are you focused on the right thing?' Ricardo is that interlocutor.",
+            ]}
+            affiliations={[
+              "Vanhall · Santos SP · CEO & Founder",
+              "Startup Studio Brasil [to confirm]",
+              "Novos Fundadores [to confirm]",
+            ]}
+            linkedinUrl="https://www.linkedin.com/in/caspirro/"
+            cta="Accept the invitation · reply to Gabriel"
+            ctaHref={"mailto:gabriel@devmagic.com.br?subject=" + encodeURIComponent("I accept the invitation — Ricardo Caspirro") + "&body=" + encodeURIComponent("Gabriel, I received the invitation for the Strategic Antenna role at canna-br.\n\n")}
+            ctaSecondaryLabel="Read first — what this means"
+            ctaSecondaryHref="/open/perguntas/"
+            signedBy="Gabriel"
+          />
+        </div>
+
+      </div>
+
+      <!-- Next arrow (right side) -->
+      <button
+        class="carousel-arrow carousel-next"
+        aria-label="Next card"
+        data-dir="1"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+
+    </div>
+
+    <!-- Dot pagination -->
+    <div class="carousel-dots" role="tablist" aria-label="Carousel navigation" id="convites-dots">
+      <button role="tab" aria-selected="true"  aria-label="Card 1: Adriany Eizo"       data-i="0" class="dot dot-active"></button>
+      <button role="tab" aria-selected="false" aria-label="Card 2: Ana Júlia Bravo"    data-i="1" class="dot"></button>
+      <button role="tab" aria-selected="false" aria-label="Card 3: Luiz Ribeiro"       data-i="2" class="dot"></button>
+      <button role="tab" aria-selected="false" aria-label="Card 4: Eduardo Yoshimura"  data-i="3" class="dot"></button>
+      <button role="tab" aria-selected="false" aria-label="Card 5: Thiago Félix"       data-i="4" class="dot"></button>
+      <button role="tab" aria-selected="false" aria-label="Card 6: Caroline Campagnone" data-i="5" class="dot"></button>
+      <button role="tab" aria-selected="false" aria-label="Card 7: Ricardo Caspirro"    data-i="6" class="dot"></button>
+    </div>
+
+    <style>
+      /* ================================================================
+         CAROUSEL — pure CSS scroll-snap + progressive enhancement JS
+         Pattern: scroll-snap mandatory, scrollbar hidden, arrow overlays
+         Reference: Vercel /templates gallery pattern (2025-2026)
+      ================================================================ */
+
+      .convites-carousel-outer {
+        position: relative;
+        /* allow arrows to escape the track horizontally on wide screens */
+      }
+
+      /* ── Track ── */
+      .carousel-track {
+        display: grid;
+        grid-auto-flow: column;
+        /* Each card: min 85vw on mobile, max 760px on desktop */
+        grid-auto-columns: minmax(min(85vw, 760px), 760px);
+        gap: 1.5rem;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        scroll-padding-inline: max(1.5rem, calc((100vw - 760px) / 2));
+        scrollbar-width: none;
+        padding: 0.5rem max(1.5rem, calc((100vw - 760px) / 2)) 2rem;
+        outline: none;
+        /* smooth scroll driven via JS — CSS fallback is swipe */
+      }
+      .carousel-track::-webkit-scrollbar { display: none; }
+
+      /* ── Snap cards ── */
+      .snap-card {
+        scroll-snap-align: center;
+        /* prevent card from collapsing when grid-auto-columns hits min */
+        min-width: 0;
+      }
+
+      /* On wide screens (≥1400px) show 2 cards at once if they fit */
+      @media (min-width: 1400px) {
+        .carousel-track {
+          grid-auto-columns: minmax(min(48%, 760px), 760px);
+          scroll-padding-inline: max(1.5rem, calc((100vw - 1554px) / 2));
+          padding: 0.5rem max(1.5rem, calc((100vw - 1554px) / 2)) 2rem;
+        }
+        .snap-card {
+          scroll-snap-align: start;
+        }
+      }
+
+      /* Mobile: full-bleed feel */
+      @media (max-width: 639px) {
+        .carousel-track {
+          grid-auto-columns: 90vw;
+          gap: 1rem;
+          padding: 0.5rem 1rem 1.5rem;
+          scroll-padding-inline: 1rem;
+        }
+      }
+
+      /* ── Arrow buttons ── */
+      .carousel-arrow {
+        display: none; /* hidden on mobile — swipe only */
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 20;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        border: 1px solid oklch(0.45 0.10 162 / 0.45);
+        background: oklch(0.12 0.015 250 / 0.90);
+        color: oklch(0.84 0.13 162);
+        cursor: pointer;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(8px);
+        transition: background 0.15s ease-out, border-color 0.15s ease-out, opacity 0.15s;
+      }
+
+      @media (min-width: 768px) {
+        .carousel-arrow {
+          display: flex;
+        }
+      }
+
+      .carousel-prev { left: 0.5rem; }
+      .carousel-next { right: 0.5rem; }
+
+      .carousel-arrow:hover {
+        background: oklch(0.18 0.02 250 / 0.95);
+        border-color: oklch(0.72 0.17 162 / 0.70);
+      }
+
+      .carousel-arrow:focus-visible {
+        outline: 2px solid oklch(0.72 0.17 162);
+        outline-offset: 2px;
+      }
+
+      .carousel-arrow:disabled,
+      .carousel-arrow[disabled] {
+        opacity: 0.25;
+        cursor: default;
+        pointer-events: none;
+      }
+
+      /* ── Dots ── */
+      .carousel-dots {
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 1.25rem;
+        padding: 0 1rem;
+      }
+
+      .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        border: 1px solid oklch(0.45 0.10 162 / 0.6);
+        background: transparent;
+        cursor: pointer;
+        padding: 0;
+        transition: background 0.2s ease-out, transform 0.2s ease-out, border-color 0.2s ease-out;
+        /* Expand touch target via box-shadow trick — visual stays 8px */
+        box-shadow: 0 0 0 8px transparent;
+      }
+
+      .dot:hover {
+        border-color: oklch(0.72 0.17 162 / 0.8);
+        background: oklch(0.72 0.17 162 / 0.3);
+      }
+
+      .dot-active,
+      .dot[aria-selected="true"] {
+        background: oklch(0.72 0.17 162);
+        border-color: oklch(0.72 0.17 162);
+        transform: scale(1.3);
+      }
+
+      .dot:focus-visible {
+        outline: 2px solid oklch(0.72 0.17 162);
+        outline-offset: 3px;
+      }
+
+      /* ── Reduced motion ── */
+      @media (prefers-reduced-motion: reduce) {
+        .carousel-track {
+          scroll-behavior: auto !important;
+        }
+        .dot,
+        .carousel-arrow {
+          transition-duration: 0.01ms !important;
+        }
+      }
+    </style>
+
+    <script is:inline>
+    (function () {
+      var track    = document.getElementById('convites-track');
+      var dotsWrap = document.getElementById('convites-dots');
+      var prevBtn  = document.querySelector('.carousel-prev');
+      var nextBtn  = document.querySelector('.carousel-next');
+      if (!track || !dotsWrap) return;
+
+      var dots  = Array.from(dotsWrap.querySelectorAll('.dot'));
+      var cards = Array.from(track.querySelectorAll('.snap-card'));
+      var total = cards.length;
+
+      /* ── card width (including gap) ── */
+      function cardStep() {
+        if (cards.length < 2) return track.scrollWidth;
+        var r0 = cards[0].getBoundingClientRect();
+        var r1 = cards[1].getBoundingClientRect();
+        return r1.left - r0.left;
+      }
+
+      /* ── scroll to card index ── */
+      function scrollTo(idx) {
+        var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        track.scrollBy({
+          left: (idx - activeIndex()) * cardStep(),
+          behavior: reduced ? 'auto' : 'smooth',
+        });
+      }
+
+      /* ── detect which card is most visible ── */
+      function activeIndex() {
+        var mid = track.getBoundingClientRect().left + track.getBoundingClientRect().width / 2;
+        var best = 0, bestDist = Infinity;
+        cards.forEach(function (c, i) {
+          var cr = c.getBoundingClientRect();
+          var center = cr.left + cr.width / 2;
+          var dist = Math.abs(center - mid);
+          if (dist < bestDist) { bestDist = dist; best = i; }
+        });
+        return best;
+      }
+
+      /* ── sync dots + arrows ── */
+      function syncUI(idx) {
+        dots.forEach(function (d, i) {
+          var active = i === idx;
+          d.classList.toggle('dot-active', active);
+          d.setAttribute('aria-selected', active ? 'true' : 'false');
+        });
+        if (prevBtn) prevBtn.disabled = idx === 0;
+        if (nextBtn) nextBtn.disabled = idx === total - 1;
+      }
+
+      /* ── IntersectionObserver — sync on scroll ── */
+      var obs = new IntersectionObserver(function () {
+        syncUI(activeIndex());
+      }, { root: track, threshold: 0.5 });
+      cards.forEach(function (c) { obs.observe(c); });
+
+      /* ── Arrow clicks ── */
+      [prevBtn, nextBtn].forEach(function (btn) {
+        if (!btn) return;
+        btn.addEventListener('click', function () {
+          var dir = parseInt(btn.getAttribute('data-dir'), 10);
+          scrollTo(activeIndex() + dir);
+        });
+      });
+
+      /* ── Dot clicks ── */
+      dots.forEach(function (d) {
+        d.addEventListener('click', function () {
+          scrollTo(parseInt(d.getAttribute('data-i'), 10));
+        });
+      });
+
+      /* ── Keyboard nav on track ── */
+      track.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowRight') { e.preventDefault(); scrollTo(Math.min(activeIndex() + 1, total - 1)); }
+        if (e.key === 'ArrowLeft')  { e.preventDefault(); scrollTo(Math.max(activeIndex() - 1, 0)); }
+      });
+
+      /* ── init ── */
+      syncUI(0);
+    })();
+    </script>
+
+  </section>
+  <!-- LANE INVITE END -->
+
+  <!-- ============================================================
+       CURRENT STATE v0.2.1.2 vs ROADMAP v1.0
+       ============================================================ -->
+  <section id="estado-vs-roadmap" class="py-24 px-6" style="background: rgba(15,23,42,0.85)">
+    <div class="max-w-5xl mx-auto">
+      <p class="text-xs font-mono font-bold text-emerald-400 uppercase tracking-widest text-center mb-4">Current state · v0.2.1.2 → v1.0</p>
+      <h2 class="text-3xl md:text-4xl font-bold text-white text-center mb-4 leading-tight">
+        What's ready, in pilot, and planned — by area.
+      </h2>
+      <p class="text-slate-400 text-center mb-10 max-w-3xl mx-auto">
+        No opacity. See exactly where we are today, what enters the seed pilot, and what stays for v1.0. Red line = external blocker (sandbox, RDC, partner).
+      </p>
+
+      <div class="overflow-x-auto">
+        <table class="w-full border-collapse text-sm">
+          <thead>
+            <tr>
+              <th class="text-left p-3 bg-slate-900 text-emerald-300 font-semibold rounded-tl-xl">Area</th>
+              <th class="text-left p-3 bg-slate-900 text-emerald-300 font-semibold">Capability</th>
+              <th class="text-center p-3 bg-slate-900 text-emerald-300 font-semibold">v0.2.1.2 (today)</th>
+              <th class="text-center p-3 bg-slate-900 text-emerald-300 font-semibold">v0.3 pilot</th>
+              <th class="text-center p-3 bg-slate-900 text-emerald-300 font-semibold rounded-tr-xl">v1.0 GA</th>
+            </tr>
+          </thead>
+          <tbody class="text-slate-300">
+            <tr>
+              <td class="p-3 border-b border-slate-800 font-mono text-emerald-400" rowspan="3">LGPD</td>
+              <td class="p-3 border-b border-slate-800">AES-256-GCM envelope per member</td>
+              <td class="p-3 border-b border-slate-800 text-center"><span class="text-emerald-400">✓ ready</span></td>
+              <td class="p-3 border-b border-slate-800 text-center"><span class="text-emerald-400">✓</span></td>
+              <td class="p-3 border-b border-slate-800 text-center"><span class="text-emerald-400">✓</span></td>
+            </tr>
+            <tr>
+              <td class="p-3 border-b border-slate-800">Crypto-deletion (Art. 18 IV)</td>
+              <td class="p-3 border-b border-slate-800 text-center"><span class="text-emerald-400">✓ ready</span></td>
+              <td class="p-3 border-b border-slate-800 text-center"><span class="text-emerald-400">✓</span></td>
+              <td class="p-3 border-b border-slate-800 text-center"><span class="text-emerald-400">✓</span></td>
+            </tr>
+            <tr>
+              <td class="p-3 border-b border-slate-800">Versioned consent + RIPD</td>
+              <td class="p-3 border-b border-slate-800 text-center"><span class="text-amber-300">partial</span></td>
+              <td class="p-3 border-b border-slate-800 text-center"><span class="text-emerald-400">✓ ready</span></td>
+              <td class="p-3 border-b border-slate-800 text-center"><span class="text-emerald-400">✓</span></td>
+            </tr>
+            <tr>
+              <td class="p-3 border-b border-slate-800 font-mono text-emerald-400" rowspan="3">SNGPC</td>
+              <td class="p-3 border-b border-slate-800">XML schema + mock submit</td>
+              <td class="p-3 border-b border-slate-800 text-center"><span class="text-emerald-400">✓ ready</span></td>
+              <td class="p-3 border-b border-slate-800 text-center"><span class="text-emerald-400">✓</span></td>
+              <td class="p-3 border-b border-slate-800 text-center"><span class="text-emerald-400">✓</span></td>
+            </tr>
+            <tr>
+              <td class="p-3 border-b border-slate-800">BullMQ retry/DLQ worker</td>
+              <td class="p-3 border-b border-slate-800 text-center"><span class="text-amber-300">scaffold</span></td>
+              <td class="p-3 border-b border-slate-800 text-center"><span class="text-emerald-400">✓ ready</span></td>
+              <td class="p-3 border-b border-slate-800 text-center"><span class="text-emerald-400">✓</span></td>
+            </tr>
+            <tr>
+              <td class="p-3 border-b border-slate-800">ANVISA production homologation (awaiting ANVISA XSD schema)</td>
+              <td class="p-3 border-b border-slate-800 text-center"><span class="text-slate-500">—</span></td>
+              <td class="p-3 border-b border-slate-800 text-center"><span class="text-amber-300">tracking</span></td>
+              <td class="p-3 border-b border-slate-800 text-center"><span class="text-emerald-400">✓ planned</span></td>
+            </tr>
+            <tr>
+              <td class="p-3 border-b border-slate-800 font-mono text-emerald-400" rowspan="3">AI / MCP</td>
+              <td class="p-3 border-b border-slate-800">MCP server + tools (levels 1-3)</td>
+              <td class="p-3 border-b border-slate-800 text-center"><span class="text-emerald-400">L1/L2 ✓ · L3 operational (pilot validation)</span></td>
+              <td class="p-3 border-b border-slate-800 text-center"><span class="text-emerald-400">✓</span></td>
+              <td class="p-3 border-b border-slate-800 text-center"><span class="text-emerald-400">✓</span></td>
+            </tr>
+            <tr>
+              <td class="p-3 border-b border-slate-800">Inline MCP Apps (3 → 12)</td>
+              <td class="p-3 border-b border-slate-800 text-center"><span class="text-amber-300">3 apps</span></td>
+              <td class="p-3 border-b border-slate-800 text-center"><span class="text-amber-300">7 apps</span></td>
+              <td class="p-3 border-b border-slate-800 text-center"><span class="text-emerald-400">12 apps</span></td>
+            </tr>
+            <tr>
+              <td class="p-3 border-b border-slate-800">Open WebUI sidecar + OAuth 2.1 auth</td>
+              <td class="p-3 border-b border-slate-800 text-center"><span class="text-amber-300">smoke</span></td>
+              <td class="p-3 border-b border-slate-800 text-center"><span class="text-emerald-400">✓ ready</span></td>
+              <td class="p-3 border-b border-slate-800 text-center"><span class="text-emerald-400">✓</span></td>
+            </tr>
+            <tr>
+              <td class="p-3 border-b border-slate-800 font-mono text-emerald-400" rowspan="3">Gov. O2</td>
+              <td class="p-3 border-b border-slate-800">RBAC + TOTP (segregation of duties)</td>
+              <td class="p-3 border-b border-slate-800 text-center"><span class="text-amber-300">partial</span></td>
+              <td class="p-3 border-b border-slate-800 text-center"><span class="text-emerald-400">✓ ready</span></td>
+              <td class="p-3 border-b border-slate-800 text-center"><span class="text-emerald-400">✓</span></td>
+            </tr>
+            <tr>
+              <td class="p-3 border-b border-slate-800">Versioned O2 roles (agreements as code)</td>
+              <td class="p-3 border-b border-slate-800 text-center"><span class="text-amber-300">scaffold</span></td>
+              <td class="p-3 border-b border-slate-800 text-center"><span class="text-amber-300">partial</span></td>
+              <td class="p-3 border-b border-slate-800 text-center"><span class="text-emerald-400">✓ planned</span></td>
+            </tr>
+            <tr>
+              <td class="p-3"></td>
+              <td class="p-3">Quarterly BSPO signed by technical officer + RIPD via MCP App</td>
+              <td class="p-3 text-center"><span class="text-slate-500">—</span></td>
+              <td class="p-3 text-center"><span class="text-amber-300">partial</span></td>
+              <td class="p-3 text-center"><span class="text-emerald-400">✓ planned</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="grid md:grid-cols-4 gap-3 mt-6 text-xs">
+        <div class="bg-slate-950/40 border border-emerald-900/30 rounded-lg p-3 text-center">
+          <span class="text-emerald-400 font-bold">✓ ready</span>
+          <p class="text-slate-400 mt-1">Covered by tests; in production/demo.</p>
+        </div>
+        <div class="bg-slate-950/40 border border-amber-900/30 rounded-lg p-3 text-center">
+          <span class="text-amber-300 font-bold">partial / scaffold</span>
+          <p class="text-slate-400 mt-1">Structure exists; missing hardening or coverage.</p>
+        </div>
+        <div class="bg-slate-950/40 border border-amber-900/30 rounded-lg p-3 text-center">
+          <span class="text-amber-300 font-bold">tracking</span>
+          <p class="text-slate-400 mt-1">Blocked by external actor (ANVISA/partner).</p>
+        </div>
+        <div class="bg-slate-950/40 border border-slate-700/30 rounded-lg p-3 text-center">
+          <span class="text-slate-400 font-bold">— planned</span>
+          <p class="text-slate-400 mt-1">Declared roadmap; not started.</p>
+        </div>
+      </div>
+
+      <p class="text-center text-slate-400 text-sm mt-8">
+        Detailed quarterly roadmap at <a href="/roadmap/" class="text-emerald-300 underline">/roadmap</a>. Releases at <a href="/releases/v021/" class="text-emerald-300 underline">/releases</a>.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       PERSONAS (Board, Legal, Pharmacy, IT)
+       ============================================================ -->
+  <section class="py-24 px-6" style="background: rgba(2,6,23,0.95)">
+    <div class="max-w-5xl mx-auto">
+      <p class="text-xs font-mono font-bold text-emerald-400 uppercase tracking-widest text-center mb-4">Start as</p>
+      <h2 class="text-3xl md:text-4xl font-bold text-white text-center mb-4 leading-tight">
+        Each role has a direct path.
+      </h2>
+      <p class="text-slate-400 text-center mb-12 max-w-2xl mx-auto">
+        Identify your pain, see what canna-br solves, go straight to the documentation that matters.
+      </p>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div class="bg-slate-900/60 border border-emerald-900/40 rounded-2xl p-6 hover:border-emerald-500/50 transition flex flex-col">
+          <div class="text-2xl mb-3" aria-hidden="true">⚖️</div>
+          <h3 class="text-lg font-bold text-white mb-3">Board of Directors</h3>
+          <p class="text-red-300/80 text-xs uppercase tracking-wider font-mono mb-2">Pain</p>
+          <p class="text-slate-300 text-sm mb-4 leading-relaxed">Personal criminal liability from health data in a closed SaaS (LGPD Art. 5 II).</p>
+          <p class="text-emerald-300/80 text-xs uppercase tracking-wider font-mono mb-2">Outcome</p>
+          <p class="text-slate-300 text-sm mb-6 leading-relaxed">Immutable trail + crypto-deletion + self-host reduce the technical risk vector (final legal exposure remains the board's + designated DPO's responsibility).</p>
+          <a href="/build/compliance/" class="mt-auto inline-flex items-center justify-center px-4 py-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/40 text-emerald-300 text-sm font-semibold hover:bg-emerald-500/20 transition" aria-label="See criminal liability and detailed compliance">See liability risk →</a>
+        </div>
+
+        <div class="bg-slate-900/60 border border-emerald-900/40 rounded-2xl p-6 hover:border-emerald-500/50 transition flex flex-col">
+          <div class="text-2xl mb-3" aria-hidden="true">📜</div>
+          <h3 class="text-lg font-bold text-white mb-3">Legal Counsel</h3>
+          <p class="text-red-300/80 text-xs uppercase tracking-wider font-mono mb-2">Pain</p>
+          <p class="text-slate-300 text-sm mb-4 leading-relaxed">Mapping RDC 1.014 + LGPD + SNGPC obligations in a system not designed for this.</p>
+          <p class="text-emerald-300/80 text-xs uppercase tracking-wider font-mono mb-2">Outcome</p>
+          <p class="text-slate-300 text-sm mb-6 leading-relaxed">Legal framework mapped article by article + signed ADRs + unquestionable audit log.</p>
+          <a href="/idea/regulation/" class="mt-auto inline-flex items-center justify-center px-4 py-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/40 text-emerald-300 text-sm font-semibold hover:bg-emerald-500/20 transition" aria-label="See full RDC 1.014 + LGPD legal framework">See legal framework →</a>
+        </div>
+
+        <div class="bg-slate-900/60 border border-emerald-900/40 rounded-2xl p-6 hover:border-emerald-500/50 transition flex flex-col">
+          <div class="text-2xl mb-3" aria-hidden="true">💊</div>
+          <h3 class="text-lg font-bold text-white mb-3">Technical Pharmacist (RT)</h3>
+          <p class="text-red-300/80 text-xs uppercase tracking-wider font-mono mb-2">Pain</p>
+          <p class="text-slate-300 text-sm mb-4 leading-relaxed">Manual dispensation + out-of-band SNGPC + parallel spreadsheets = inspection impossible.</p>
+          <p class="text-emerald-300/80 text-xs uppercase tracking-wider font-mono mb-2">Outcome</p>
+          <p class="text-slate-300 text-sm mb-6 leading-relaxed">MCP chat records dispensation, deducts quota, generates SNGPC without leaving the workflow.</p>
+          <a href="/build/big-picture/" class="mt-auto inline-flex items-center justify-center px-4 py-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/40 text-emerald-300 text-sm font-semibold hover:bg-emerald-500/20 transition" aria-label="See dispensation workflow for technical pharmacist">See dispensation flow →</a>
+        </div>
+
+        <div class="bg-slate-900/60 border border-emerald-900/40 rounded-2xl p-6 hover:border-emerald-500/50 transition flex flex-col">
+          <div class="text-2xl mb-3" aria-hidden="true">⚙️</div>
+          <h3 class="text-lg font-bold text-white mb-3">Association IT</h3>
+          <p class="text-red-300/80 text-xs uppercase tracking-wider font-mono mb-2">Pain</p>
+          <p class="text-slate-300 text-sm mb-4 leading-relaxed">Proprietary SaaS = lock-in, no code audit, no self-host for sensitive data.</p>
+          <p class="text-emerald-300/80 text-xs uppercase tracking-wider font-mono mb-2">Outcome</p>
+          <p class="text-slate-300 text-sm mb-6 leading-relaxed">Auditable OSS stack, docker-compose in 10 min, versioned ADRs, forks permitted.</p>
+          <a href="/build/stack/" class="mt-auto inline-flex items-center justify-center px-4 py-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/40 text-emerald-300 text-sm font-semibold hover:bg-emerald-500/20 transition" aria-label="See canna-br OSS stack and local setup">See stack + setup →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       TRUST MARKERS
+       ============================================================ -->
+  <section class="py-20 px-6" style="background: rgba(2,6,23,0.95)">
+    <div class="max-w-5xl mx-auto">
+      <p class="text-xs font-mono font-bold text-emerald-400 uppercase tracking-widest text-center mb-4">Trust & Transparency</p>
+      <h2 class="text-3xl md:text-4xl font-bold text-white text-center mb-10 leading-tight">
+        Everything that backs the thesis, in public links.
+      </h2>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <a href="/build/compliance/" class="bg-slate-900/60 border border-emerald-900/40 rounded-xl p-5 hover:border-emerald-500/60 transition group">
+          <p class="text-emerald-400 text-2xl mb-2" aria-hidden="true">🔐</p>
+          <p class="text-white font-semibold mb-1">LGPD & Cryptography</p>
+          <p class="text-slate-400 text-xs">DEK + KEK envelope, crypto-deletion Art. 18 IV mapped.</p>
+          <p class="text-emerald-300 text-xs mt-3 group-hover:text-emerald-200">/build/compliance →</p>
+        </a>
+        <a href="/build/stack/" class="bg-slate-900/60 border border-emerald-900/40 rounded-xl p-5 hover:border-emerald-500/60 transition group">
+          <p class="text-emerald-400 text-2xl mb-2" aria-hidden="true">🛡️</p>
+          <p class="text-white font-semibold mb-1">Security architecture</p>
+          <p class="text-slate-400 text-xs">Stack, tenant isolation, RBAC segregation, TOTP.</p>
+          <p class="text-emerald-300 text-xs mt-3 group-hover:text-emerald-200">/build/stack →</p>
+        </a>
+        <a href="/en/trust/" class="bg-slate-900/60 border border-emerald-900/40 rounded-xl p-5 hover:border-emerald-500/60 transition group">
+          <p class="text-emerald-400 text-2xl mb-2" aria-hidden="true">📜</p>
+          <p class="text-white font-semibold mb-1">Terms & Legal Opinion</p>
+          <p class="text-slate-400 text-xs">AGPL-3.0 + CLA, pilot terms, embryonic regulatory opinion.</p>
+          <p class="text-emerald-300 text-xs mt-3 group-hover:text-emerald-200">/trust →</p>
+        </a>
+        <a href="/idea/evolucao-pos-sandbox/" class="bg-slate-900/60 border border-emerald-900/40 rounded-xl p-5 hover:border-emerald-500/60 transition group">
+          <p class="text-emerald-400 text-2xl mb-2" aria-hidden="true">📡</p>
+          <p class="text-white font-semibold mb-1">Update commitment</p>
+          <p class="text-slate-400 text-xs">How the system tracks RDC changes post-sandbox.</p>
+          <p class="text-emerald-300 text-xs mt-3 group-hover:text-emerald-200">/idea/evolucao-pos-sandbox →</p>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       O2 GOVERNANCE
+       ============================================================ -->
+  <section class="py-24 px-6" style="background: linear-gradient(180deg, rgba(2,6,23,0.95) 0%, rgba(6,42,40,0.85) 100%)">
+    <div class="max-w-5xl mx-auto">
+      <p class="text-xs font-mono font-bold text-emerald-400 uppercase tracking-widest text-center mb-4">Organic Governance · O2</p>
+      <h2 class="text-3xl md:text-4xl font-bold text-white text-center mb-4 leading-tight">
+        Organic Organization: explicit roles, living circles, tensions as fuel.
+      </h2>
+      <p class="text-slate-400 text-center mb-12 max-w-3xl mx-auto">
+        canna-br adopts <strong class="text-emerald-300">O2 (Organic Organization)</strong> from <a href="https://targetteal.com" class="text-emerald-300 underline hover:text-emerald-200">Target Teal</a> — Brazilian OSS social technology for self-management. No command chain, no fixed titles. Structure is a map of agreements that evolves through real tensions.
+      </p>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-5 gap-4 mb-12">
+        <div class="bg-slate-900/60 border border-emerald-900/40 rounded-2xl p-6 hover:border-emerald-500/50 transition">
+          <div class="text-emerald-300 font-mono text-xs mb-2">01</div>
+          <h3 class="text-base font-bold text-white mb-2">Distributed Authority</h3>
+          <p class="text-slate-400 text-xs leading-relaxed">Individual autocratic operational decisions by default. Everything is permitted unless explicitly prohibited.</p>
+        </div>
+        <div class="bg-slate-900/60 border border-emerald-900/40 rounded-2xl p-6 hover:border-emerald-500/50 transition">
+          <div class="text-emerald-300 font-mono text-xs mb-2">02</div>
+          <h3 class="text-base font-bold text-white mb-2">Roles and Circles</h3>
+          <p class="text-slate-400 text-xs leading-relaxed">Structure by purpose and granular accountabilities. No "CTO" or "CEO" title — only explicit roles.</p>
+        </div>
+        <div class="bg-slate-900/60 border border-emerald-900/40 rounded-2xl p-6 hover:border-emerald-500/50 transition">
+          <div class="text-emerald-300 font-mono text-xs mb-2">03</div>
+          <h3 class="text-base font-bold text-white mb-2">Evolution through Tensions</h3>
+          <p class="text-slate-400 text-xs leading-relaxed">Real problems and opportunities feed structural adaptations. Agreements versioned as code.</p>
+        </div>
+        <div class="bg-slate-900/60 border border-emerald-900/40 rounded-2xl p-6 hover:border-emerald-500/50 transition">
+          <div class="text-emerald-300 font-mono text-xs mb-2">04</div>
+          <h3 class="text-base font-bold text-white mb-2">5 Interaction Modes</h3>
+          <p class="text-slate-400 text-xs leading-relaxed">Review · Sync · Adapt · Select · Care. Meetings with a clear objective, not a loose agenda.</p>
+        </div>
+        <div class="bg-slate-900/60 border border-emerald-900/40 rounded-2xl p-6 hover:border-emerald-500/50 transition">
+          <div class="text-emerald-300 font-mono text-xs mb-2">05</div>
+          <h3 class="text-base font-bold text-white mb-2">Tribal Space</h3>
+          <p class="text-slate-400 text-xs leading-relaxed">Care Mode isolates human relationships from work. Empathy and vulnerability have their own space.</p>
+        </div>
+      </div>
+
+      <div class="bg-slate-950/40 border border-emerald-900/30 rounded-xl p-6 mb-12 max-w-3xl mx-auto">
+        <p class="text-slate-300 text-sm leading-relaxed text-center">
+          <strong class="text-emerald-300">Differentiator:</strong> O2 avoids the proprietary density of Holacracy (includes Care Mode) and the slowness of excessive consent in Sociocracy 3.0 (individual autocracy default). Adopted by Tera, eduK, Take, More Than Real, Kanpai BH, and more.
+        </p>
+      </div>
+
+      <div class="bg-slate-950/70 border border-emerald-700/30 rounded-2xl p-8 max-w-4xl mx-auto">
+        <p class="text-xs font-mono font-bold text-emerald-400 uppercase tracking-widest mb-4">Initiator · circle lead</p>
+
+        <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-6 mb-6">
+          <div>
+            <p class="text-2xl font-bold text-white">Gabriel Fonseca</p>
+            <p class="text-emerald-300 text-sm mt-1">Founder Via Corretor · Senior AI Engineer (Mukutu) · Software Zen Kanban</p>
+            <p class="text-slate-400 text-sm mt-3 leading-relaxed max-w-xl">
+              Engineer with 12+ years in regulated systems (event sourcing, compliance, operational kanban). Medical cannabis patient — experienced firsthand the operational friction that canna-br resolves. Conceived the project after mapping the OSS gap in the Brazilian sector ahead of the RDC 1.014 window.
+            </p>
+          </div>
+          <div class="text-sm text-slate-300 font-mono space-y-1 shrink-0">
+            <p><a href="mailto:gabriel@devmagic.com.br" class="hover:text-emerald-300 transition">gabriel@devmagic.com.br</a></p>
+            <p><a href="https://wa.me/5513988032053" class="hover:text-emerald-300 transition">WhatsApp +55 13 98803-2053</a></p>
+            <p><a href="/en/about/" class="hover:text-emerald-300 transition">/about</a></p>
+          </div>
+        </div>
+
+        <p class="text-xs font-mono font-bold text-emerald-400 uppercase tracking-widest mb-3">Current accountabilities</p>
+        <ul class="grid sm:grid-cols-2 gap-x-6 gap-y-2 text-slate-300 text-sm list-none p-0 m-0">
+          <li><strong class="text-emerald-300">Circle purpose</strong> — carries the aim until new roles anchor</li>
+          <li><strong class="text-emerald-300">Domain modeling</strong> — Emmett-pure, Event Sourcing, versioned ADRs</li>
+          <li><strong class="text-emerald-300">Infra ops</strong> — VPS, Kamal, hosted canna-br.fonsecagabriel.com.br</li>
+          <li><strong class="text-emerald-300">MCP-first surface</strong> — gate for awesome UX production polish</li>
+          <li><strong class="text-emerald-300">Pilot on-call</strong> — WhatsApp direct during seed</li>
+          <li><strong class="text-emerald-300">Seed recruiter</strong> — 5 association slots, curation + onboarding</li>
+          <li><strong class="text-emerald-300">Compliance liaison</strong> — RDC 1.014, LGPD, SNGPC tracking</li>
+          <li><strong class="text-emerald-300">Caretaker (O2 Mode)</strong> — tribal space of the circle</li>
+        </ul>
+
+        <p class="text-slate-500 text-xs mt-6 font-mono">
+          Explicit roles derived from active premises in the /manager ledger (governance + infra + ops + product + hard_rule). Structure evolves through tensions — roles will be partitioned when RT compliance, infra-owner, and association-relations roles anchor.
+        </p>
+      </div>
+
+      <div class="max-w-3xl mx-auto mt-8 p-5 rounded-xl border border-slate-700/50 bg-slate-900/40 text-slate-300 text-sm">
+        <p class="text-xs font-mono font-bold text-slate-400 uppercase tracking-widest mb-2">Current team</p>
+        <p class="leading-relaxed">One founder, open source, nascent community. No hired staff, no incorporated entity yet. canna-br is a serious project in pre-commercial-MVP stage — the ambition is to hire 2 roles (technical + legal) when the pilot validates PMF. Full transparency: <a href="/en/about/" class="text-emerald-300 underline">/about/</a> + <a href="/en/trust/" class="text-emerald-300 underline">/trust/</a>.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       MARKET & PROJECTION — TEASER
+       ============================================================ -->
+  <section class="py-20 px-6" style="background: rgba(2,6,23,0.9)">
+    <div class="max-w-3xl mx-auto text-center">
+      <p class="text-xs font-mono font-bold text-emerald-400 uppercase tracking-widest mb-4">For market analysts</p>
+      <h2 class="text-2xl md:text-3xl font-bold text-white mb-4 leading-tight">
+        TAM R$130M (~US$26M) by 2030. SOM R$27M (~US$5.4M). Comparable: Cannanas DE (€7.2M ARR).
+      </h2>
+      <p class="text-slate-400 mb-8 leading-relaxed">
+        Full financial model — TAM/SAM/SOM, 24-month projection in 3 scenarios (pessimistic/conservative/optimistic), validated German reference, explicit assumptions — lives on a dedicated page. Homepage focuses on value + proof; market analysis stays separate.
+      </p>
+      <a href="/en/idea/market/" class="inline-flex items-center justify-center px-6 py-3 rounded-full border-2 border-emerald-400 text-emerald-300 hover:bg-emerald-400/10 font-semibold transition">
+        See market, TAM/SAM/SOM and projections →
+      </a>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       TECHNICAL-LEGAL DISCLAIMER
+       ============================================================ -->
+  <section class="py-10 px-6" style="background: rgba(2,6,23,0.9)">
+    <div class="max-w-3xl mx-auto my-4 p-5 rounded-xl border border-amber-500/30 bg-amber-950/20 text-amber-100/80 text-sm">
+      <p class="font-semibold text-amber-300 mb-2">Technical-legal disclaimer</p>
+      <p>canna-br is a software tool. Legal compliance (LGPD, RDC 1.014, Portaria 344/98) is the sole responsibility of the adopting association and its lawyers/DPO. No technical mechanism substitutes a proper legal opinion or formal appointment of a pharmaceutical technical officer (RT) and DPO as required by law. <a href="/en/trust/" class="text-amber-200 underline">See /trust/ — Privacy Policy, Terms, and DPO</a>.</p>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       FINAL CTA
+       ============================================================ -->
+  <section class="bg-emerald-600 py-24 px-6">
+    <div class="max-w-2xl mx-auto text-center">
+      <span class="inline-block px-4 py-2 bg-emerald-950 rounded-full text-white font-mono text-sm mb-6">
+        5 slots · deadline Sep 30 2026 · 2 available
+      </span>
+      <h2 class="text-3xl md:text-5xl font-bold text-white mb-6 leading-tight">
+        Get in before the public call. Influence the roadmap. Receive the ANVISA dossier template ready to go.
+      </h2>
+      <p class="text-emerald-100/80 text-lg mb-10 leading-relaxed">
+        We are looking for 5 associations to co-develop the SNGPC integration and the ANVISA application template dossier. Pilot associations influence the roadmap and get early access to the system's auto-documented template.
+      </p>
+      <a
+        href="/en/open/seed-associations/"
+        class="inline-flex items-center justify-center px-10 py-5 rounded-full bg-white text-emerald-800 font-bold text-xl hover:bg-emerald-50 transition shadow-2xl shadow-emerald-900/40 focus-visible:ring-4 ring-white/50"
+        aria-label="See slots and criteria for pilot associations"
+      >
+        See slots and criteria
+      </a>
+      <p class="text-emerald-100/50 text-sm mt-6">
+        Applications open through September 30, 2026. Free for pilots.
+      </p>
+    </div>
+  </section>
+
+  <ApplyVideoModal />
+
+  <!-- ============================================================
+       FOOTER
+       ============================================================ -->
+  <footer role="contentinfo" class="bg-slate-950 border-t border-slate-800/60 py-16 px-6">
+    <div class="max-w-5xl mx-auto">
+      <div class="grid sm:grid-cols-2 md:grid-cols-4 gap-10 mb-12">
+        <!-- Product -->
+        <div>
+          <p class="text-xs font-mono font-bold text-emerald-400 uppercase tracking-widest mb-4">Product</p>
+          <ul class="space-y-2 list-none p-0 m-0">
+            <li><a href="/build/big-picture/" class="text-slate-400 hover:text-emerald-300 text-sm transition" hreflang="pt-BR">Big Picture</a></li>
+            <li><a href="/build/capacidades/" class="text-slate-400 hover:text-emerald-300 text-sm transition" hreflang="pt-BR">Capabilities</a></li>
+            <li><a href="/build/stack/" class="text-slate-400 hover:text-emerald-300 text-sm transition" hreflang="pt-BR">Stack &amp; Architecture</a></li>
+            <li><a href="/roadmap/" class="text-slate-400 hover:text-emerald-300 text-sm transition" hreflang="pt-BR">Roadmap</a></li>
+            <li><a href="/releases/v021/" class="text-slate-400 hover:text-emerald-300 text-sm transition" hreflang="pt-BR">Release v0.2.1</a></li>
+            <li><a href="/idea/regulation/" class="text-slate-400 hover:text-emerald-300 text-sm transition" hreflang="pt-BR">RDC 1.014 Regulation</a></li>
+          </ul>
+        </div>
+        <!-- Trust -->
+        <div>
+          <p class="text-xs font-mono font-bold text-emerald-400 uppercase tracking-widest mb-4">Trust</p>
+          <ul class="space-y-2 list-none p-0 m-0">
+            <li><a href="/en/trust/" class="text-slate-400 hover:text-emerald-300 text-sm transition">Overview</a></li>
+            <li><a href="/trust/privacy-policy/" class="text-slate-400 hover:text-emerald-300 text-sm transition" hreflang="pt-BR">Privacy Policy</a></li>
+            <li><a href="/trust/terms-of-service/" class="text-slate-400 hover:text-emerald-300 text-sm transition" hreflang="pt-BR">Terms of Service</a></li>
+            <li><a href="/trust/dpo/" class="text-slate-400 hover:text-emerald-300 text-sm transition" hreflang="pt-BR">DPO — LGPD Officer</a></li>
+            <li><a href="/build/compliance/" class="text-slate-400 hover:text-emerald-300 text-sm transition" hreflang="pt-BR">LGPD + SNGPC Compliance</a></li>
+          </ul>
+        </div>
+        <!-- Open Roles -->
+        <div>
+          <p class="text-xs font-mono font-bold text-emerald-400 uppercase tracking-widest mb-4">Open Roles</p>
+          <ul class="space-y-2 list-none p-0 m-0">
+            <li><a href="/en/open/seed-associations/" class="text-slate-400 hover:text-emerald-300 text-sm transition">Pilot associations (5 slots)</a></li>
+            <li><a href="/open/contribute/" class="text-slate-400 hover:text-emerald-300 text-sm transition" hreflang="pt-BR">Contribute to the code</a></li>
+            <li><a href="/build/abertas/" class="text-slate-400 hover:text-emerald-300 text-sm transition" hreflang="pt-BR">Open questions</a></li>
+            <li><a href="/en/idea/market/" class="text-slate-400 hover:text-emerald-300 text-sm transition">Market analysis</a></li>
+          </ul>
+        </div>
+        <!-- Contact -->
+        <div>
+          <p class="text-xs font-mono font-bold text-emerald-400 uppercase tracking-widest mb-4">Contact</p>
+          <ul class="space-y-2 list-none p-0 m-0">
+            <li><a href="mailto:gabriel@devmagic.com.br" class="text-slate-400 hover:text-emerald-300 text-sm transition">gabriel@devmagic.com.br</a></li>
+            <li><a href="https://wa.me/5513988032053" class="text-slate-400 hover:text-emerald-300 text-sm transition" rel="noopener noreferrer" target="_blank">WhatsApp +55 13 98803-2053</a></li>
+            <li><a href="mailto:gabriel@devmagic.com.br" class="text-slate-400 hover:text-emerald-300 text-sm transition">[LGPD] DPO channel</a></li>
+            <li><a href="/en/about/" class="text-slate-400 hover:text-emerald-300 text-sm transition">About the project</a></li>
+            <li>
+              <a href="https://github.com/biliboss/canna-br" target="_blank" rel="noopener noreferrer" class="text-slate-400 hover:text-emerald-300 text-sm transition inline-flex items-center gap-1">
+                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                GitHub (repo v0.3)
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- i18n note -->
+      <p class="text-xs font-mono text-slate-600 mb-6">
+        <a href="/en/" class="hover:text-slate-400 underline underline-offset-2 transition">EN</a> / <a href="/es/" class="hover:text-slate-400 underline underline-offset-2 transition">ES</a> versions are machine-translated — human polish in progress. Report errors to <a href="mailto:gabriel@devmagic.com.br" class="hover:text-slate-400 underline underline-offset-2 transition">gabriel@devmagic.com.br</a>.
+        Machine-translated v1 — human polish in progress. Report errors to gabriel@devmagic.com.br.
+      </p>
+
+      <!-- Legal block -->
+      <div class="border-t border-slate-800/50 pt-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500 font-mono">
+          <span>AGPL-3.0</span>
+          <span>·</span>
+          <span>LGPD-by-design</span>
+          <span>·</span>
+          <a href="https://canna-br.fonsecagabriel.com.br/" class="hover:text-slate-400 transition underline underline-offset-2">canna-br.fonsecagabriel.com.br</a>
+          <span>·</span>
+          <span>v0.2.1.2</span>
+          <span>·</span>
+          <span>154/154 tests</span>
+        </div>
+        <p class="text-xs text-slate-600 font-mono">
+          canna-br is software. Legal compliance is the adopting association's responsibility. <a href="/en/trust/" class="hover:text-slate-400 underline underline-offset-2 transition">See /trust/</a>
+        </p>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

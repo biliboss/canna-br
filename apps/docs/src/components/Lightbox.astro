@@ -1,0 +1,140 @@
+---
+/**
+ * Lightbox.astro — click-to-fullscreen + pan/zoom for screenshots.
+ * Powered by PhotoSwipe v5 (vanilla JS, MIT, ~30KB gzipped).
+ *
+ * Adapted from ops-stack/starlight-init.ts lightboxComponentTemplate for
+ * canna-br: card-embedded thumbnails, emerald hover glow, dark-mode-first.
+ *
+ * Usage in pages/index.astro (or any .astro page):
+ *   import Lightbox from '../components/Lightbox.astro';
+ *   <Lightbox src="/screenshots/owui/foo.png" alt="Description" width={1280} height={800} />
+ *
+ * Width/height REQUIRED — PhotoSwipe needs them to compute zoom bounds
+ * without an extra HEAD request on click.
+ */
+export interface Props {
+  src: string;
+  alt: string;
+  caption?: string;
+  width: number;
+  height: number;
+  /** Adds emerald ring glow on hover. Default true. */
+  glowOnHover?: boolean;
+}
+
+const { src, alt, caption, width, height, glowOnHover = true } = Astro.props;
+const figClass = glowOnHover ? "lightbox-figure lightbox-glow" : "lightbox-figure";
+---
+
+<figure class={figClass}>
+  <a
+    href={src}
+    data-pswp-src={src}
+    data-pswp-width={width}
+    data-pswp-height={height}
+    target="_blank"
+    rel="noreferrer"
+    aria-label={`Abrir ${alt} em tela cheia`}
+    class="lightbox-link"
+  >
+    <img
+      src={src}
+      alt={alt}
+      loading="lazy"
+      width={width}
+      height={height}
+      class="lightbox-thumb"
+    />
+  </a>
+  {caption && <p class="lightbox-caption">{caption}</p>}
+</figure>
+
+<script>
+  import PhotoSwipeLightbox from "photoswipe/lightbox";
+  import "photoswipe/style.css";
+
+  function mountLightbox() {
+    const w = window as unknown as { __cannaLightboxMounted?: boolean };
+    if (w.__cannaLightboxMounted) return;
+    w.__cannaLightboxMounted = true;
+
+    const lightbox = new PhotoSwipeLightbox({
+      gallery: ".lightbox-figure",
+      children: "a.lightbox-link",
+      pswpModule: () => import("photoswipe"),
+      wheelToZoom: true,
+      bgOpacity: 0.97,
+      showHideAnimationType: "zoom",
+      padding: { top: 20, bottom: 20, left: 20, right: 20 },
+    });
+    lightbox.init();
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", mountLightbox);
+  } else {
+    mountLightbox();
+  }
+</script>
+
+<style>
+  .lightbox-figure {
+    margin: 0;
+    display: block;
+    cursor: zoom-in;
+    border-radius: 0;
+    overflow: hidden;
+    position: relative;
+    transition: box-shadow 0.15s ease-out;
+  }
+
+  .lightbox-glow:hover {
+    box-shadow: 0 0 0 1.5px oklch(0.72 0.17 162), 0 4px 24px oklch(0.72 0.17 162 / 0.25);
+  }
+
+  .lightbox-link {
+    display: block;
+    text-decoration: none;
+    outline-offset: 2px;
+  }
+
+  .lightbox-link:focus-visible {
+    outline: 2px solid oklch(0.72 0.17 162);
+    outline-offset: 2px;
+  }
+
+  .lightbox-thumb {
+    display: block;
+    width: 100%;
+    height: auto;
+    /* Preserve aspect ratio — no cropping. Aspect is set via container padding-top trick below */
+    transition: transform 0.15s ease-out, opacity 0.15s ease-out;
+    margin: 0 !important;
+  }
+
+  .lightbox-figure:hover .lightbox-thumb {
+    transform: scale(1.015);
+    opacity: 0.92;
+  }
+
+  .lightbox-caption {
+    font-size: 0.8rem;
+    color: oklch(0.65 0.04 220);
+    padding: 0.35rem 0.6rem;
+    margin: 0;
+    background: oklch(0.14 0.02 250 / 0.8);
+    border-top: 1px solid oklch(0.25 0.03 250);
+    font-family: ui-monospace, "JetBrains Mono", monospace;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lightbox-thumb,
+    .lightbox-figure {
+      transition-duration: 0.01ms !important;
+    }
+    .lightbox-figure:hover .lightbox-thumb {
+      transform: none;
+    }
+  }
+</style>

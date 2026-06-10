@@ -1,0 +1,192 @@
+---
+title: "Onboarding em 30/90 dias"
+description: "Jornada do piloto seed canna-br em 5 etapas com prazos, atores envolvidos e entregas verificáveis. Diagnóstico → Setup → Treinamento → Operação assistida → Auditoria."
+template: splash
+---
+
+{/* Item #3 do review — jornada explícita em 5 etapas. */}
+
+<section class="bg-gradient-to-b from-emerald-950 to-slate-950 text-white py-16 px-6 -mx-4 sm:-mx-6 lg:-mx-8 xl:-mx-12 mb-0 not-content">
+  <div class="max-w-3xl mx-auto text-center">
+    <p class="text-xs font-mono font-bold text-emerald-300 uppercase tracking-widest mb-4">Programa Seed · 14 semanas</p>
+    <h1 class="text-3xl md:text-5xl font-bold tracking-tight leading-tight">
+      30 dias para validar. 90 dias para operar com segurança.
+    </h1>
+    <p class="text-lg text-emerald-100/80 mt-6 max-w-2xl mx-auto">
+      O programa seed canna-br tem 5 etapas declaradas, com prazos e atores envolvidos. Sem promessa vaga — cada etapa tem entregável verificável e sai com checkpoint.
+    </p>
+    <div class="flex flex-col sm:flex-row gap-3 mt-8 justify-center">
+      <a href="/open/seed-associations/" class="inline-flex items-center justify-center px-6 py-3 rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold transition">
+        Ver vagas piloto
+      </a>
+      <a href="/open/how-it-works/" class="inline-flex items-center justify-center px-6 py-3 rounded-full border-2 border-emerald-400 text-emerald-300 hover:bg-emerald-400/10 font-semibold transition">
+        Detalhe do programa seed
+      </a>
+    </div>
+  </div>
+</section>
+
+{/* TIMELINE */}
+<section class="py-20 px-6 -mx-4 sm:-mx-6 lg:-mx-8 xl:-mx-12 not-content" style="background: rgba(15,23,42,0.85)">
+  <div class="max-w-5xl mx-auto">
+    <p class="text-xs font-mono font-bold text-emerald-400 uppercase tracking-widest text-center mb-4">Jornada · 5 etapas</p>
+    <h2 class="text-3xl md:text-4xl font-bold text-white text-center mb-16 leading-tight">
+      Cada etapa tem prazo, atores e entregável.
+    </h2>
+
+    <ol class="space-y-8">
+      <li class="bg-slate-900/60 border border-emerald-900/40 rounded-2xl p-6 md:p-8">
+        <div class="flex flex-col md:flex-row md:items-start md:gap-6">
+          <div class="flex items-center md:flex-col md:items-start mb-4 md:mb-0 md:w-32 shrink-0">
+            <span class="text-5xl font-bold text-emerald-400 font-mono mr-4 md:mr-0">01</span>
+            <div>
+              <p class="text-emerald-300 text-xs font-mono uppercase tracking-widest">Semana 0</p>
+              <p class="text-slate-400 text-xs">Dia 0 → 7</p>
+            </div>
+          </div>
+          <div class="flex-1">
+            <h3 class="text-2xl font-bold text-white mb-3">Diagnóstico</h3>
+            <p class="text-slate-300 mb-4 leading-relaxed">
+              Chamada 1h com Gabriel + diretoria + RT. Mapeamos fluxo atual: como vocês cadastram membro, dispensam, fecham SNGPC, geram relatório ANVISA. Identificamos gaps regulatórios e oportunidades de simplificação.
+            </p>
+            <div class="grid sm:grid-cols-2 gap-3 text-xs">
+              <div class="bg-slate-950/40 border border-emerald-900/20 rounded-lg p-3">
+                <p class="text-emerald-300 font-mono mb-1">Atores</p>
+                <p class="text-slate-400">Diretoria, RT, Gabriel</p>
+              </div>
+              <div class="bg-slate-950/40 border border-emerald-900/20 rounded-lg p-3">
+                <p class="text-emerald-300 font-mono mb-1">Entregável</p>
+                <p class="text-slate-400">Mapa AS-IS + plano de migração escrito</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </li>
+
+      <li class="bg-slate-900/60 border border-emerald-900/40 rounded-2xl p-6 md:p-8">
+        <div class="flex flex-col md:flex-row md:items-start md:gap-6">
+          <div class="flex items-center md:flex-col md:items-start mb-4 md:mb-0 md:w-32 shrink-0">
+            <span class="text-5xl font-bold text-emerald-400 font-mono mr-4 md:mr-0">02</span>
+            <div>
+              <p class="text-emerald-300 text-xs font-mono uppercase tracking-widest">Semanas 1-2</p>
+              <p class="text-slate-400 text-xs">Dia 7 → 21</p>
+            </div>
+          </div>
+          <div class="flex-1">
+            <h3 class="text-2xl font-bold text-white mb-3">Setup técnico</h3>
+            <p class="text-slate-300 mb-4 leading-relaxed">
+              Decisão self-host vs hosted. Provisão de ambiente. Importação de dados de membros existentes (CSV). Configuração de RBAC (quem vê o quê), TOTP para ações críticas, integração com instância Open WebUI da associação.
+            </p>
+            <div class="grid sm:grid-cols-2 gap-3 text-xs">
+              <div class="bg-slate-950/40 border border-emerald-900/20 rounded-lg p-3">
+                <p class="text-emerald-300 font-mono mb-1">Atores</p>
+                <p class="text-slate-400">TI, RT, Gabriel</p>
+              </div>
+              <div class="bg-slate-950/40 border border-emerald-900/20 rounded-lg p-3">
+                <p class="text-emerald-300 font-mono mb-1">Entregável</p>
+                <p class="text-slate-400">Ambiente live + dados importados + RBAC funcional</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </li>
+
+      <li class="bg-slate-900/60 border border-emerald-900/40 rounded-2xl p-6 md:p-8">
+        <div class="flex flex-col md:flex-row md:items-start md:gap-6">
+          <div class="flex items-center md:flex-col md:items-start mb-4 md:mb-0 md:w-32 shrink-0">
+            <span class="text-5xl font-bold text-emerald-400 font-mono mr-4 md:mr-0">03</span>
+            <div>
+              <p class="text-emerald-300 text-xs font-mono uppercase tracking-widest">Semanas 3-4</p>
+              <p class="text-slate-400 text-xs">Dia 21 → 35</p>
+            </div>
+          </div>
+          <div class="flex-1">
+            <h3 class="text-2xl font-bold text-white mb-3">Treinamento</h3>
+            <p class="text-slate-300 mb-4 leading-relaxed">
+              Sessões focadas por papel: dispensador opera MCP Apps no chat, RT aprova COA via REST TOTP, diretoria consulta KPIs via MCP Resource. Documentação dos fluxos específicos da sua associação. Simulação de cenários reais com dados de teste.
+            </p>
+            <div class="grid sm:grid-cols-2 gap-3 text-xs">
+              <div class="bg-slate-950/40 border border-emerald-900/20 rounded-lg p-3">
+                <p class="text-emerald-300 font-mono mb-1">Atores</p>
+                <p class="text-slate-400">Dispensador, RT, diretoria</p>
+              </div>
+              <div class="bg-slate-950/40 border border-emerald-900/20 rounded-lg p-3">
+                <p class="text-emerald-300 font-mono mb-1">Entregável</p>
+                <p class="text-slate-400">Checklist de treinamento por papel + manual operacional</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </li>
+
+      <li class="bg-slate-900/60 border-2 border-emerald-500/60 rounded-2xl p-6 md:p-8 ring-2 ring-emerald-500/20">
+        <div class="flex flex-col md:flex-row md:items-start md:gap-6">
+          <div class="flex items-center md:flex-col md:items-start mb-4 md:mb-0 md:w-32 shrink-0">
+            <span class="text-5xl font-bold text-emerald-400 font-mono mr-4 md:mr-0">04</span>
+            <div>
+              <p class="text-emerald-300 text-xs font-mono uppercase tracking-widest">Semanas 5-10</p>
+              <p class="text-slate-400 text-xs">Dia 35 → 70</p>
+              <p class="text-emerald-300 text-xs font-bold mt-1">CORE</p>
+            </div>
+          </div>
+          <div class="flex-1">
+            <h3 class="text-2xl font-bold text-white mb-3">Operação assistida</h3>
+            <p class="text-slate-300 mb-4 leading-relaxed">
+              Associação opera em produção real. Suporte direto Gabriel via WhatsApp/Discord (não tier, não ticket). Sincronização semanal curta sobre o que funcionou e o que quebrou. Bugs reportados → patch dentro de 48h em dias úteis. Esta é a fase onde o produto consolida — para a associação e para canna-br.
+            </p>
+            <div class="grid sm:grid-cols-2 gap-3 text-xs">
+              <div class="bg-slate-950/40 border border-emerald-900/20 rounded-lg p-3">
+                <p class="text-emerald-300 font-mono mb-1">Atores</p>
+                <p class="text-slate-400">Toda associação + Gabriel on-call</p>
+              </div>
+              <div class="bg-slate-950/40 border border-emerald-900/20 rounded-lg p-3">
+                <p class="text-emerald-300 font-mono mb-1">Entregável</p>
+                <p class="text-slate-400">3 meses de operação live, audit trail completo, KPIs alimentando relatórios</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </li>
+
+      <li class="bg-slate-900/60 border border-emerald-900/40 rounded-2xl p-6 md:p-8">
+        <div class="flex flex-col md:flex-row md:items-start md:gap-6">
+          <div class="flex items-center md:flex-col md:items-start mb-4 md:mb-0 md:w-32 shrink-0">
+            <span class="text-5xl font-bold text-emerald-400 font-mono mr-4 md:mr-0">05</span>
+            <div>
+              <p class="text-emerald-300 text-xs font-mono uppercase tracking-widest">Semanas 11-14</p>
+              <p class="text-slate-400 text-xs">Dia 70 → 90+</p>
+            </div>
+          </div>
+          <div class="flex-1">
+            <h3 class="text-2xl font-bold text-white mb-3">Auditoria + dossier ANVISA</h3>
+            <p class="text-slate-300 mb-4 leading-relaxed">
+              Geração do dossier template auto-documentado pelo sistema (LGPD + SNGPC + audit trail + RIPD + BSPO trimestral). Revisão por advogado especializado (parceiro ou próprio). Submissão à ANVISA quando edital abrir. Decisão de continuidade: managed hosting, self-host, ou encerramento.
+            </p>
+            <div class="grid sm:grid-cols-2 gap-3 text-xs">
+              <div class="bg-slate-950/40 border border-emerald-900/20 rounded-lg p-3">
+                <p class="text-emerald-300 font-mono mb-1">Atores</p>
+                <p class="text-slate-400">Diretoria, advogado, Gabriel</p>
+              </div>
+              <div class="bg-slate-950/40 border border-emerald-900/20 rounded-lg p-3">
+                <p class="text-emerald-300 font-mono mb-1">Entregável</p>
+                <p class="text-slate-400">Dossier ANVISA pronto + relato público (com consentimento) do piloto</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </li>
+    </ol>
+
+    <div class="mt-12 bg-amber-950/20 border border-amber-700/30 rounded-xl p-5 max-w-3xl mx-auto">
+      <p class="text-amber-200/90 text-sm leading-relaxed text-center">
+        <strong class="text-amber-300">Honestidade:</strong> 90 dias é o prazo nominal. Se sua associação tem fluxo complexo (cultivo próprio, multi-RT, importação grande), pode ir para 120 dias. Se tem fluxo simples (membros pré-cadastrados, dispensação 1×/semana), pode fechar em 60. O combinado é transparência sobre desvio, não fingir que vai bater prazo a qualquer custo.
+      </p>
+    </div>
+
+    <div class="mt-10 text-center">
+      <a href="/open/seed-associations/" class="inline-flex items-center justify-center px-8 py-4 rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold transition shadow-lg shadow-emerald-500/30">
+        Inscrever associação piloto →
+      </a>
+    </div>
+  </div>
+</section>

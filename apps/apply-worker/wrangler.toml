@@ -1,0 +1,23 @@
+name = "canna-br-apply"
+main = "src/index.ts"
+compatibility_date = "2026-06-01"
+account_id = "590c01d7ef0f2b2edacc31c76f81db48"
+
+[[r2_buckets]]
+binding = "VIDEOS"
+bucket_name = "canna-br-application-videos"
+
+[vars]
+NOTIFY_EMAIL = "gabryelfs@gmail.com"
+FROM_EMAIL = "noreply@fonsecagabriel.com.br"
+
+# SENDKIT_API_KEY = (set via: wrangler secret put SENDKIT_API_KEY)
+# Get key at https://sendkit.dev/pt-BR (free tier 3000 emails/mo, verify fonsecagabriel.com.br domain first)
+
+# NOTE: routes section requires fonsecagabriel.com.br proxied via Cloudflare.
+# If the domain is NOT on Cloudflare proxy, the worker is accessible at:
+#   https://canna-br-apply.<CF_SUBDOMAIN>.workers.dev
+# To add custom domain later: wrangler deploy + CF dashboard → Workers → Triggers → Custom Domains
+# [[routes]]
+# pattern = "canna-br-apply.fonsecagabriel.com.br/*"
+# zone_name = "fonsecagabriel.com.br"

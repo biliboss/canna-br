@@ -1,0 +1,104 @@
+---
+title: Stack e Interfaces
+description: Domain Kernel (Emmett) + MCP-First surface + Open WebUI sidecar + Fastify 5 + PostgreSQL 16 — arquitetura completa sem admin Next.js.
+---
+
+## Tese Arquitetural
+
+[ADR-001](/adr/0001-domain-kernel-emmett/): Domain Kernel em TypeScript puro + Emmett como event-sourcing kernel.
+[ADR-002](/adr/0002-mcp-first-surface/): Primary surface = MCP Server + MCP Apps em Open WebUI. Sem admin Next.js standalone até pós-v1.0.
+
+**Regra invariante:** toda interface chama `packages/app-services`. Nenhuma interface bypassa o domain kernel, escreve direto no event store ou chama Drizzle para mutação.
+
+## Camadas
+
+```
+Domain Kernel (packages/domain)   — funções puras decide/evolve
+          ↑ zero side effects
+App Services (packages/app-services) — loads stream → decide → append → project
+          ↑
+  ┌───────────────────────┬──────────────────┬──────────────┐
+  │                       │                  │              │
+MCP Server             REST/OpenAPI       Worker/Jobs    (sem admin
+(apps/mcp)             (apps/api)         (apps/worker)   Next.js)
+  │                       │                  │
+MCP Apps             Nível-4 TOTP,      SNGPC, PDF,
+(packages/ui-apps)   federação,         Email, BSPO
+  │                  jurídico
+Open WebUI sidecar
+```
+
+## Stack por Camada
+
+### Domain Kernel
+
+| Tecnologia | Papel |
+|---|---|
+| TypeScript (strict) | `packages/domain` — funções puras `decide`/`evolve` |
+| Emmett (event-driven-io) | Event store (in-memory + Postgres), optimistic concurrency, test harness |
+| Vitest | Testes GIVEN/WHEN/THEN, scenario coverage |
+| ULID (`ulid` npm) | IDs lexicograficamente ordenáveis para eventos e aggregates |
+
+### Interfaces
+
+| Tecnologia | Papel |
+|---|---|
+| MCP Server (`@modelcontextprotocol/sdk`) | Tools (commands) + Resources (read models) + Apps (UI inline) |
+| MCP Apps (`ext-apps`) | Componentes UI interativos inline no chat — substituem 80+ telas CRUD |
+| `packages/ui-apps/` | Registry de apps: `MemberQuotaCardApp`, `TraceabilityTimelineApp`, `DispensationFormApp` |
+| OAuth 2.1 | Autorização agente↔canna-br com escopo limitado |
+| Open WebUI v0.9.6+ | Chat host primário — sidecar obrigatório |
+| mcpo bridge | MCP-to-OpenAPI proxy para hosts que não falam MCP nativo |
+| Fastify 5 | HTTP server fino — chama `app-services`, sem regra de negócio |
+| Drizzle ORM | Apenas read models — sem mutação no event store |
+| Zod | Validação de schema HTTP em runtime |
+| BullMQ + Redis | Side effects assíncronos (SNGPC, PDF, email) |
+
+### Banco e Storage
+
+| Tecnologia | Papel |
+|---|---|
+| PostgreSQL 16 + pgAudit | Banco principal + log de auditoria imutável |
+| Redis 7 | Cache de sessão + filas BullMQ |
+| MinIO | S3-compatible self-hosted (laudos, docs) |
+| Puppeteer headless | Geração de PDFs (relatórios, carteirinhas) |
+
+### Auth e Deploy
+
+| Tecnologia | Papel |
+|---|---|
+| JWT (jose) + TOTP (speakeasy) | Tokens stateless + 2FA sem SaaS externo |
+| Kamal 2 | Deploy zero-downtime via Docker |
+| Caddy | Reverse proxy + TLS automático (Let's Encrypt) |
+| Hetzner DE | VPS GDPR-aligned (Frankfurt) |
+
+## Níveis de Risco MCP
+
+| Nível | Descrição | Quando habilita |
+|---|---|---|
+| **1 — Read-only** | Consulta sem efeito (`get_inventory_summary`, `get_member_quota_summary`) | v0.3 |
+| **2 — Draft** | Prepara sem executar; humano confirma (`draft_dispensation`) | v0.4 |
+| **3 — Escrita operacional** | Cria `PendingAction`; requer RBAC + confirmação (`request_record_dispensation`) | v0.5 |
+| **4 — Alto risco** | Nunca via MCP — exige TOTP REST direto (`crypto-deletion`, `role change`, `recall`) | fora do MCP |
+
+## Por Que Self-Hosted é Não-Negociável
+
+Dados de saúde (LGPD Art. 5 II) em SaaS multi-tenant exigem RIPD, contratos com sub-processadores e cláusulas BCR para transferência internacional — responsabilidade solidária da diretoria em caso de vazamento. Self-hosted elimina todos esses vetores.
+
+## Opções de Deploy
+
+| Opção | Setup | Custo |
+|---|---|---|
+| A — Hetzner + Kamal (recomendada) | VPS Frankfurt GDPR + Caddy TLS auto + Restic → S3 | ~€15–25/mês |
+| B — Mini-PC + Tailscale | Hardware próprio + Docker + zero porta aberta | Hardware único |
+| C — Multi-Tenant Managed | Schema isolation por associação + DPA LGPD pré-negociado | SaaS gerenciado |
+
+## Roadmap de Interfaces
+
+| Versão | Capability |
+|---|---|
+| v0.2.1 (atual) | MCP Tools Nível 1–3, MCP Apps iniciais, REST/OpenAPI, Open WebUI sidecar, OAuth 2.1 |
+| v0.3 | LGPD hardening, CSV import, MCP Apps adicionais, Auditor + Federation roles |
+| v0.4 | Dossier template, BSPO trimestral, RIPD via `RipdReviewApp`, DPO view completa |
+| v0.5 | SNGPC + SNCR real, retry/DLQ, REST API pública v1 estável |
+| v1.0 | Cultivation + Processing + Lab + CPC 29 + multi-tenant + billing |

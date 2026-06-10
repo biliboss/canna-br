@@ -1,0 +1,24 @@
+---
+const path = Astro.url.pathname;
+// Strip /en/ or /es/ prefix to get PT canonical path
+const ptPath = path.replace(/^\/(en|es)(\/|$)/, '/');
+const enPath = ptPath === '/' ? '/en/' : `/en${ptPath}`;
+const esPath = ptPath === '/' ? '/es/' : `/es${ptPath}`;
+const current = path.startsWith('/en') ? 'en' : path.startsWith('/es') ? 'es' : 'pt';
+---
+
+<div class="lang-switcher" role="group" aria-label="Idioma">
+  <a href={ptPath} aria-current={current === 'pt' ? 'true' : 'false'} hreflang="pt-BR">PT</a>
+  <span aria-hidden="true">·</span>
+  <a href={enPath} aria-current={current === 'en' ? 'true' : 'false'} hreflang="en">EN</a>
+  <span aria-hidden="true">·</span>
+  <a href={esPath} aria-current={current === 'es' ? 'true' : 'false'} hreflang="es">ES</a>
+</div>
+
+<style>
+  .lang-switcher { display: inline-flex; gap: 0.4rem; align-items: center; font-family: ui-monospace, monospace; font-size: 0.75rem; letter-spacing: 0.05em; }
+  .lang-switcher a { color: rgba(148, 163, 184, 0.7); text-decoration: none; padding: 0.2rem 0.4rem; border-radius: 4px; transition: color 0.2s, background 0.2s; }
+  .lang-switcher a:hover { color: #6ee7b7; }
+  .lang-switcher a[aria-current="true"] { color: #6ee7b7; background: rgba(16, 185, 129, 0.15); }
+  .lang-switcher span { color: rgba(148, 163, 184, 0.3); }
+</style>

@@ -1,0 +1,235 @@
+---
+title: Application Layer
+description: "@canna/app-services — command handlers que orquestram load-stream → decide → append → fanout. A cola entre Domain Kernel e Interfaces."
+---
+
+import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+## Tese
+
+A Application Layer é a camada que orquestra a interação entre Interfaces (MCP, REST, Worker) e o Domain Kernel puro. Ela não contém regra de negócio — essa responsabilidade é do `@canna/domain`. Ela não conhece HTTP, MCP ou banco de dados — essa responsabilidade é das Interfaces e Infra.
+
+O que ela faz: recebe um command tipado, carrega o stream de eventos do aggregate, invoca `decide()` do domínio, faz o append com concorrência otimista, e dispara side-effects via NATS.
+
+Isso é DDD Onion aplicado: o Domain Kernel não sabe que existe NATS; a Application Layer não sabe que existe Fastify. Cf. [ADR-001](/adr/0001-domain-kernel-emmett/) e [ADR-003](/adr/0003-stack-pivot-nats-surreal-dbos/).
+
+---
+
+## Workspace `@canna/app-services`
+
+```
+packages/app-services/
+├── contracts.ts          # tipos compartilhados: commands, results, actor refs
+├── ports.ts              # interfaces de infra — sem implementações aqui
+└── handlers/
+    ├── registerMember.ts
+    ├── recordDispensation.ts
+    ├── registerPlant.ts
+    ├── advancePlantStage.ts
+    ├── approveLabSample.ts
+    ├── releaseLot.ts
+    ├── recallLot.ts
+    └── submitSngpcBatch.ts
+
+infra/
+├── surreal/
+│   ├── memberReadModel.ts    # Drizzle → SurrealDB read model adapter
+│   └── lotReadModel.ts
+├── nats/
+│   └── eventPublisher.ts     # JetStream publisher
+└── sngpc/
+    └── sngpcAdapter.ts       # integração ANVISA SNGPC
+```
+
+Um arquivo por command handler. Claude Code encontra `recordDispensation.ts`, lê uma função, conhece o contrato. Sem class hunting.
+
+### Commands por Bounded Context
+
+| Command | Bounded Context | Modo | Ator |
+|---|---|---|---|
+| `RegisterMember` | Membership | determinístico | Dispensador |
+| `RecordDispensation` | Dispensation | determinístico | Dispensador |
+| `RegisterPlant` | Cultivation | determinístico | Cultivador |
+| `AdvancePlantStage` | Cultivation | determinístico | Cultivador |
+| `ApproveLabSample` | Processing | requer humano | Responsavel Tecnico |
+| `ReleaseLot` | Inventory | determinístico | Sistema (pós-COA) |
+| `RecallLot` | Inventory | terminal | Admin |
+| `SubmitSngpcBatch` | Compliance | saga | Worker (DBOS) |
+
+---
+
+## Padrão de Command Handler
+
+Fluxo canônico — todo handler segue exatamente esta sequência:
+
+```typescript
+// handlers/recordDispensation.ts
+import { ulid } from 'ulid';
+import type { RecordDispensation }     from '../contracts';
+import type { EventStore, EventBus,
+              MemberPort, LotPort }     from '../ports';
+import { recordDispensation as decide } from '@canna/domain';
+
+interface Deps {
+  eventStore: EventStore;
+  eventBus:   EventBus;
+  members:    MemberPort;
+  lots:       LotPort;
+}
+
+/**
+ * @handler     recordDispensation
+ * @emits       DispensationRecorded + MemberQuotaConsumed + LotQuantityDeducted
+ * @concurrency optimistic — falha se stream do lote mudou entre load e append
+ */
+export async function recordDispensationHandler(
+  cmd: RecordDispensation,
+  deps: Deps,
+): Promise<{ dispensationId: string }> {
+  // 1. Resolver aggregate ID — stream do lote é a unidade de concorrência
+  const streamId = `lot-${cmd.lotId}`;
+
+  // 2. Carregar stream + estado atual
+  const { state, expectedVersion } = await deps.eventStore.loadStream(streamId);
+
+  // 3. Domain decide — puro, sem I/O
+  const events = decide(state, cmd);
+
+  // 4. Append com concorrência otimista — falha se versão divergiu
+  await deps.eventStore.appendToStream(streamId, events, { expectedVersion });
+
+  // 5. Fanout NATS — async, non-blocking
+  await Promise.all(events.map(e => deps.eventBus.publish(e)));
+
+  return { dispensationId: cmd.dispensationId ?? ulid() };
+}
+```
+
+Dependências injetadas como `deps` — sem singletons, sem container DI. Testável com in-memory adapters.
+
+---
+
+## Sagas e Orquestração
+
+Nem todo command é síncrono. Quando o side-effect requer retry durável, compensação ou coordenação multi-step, o handler delega para DBOS workflow via `SubmitSngpcBatch` ou equivalente.
+
+| Command | Execução | Motivo |
+|---|---|---|
+| `RecordDispensation` | Síncrono | Append atômico; BullMQ dispara async XML/PDF |
+| `RegisterMember` | Síncrono | Sem side-effect externo imediato |
+| `AdvancePlantStage` | Síncrono | Determinístico; sem retry |
+| `ApproveLabSample` | Síncrono + evento | NATS notifica Worker que libera Lot |
+| `SubmitSngpcBatch` | DBOS workflow | Retry HTTP ANVISA; compensação em falha parcial |
+| `RecallLot` | Síncrono + NATS | Fanout imediato para bloquear dispensações |
+
+Regra de decisão: se o side-effect pode falhar e precisa de retry auditável com estado durável → DBOS. Se o side-effect é fire-and-forget tolerante à perda → NATS + BullMQ consumer.
+
+---
+
+## Boundaries
+
+<strong>O que `@canna/app-services` NUNCA faz:</strong>
+
+- Importar `fastify`, `@modelcontextprotocol/sdk` ou qualquer lib de interface
+- Ler diretamente do banco (Drizzle queries são responsabilidade dos adaptadores em `infra/`)
+- Conter regra de negócio — `decide()` sempre vive em `@canna/domain`
+- Fazer HTTP externo diretamente — delegado a ports (`SngpcPort`, etc.)
+- Logar para stdout em produção — usa structured events via NATS
+
+<strong>O que `@canna/app-services` SEMPRE faz:</strong>
+
+- Retornar `Result<T, DomainError>` tipado — sem throws não tratados
+- Receber `idempotencyKey` em commands que podem ser re-tentados
+- Emitir entrada no audit log (evento `CommandExecuted`) antes do append de domínio
+- Validar schema do command via Zod antes de invocar `decide()`
+
+---
+
+## Testes
+
+In-memory adapters tornam 100% dos testes determinísticos — sem banco, sem NATS, sem SNGPC real.
+
+```typescript
+// test/recordDispensation.test.ts
+import { InMemoryEventStore } from '@canna/test-kit';
+import { InMemoryEventBus }   from '@canna/test-kit';
+import { recordDispensationHandler } from '../handlers/recordDispensation';
+
+test('dispensa registrada emite 3 eventos atômicos', async () => {
+  const store = new InMemoryEventStore();
+  const bus   = new InMemoryEventBus();
+
+  await recordDispensationHandler(
+    { _type: 'RecordDispensation', lotId: 'lot-1', memberId: 'mbr-1', ... },
+    { eventStore: store, eventBus: bus, members: mockMembers, lots: mockLots },
+  );
+
+  expect(bus.events).toHaveLength(3);
+  expect(bus.events[0]._type).toBe('DispensationRecorded');
+  expect(bus.events[1]._type).toBe('MemberQuotaConsumed');
+  expect(bus.events[2]._type).toBe('LotQuantityDeducted');
+});
+```
+
+| Workspace | Testes (meta v0.3) |
+|---|---|
+| `@canna/domain` | 154 (GIVEN/WHEN/THEN por invariante) |
+| `@canna/app-services` | 40 (um por handler × cenários de erro) |
+| `apps/mcp` | 12 (contrato MCP Tool → handler) |
+| `apps/api` | 8 (schema HTTP → handler) |
+
+---
+
+## Mapeamento de Stack
+
+Como a Application Layer se conecta ao restante do stack (ADR-003):
+
+```
+Interface (MCP / REST / Worker)
+        |
+        | command tipado + idempotency key
+        v
+@canna/app-services
+        |
+        |--- load stream ---------> Emmett EventStore
+        |                           (in-mem dev / NATS JetStream prod)
+        |--- decide() -----------> @canna/domain (puro TS)
+        |--- append events -------> Emmett EventStore (optimistic concurrency)
+        |--- publish events ------> NATS JetStream
+                                    |
+                         ┌──────────┴──────────┐
+                         v                     v
+                   SurrealDB              DBOS Worker
+                 (read models)      (sagas: SNGPC, PDF, email)
+```
+
+Emmett gerencia o event store e o optimistic concurrency. NATS é o barramento de fanout. SurrealDB serve as read-side queries. DBOS executa sagas com retry durável.
+
+---
+
+<CardGrid>
+  <LinkCard
+    title="Domain Model"
+    href="/build/domain/"
+    description="8 bounded contexts, chain of custody, invariantes criticos — o nucleo regulatorio."
+  />
+  <LinkCard
+    title="Stack e Interfaces"
+    href="/build/stack/"
+    description="Emmett + MCP + NATS + SurrealDB + DBOS — arquitetura completa por camada."
+  />
+  <LinkCard
+    title="ADR-001 — Domain Kernel"
+    href="/adr/0001-domain-kernel-emmett/"
+    description="Decisao de separar domain puro de app-services e infra."
+  />
+  <LinkCard
+    title="ADR-003 — Stack Pivot"
+    href="/adr/0003-stack-pivot-nats-surreal-dbos/"
+    description="NATS JetStream + SurrealDB + DBOS como infra de producao."
+  />
+</CardGrid>
+
+---
+
+_Padrão estrutural baseado em [manager skill / application-layer.mdx](https://github.com/fonsecagabriel/canna-br) — contratos, ports, use-case functions e Emmett router adaptados para o domínio canna-br._

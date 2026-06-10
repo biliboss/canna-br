@@ -1,0 +1,93 @@
+---
+title: Marco Regulatório
+description: Lei 11.343, STJ Tema 16, RDC 1.014/2026, SNGPC, LGPD — o arcabouço jurídico que define o que o sistema precisa fazer.
+---
+
+## Evolução Regulatória
+
+| Marco | Ano | Efeito prático |
+|---|---|---|
+| Lei 11.343/2006 | 2006 | Proibição geral — sem diferenciação medicinal/associativo |
+| STF Tema 506 | 2015+ | Descriminalização pessoal — não resolve associações coletivas |
+| STJ Tema 16 IAC | 2023 | HC coletivo — protege a associação inteira; habilita operação sob supervisão judicial |
+| RDC 1.014/2026 | ago/2026 | Sandbox ANVISA — legitimidade administrativa; fiscalização direta |
+
+Hoje: 315 associações operam sob HC judicial, com compliance informal. RDC 1.014 muda o paradigma para operação legitimada com ANVISA como autoridade fiscalizadora primária.
+
+## RDC 1.014/2026 — Sandbox
+
+Regime experimental de 5 anos (ago/2026 → ago/2031). Vigência a partir de 4 de agosto de 2026.
+
+**Proibições absolutas:**
+
+| Proibição | Detalhe |
+|---|---|
+| Comercialização | Nenhuma transação financeira pela cannabis; apenas custeio |
+| Membros somente | Dispensação estritamente para quadro associativo cadastrado |
+| Sem fins lucrativos | Receita reverte para operação/pesquisa |
+| Publicidade proibida | Sem divulgação de produtos ou serviços derivados |
+
+**6 Planos Obrigatórios no Dossier:**
+
+| Plano | Exige do sistema |
+|---|---|
+| Monitoramento de KPIs | Dashboard com 7 KPIs exportável |
+| Controle de Qualidade | Registro COA, lotes, especificações |
+| Rastreabilidade | Seed-to-dispensação completo |
+| Sustentabilidade Financeira | DRE sem fins lucrativos |
+| Farmacovigilância | Registro de eventos adversos |
+| Capacidade Técnico-Operacional | Comprovação de infraestrutura TI + RH |
+
+**Ponto crítico: ANVISA certifica associações, não software.** O sistema entra como evidência técnica no dossier — um sistema bem documentado aumenta pontuação da associação, mas a certificação é da associação.
+
+## SNGPC — Único Ponto de Homologação Formal
+
+O SNGPC (Sistema Nacional de Gerenciamento de Produtos Controlados, Portaria 344/98) é o único componente com homologação formal obrigatória. Toda dispensação de substâncias das Listas C1/C5 deve ser reportada.
+
+**Homologação em 5 passos:**
+
+1. Credenciamento no portal SNGPC com CNPJ da associação
+2. Certificado ICP-Brasil A1 ou A3
+3. Testes no sandbox SNGPC com envios fictícios
+4. Validação dos XMLs contra os XSDs publicados
+5. Autorização para envio em produção
+
+API REST nova (`sngpc-api.anvisa.gov.br`), coexiste com SOAP legado. Schema XSD para associações (vs. farmácias) ainda não publicado em jun/2026.
+
+**Fluxo no sistema:** `DispensationRecorded` → `SngpcXmlBuilder` → validação XSD local → BullMQ → ANVISA REST API (retry 3× com backoff exponencial → DLQ com alerta).
+
+## LGPD — Dados de Saúde como Sensíveis
+
+Art. 5 II: dados de saúde (prescrições, condições, dosagem) são dados **sensíveis**. Bases legais:
+
+| Operação | Base Legal |
+|---|---|
+| Cadastro com condição médica | Art. 11 II a — consentimento explícito |
+| Dispensação com prescrição | Art. 11 II f — tutela da saúde |
+| Relatório SNGPC (ANVISA) | Art. 11 II b — obrigação legal |
+| Auditoria interna | Art. 11 II b — exercício regular de direitos |
+
+**Crypto-deletion (Art. 18 IV):** destruição da `EncryptedMemberDEK` torna dados cifrados computacionalmente irrecuperáveis. Registro permanece no banco (preserva chain of custody), mas dado pessoal é irrecuperável. Aceito em auditoria LGPD.
+
+Self-hosted elimina transferência internacional, sub-processadores externos e responsabilidade solidária da diretoria por vazamento em SaaS.
+
+## Premissas por Nível de Confiança
+
+| Premissa | Confiança |
+|---|---|
+| RDC 1.014 é o instrumento sandbox para associações | Confirmada (texto publicado) |
+| LGPD dados de saúde = sensíveis | Confirmada (Lei 13.709) |
+| Crypto-deletion cumpre Art. 18 IV | Confirmada (técnica aceita) |
+| RDC 657 (SaMD) não se aplica a sistema de gestão administrativa | Provável (Alta) |
+| Sandbox terá edital seletivo, não inscrição contínua | Provável (Alta) |
+| FACT negocia 1 contrato → 36 instalações | Provável (Média) |
+| Schema SNGPC para associações será publicado antes do edital | Especulativa |
+
+**Gaps críticos (jun/2026):** Schema XML SNGPC para associações não publicado; endpoint específico associações vs. farmácias não confirmado; critérios de pontuação do dossier não detalhados pela GGMED.
+
+---
+
+<div class="max-w-3xl mx-auto my-12 p-5 rounded-xl border border-amber-500/30 bg-amber-950/20 text-amber-100/80 text-sm">
+  <p class="font-semibold text-amber-300 mb-2">Disclaimer técnico-jurídico</p>
+  <p>canna-br é ferramenta de software. Conformidade legal (LGPD, RDC 1.014, Portaria 344/98) é responsabilidade integral da associação adotante e seus advogados/DPO. Nenhum mecanismo técnico substitui parecer jurídico próprio ou designação formal de RT farmacêutica e DPO conforme exigido em lei. <a href="/trust/">Ver /trust/ — Política de Privacidade, Termos e DPO</a>.</p>
+</div>

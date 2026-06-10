@@ -1,0 +1,328 @@
+---
+const ROTEIRO = [
+  { step: 1, title: "Apresente-se (15s)", prompt: "Quem é você, qual seu papel na associação (diretoria, RT, jurídico, TI)." },
+  { step: 2, title: "Sua associação (45s)", prompt: "Nome, cidade, há quanto tempo opera, pacientes ativos, sob qual regime (HC judicial ou RDC pendente)." },
+  { step: 3, title: "Sua dor (60s)", prompt: "O problema mais urgente agora: planilhas, falta de SNGPC, risco fiscalização ANVISA, LGPD não conforme, lock-in de sistema atual." },
+  { step: 4, title: "O que espera do piloto (60s)", prompt: "Que outcome concreto você quer no primeiro trimestre. Conforme RDC? Migração total? Co-design de feature?" },
+  { step: 5, title: "Como contatar (15s)", prompt: "Email, WhatsApp, melhor horário pra retorno." },
+];
+---
+
+<dialog
+  id="apply-video-dialog"
+  class="backdrop:bg-slate-950/95 backdrop:backdrop-blur-md bg-transparent p-0 m-auto max-w-7xl w-[96vw] h-[92vh] rounded-2xl border border-emerald-700/30 overflow-hidden"
+  aria-labelledby="apply-video-title"
+>
+  <div class="bg-slate-950 h-full flex flex-col">
+    <!-- Header -->
+    <div class="flex items-center justify-between p-4 bg-slate-900 border-b border-slate-800 shrink-0">
+      <div>
+        <p id="apply-video-title" class="text-emerald-300 font-mono text-xs uppercase tracking-widest">Candidatura · Associação Piloto</p>
+        <h2 class="text-white font-bold text-lg mt-1">Grave seu vídeo de até 3 minutos</h2>
+      </div>
+      <button id="close-apply-modal" type="button" class="text-slate-400 hover:text-white p-2 rounded transition focus-visible:ring-2 ring-emerald-400" aria-label="Fechar">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Split body -->
+    <div class="flex-1 grid lg:grid-cols-[1fr_1.4fr] overflow-hidden">
+      <!-- Roteiro left -->
+      <aside class="bg-slate-900/40 border-r border-slate-800 overflow-y-auto p-6">
+        <p class="text-xs font-mono font-bold text-emerald-400 uppercase tracking-widest mb-3">Roteiro sugerido</p>
+        <p class="text-slate-400 text-sm mb-6 leading-relaxed">Use como guia. Não precisa decorar — fala natural funciona melhor. ~3 minutos total.</p>
+        <ol class="space-y-4">
+          {ROTEIRO.map(({ step, title, prompt }) => (
+            <li class="bg-slate-900/60 border border-emerald-900/30 rounded-xl p-4">
+              <div class="flex items-start gap-3">
+                <span class="shrink-0 w-7 h-7 rounded-full bg-emerald-500 text-slate-950 font-bold text-sm flex items-center justify-center">{step}</span>
+                <div>
+                  <p class="text-white font-semibold text-sm mb-1">{title}</p>
+                  <p class="text-slate-400 text-sm leading-relaxed">{prompt}</p>
+                </div>
+              </div>
+            </li>
+          ))}
+        </ol>
+        <div class="mt-6 bg-amber-950/30 border border-amber-700/40 rounded-xl p-4">
+          <p class="text-xs font-mono font-bold text-amber-300 uppercase tracking-widest mb-2">Transferência internacional</p>
+          <p class="text-amber-100/80 text-xs leading-relaxed">Vídeo armazenado em Cloudflare R2 (Estados Unidos). Ao gravar, você consente expressamente com a transferência internacional (LGPD Art. 33 VII). Detalhes em <a href="/trust/privacy-policy/" class="text-amber-200 underline">/trust/privacy-policy/</a>.</p>
+        </div>
+        <div class="mt-4 bg-slate-950/60 border border-emerald-900/30 rounded-xl p-4">
+          <p class="text-xs font-mono font-bold text-emerald-400 uppercase tracking-widest mb-2">Privacidade</p>
+          <p class="text-slate-400 text-xs leading-relaxed">Este vídeo vai direto pro inbox privado de Gabriel Fonseca (gabryelfs@gmail.com). Não é publicado em lugar nenhum. Crypto-deletion garantida sob solicitação.</p>
+        </div>
+      </aside>
+
+      <!-- Recorder right -->
+      <section class="bg-slate-950 flex flex-col p-6 overflow-y-auto">
+        <div id="recorder-state-idle" class="flex-1 flex flex-col">
+          <div class="flex-1 bg-slate-900 rounded-2xl border border-slate-800 flex items-center justify-center min-h-[280px]">
+            <div class="text-center p-8">
+              <div class="w-16 h-16 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+              </div>
+              <p class="text-white font-semibold mb-2">Clique para permitir câmera + microfone</p>
+              <p class="text-slate-400 text-sm">Você pode pré-visualizar antes de começar a gravar.</p>
+            </div>
+          </div>
+          <button id="recorder-permission" type="button" class="mt-6 inline-flex items-center justify-center px-8 py-4 rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold transition shadow-lg shadow-emerald-500/30 focus-visible:ring-4 ring-emerald-400">
+            Permitir câmera e microfone
+          </button>
+        </div>
+
+        <div id="recorder-state-preview" class="hidden flex-1 flex flex-col">
+          <video id="recorder-preview" autoplay muted playsinline class="flex-1 bg-black rounded-2xl object-cover w-full min-h-[280px]"></video>
+          <div class="mt-6 flex flex-col sm:flex-row gap-3 items-center justify-between">
+            <p class="text-slate-400 text-sm font-mono">Pré-visualização · áudio mutado</p>
+            <button id="recorder-start" type="button" class="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-red-500 hover:bg-red-400 text-white font-bold transition shadow-lg shadow-red-500/30 focus-visible:ring-4 ring-red-400">
+              <span class="w-3 h-3 rounded-full bg-white"></span>
+              Iniciar gravação
+            </button>
+          </div>
+        </div>
+
+        <div id="recorder-state-recording" class="hidden flex-1 flex flex-col">
+          <div class="relative flex-1">
+            <video id="recorder-live" autoplay muted playsinline class="bg-black rounded-2xl object-cover w-full h-full min-h-[280px]"></video>
+            <div class="absolute top-4 left-4 flex items-center gap-2 bg-red-950/80 backdrop-blur px-3 py-1.5 rounded-full">
+              <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+              <span id="recorder-timer" class="text-white text-sm font-mono">00:00 / 03:00</span>
+            </div>
+          </div>
+          <div class="mt-6 flex justify-center">
+            <button id="recorder-stop" type="button" class="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-slate-800 hover:bg-slate-700 text-white font-bold transition border border-slate-700 focus-visible:ring-4 ring-slate-400">
+              <span class="w-3 h-3 bg-white rounded-sm"></span>
+              Parar e revisar
+            </button>
+          </div>
+        </div>
+
+        <div id="recorder-state-review" class="hidden flex-1 flex flex-col">
+          <video id="recorder-playback" controls playsinline class="flex-1 bg-black rounded-2xl object-contain w-full min-h-[280px]"></video>
+          <form id="recorder-form" class="mt-6 space-y-4">
+            <div class="grid sm:grid-cols-2 gap-4">
+              <input id="apply-name" name="name" type="text" placeholder="Seu nome" required class="bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder:text-slate-500 focus:border-emerald-500 focus:outline-none" />
+              <input id="apply-email" name="email" type="email" placeholder="Email para retorno" required class="bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder:text-slate-500 focus:border-emerald-500 focus:outline-none" />
+            </div>
+            <input id="apply-association" name="association" type="text" placeholder="Nome da associação" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder:text-slate-500 focus:border-emerald-500 focus:outline-none" />
+
+            <label for="apply-consent-public" class="flex items-start gap-3 bg-emerald-950/30 border border-emerald-700/40 rounded-xl p-4 cursor-pointer hover:border-emerald-500/60 transition">
+              <input id="apply-consent-public" name="consent_public" type="checkbox" checked class="mt-1 w-5 h-5 accent-emerald-500 cursor-pointer shrink-0" />
+              <span class="text-sm">
+                <strong class="text-emerald-300 block mb-1">Publicar minha candidatura na página /open/candidaturas/</strong>
+                <span class="text-slate-300 leading-relaxed">canna-br é OSS radical-transparente: documentar tudo desde o princípio cria confiança e flywheel de associações. Sua candidatura vira página pública (apenas com seu consentimento aqui). Desmarque se preferir candidatura privada — Gabriel ainda recebe, só não publica.</span>
+              </span>
+            </label>
+
+            <div class="flex flex-col sm:flex-row gap-3 justify-between items-center">
+              <button id="recorder-redo" type="button" class="text-slate-400 hover:text-white text-sm transition">Refazer gravação</button>
+              <button id="recorder-send" type="submit" class="inline-flex items-center justify-center px-8 py-4 rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold transition shadow-lg shadow-emerald-500/30 focus-visible:ring-4 ring-emerald-400">
+                Enviar candidatura →
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div id="recorder-state-uploading" class="hidden flex-1 flex flex-col items-center justify-center text-center p-8">
+          <div class="w-12 h-12 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin mb-6"></div>
+          <p class="text-white font-bold text-lg mb-2">Enviando candidatura</p>
+          <p class="text-slate-400 text-sm">Não feche esta janela.</p>
+        </div>
+
+        <div id="recorder-state-success" class="hidden flex-1 flex flex-col items-center justify-center text-center p-8">
+          <div class="w-16 h-16 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center mb-6">
+            <svg class="w-8 h-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+          </div>
+          <p class="text-white font-bold text-2xl mb-3">Candidatura recebida</p>
+          <p class="text-slate-300 mb-2">Gabriel retorna em até 5 dias úteis.</p>
+          <p class="text-slate-500 text-sm mb-8 font-mono" id="apply-receipt-id"></p>
+          <button id="recorder-close-success" type="button" class="px-6 py-2.5 rounded-full bg-slate-800 hover:bg-slate-700 text-white text-sm font-semibold transition">Fechar</button>
+        </div>
+
+        <div id="recorder-state-error" class="hidden flex-1 flex flex-col items-center justify-center text-center p-8">
+          <p class="text-red-300 font-bold text-lg mb-2">Erro ao enviar</p>
+          <p id="recorder-error-message" class="text-slate-400 text-sm mb-6"></p>
+          <p class="text-slate-500 text-xs mb-6">Como fallback, envie por WhatsApp +55 13 98803-2053 ou email gabryelfs@gmail.com</p>
+          <button id="recorder-retry" type="button" class="px-6 py-2.5 rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-sm font-bold transition">Tentar novamente</button>
+        </div>
+      </section>
+    </div>
+  </div>
+</dialog>
+
+<script is:inline>
+  (function () {
+    var dialog = document.getElementById('apply-video-dialog');
+    if (!dialog) return;
+
+    var openBtn = document.getElementById('open-apply-modal');
+    var closeBtn = document.getElementById('close-apply-modal');
+    var closeSuccessBtn = document.getElementById('recorder-close-success');
+
+    var states = {
+      idle: document.getElementById('recorder-state-idle'),
+      preview: document.getElementById('recorder-state-preview'),
+      recording: document.getElementById('recorder-state-recording'),
+      review: document.getElementById('recorder-state-review'),
+      uploading: document.getElementById('recorder-state-uploading'),
+      success: document.getElementById('recorder-state-success'),
+      error: document.getElementById('recorder-state-error'),
+    };
+
+    var setState = function(key) {
+      Object.keys(states).forEach(function(k) {
+        var el = states[k];
+        if (el) el.classList.toggle('hidden', k !== key);
+      });
+    };
+
+    var mediaStream = null;
+    var mediaRecorder = null;
+    var recordedChunks = [];
+    var recordedBlob = null;
+    var timerInterval = null;
+    var startTime = 0;
+    var MAX_SECONDS = 180;
+
+    var previewVideo = document.getElementById('recorder-preview');
+    var liveVideo = document.getElementById('recorder-live');
+    var playback = document.getElementById('recorder-playback');
+    var timer = document.getElementById('recorder-timer');
+
+    var reset = function() {
+      if (mediaStream) {
+        mediaStream.getTracks().forEach(function(t) { t.stop(); });
+        mediaStream = null;
+      }
+      if (timerInterval) clearInterval(timerInterval);
+      mediaRecorder = null;
+      recordedChunks = [];
+      recordedBlob = null;
+    };
+
+    var openDialog = function() {
+      try { dialog.showModal(); } catch (e) { dialog.setAttribute('open', ''); }
+      setState('idle');
+    };
+
+    var closeDialog = function() {
+      reset();
+      try { dialog.close(); } catch (e) { dialog.removeAttribute('open'); }
+    };
+
+    if (openBtn) openBtn.addEventListener('click', openDialog);
+    if (closeBtn) closeBtn.addEventListener('click', closeDialog);
+    if (closeSuccessBtn) closeSuccessBtn.addEventListener('click', closeDialog);
+    dialog.addEventListener('click', function(e) { if (e.target === dialog) closeDialog(); });
+
+    // Permission → preview
+    var permBtn = document.getElementById('recorder-permission');
+    if (permBtn) permBtn.addEventListener('click', function() {
+      navigator.mediaDevices.getUserMedia({
+        video: { width: { ideal: 1280 }, height: { ideal: 720 } },
+        audio: true,
+      }).then(function(stream) {
+        mediaStream = stream;
+        previewVideo.srcObject = stream;
+        setState('preview');
+      }).catch(function(err) {
+        var errMsg = document.getElementById('recorder-error-message');
+        if (errMsg) errMsg.textContent = (err && err.name === 'NotAllowedError')
+          ? 'Permissão de câmera/microfone negada.'
+          : 'Não foi possível acessar câmera ou microfone.';
+        setState('error');
+      });
+    });
+
+    // Start recording
+    var startBtn = document.getElementById('recorder-start');
+    if (startBtn) startBtn.addEventListener('click', function() {
+      if (!mediaStream) return;
+      liveVideo.srcObject = mediaStream;
+      recordedChunks = [];
+      var mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')
+        ? 'video/webm;codecs=vp9,opus'
+        : (MediaRecorder.isTypeSupported('video/webm;codecs=vp8,opus') ? 'video/webm;codecs=vp8,opus' : 'video/webm');
+      mediaRecorder = new MediaRecorder(mediaStream, { mimeType: mimeType });
+      mediaRecorder.ondataavailable = function(e) {
+        if (e.data && e.data.size > 0) recordedChunks.push(e.data);
+      };
+      mediaRecorder.onstop = function() {
+        recordedBlob = new Blob(recordedChunks, { type: mimeType });
+        playback.src = URL.createObjectURL(recordedBlob);
+        setState('review');
+      };
+      mediaRecorder.start(1000);
+      startTime = Date.now();
+      setState('recording');
+      timerInterval = setInterval(function() {
+        var elapsed = Math.floor((Date.now() - startTime) / 1000);
+        var mm = String(Math.floor(elapsed / 60)).padStart(2, '0');
+        var ss = String(elapsed % 60).padStart(2, '0');
+        timer.textContent = mm + ':' + ss + ' / 03:00';
+        if (elapsed >= MAX_SECONDS) { stopRecording(); }
+      }, 250);
+    });
+
+    var stopRecording = function() {
+      if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+      if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+    };
+
+    var stopBtn = document.getElementById('recorder-stop');
+    if (stopBtn) stopBtn.addEventListener('click', stopRecording);
+
+    var redoBtn = document.getElementById('recorder-redo');
+    if (redoBtn) redoBtn.addEventListener('click', function() {
+      recordedBlob = null;
+      recordedChunks = [];
+      if (mediaStream && mediaStream.active) {
+        previewVideo.srcObject = mediaStream;
+        setState('preview');
+      } else {
+        navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 1280 }, height: { ideal: 720 } }, audio: true })
+          .then(function(stream) {
+            mediaStream = stream;
+            previewVideo.srcObject = stream;
+            setState('preview');
+          })
+          .catch(function() { setState('idle'); });
+      }
+    });
+
+    // Submit
+    var form = document.getElementById('recorder-form');
+    if (form) form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      if (!recordedBlob) return;
+      setState('uploading');
+      var fd = new FormData();
+      fd.append('video', recordedBlob, 'candidatura-' + Date.now() + '.webm');
+      fd.append('name', document.getElementById('apply-name').value);
+      fd.append('email', document.getElementById('apply-email').value);
+      fd.append('association', document.getElementById('apply-association').value);
+        fd.append('consent_public', document.getElementById('apply-consent-public').checked ? 'true' : 'false');
+      fetch('https://canna-br-apply.gabrielfonseca.workers.dev/api/apply-video', {
+        method: 'POST',
+        body: fd,
+      }).then(function(res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+      }).then(function(json) {
+        var receipt = document.getElementById('apply-receipt-id');
+        if (receipt) receipt.textContent = 'Recibo: ' + (json.id || 'enviado');
+        setState('success');
+      }).catch(function(err) {
+        var errMsg = document.getElementById('recorder-error-message');
+        if (errMsg) errMsg.textContent = (err && err.message) ? err.message : 'Erro de rede.';
+        setState('error');
+      });
+    });
+
+    var retryBtn = document.getElementById('recorder-retry');
+    if (retryBtn) retryBtn.addEventListener('click', function() { setState('review'); });
+  })();
+</script>
