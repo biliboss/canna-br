@@ -1,0 +1,14 @@
+node_modules
+dist
+.astro
+.turbo
+*.tsbuildinfo
+.DS_Store
+.env
+.env.local
+.env.production
+.envless/
+**/admin-credentials.txt
+coverage
+.vitest-cache
+.pnpm-store

@@ -1,0 +1,61 @@
+---
+title: canna-oss
+description: OSS cannabis association management system — RDC 1.014 sandbox BR
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+# canna-oss
+
+**OSS platform for Brazilian patient cannabis associations — ANVISA RDC 1.014/2026 sandbox.**
+
+Self-hosted first. AGPL-3.0 + CLA. LGPD per-member crypto. SNGPC nativo. Zero vendor lock-in em dados de saúde.
+
+## Gap Confirmado
+
+Nenhum produto existente cobre simultaneamente:
+
+- **LGPD** per-member AES-256-GCM + crypto-deletion (Art. 18 IV)
+- **SNGPC XML** nativo (homologado ANVISA)
+- **BSPO** trimestral/anual auto-gerado
+- **CPC 29 / IAS 41** ativo biológico
+- **Self-hosted** — associação é controladora única
+- **OSS auditável** — código aberto = trust moat para dados de saúde em setor cinzento
+
+## Arquitetura em Uma Frase
+
+**Domain Kernel em TypeScript puro + [Emmett](https://github.com/event-driven-io/emmett) como event-sourcing kernel + raw para todo o resto.**
+
+Domínio é função pura (`decide` / `evolve`). Emmett fornece event store, command handler e optimistic concurrency. HTTP/UI/DB schema ficam explícitos. Decisão em [ADR-001](/adr/0001-domain-kernel-emmett/).
+
+## Stack
+
+**Domain Kernel:** `TypeScript strict` · `Emmett` · `Vitest scenario coverage` · `ULID`
+
+**Application:** `Fastify 5` · `Drizzle (read models)` · `BullMQ workers` · `PostgreSQL 16` · `Redis` · `MinIO` · `Kamal 2` · `TOTP sem SaaS auth`
+
+## Contexto de Mercado
+
+- 315 associações ativas no Brasil (operando sob HC judicial)
+- 873k pacientes estimados ANVISA 2026
+- Sandbox RDC 1.014 vigente agosto/2026 — edital esperado abr–jul/2026
+- TAM R$130M → SAM R$47M → SOM R$27M (2030)
+
+<CardGrid>
+  <Card title="Domain Kernel" icon="seti:typescript">
+    TypeScript puro + Emmett event store + scenario coverage. Domínio executável primeiro, banco/HTTP depois.
+    [Ver Domain Kernel](/architecture/domain-kernel/)
+  </Card>
+  <Card title="Event Storming" icon="puzzle">
+    Mapeamento completo de domain events, commands, aggregates e policies. Core Spine vs Later Module marcado.
+    [Ver Event Storming](/domain/event-storming/)
+  </Card>
+  <Card title="Premissas Regulatórias" icon="warning">
+    Confirmadas / Prováveis / Especulativas. Aposta especulativa não vira arquitetura.
+    [Ver Premissas](/regulatory-assumptions/)
+  </Card>
+  <Card title="ANVISA Sandbox" icon="document">
+    RDC 1.014/2026: o que exige, como entrar, linha do tempo.
+    [Ver ANVISA Sandbox](/research/anvisa-sandbox/)
+  </Card>
+</CardGrid>

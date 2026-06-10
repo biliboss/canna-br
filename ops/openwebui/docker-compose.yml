@@ -1,0 +1,133 @@
+# canna-oss — Open WebUI sidecar (v0.2.1 obrigatório, ADR-0002 MCP-first surface)
+#
+# Production-ready compose for the OWUI front-door + canna-mcp stdio sidecar.
+# TLS terminates in the reverse proxy (Caddy/Traefik); OWUI binds 127.0.0.1 only.
+#
+# IMPORTANT: never expose L4 Tools (crypto-deletion, role change, recall, SNGPC
+# prod) via this stack. Those live in apps/api REST with TOTP only.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: canna-owui-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: openwebui
+      POSTGRES_USER: openwebui
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U openwebui -d openwebui"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - canna-owui
+
+  redis:
+    image: redis:7-alpine
+    container_name: canna-owui-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - canna-owui
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:v0.9.6
+    container_name: canna-owui
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      # TLS via reverse proxy — bind localhost only.
+      - "127.0.0.1:8080:8080"
+    environment:
+      # --- Storage ---
+      DATABASE_URL: postgresql://openwebui:${DB_PASSWORD}@postgres:5432/openwebui
+      REDIS_URL: redis://redis:6379/0
+      # --- Crypto ---
+      WEBUI_SECRET_KEY: ${WEBUI_SECRET_KEY:?WEBUI_SECRET_KEY is required}
+      # --- Auth (OAuth-only; password form disabled). For v0.2.1 single-tenant
+      # bootstrap, flip ENABLE_PASSWORD_FORM=True temporarily to seed the first
+      # admin, then disable + wire Authentik. ---
+      ENABLE_PASSWORD_FORM: "False"
+      # OAUTH_PROVIDERS: authentik
+      # OAUTH_CLIENT_ID: ${OAUTH_CLIENT_ID}
+      # OAUTH_CLIENT_SECRET: ${OAUTH_CLIENT_SECRET}
+      # OAUTH_PROVIDER_NAME: Authentik
+      # OPENID_PROVIDER_URL: ${OAUTH_ISSUER}/.well-known/openid-configuration
+      # --- SECURITY HARDENING ---
+      # CRITICAL: disable Workspace Tools (arbitrary Python = RCE).
+      ENABLE_KB_EXEC: "False"
+      ENABLE_COMMUNITY_SHARING: "False"
+      ENABLE_MESSAGE_RATING: "True"
+      # --- Telemetry (LGPD) ---
+      SCARF_NO_ANALYTICS: "true"
+      DO_NOT_TRACK: "true"
+      ANONYMIZED_TELEMETRY: "false"
+      # --- MCP runtime ---
+      MCP_INITIALIZE_TIMEOUT: "30000"
+      CHAT_RESPONSE_MAX_TOOL_CALL_ITERATIONS: "256"
+      # --- Perf ---
+      UVICORN_WORKERS: "2"
+    volumes:
+      - webui_data:/app/backend/data
+      # MCP server registration (read-only).
+      - ./mcp_config.json:/app/backend/data/mcp_config.json:ro
+      # apps/mcp built output mounted into OWUI container so its stdio MCP
+      # client can spawn `node /opt/canna-mcp/server.js`. Placeholder until
+      # v0.2.1.x ships a real OCI image for canna-mcp.
+      - ./canna-mcp:/opt/canna-mcp:ro
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - canna-owui
+
+  # canna-mcp stdio sidecar — SCAFFOLD-ONLY in v0.2.1.
+  #
+  # In v0.2.1 the apps/mcp package is spawned in-process by OWUI via the
+  # `command + args` block in mcp_config.json (stdio transport, mounted at
+  # /opt/canna-mcp). This service is reserved for v0.2.1.x when we cut a
+  # proper OCI image and switch OWUI to HTTP/SSE transport.
+  #
+  # Uncomment + build once apps/mcp ships a Dockerfile.
+  #
+  # canna-mcp:
+  #   image: ghcr.io/mukutu/canna-mcp:v0.2.1
+  #   container_name: canna-mcp
+  #   restart: unless-stopped
+  #   environment:
+  #     CANNA_API_URL: http://canna-api:3000
+  #     CANNA_OAUTH_ENABLED: "true"
+  #   networks:
+  #     - canna-owui
+
+volumes:
+  postgres_data:
+    name: canna-owui-postgres-data
+  webui_data:
+    name: canna-owui-webui-data
+  redis_data:
+    name: canna-owui-redis-data
+
+networks:
+  canna-owui:
+    name: canna-owui
+    driver: bridge

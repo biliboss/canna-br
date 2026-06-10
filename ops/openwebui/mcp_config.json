@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "canna-dispensations": {
+      "command": "node",
+      "args": ["/opt/canna-mcp/server.js"],
+      "type": "stdio",
+      "env": {
+        "CANNA_API_URL": "http://canna-api:3000",
+        "CANNA_OAUTH_ENABLED": "true"
+      }
+    }
+  }
+}

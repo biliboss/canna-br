@@ -1,0 +1,32 @@
+{
+  "name": "@canna/domain",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./membership": "./src/membership/index.ts",
+    "./inventory": "./src/inventory/index.ts",
+    "./dispensation": "./src/dispensation/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:agent": "VITEST_AGENT_REPORTER=1 vitest run",
+    "test:agent:watch": "VITEST_AGENT_REPORTER=1 vitest",
+    "coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@canna/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@canna/test-utils": "workspace:*",
+    "@canna/tsconfig": "workspace:*",
+    "@vitest/coverage-v8": "^2.1.9",
+    "typescript": "^5.9.3",
+    "vitest": "^2.1.9"
+  }
+}

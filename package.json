@@ -1,0 +1,27 @@
+{
+  "name": "canna-oss",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "OSS cannabis association management system — RDC 1.014 sandbox BR. Domain-first, event-sourced, agentic-native, self-hosted.",
+  "license": "AGPL-3.0",
+  "packageManager": "pnpm@10.29.3",
+  "scripts": {
+    "dev": "pnpm --filter @canna/docs dev",
+    "build": "pnpm -r build",
+    "preview": "pnpm --filter @canna/docs preview",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "test": "pnpm -r --if-present test",
+    "test:domain": "pnpm --filter @canna/domain test",
+    "test:watch": "pnpm --filter @canna/domain test:watch",
+    "coverage": "pnpm --filter @canna/domain coverage",
+    "verify": "pnpm typecheck && pnpm test"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=20.11",
+    "pnpm": ">=10"
+  }
+}

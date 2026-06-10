@@ -1,0 +1,29 @@
+{
+  "name": "@canna/mcp",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./server": "./src/server.ts",
+    "./tools": "./src/tools/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "start": "node --experimental-strip-types src/server.ts"
+  },
+  "dependencies": {
+    "@canna/app-services": "workspace:*",
+    "@canna/domain": "workspace:*",
+    "@canna/event-store": "workspace:*",
+    "@canna/shared": "workspace:*",
+    "@modelcontextprotocol/sdk": "^1.0.4"
+  },
+  "devDependencies": {
+    "@canna/tsconfig": "workspace:*",
+    "typescript": "^5.9.3",
+    "vitest": "^2.1.9"
+  }
+}

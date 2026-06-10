@@ -1,0 +1,15 @@
+{
+  "extends": "@canna/tsconfig/base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "composite": false,
+    // App entry scripts (main.ts) run in the MCP host iframe → need DOM lib.
+    // Manifests stay pure ES2022, but mixing DOM here keeps `tsc --noEmit`
+    // single-pass without per-app tsconfigs.
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": []
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

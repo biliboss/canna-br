@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="pt-BR" data-app="traceability-timeline">
+  <head>
+    <meta charset="utf-8" />
+    <title>Traceability Timeline</title>
+    <style>
+      :root {
+        --bg: var(--mcp-app-bg-primary, #0c0a09);
+        --fg: var(--mcp-app-text-primary, #f5f5f4);
+        --muted: var(--mcp-app-text-muted, #a8a29e);
+        --border: var(--mcp-app-border, #292524);
+        --accent: var(--mcp-app-brand, #22c55e);
+      }
+      body { margin: 0; padding: 14px; background: var(--bg); color: var(--fg);
+        font-family: ui-sans-serif, system-ui, sans-serif; font-size: 13px; }
+      .timeline { display: flex; gap: 0; overflow-x: auto; padding-bottom: 6px; }
+      .step { min-width: 120px; flex-shrink: 0; text-align: center; }
+      .node { background: #1c1917; border: 1px solid var(--accent); border-radius: 8px;
+        padding: 8px 10px; font-weight: 700; font-size: 11px; }
+      .meta { font-size: 10px; color: var(--muted); margin-top: 4px; }
+      .arrow { color: #3f3f46; font-size: 18px; align-self: center; padding: 0 6px; }
+      .empty { color: var(--muted); padding: 12px; text-align: center; }
+    </style>
+  </head>
+  <body>
+    <div id="root"><div class="empty" id="placeholder">Loading traceability chain…</div></div>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>
