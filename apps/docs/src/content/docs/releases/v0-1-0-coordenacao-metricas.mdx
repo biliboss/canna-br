@@ -4,6 +4,7 @@ description: "Ledger de métricas de coordenação e custo de IA da missão cann
 ---
 
 import CoordMetrics from '../../../components/CoordMetrics.astro';
+import DeliveryDashboard from '../../../components/marketing/widgets/DeliveryDashboard.astro';
 
 Toda missão coordenada do canna-br é **medida** (lead time, cycle time por lane, throughput, WIP, flow efficiency, SLA) e **contabilizada** (custo de IA por lane, pago por Gabriel Fonseca). Esta página é a **Entrada #1 do cost ledger da empresa** — audit trail permanente de quanto custou, quanto levou e como foi organizado o trabalho.
 
@@ -59,6 +60,12 @@ A missão usou o **Claude Code Workflow tool** com 3 lanes de trabalho paralelas
 </ul>
 
 Referência de arquitetura: [manager skill](/roadmap/v0-1-0/) · ledger SurrealDB em produção · task <code>task#7hf358</code>.
+
+## CI/CD ao vivo
+
+Pipeline de entrega contínua do docsite — cada push ao `main` que toca `apps/docs/` dispara build + rsync e registra lead time (push→live), build time e contagem de páginas em `/ci-metrics.json`. O widget abaixo lê esse arquivo ao vivo.
+
+<DeliveryDashboard />
 
 ## Próximas entradas do ledger
 

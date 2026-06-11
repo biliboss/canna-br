@@ -1,0 +1,571 @@
+---
+/**
+ * DeliveryDashboard — live CI/CD metrics widget.
+ *
+ * Contract:
+ *   - Reads `data-src` (default: "/ci-metrics.json") on the client (fetch).
+ *   - Renders: último deploy card (status, commit, lead time, live url) +
+ *     build-time + lead-time sparklines (last 15 runs) +
+ *     deploy history list (last 10 entries).
+ *   - Skeleton while loading; honest error if fetch fails.
+ *   - Multi-instance safe (each root bootstraps independently).
+ *   - Zero external dependencies — self-contained inline SVG sparklines.
+ *
+ * Design: dark slate (#020617) + emerald (success) + amber (lead-time),
+ * WCAG AA contrast on all text, reduced-motion safe.
+ * Mirrors ReleasesDashboard.astro / StateSnapshot.astro.
+ */
+export interface Props {
+  /** URL of the ci-metrics.json file. Default "/ci-metrics.json". */
+  dataSrc?: string;
+  /** Root element id — change when placing multiple instances on one page. */
+  id?: string;
+}
+
+const { dataSrc = '/ci-metrics.json', id = 'delivery-dashboard' } = Astro.props;
+---
+
+<div
+  class="dd-root"
+  id={id}
+  data-src={dataSrc}
+  aria-busy="true"
+>
+  <!-- Skeleton -->
+  <div class="dd-skeleton" data-skeleton aria-hidden="true">
+    <div class="dd-card dd-card--skel">
+      <div class="dd-skel-line dd-skel-line--title"></div>
+      <div class="dd-skel-line"></div>
+      <div class="dd-skel-line dd-skel-line--short"></div>
+    </div>
+    <div class="dd-card dd-card--skel">
+      <div class="dd-skel-line dd-skel-line--title"></div>
+      <div class="dd-skel-line"></div>
+    </div>
+    <div class="dd-card dd-card--skel">
+      <div class="dd-skel-line dd-skel-line--title"></div>
+      <div class="dd-skel-line"></div>
+      <div class="dd-skel-line"></div>
+    </div>
+  </div>
+
+  <!-- Live content (injected by JS) -->
+  <div class="dd-content" data-content hidden aria-live="polite"></div>
+
+  <!-- Honest error -->
+  <div class="dd-error" data-error hidden role="status">
+    <p>Dados de deploy indisponíveis no momento.</p>
+    <p class="dd-error-sub">
+      O arquivo <code>/ci-metrics.json</code> é gerado após o primeiro push ao main.
+    </p>
+  </div>
+
+  <!-- Stamp -->
+  <p class="dd-stamp" data-stamp hidden>
+    <span class="dd-stamp-dot" aria-hidden="true"></span>
+    <span data-stamp-text></span>
+  </p>
+</div>
+
+<script is:inline>
+(function () {
+  /* ── bootstrap: multi-instance safe ── */
+  document.querySelectorAll('.dd-root[data-src]').forEach(function (root) {
+    if (root.__dd_init) return;
+    root.__dd_init = true;
+
+    var content  = root.querySelector('[data-content]');
+    var skeleton = root.querySelector('[data-skeleton]');
+    var errorBox = root.querySelector('[data-error]');
+    var stamp    = root.querySelector('[data-stamp]');
+    var stampTxt = root.querySelector('[data-stamp-text]');
+    var src      = root.getAttribute('data-src') || '/ci-metrics.json';
+
+    /* ── helpers ── */
+    function esc(s) {
+      return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+        return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+      });
+    }
+
+    function fmtDate(iso) {
+      if (!iso) return '';
+      try {
+        var d = new Date(iso);
+        if (isNaN(d.getTime())) return iso;
+        var m = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+        return d.getDate() + ' ' + m[d.getMonth()] + ' ' + d.getFullYear()
+          + ' ' + String(d.getHours()).padStart(2,'0')
+          + ':' + String(d.getMinutes()).padStart(2,'0') + ' UTC';
+      } catch (e) { return iso; }
+    }
+
+    function fmtDuration(s) {
+      if (s == null || isNaN(s)) return '—';
+      s = Math.round(Number(s));
+      if (s < 60) return s + 's';
+      var m = Math.floor(s / 60);
+      var rem = s % 60;
+      return m + 'm' + (rem > 0 ? ' ' + rem + 's' : '');
+    }
+
+    /* ── SVG sparkline (bars) ── */
+    function sparkline(values, color, labelFn) {
+      /* values = number[], nulls skipped */
+      var valid = values.filter(function (v) { return v != null && !isNaN(v); });
+      if (!valid.length) return '<span class="dd-spark-empty">sem dados</span>';
+      var max = Math.max.apply(null, valid);
+      if (max === 0) max = 1;
+      var W = 160, H = 36, gap = 3;
+      var n = values.length;
+      var barW = Math.max(2, Math.floor((W - gap * (n - 1)) / n));
+      var bars = values.map(function (v, i) {
+        if (v == null || isNaN(v)) {
+          return '<rect x="' + (i * (barW + gap)) + '" y="' + (H - 2) + '" width="' + barW + '" height="2"'
+            + ' fill="oklch(0.35 0.01 250 / 0.5)" rx="1"/>';
+        }
+        var h = Math.max(2, Math.round((v / max) * H));
+        var y = H - h;
+        var title = labelFn ? esc(labelFn(v)) : esc(String(v));
+        return '<rect x="' + (i * (barW + gap)) + '" y="' + y + '" width="' + barW + '" height="' + h + '"'
+          + ' fill="' + color + '" rx="1"><title>' + title + '</title></rect>';
+      }).join('');
+      return '<svg width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '"'
+        + ' aria-hidden="true" class="dd-spark"><g>' + bars + '</g></svg>';
+    }
+
+    /* ── render ── */
+    function render(data) {
+      var runs = Array.isArray(data.runs) ? data.runs : [];
+
+      /* ── empty state ── */
+      if (!runs.length) {
+        content.innerHTML = '<div class="dd-card dd-card--empty">'
+          + '<p class="dd-eyebrow">CI/CD ao vivo</p>'
+          + '<p class="dd-empty-msg">Nenhum deploy registrado ainda.</p>'
+          + '<p class="dd-empty-sub">O primeiro push ao branch <code>main</code> iniciará o registro.</p>'
+          + '</div>';
+        if (skeleton) skeleton.hidden = true;
+        content.hidden = false;
+        root.setAttribute('aria-busy', 'false');
+        if (data.updatedAt && stamp && stampTxt) {
+          stampTxt.textContent = 'ci-metrics.json · sem runs registradas';
+          stamp.hidden = false;
+        }
+        return;
+      }
+
+      var latest = runs[0];
+      var isSuccess = latest.deploy_status === 'success';
+
+      /* ── card: Último deploy ── */
+      var statusBadge = isSuccess
+        ? '<span class="dd-badge dd-badge--ok" aria-label="sucesso">deployed</span>'
+        : '<span class="dd-badge dd-badge--fail" aria-label="falha">failed</span>';
+
+      var commitSpan = latest.commit
+        ? '<code class="dd-code">' + esc(latest.commit) + '</code>' : '';
+      var msgSpan = latest.commit_msg
+        ? '<span class="dd-commit-msg">' + esc(String(latest.commit_msg).slice(0, 72))
+          + (latest.commit_msg.length > 72 ? '…' : '') + '</span>' : '';
+      var liveLink = latest.live_url
+        ? '<a class="dd-live-link" href="' + esc(latest.live_url) + '" target="_blank" rel="noopener">'
+          + esc(latest.live_url) + ' ↗</a>' : '';
+      var tsSpan = latest.ts
+        ? '<span class="dd-meta-val">' + esc(fmtDate(latest.ts)) + '</span>' : '';
+      var pagesSpan = latest.pages != null
+        ? '<span class="dd-meta-item"><span class="dd-meta-key">páginas</span>'
+          + '<span class="dd-meta-val">' + esc(latest.pages) + '</span></span>' : '';
+      var actorSpan = latest.actor
+        ? '<span class="dd-meta-item"><span class="dd-meta-key">actor</span>'
+          + '<span class="dd-meta-val">' + esc(latest.actor) + '</span></span>' : '';
+
+      var latestCard = '<div class="dd-card dd-card--latest' + (isSuccess ? '' : ' dd-card--fail') + '">'
+        + '<div class="dd-card-header">'
+        +   '<p class="dd-eyebrow">Último deploy</p>'
+        +   '<div class="dd-title-row">' + statusBadge + commitSpan + msgSpan + '</div>'
+        + '</div>'
+        + '<div class="dd-metrics-row">'
+        +   '<span class="dd-metric"><span class="dd-metric-key">push→live</span>'
+        +   '<span class="dd-metric-val dd-metric-val--amber">' + esc(fmtDuration(latest.lead_time_s)) + '</span></span>'
+        +   '<span class="dd-metric"><span class="dd-metric-key">build</span>'
+        +   '<span class="dd-metric-val">' + esc(fmtDuration(latest.build_time_s)) + '</span></span>'
+        +   (latest.pages != null ? '<span class="dd-metric"><span class="dd-metric-key">páginas</span>'
+        +   '<span class="dd-metric-val">' + esc(latest.pages) + '</span></span>' : '')
+        + '</div>'
+        + (liveLink ? '<div class="dd-live-row">' + liveLink + '</div>' : '')
+        + '<div class="dd-meta-row">'
+        +   (tsSpan ? '<span class="dd-meta-item"><span class="dd-meta-key">em</span>' + tsSpan + '</span>' : '')
+        +   actorSpan
+        + '</div>'
+        + '</div>';
+
+      /* ── card: Sparklines (last 15 runs) ── */
+      var slice15 = runs.slice(0, 15).reverse(); /* oldest→newest left to right */
+      var buildVals  = slice15.map(function (r) { return r.build_time_s; });
+      var leadVals   = slice15.map(function (r) { return r.lead_time_s; });
+
+      var sparkCard = '<div class="dd-card dd-card--sparks">'
+        + '<p class="dd-eyebrow">Tendência — últimas ' + Math.min(runs.length, 15) + ' execuções</p>'
+        + '<div class="dd-spark-row">'
+        +   '<div class="dd-spark-group">'
+        +     '<span class="dd-spark-label">Build time</span>'
+        +     sparkline(buildVals, 'oklch(0.62 0.15 162 / 0.85)', fmtDuration)
+        +   '</div>'
+        +   '<div class="dd-spark-group">'
+        +     '<span class="dd-spark-label dd-spark-label--amber">Lead time push→live</span>'
+        +     sparkline(leadVals, 'oklch(0.72 0.17 60 / 0.85)', fmtDuration)
+        +   '</div>'
+        + '</div>'
+        + '</div>';
+
+      /* ── card: Deploy history (last 10) ── */
+      var histRows = runs.slice(0, 10).map(function (r) {
+        var ok = r.deploy_status === 'success';
+        var dot = ok
+          ? '<span class="dd-hist-dot dd-hist-dot--ok" aria-hidden="true">●</span>'
+          : '<span class="dd-hist-dot dd-hist-dot--fail" aria-hidden="true">●</span>';
+        var lt = r.lead_time_s != null
+          ? '<span class="dd-hist-lt">' + esc(fmtDuration(r.lead_time_s)) + '</span>' : '';
+        var bt = r.build_time_s != null
+          ? '<span class="dd-hist-bt">build ' + esc(fmtDuration(r.build_time_s)) + '</span>' : '';
+        var sha = r.commit ? '<code class="dd-code dd-code--xs">' + esc(r.commit) + '</code>' : '';
+        var ts  = r.ts ? '<span class="dd-hist-ts">' + esc(fmtDate(r.ts)) + '</span>' : '';
+        return '<li class="dd-hist-item">'
+          + dot + sha
+          + '<span class="dd-hist-msg">' + esc(String(r.commit_msg || '').slice(0, 55)) + '</span>'
+          + '<span class="dd-hist-meta">' + lt + bt + '</span>'
+          + ts
+          + '</li>';
+      }).join('');
+
+      var histCard = '<div class="dd-card dd-card--hist">'
+        + '<p class="dd-eyebrow">Histórico de deploys</p>'
+        + '<ul class="dd-hist-list" aria-label="Deploy history">' + histRows + '</ul>'
+        + '</div>';
+
+      content.innerHTML = latestCard + sparkCard + histCard;
+      if (skeleton) skeleton.hidden = true;
+      content.hidden = false;
+      root.setAttribute('aria-busy', 'false');
+
+      if (stamp && stampTxt) {
+        var updatedAt = data.updatedAt || (runs[0] && runs[0].ts) || '';
+        stampTxt.textContent = 'ci-metrics.json · '
+          + runs.length + ' run' + (runs.length === 1 ? '' : 's')
+          + (updatedAt ? ' · ' + fmtDate(updatedAt) : '');
+        stamp.hidden = false;
+      }
+    }
+
+    function fail() {
+      if (skeleton) skeleton.hidden = true;
+      if (errorBox) errorBox.hidden = false;
+      root.setAttribute('aria-busy', 'false');
+    }
+
+    fetch(src, { headers: { 'Accept': 'application/json' } })
+      .then(function (r) { if (!r.ok) throw new Error(String(r.status)); return r.json(); })
+      .then(render)
+      .catch(fail);
+  });
+})();
+</script>
+
+<!-- is:global required: innerHTML-injected nodes don't receive scoped Astro styles -->
+<style is:global>
+/* ====================================================================
+   DELIVERY DASHBOARD — dark slate #020617 + emerald (success) + amber (lead-time)
+   Tokens mirror ReleasesDashboard.astro / StateSnapshot.astro.
+==================================================================== */
+
+.dd-root { width: 100%; display: flex; flex-direction: column; gap: 1rem; }
+
+/* ── skeleton ── */
+.dd-skeleton { display: flex; flex-direction: column; gap: 1rem; }
+.dd-card--skel {
+  background: oklch(0.16 0.015 250);
+  border: 1px solid oklch(0.28 0.04 162 / 0.45);
+  border-radius: 16px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  min-height: 100px;
+}
+.dd-skel-line {
+  height: 10px; border-radius: 4px;
+  background: oklch(0.26 0.02 250);
+  position: relative; overflow: hidden;
+}
+.dd-skel-line--title { width: 45%; height: 12px; }
+.dd-skel-line--short { width: 60%; }
+.dd-skel-line::after {
+  content: ""; position: absolute; inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, oklch(0.4 0.03 250 / 0.5), transparent);
+  animation: dd-shimmer 1.4s infinite;
+}
+@keyframes dd-shimmer { 100% { transform: translateX(100%); } }
+
+/* ── base card ── */
+.dd-card {
+  background: oklch(0.16 0.015 250);
+  border: 1px solid oklch(0.28 0.04 162 / 0.45);
+  border-radius: 16px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  transition: border-color 0.15s ease-out;
+}
+.dd-card--latest {
+  border-color: oklch(0.5 0.14 162 / 0.55);
+}
+.dd-card--fail {
+  border-color: oklch(0.55 0.16 30 / 0.55);
+}
+.dd-card--empty {
+  align-items: center;
+  text-align: center;
+  padding: 2rem 1.5rem;
+  border-style: dashed;
+  border-color: oklch(0.3 0.02 250 / 0.5);
+}
+
+/* ── eyebrow ── */
+.dd-eyebrow {
+  color: oklch(0.78 0.15 162);
+  font-size: 0.70rem;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+/* ── latest card internals ── */
+.dd-card-header { display: flex; flex-direction: column; gap: 0.4rem; }
+.dd-title-row { display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
+
+.dd-badge {
+  display: inline-flex; align-items: center;
+  font-size: 0.65rem;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.dd-badge--ok {
+  color: oklch(0.78 0.17 162);
+  background: oklch(0.5 0.14 162 / 0.14);
+  border: 1px solid oklch(0.5 0.14 162 / 0.45);
+}
+.dd-badge--fail {
+  color: oklch(0.72 0.18 30);
+  background: oklch(0.5 0.16 30 / 0.14);
+  border: 1px solid oklch(0.5 0.16 30 / 0.45);
+}
+
+.dd-code {
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 0.82rem;
+  color: #94a3b8;
+  background: oklch(0.13 0.01 250);
+  border: 1px solid oklch(0.28 0.02 250 / 0.5);
+  border-radius: 5px;
+  padding: 0.1em 0.4em;
+}
+.dd-code--xs { font-size: 0.72rem; }
+
+.dd-commit-msg {
+  color: #cbd5e1;
+  font-size: 0.83rem;
+  line-height: 1.4;
+  min-width: 0;
+}
+
+/* ── metrics row (lead time + build time) ── */
+.dd-metrics-row {
+  display: flex; flex-wrap: wrap; gap: 1rem;
+}
+.dd-metric {
+  display: flex; flex-direction: column; gap: 0.2rem;
+}
+.dd-metric-key {
+  color: oklch(0.55 0.02 250);
+  font-size: 0.68rem;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.dd-metric-val {
+  color: #fff;
+  font-size: 1.15rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  line-height: 1;
+}
+.dd-metric-val--amber {
+  color: oklch(0.82 0.17 60);
+}
+
+/* ── live link ── */
+.dd-live-row { margin-top: -0.1rem; }
+.dd-live-link {
+  color: oklch(0.72 0.17 162);
+  font-size: 0.83rem;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.dd-live-link:hover { color: #6ee7b7; text-decoration: underline; }
+.dd-live-link:focus-visible {
+  outline: 2px solid #6ee7b7; outline-offset: 2px; border-radius: 3px;
+}
+
+/* ── meta row ── */
+.dd-meta-row { display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; }
+.dd-meta-item { display: flex; flex-direction: column; gap: 0.15rem; }
+.dd-meta-key {
+  color: oklch(0.52 0.02 250);
+  font-size: 0.65rem;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.dd-meta-val {
+  color: #94a3b8;
+  font-size: 0.78rem;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+}
+
+/* ── empty state ── */
+.dd-empty-msg {
+  color: #94a3b8; font-size: 0.9rem; margin: 0.5rem 0 0;
+}
+.dd-empty-sub {
+  color: oklch(0.55 0.02 250); font-size: 0.78rem; margin: 0.25rem 0 0;
+}
+.dd-empty-sub code {
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 0.82em;
+  color: #94a3b8;
+}
+
+/* ── sparkline card ── */
+.dd-card--sparks { gap: 0.9rem; }
+.dd-spark-row {
+  display: flex; flex-wrap: wrap; gap: 1.25rem 2rem; align-items: flex-end;
+}
+.dd-spark-group {
+  display: flex; flex-direction: column; gap: 0.35rem;
+}
+.dd-spark-label {
+  color: oklch(0.62 0.02 230);
+  font-size: 0.68rem;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.dd-spark-label--amber { color: oklch(0.72 0.12 60); }
+.dd-spark { display: block; overflow: visible; }
+.dd-spark-empty {
+  color: oklch(0.45 0.02 250);
+  font-size: 0.72rem;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+}
+
+/* ── history card ── */
+.dd-card--hist { gap: 0.6rem; }
+.dd-hist-list {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; flex-direction: column; gap: 0;
+}
+.dd-hist-item {
+  display: grid;
+  grid-template-columns: 1.1rem 5.5rem 1fr auto auto;
+  align-items: baseline;
+  gap: 0 0.55rem;
+  padding: 0.45rem 0;
+  border-bottom: 1px solid oklch(0.22 0.015 250 / 0.5);
+  font-size: 0.78rem;
+  line-height: 1.45;
+  flex-wrap: wrap;
+}
+.dd-hist-item:last-child { border-bottom: 0; }
+.dd-hist-dot { font-size: 0.55em; line-height: 2.2; flex-shrink: 0; }
+.dd-hist-dot--ok   { color: oklch(0.72 0.17 162); }
+.dd-hist-dot--fail { color: oklch(0.65 0.18 30); }
+.dd-hist-msg {
+  color: #94a3b8;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.dd-hist-meta {
+  display: flex; gap: 0.4rem; flex-wrap: nowrap; white-space: nowrap;
+}
+.dd-hist-lt {
+  color: oklch(0.78 0.16 60);
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 0.72rem;
+}
+.dd-hist-bt {
+  color: oklch(0.55 0.02 250);
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 0.72rem;
+}
+.dd-hist-ts {
+  color: oklch(0.45 0.02 250);
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 0.68rem;
+  white-space: nowrap;
+}
+
+/* ── stamp ── */
+.dd-stamp {
+  display: flex; align-items: center; gap: 0.45rem;
+  justify-content: center;
+  margin: 0.5rem 0 0;
+  font-size: 0.73rem;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  color: oklch(0.6 0.02 230);
+  letter-spacing: 0.02em;
+}
+.dd-stamp-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: oklch(0.72 0.17 162);
+  box-shadow: 0 0 0 0 oklch(0.72 0.17 162 / 0.6);
+  animation: dd-pulse 2.4s ease-out infinite;
+  flex-shrink: 0;
+}
+@keyframes dd-pulse {
+  0%   { box-shadow: 0 0 0 0 oklch(0.72 0.17 162 / 0.5); }
+  70%  { box-shadow: 0 0 0 6px oklch(0.72 0.17 162 / 0); }
+  100% { box-shadow: 0 0 0 0 oklch(0.72 0.17 162 / 0); }
+}
+
+/* ── error ── */
+.dd-error {
+  text-align: center; padding: 2rem 1rem;
+  color: #94a3b8; font-size: 0.9rem;
+}
+.dd-error p { margin: 0 0 0.4rem; }
+.dd-error-sub { font-size: 0.8rem; color: #8595ab; }
+.dd-error-sub code {
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+}
+
+/* ── reduced-motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .dd-card { transition-duration: 0.01ms !important; }
+  .dd-stamp-dot { animation: none !important; box-shadow: none !important; }
+  .dd-skel-line::after { animation: none !important; }
+}
+</style>

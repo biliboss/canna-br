@@ -1,0 +1,167 @@
+name: Deploy Docs
+
+# ── Triggers ──────────────────────────────────────────────────────────────────
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/docs/**'
+      - '.github/workflows/deploy-docs.yml'
+  workflow_dispatch:
+
+# ── Concurrency: one active deploy per branch, cancel outdated runs ───────────
+concurrency:
+  group: deploy-docs-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Build + Deploy + Metrics
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      # ── 1. Checkout (full depth for accurate commit timestamps) ───────────────
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # ── 2. Setup pnpm (packageManager field = pnpm@10.29.3) ──────────────────
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.29.3
+
+      # ── 3. Setup Node 22 (corepack will use pnpm from above) ─────────────────
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      # ── 4. Install dependencies (frozen — no unintended version bumps) ────────
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # ── 5. Build — record wall-clock time ────────────────────────────────────
+      - name: Build docs
+        id: build
+        run: |
+          BUILD_START=$(date +%s)
+          # Capture build output to parse page count
+          pnpm --filter @canna/docs build 2>&1 | tee /tmp/build-log.txt
+          BUILD_END=$(date +%s)
+          BUILD_TIME_S=$((BUILD_END - BUILD_START))
+          echo "build_time_s=${BUILD_TIME_S}" >> "$GITHUB_OUTPUT"
+          # Parse "N page(s) built" from Astro output (e.g. "288 pages built in …")
+          PAGES=$(grep -oP '(\d+) page' /tmp/build-log.txt | tail -1 | grep -oP '\d+' || echo "null")
+          echo "pages=${PAGES}" >> "$GITHUB_OUTPUT"
+
+      # ── 6. Deploy via rsync over SSH ─────────────────────────────────────────
+      #    Low latency: rsync pushes only changed files; bind-mount is instantly live.
+      - name: Deploy to host
+        id: deploy
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          # Write SSH key with strict perms
+          install -m 600 /dev/null /tmp/deploy_key
+          echo "$DEPLOY_SSH_KEY" > /tmp/deploy_key
+
+          rsync -az --delete \
+            -e "ssh -i /tmp/deploy_key -o StrictHostKeyChecking=accept-new -o BatchMode=yes" \
+            apps/docs/dist/ \
+            "${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}/"
+
+          # Scrub key immediately
+          rm -f /tmp/deploy_key
+
+      # ── 7. Append run to ci-metrics.json on the deploy box ───────────────────
+      #    The file lives at ${DEPLOY_PATH}/ci-metrics.json and is served live at
+      #    https://cannabr.org/ci-metrics.json so the widget reads real data.
+      #    On deploy failure, deploy_status is "failed" but we still record.
+      - name: Record metrics
+        if: always()
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          BUILD_TIME_S: ${{ steps.build.outputs.build_time_s }}
+          PAGES: ${{ steps.build.outputs.pages }}
+          DEPLOY_OUTCOME: ${{ steps.deploy.outcome }}
+        run: |
+          # Compute lead_time_s = now (deploy live) − push event timestamp
+          PUSH_TS="${{ github.event.head_commit.timestamp }}"
+          NOW_EPOCH=$(date +%s)
+          if [ -n "$PUSH_TS" ]; then
+            PUSH_EPOCH=$(date -d "$PUSH_TS" +%s 2>/dev/null || echo "$NOW_EPOCH")
+          else
+            PUSH_EPOCH=$NOW_EPOCH
+          fi
+          LEAD_TIME_S=$((NOW_EPOCH - PUSH_EPOCH))
+
+          # Short SHA (7 chars)
+          SHORT_SHA="${GITHUB_SHA:0:7}"
+
+          # Escape commit message for JSON (replace backslash, double-quote, newlines)
+          RAW_MSG="${{ github.event.head_commit.message }}"
+          COMMIT_MSG=$(echo "$RAW_MSG" | head -1 | sed 's/\\/\\\\/g; s/"/\\"/g')
+
+          # Build the new run JSON object (inline node — no extra deps needed)
+          NEW_RUN=$(node -e "
+            const run = {
+              ts: new Date().toISOString(),
+              commit: process.env.SHORT_SHA,
+              commit_msg: process.env.COMMIT_MSG,
+              build_time_s: Number(process.env.BUILD_TIME_S) || null,
+              deploy_status: process.env.DEPLOY_OUTCOME === 'success' ? 'success' : 'failed',
+              lead_time_s: Number(process.env.LEAD_TIME_S),
+              pages: process.env.PAGES === 'null' || !process.env.PAGES
+                ? null : Number(process.env.PAGES),
+              live_url: 'https://cannabr.org',
+              actor: process.env.GITHUB_ACTOR,
+            };
+            process.stdout.write(JSON.stringify(run));
+          " SHORT_SHA="$SHORT_SHA" \
+            COMMIT_MSG="$COMMIT_MSG" \
+            LEAD_TIME_S="$LEAD_TIME_S")
+
+          # Write SSH key
+          install -m 600 /dev/null /tmp/deploy_key_metrics
+          echo "$DEPLOY_SSH_KEY" > /tmp/deploy_key_metrics
+
+          SSH_CMD="ssh -i /tmp/deploy_key_metrics -o StrictHostKeyChecking=accept-new -o BatchMode=yes"
+
+          # Read existing file from box (or use empty baseline), prepend new run,
+          # cap at 50 entries, write back. All inline node over SSH.
+          $SSH_CMD "${DEPLOY_USER}@${DEPLOY_HOST}" "
+            METRICS_FILE=\"${DEPLOY_PATH}/ci-metrics.json\"
+            # Read existing or use empty baseline
+            if [ -f \"\$METRICS_FILE\" ]; then
+              EXISTING=\$(cat \"\$METRICS_FILE\")
+            else
+              EXISTING='{\"updatedAt\":\"\",\"runs\":[]}'
+            fi
+            # Prepend new run, cap at 50 — inline node (available on ubuntu:latest-based VPS)
+            echo \"\$EXISTING\" | node -e \"
+              const fs = require('fs');
+              let existing = '';
+              process.stdin.on('data', d => existing += d);
+              process.stdin.on('end', () => {
+                let store;
+                try { store = JSON.parse(existing); } catch(e) { store = { runs: [] }; }
+                if (!Array.isArray(store.runs)) store.runs = [];
+                const newRun = JSON.parse(process.argv[1]);
+                store.runs = [newRun, ...store.runs].slice(0, 50);
+                store.updatedAt = new Date().toISOString();
+                process.stdout.write(JSON.stringify(store, null, 2));
+              });
+            \" '${NEW_RUN}' > /tmp/ci-metrics-new.json && mv /tmp/ci-metrics-new.json \"\$METRICS_FILE\"
+          " || echo "[deploy-docs] metrics update warning — non-fatal"
+
+          rm -f /tmp/deploy_key_metrics
