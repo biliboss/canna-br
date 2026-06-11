@@ -116,7 +116,7 @@ jobs:
           COMMIT_MSG=$(echo "$RAW_MSG" | head -1 | sed 's/\\/\\\\/g; s/"/\\"/g')
 
           # Build the new run JSON object (inline node — no extra deps needed)
-          NEW_RUN=$(node -e "
+          NEW_RUN=$(SHORT_SHA="$SHORT_SHA" COMMIT_MSG="$COMMIT_MSG" LEAD_TIME_S="$LEAD_TIME_S" node -e "
             const run = {
               ts: new Date().toISOString(),
               commit: process.env.SHORT_SHA,
@@ -130,9 +130,7 @@ jobs:
               actor: process.env.GITHUB_ACTOR,
             };
             process.stdout.write(JSON.stringify(run));
-          " SHORT_SHA="$SHORT_SHA" \
-            COMMIT_MSG="$COMMIT_MSG" \
-            LEAD_TIME_S="$LEAD_TIME_S")
+          ")
 
           # Write SSH key
           install -m 600 /dev/null /tmp/deploy_key_metrics
