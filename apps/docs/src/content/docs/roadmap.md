@@ -3,8 +3,6 @@ title: Roadmap
 description: MCP-first agentic surface. Open WebUI + MCP server + MCP Apps substitui admin Next.js até pós-v1.0. Estrutura Slice Vertical (Capability+Valor+Done-when).
 ---
 
-# Roadmap
-
 > **Princípio (revisado pós-pivot 2026-06-08):** spine-first **+** agentic-first.
 > Tronco regulatório: Member → Prescrição → Quota → Lote → Dispensação → Audit Log → Relatório.
 > Tronco de interface: **MCP server + MCP Apps + Open WebUI**. **NÃO existe admin Next.js no roadmap até pós-v1.0.** Tudo que era "admin view" virou MCP App contextual ou ficou no Ideas Park.

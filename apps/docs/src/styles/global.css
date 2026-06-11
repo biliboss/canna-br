@@ -67,3 +67,11 @@ body.landing-chromeless {
     padding-top: 0 !important;
   }
 }
+
+/* Mobile: markdown tables scroll horizontally instead of stretching the page
+   (tokenomics/blog tables are ~780px wide; at 320px they forced page scroll). */
+.sl-markdown-content table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+}

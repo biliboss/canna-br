@@ -44,6 +44,21 @@ export default defineConfig({
           tag: 'meta',
           attrs: { name: 'theme-color', content: '#ffffff', media: '(prefers-color-scheme: light)' },
         },
+        // Default OG/Twitter image for every Starlight content page (blog,
+        // business, apps, roadmap…). Marketing pages set their own via
+        // MarketingLayout and don't go through this head.
+        {
+          tag: 'meta',
+          attrs: { property: 'og:image', content: 'https://canna-br.fonsecagabriel.com.br/og-default.png' },
+        },
+        {
+          tag: 'meta',
+          attrs: { name: 'twitter:image', content: 'https://canna-br.fonsecagabriel.com.br/og-default.png' },
+        },
+        {
+          tag: 'link',
+          attrs: { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: true },
+        },
         // a11y: Starlight's <starlight-theme-select>/<starlight-lang-select>
         // render native <select> with no id/name/aria-label (theme + language,
         // twice each = 4 unlabeled form fields, flagged by the browser). They're
@@ -51,7 +66,7 @@ export default defineConfig({
         // localized off <html lang>. Idempotent + works on bfcache restore.
         {
           tag: 'script',
-          content: `(function(){function L(){var pt=(document.documentElement.lang||'pt').slice(0,2);var T={pt:'Selecionar tema',en:'Select theme',es:'Seleccionar tema'};var G={pt:'Selecionar língua',en:'Select language',es:'Seleccionar idioma'};var t=T[pt]||T.pt,g=G[pt]||G.pt;var n=0;document.querySelectorAll('starlight-theme-select select').forEach(function(s){if(!s.getAttribute('aria-label')){s.setAttribute('aria-label',t);}if(!s.id){s.id='sl-theme-select-'+(n++);}if(!s.name){s.name='sl-theme-select';}});var m=0;document.querySelectorAll('starlight-lang-select select').forEach(function(s){if(!s.getAttribute('aria-label')){s.setAttribute('aria-label',g);}if(!s.id){s.id='sl-lang-select-'+(m++);}if(!s.name){s.name='sl-lang-select';}});}if(document.readyState!=='loading'){L();}else{document.addEventListener('DOMContentLoaded',L);}window.addEventListener('pageshow',L);})();`,
+          content: `(function(){function L(){var pt=(document.documentElement.lang||'pt').slice(0,2);var T={pt:'Selecionar tema',en:'Select theme',es:'Seleccionar tema'};var G={pt:'Selecionar língua',en:'Select language',es:'Seleccionar idioma'};var t=T[pt]||T.pt,g=G[pt]||G.pt;var n=0;document.querySelectorAll('starlight-theme-select select').forEach(function(s){if(!s.getAttribute('aria-label')){s.setAttribute('aria-label',t);}if(!s.id){s.id='sl-theme-select-'+(n++);}if(!s.name){s.name='sl-theme-select';}});var m=0;document.querySelectorAll('starlight-lang-select select').forEach(function(s){if(!s.getAttribute('aria-label')){s.setAttribute('aria-label',g);}if(!s.id){s.id='sl-lang-select-'+(m++);}if(!s.name){s.name='sl-lang-select';}});var S={pt:'Pesquisar',en:'Search',es:'Buscar'};var sl=S[pt]||S.pt;var k=0;document.querySelectorAll('.pagefind-ui__search-input').forEach(function(s){if(!s.getAttribute('aria-label')){s.setAttribute('aria-label',sl);}if(!s.id){s.id='pagefind-search-'+(k++);}});}if(document.readyState!=='loading'){L();}else{document.addEventListener('DOMContentLoaded',L);}window.addEventListener('pageshow',L);var mo=new MutationObserver(function(){if(document.querySelector('.pagefind-ui__search-input:not([aria-label])')){L();}});mo.observe(document.documentElement,{childList:true,subtree:true});})();`,
         },
       ],
       customCss: ['./src/styles/global.css', './src/styles/brand.css', './src/styles/blog.css'],
