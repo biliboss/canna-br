@@ -1,0 +1,214 @@
+---
+/**
+ * MarketingLayout — shell HTML para todas as páginas públicas de marketing.
+ *
+ * Uso:
+ *   import Layout from "../components/marketing/MarketingLayout.astro";
+ *   <Layout title="Título da página" description="Meta description">
+ *     <!-- conteúdo da página -->
+ *   </Layout>
+ *
+ * Inclui: head (meta/OG/canonical), MarketingNav, slot, footer compacto.
+ * Não toca em index.astro.
+ */
+
+import MarketingNav from './MarketingNav.astro';
+import '../../styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+  /** URL canônica absoluta. Padrão: URL atual. */
+  canonical?: string;
+  /** URL da imagem OG. Padrão: /og-default.png */
+  ogImage?: string;
+}
+
+const {
+  title,
+  description,
+  canonical = Astro.url.href,
+  ogImage = '/og-default.png',
+} = Astro.props;
+
+const siteBase = 'https://canna-br.fonsecagabriel.com.br';
+---
+
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content={description} />
+
+  <!-- Open Graph -->
+  <meta property="og:title"       content={title} />
+  <meta property="og:description" content={description} />
+  <meta property="og:type"        content="website" />
+  <meta property="og:url"         content={canonical} />
+  <meta property="og:image"       content={`${siteBase}${ogImage}`} />
+  <meta property="og:site_name"   content="canna-br" />
+  <meta property="og:locale"      content="pt_BR" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image" />
+  <meta name="twitter:title"       content={title} />
+  <meta name="twitter:description" content={description} />
+  <meta name="twitter:image"       content={`${siteBase}${ogImage}`} />
+
+  <!-- Canonical + hreflang PT only (EN/ES marketing fora do v0) -->
+  <link rel="canonical" href={canonical} />
+  <link rel="alternate" hreflang="pt-BR"   href={canonical} />
+  <link rel="alternate" hreflang="x-default" href={canonical} />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+  <title>{title}</title>
+
+  <style>
+    :root { color-scheme: dark; }
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: #020617;
+      color: #e2e8f0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    main {
+      flex: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <MarketingNav />
+
+  <main id="main-content">
+    <slot />
+  </main>
+
+  <!-- Footer compacto -->
+  <footer class="mktg-footer" aria-label="Rodapé">
+    <div class="mktg-footer-inner">
+      <a href="/" class="mktg-footer-brand">canna-br</a>
+
+      <nav aria-label="Links do rodapé" class="mktg-footer-links">
+        <a href="/about/">Docs</a>
+        <a href="/trust/">Confiança & LGPD</a>
+        <a href="/compliance/">Compliance</a>
+        <a href="/transparencia/">Transparência</a>
+        <a href="https://github.com/biliboss/canna-br" target="_blank" rel="noopener noreferrer">
+          GitHub
+          <svg
+            width="12" height="12" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round" aria-hidden="true"
+            style="display:inline;vertical-align:middle;margin-left:2px"
+          >
+            <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/>
+            <polyline points="15 3 21 3 21 9"/>
+            <line x1="10" y1="14" x2="21" y2="3"/>
+          </svg>
+        </a>
+      </nav>
+
+      <p class="mktg-footer-copy">
+        &copy; {new Date().getFullYear()} canna-br &mdash; AGPL-3.0 &mdash;
+        <a href="/trust/">Privacidade</a>
+      </p>
+    </div>
+  </footer>
+
+</body>
+</html>
+
+<style>
+  /* ================================================================
+     MARKETING FOOTER — compact dark slate strip
+  ================================================================ */
+
+  .mktg-footer {
+    background: rgba(2, 6, 23, 0.96);
+    border-top: 1px solid rgba(16, 185, 129, 0.10);
+    padding: 2rem 1.5rem;
+    margin-top: auto;
+  }
+
+  .mktg-footer-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 2rem;
+  }
+
+  .mktg-footer-brand {
+    color: #fff;
+    font-weight: 800;
+    font-size: 1rem;
+    letter-spacing: -0.04em;
+    text-decoration: none;
+  }
+  .mktg-footer-brand:hover { color: #6ee7b7; }
+
+  .mktg-footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1.25rem;
+    flex: 1;
+  }
+  .mktg-footer-links a {
+    color: #8595ab;
+    text-decoration: none;
+    font-size: 0.825rem;
+    transition: color 0.15s;
+  }
+  .mktg-footer-links a:hover { color: #94a3b8; }
+  .mktg-footer-links a:focus-visible {
+    outline: 2px solid #6ee7b7;
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  /* #748396 on #020617 ≈ 5.22:1 — clears WCAG AA 4.5:1 for normal text.
+     (#475569 was 2.66:1 fail; #64748b only 4.24:1, still short.) */
+  .mktg-footer-copy {
+    color: #748396;
+    font-size: 0.775rem;
+    margin: 0;
+    width: 100%;
+  }
+  .mktg-footer-copy a {
+    color: #748396;
+    text-decoration: underline;
+    transition: color 0.15s;
+  }
+  .mktg-footer-copy a:hover { color: #cbd5e1; }
+
+  @media (max-width: 640px) {
+    .mktg-footer-inner {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+    .mktg-footer-links {
+      flex: unset;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mktg-footer-brand,
+    .mktg-footer-links a,
+    .mktg-footer-copy a {
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>

@@ -1,0 +1,352 @@
+---
+/**
+ * MarketingNav — sticky header para todas as páginas de marketing.
+ *
+ * Design system: dark slate (#020617 base) + emerald accents.
+ * Mobile: hamburger via <details> nativo, sem JS framework.
+ * Acessível: nav landmark, aria-label, foco visível, aria-expanded.
+ */
+
+import { APP_URL } from '../../data/site-constants';
+
+const navLinks = [
+  { label: 'Produto',        href: '/produto/' },
+  { label: 'Associações',    href: '/associacoes/' },
+  { label: 'Compliance',     href: '/compliance/' },
+  { label: 'Transparência',  href: '/transparencia/' },
+  { label: 'Piloto',         href: '/piloto/' },
+  { label: 'Marca',          href: '/marca/' },
+  { label: 'Blog',           href: '/blog/' },
+  { label: 'Docs',           href: '/about/' },
+];
+
+const currentPath = Astro.url.pathname;
+function isActive(href: string) {
+  if (href === '/') return currentPath === '/';
+  return currentPath.startsWith(href);
+}
+---
+
+<header class="mktg-header" role="banner">
+  <nav class="mktg-nav" aria-label="Navegação principal">
+
+    <!-- Brand -->
+    <a href="/" class="mktg-brand" aria-label="canna-br — página inicial">
+      canna-br
+    </a>
+
+    <!-- Desktop links -->
+    <ul class="mktg-links" role="list">
+      {navLinks.map(({ label, href }) => (
+        <li>
+          <a
+            href={href}
+            class:list={['mktg-link', { 'mktg-link--active': isActive(href) }]}
+            aria-current={isActive(href) ? 'page' : undefined}
+          >
+            {label}
+          </a>
+        </li>
+      ))}
+    </ul>
+
+    <!-- CTAs desktop -->
+    <div class="mktg-ctas">
+      <a href={APP_URL} class="mktg-cta-secondary">Ver demonstração</a>
+      <a href="/piloto/" class="mktg-cta-primary">Entrar como piloto</a>
+    </div>
+
+    <!-- Hamburger mobile — details/summary, zero JS framework -->
+    <details class="mktg-mobile-menu" id="mobile-menu">
+      <summary
+        class="mktg-hamburger"
+        aria-label="Abrir menu de navegação"
+        aria-controls="mobile-menu-list"
+      >
+        <!-- Open icon -->
+        <svg class="icon-open" width="22" height="22" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round"
+             stroke-linejoin="round" aria-hidden="true">
+          <line x1="3" y1="6"  x2="21" y2="6"/>
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+        <!-- Close icon (shown when open) -->
+        <svg class="icon-close" width="22" height="22" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round"
+             stroke-linejoin="round" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </summary>
+
+      <div class="mktg-mobile-dropdown" id="mobile-menu-list" role="dialog" aria-modal="true" aria-label="Menu de navegação">
+        <ul role="list" class="mktg-mobile-links">
+          {navLinks.map(({ label, href }) => (
+            <li>
+              <a
+                href={href}
+                class:list={['mktg-mobile-link', { 'mktg-mobile-link--active': isActive(href) }]}
+                aria-current={isActive(href) ? 'page' : undefined}
+              >
+                {label}
+              </a>
+            </li>
+          ))}
+        </ul>
+        <div class="mktg-mobile-ctas">
+          <a href={APP_URL} class="mktg-cta-secondary mktg-cta--block">Ver demonstração</a>
+          <a href="/piloto/" class="mktg-cta-primary mktg-cta--block">Entrar como piloto</a>
+        </div>
+      </div>
+    </details>
+
+  </nav>
+</header>
+
+<!-- Close mobile menu when clicking outside -->
+<script>
+  const details = document.getElementById('mobile-menu') as HTMLDetailsElement | null;
+  if (details) {
+    document.addEventListener('click', (e) => {
+      if (!details.contains(e.target as Node)) {
+        details.open = false;
+      }
+    });
+    // Close on Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') details.open = false;
+    });
+    // Sync aria-expanded on summary (details does not expose it natively)
+    const summary = details.querySelector('summary');
+    if (summary) {
+      const sync = () => summary.setAttribute('aria-expanded', String(details.open));
+      details.addEventListener('toggle', sync);
+      sync();
+    }
+  }
+</script>
+
+<style>
+  /* ================================================================
+     MARKETING HEADER — sticky, backdrop-blur, dark slate + emerald
+     Design system mirrors index.astro floating-nav tokens.
+  ================================================================ */
+
+  .mktg-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    width: 100%;
+    backdrop-filter: blur(14px) saturate(180%);
+    background: rgba(2, 6, 23, 0.88);
+    border-bottom: 1px solid rgba(16, 185, 129, 0.14);
+  }
+
+  .mktg-nav {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+  }
+
+  /* Brand */
+  .mktg-brand {
+    color: #fff;
+    font-weight: 800;
+    font-size: 1.05rem;
+    letter-spacing: -0.04em;
+    text-decoration: none;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .mktg-brand:hover { color: #6ee7b7; }
+
+  /* Desktop nav links */
+  .mktg-links {
+    display: flex;
+    align-items: center;
+    gap: 0.15rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    flex: 1;
+  }
+
+  .mktg-link {
+    color: #94a3b8;
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 0.35rem 0.65rem;
+    border-radius: 6px;
+    transition: color 0.15s, background 0.15s;
+    white-space: nowrap;
+  }
+  .mktg-link:hover { color: #e2e8f0; background: rgba(255,255,255,0.05); }
+  .mktg-link--active { color: #6ee7b7; }
+  .mktg-link:focus-visible {
+    outline: 2px solid #6ee7b7;
+    outline-offset: 2px;
+  }
+
+  /* Desktop CTAs */
+  .mktg-ctas {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-shrink: 0;
+  }
+
+  .mktg-cta-secondary {
+    color: #6ee7b7;
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 600;
+    padding: 0.4rem 0.9rem;
+    border-radius: 999px;
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    background: rgba(16, 185, 129, 0.08);
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+    white-space: nowrap;
+  }
+  .mktg-cta-secondary:hover {
+    background: rgba(16, 185, 129, 0.18);
+    border-color: rgba(16, 185, 129, 0.6);
+    color: #fff;
+  }
+  .mktg-cta-secondary:focus-visible {
+    outline: 2px solid #6ee7b7;
+    outline-offset: 2px;
+  }
+
+  .mktg-cta-primary {
+    color: #020617;
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 700;
+    padding: 0.45rem 1.1rem;
+    border-radius: 999px;
+    background: #10b981;
+    border: 1px solid transparent;
+    transition: background 0.15s, box-shadow 0.15s;
+    white-space: nowrap;
+  }
+  .mktg-cta-primary:hover {
+    background: #34d399;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+  }
+  .mktg-cta-primary:focus-visible {
+    outline: 2px solid #6ee7b7;
+    outline-offset: 2px;
+  }
+
+  /* ── Mobile hamburger ── */
+  .mktg-mobile-menu {
+    display: none;
+    margin-left: auto;
+    position: relative;
+  }
+
+  .mktg-hamburger {
+    list-style: none;
+    cursor: pointer;
+    color: #94a3b8;
+    padding: 0.5rem;
+    border-radius: 6px;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    background: transparent;
+    transition: color 0.15s, border-color 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .mktg-hamburger::-webkit-details-marker { display: none; }
+  .mktg-hamburger:hover { color: #e2e8f0; border-color: rgba(148, 163, 184, 0.4); }
+  .mktg-hamburger:focus-visible {
+    outline: 2px solid #6ee7b7;
+    outline-offset: 2px;
+  }
+
+  /* Toggle icons */
+  .icon-close { display: none; }
+  details[open] .icon-open  { display: none; }
+  details[open] .icon-close { display: block; }
+
+  /* Mobile dropdown */
+  .mktg-mobile-dropdown {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    min-width: 240px;
+    background: rgba(2, 6, 23, 0.97);
+    border: 1px solid rgba(16, 185, 129, 0.18);
+    border-radius: 12px;
+    padding: 0.75rem;
+    backdrop-filter: blur(16px);
+    box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+    z-index: 200;
+  }
+
+  .mktg-mobile-links {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+  }
+
+  .mktg-mobile-link {
+    display: block;
+    color: #94a3b8;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 0.55rem 0.75rem;
+    border-radius: 8px;
+    transition: color 0.15s, background 0.15s;
+  }
+  .mktg-mobile-link:hover { color: #e2e8f0; background: rgba(255,255,255,0.06); }
+  .mktg-mobile-link--active { color: #6ee7b7; }
+  .mktg-mobile-link:focus-visible {
+    outline: 2px solid #6ee7b7;
+    outline-offset: 2px;
+  }
+
+  .mktg-mobile-ctas {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .mktg-cta--block {
+    display: block;
+    text-align: center;
+    width: 100%;
+  }
+
+  /* ── Responsive breakpoints ── */
+  @media (max-width: 860px) {
+    .mktg-links { display: none; }
+    .mktg-ctas  { display: none; }
+    .mktg-mobile-menu { display: block; }
+  }
+
+  /* Reduce motion */
+  @media (prefers-reduced-motion: reduce) {
+    .mktg-link,
+    .mktg-cta-primary,
+    .mktg-cta-secondary,
+    .mktg-hamburger,
+    .mktg-mobile-link {
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>

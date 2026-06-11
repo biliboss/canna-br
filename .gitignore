@@ -34,7 +34,8 @@ ops/openwebui/smoke/
 
 # Apple metadata
 ._*
-marketing/
+# anchored to repo root only — must NOT ignore apps/docs/src/components/marketing/
+/marketing/
 *.mp4
 *.mov
 

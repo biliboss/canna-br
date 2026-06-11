@@ -1,0 +1,601 @@
+---
+/**
+ * ReleasesDashboard — single source of truth para versões, roadmap e changelog.
+ *
+ * Contrato:
+ *   - Lê `data-src` (default: "/releases.json") no cliente (fetch).
+ *   - Prop `view`:
+ *       "roadmap"   — card current + roadmap[] com status badges
+ *       "changelog" — releases[] + preMilestones, newest first
+ *       "badge"     — currentVersion + testCount, inline compacto
+ *       "full"      — todos os painéis acima
+ *   - Skeleton enquanto carrega; mensagem honesta se fetch falhar.
+ *   - Carimbo visível "atualizado em".
+ *   - ZERO linguagem de investimento/rendimento.
+ *   - Qualquer projeto pode reusar apontando data-src pro próprio releases.json.
+ *
+ * Design system: dark slate (#020617) + emerald, WCAG AA, reduced-motion safe.
+ * Espelha StateSnapshot.astro.
+ */
+export interface Props {
+  /** "roadmap" | "changelog" | "badge" | "full" — default "full" */
+  view?: 'roadmap' | 'changelog' | 'badge' | 'full';
+  /** URL do JSON de releases. Default "/releases.json". */
+  dataSrc?: string;
+  /** id único do elemento raiz. Default "releases-dashboard". */
+  id?: string;
+}
+
+const {
+  view = 'full',
+  dataSrc = '/releases.json',
+  id = 'releases-dashboard',
+} = Astro.props;
+---
+
+<div
+  class="rd-root"
+  id={id}
+  data-src={dataSrc}
+  data-view={view}
+  aria-busy="true"
+>
+  <!-- Skeleton -->
+  <div class="rd-skeleton" data-skeleton aria-hidden="true">
+    {Array.from({ length: view === 'badge' ? 1 : 3 }).map(() => (
+      <div class="rd-card rd-card--skel">
+        <div class="rd-skel-line rd-skel-line--title"></div>
+        <div class="rd-skel-line"></div>
+        <div class="rd-skel-line rd-skel-line--short"></div>
+      </div>
+    ))}
+  </div>
+
+  <!-- Conteúdo vivo -->
+  <div class="rd-content" data-content hidden aria-live="polite"></div>
+
+  <!-- Erro honesto -->
+  <div class="rd-error" data-error hidden role="status">
+    <p>Não foi possível carregar as informações de versão agora.</p>
+    <p class="rd-error-sub">
+      Acesse <a href="/releases/">Releases</a> e <a href="/roadmap/">Roadmap</a>.
+    </p>
+  </div>
+
+  <!-- Carimbo -->
+  <p class="rd-stamp" data-stamp hidden>
+    <span class="rd-stamp-dot" aria-hidden="true"></span>
+    <span data-stamp-text></span>
+  </p>
+</div>
+
+<script is:inline>
+(function () {
+  /* ── bootstrap: pode haver múltiplas instâncias na página ── */
+  document.querySelectorAll('.rd-root[data-src]').forEach(function (root) {
+    if (root.__rd_init) return;
+    root.__rd_init = true;
+
+    var content  = root.querySelector('[data-content]');
+    var skeleton = root.querySelector('[data-skeleton]');
+    var errorBox = root.querySelector('[data-error]');
+    var stamp    = root.querySelector('[data-stamp]');
+    var stampTxt = root.querySelector('[data-stamp-text]');
+    var src      = root.getAttribute('data-src') || '/releases.json';
+    var view     = root.getAttribute('data-view') || 'full';
+
+    /* ── helpers ── */
+    function esc(s) {
+      return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+        return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+      });
+    }
+
+    function fmtDate(iso) {
+      if (!iso) return '';
+      try {
+        var d = new Date(iso + (iso.length === 10 ? 'T00:00:00' : ''));
+        if (isNaN(d.getTime())) return iso;
+        var m = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+        return d.getDate() + ' ' + m[d.getMonth()] + ' ' + d.getFullYear();
+      } catch (e) { return iso; }
+    }
+
+    /* ── status badge ── */
+    var STATUS_LABEL = {
+      'current':            { text: 'live',       cls: 'rd-badge--live' },
+      'planned':            { text: 'planejado',  cls: 'rd-badge--plan' },
+      'future':             { text: 'futuro',     cls: 'rd-badge--future' },
+      'future-conditional': { text: 'condicional',cls: 'rd-badge--cond' },
+      'done':               { text: 'entregue',   cls: 'rd-badge--done' },
+    };
+
+    function badge(status) {
+      var s = STATUS_LABEL[status] || { text: esc(status), cls: '' };
+      return '<span class="rd-badge ' + s.cls + '">' + s.text + '</span>';
+    }
+
+    /* ────────────────────────────────────────────────────────────────
+       VIEW: badge — uma linha compacta
+    ──────────────────────────────────────────────────────────────── */
+    function renderBadge(data) {
+      var ver   = data.currentVersion || '—';
+      var count = '';
+      if (data.releases && data.releases[0] && data.releases[0].testCount != null) {
+        count = '<span class="rd-badge-tests">' + esc(data.releases[0].testCount) + ' testes</span>';
+      }
+      return '<div class="rd-badge-row">'
+        + '<span class="rd-badge-ver">' + esc(ver) + '</span>'
+        + badge('current')
+        + count
+        + '</div>';
+    }
+
+    /* ────────────────────────────────────────────────────────────────
+       VIEW: roadmap — current card + roadmap cards
+    ──────────────────────────────────────────────────────────────── */
+    function renderRoadmap(data) {
+      var html = '';
+
+      /* current release card */
+      var cur = data.releases && data.releases.find(function (r) { return r.status === 'current'; });
+      if (cur) {
+        var modList = '';
+        if (Array.isArray(cur.modules) && cur.modules.length) {
+          modList = '<ul class="rd-list">'
+            + cur.modules.map(function (m) {
+                return '<li class="rd-item">'
+                  + '<span class="rd-dot-ok" aria-hidden="true">●</span>'
+                  + '<span class="rd-item-label">' + esc(m) + '</span>'
+                  + '</li>';
+              }).join('')
+            + '</ul>';
+        }
+        var testsBadge = cur.testCount != null
+          ? ' <span class="rd-badge rd-badge--tests">' + esc(cur.testCount) + ' testes</span>' : '';
+        var docsLink = cur.docsSlug
+          ? ' <a class="rd-item-link" href="' + esc(cur.docsSlug) + '">ver release →</a>' : '';
+
+        html += '<div class="rd-card rd-card--current">'
+          + '<div class="rd-card-header">'
+          +   '<p class="rd-eyebrow">Versão atual</p>'
+          +   '<div class="rd-card-title-row">'
+          +     '<span class="rd-version">' + esc(cur.version) + '</span>'
+          +     badge('current')
+          +     testsBadge
+          +   '</div>'
+          +   '<p class="rd-headline">' + esc(cur.headline) + '</p>'
+          + '</div>'
+          + modList
+          + (docsLink ? '<p class="rd-docs-link">' + docsLink + '</p>' : '')
+          + '</div>';
+      }
+
+      /* roadmap cards */
+      if (Array.isArray(data.roadmap) && data.roadmap.length) {
+        html += '<div class="rd-roadmap-grid">';
+        data.roadmap.forEach(function (item) {
+          var win = item.window
+            ? '<span class="rd-tag rd-tag--plan">' + esc(item.window) + '</span>' : '';
+          html += '<div class="rd-card rd-card--roadmap">'
+            + '<div class="rd-card-title-row">'
+            +   '<span class="rd-version rd-version--sm">' + esc(item.version) + '</span>'
+            +   badge(item.status)
+            + '</div>'
+            + '<p class="rd-label">' + esc(item.label) + '</p>'
+            + win
+            + '</div>';
+        });
+        html += '</div>';
+      }
+
+      return html;
+    }
+
+    /* ────────────────────────────────────────────────────────────────
+       VIEW: changelog — releases + pre-milestones
+    ──────────────────────────────────────────────────────────────── */
+    function renderChangelog(data) {
+      var html = '<div class="rd-changelog">';
+
+      /* releases newest-first */
+      var releases = Array.isArray(data.releases) ? data.releases.slice().reverse() : [];
+      releases.forEach(function (r) {
+        var docsLink = r.docsSlug
+          ? '<a class="rd-item-link" href="' + esc(r.docsSlug) + '">detalhes →</a>' : '';
+        var testsBadge = r.testCount != null
+          ? '<span class="rd-badge rd-badge--tests">' + esc(r.testCount) + ' testes</span>' : '';
+        var modList = '';
+        if (Array.isArray(r.modules) && r.modules.length) {
+          modList = '<ul class="rd-list">'
+            + r.modules.map(function (m) {
+                return '<li class="rd-item">'
+                  + '<span class="rd-dot-ok" aria-hidden="true">●</span>'
+                  + '<span class="rd-item-label">' + esc(m) + '</span>'
+                  + '</li>';
+              }).join('')
+            + '</ul>';
+        }
+        html += '<div class="rd-cl-entry">'
+          + '<div class="rd-cl-meta">'
+          +   '<span class="rd-version">' + esc(r.version) + '</span>'
+          +   badge(r.status)
+          +   testsBadge
+          +   (r.date ? '<span class="rd-tag">' + esc(fmtDate(r.date)) + '</span>' : '')
+          + '</div>'
+          + '<p class="rd-headline">' + esc(r.headline) + '</p>'
+          + modList
+          + (docsLink ? '<p class="rd-docs-link">' + docsLink + '</p>' : '')
+          + '</div>';
+      });
+
+      /* pre-milestones */
+      if (Array.isArray(data.preMilestones) && data.preMilestones.length) {
+        html += '<div class="rd-pre-section">'
+          + '<p class="rd-eyebrow rd-eyebrow--pre">Fundações pré-versão (não releases)</p>'
+          + '<ul class="rd-list">';
+        data.preMilestones.forEach(function (pm) {
+          html += '<li class="rd-item rd-item--pre">'
+            + '<span class="rd-dot-pre" aria-hidden="true">◇</span>'
+            + '<span class="rd-item-label">' + esc(pm.label) + '</span>'
+            + (pm.date ? '<span class="rd-tag rd-tag--pre">' + esc(fmtDate(pm.date)) + '</span>' : '')
+            + (pm.note ? '<p class="rd-item-sub">' + esc(pm.note) + '</p>' : '')
+            + '</li>';
+        });
+        html += '</ul></div>';
+      }
+
+      html += '</div>';
+      return html;
+    }
+
+    /* ────────────────────────────────────────────────────────────────
+       RENDER dispatcher
+    ──────────────────────────────────────────────────────────────── */
+    function render(data) {
+      var html = '';
+      if (view === 'badge') {
+        html = renderBadge(data);
+      } else if (view === 'roadmap') {
+        html = renderRoadmap(data);
+      } else if (view === 'changelog') {
+        html = renderChangelog(data);
+      } else {
+        /* full */
+        html = renderBadge(data)
+          + '<hr class="rd-divider" aria-hidden="true">'
+          + renderRoadmap(data)
+          + '<hr class="rd-divider" aria-hidden="true">'
+          + renderChangelog(data);
+      }
+
+      content.innerHTML = html;
+      if (skeleton) skeleton.hidden = true;
+      content.hidden = false;
+      root.setAttribute('aria-busy', 'false');
+
+      if (data.updatedAt && stamp && stampTxt) {
+        stampTxt.textContent = 'Atualizado em ' + fmtDate(data.updatedAt)
+          + (data.currentVersion ? ' · ' + data.currentVersion : '')
+          + ' · fonte canonical releases.json';
+        stamp.hidden = false;
+      }
+    }
+
+    function fail() {
+      if (skeleton) skeleton.hidden = true;
+      if (errorBox) errorBox.hidden = false;
+      root.setAttribute('aria-busy', 'false');
+    }
+
+    fetch(src, { headers: { 'Accept': 'application/json' } })
+      .then(function (r) { if (!r.ok) throw new Error(String(r.status)); return r.json(); })
+      .then(render)
+      .catch(fail);
+  });
+})();
+</script>
+
+<!-- is:global: cards injetados via innerHTML não recebem estilos com escopo Astro -->
+<style is:global>
+/* ====================================================================
+   RELEASES DASHBOARD — dark slate #020617 + emerald
+   Tokens espelham StateSnapshot.astro.
+==================================================================== */
+
+.rd-root { width: 100%; }
+
+/* ── skeleton ── */
+.rd-skeleton {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  gap: 1rem;
+}
+.rd-card--skel {
+  background: oklch(0.16 0.015 250);
+  border: 1px solid oklch(0.28 0.04 162 / 0.45);
+  border-radius: 16px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  min-height: 140px;
+}
+.rd-skel-line {
+  height: 10px; border-radius: 4px;
+  background: oklch(0.26 0.02 250);
+  position: relative; overflow: hidden;
+}
+.rd-skel-line--title { width: 55%; height: 12px; }
+.rd-skel-line--short { width: 65%; }
+.rd-skel-line::after {
+  content: ""; position: absolute; inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, oklch(0.4 0.03 250 / 0.5), transparent);
+  animation: rd-shimmer 1.4s infinite;
+}
+@keyframes rd-shimmer { 100% { transform: translateX(100%); } }
+
+/* ── generic card ── */
+.rd-card {
+  background: oklch(0.16 0.015 250);
+  border: 1px solid oklch(0.28 0.04 162 / 0.45);
+  border-radius: 16px;
+  padding: 1.25rem 1.25rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  transition: border-color 0.15s ease-out, background 0.15s ease-out;
+}
+.rd-card:hover {
+  background: oklch(0.18 0.015 250);
+  border-color: oklch(0.55 0.12 162 / 0.6);
+}
+.rd-card--current {
+  border-color: oklch(0.5 0.14 162 / 0.6);
+}
+
+/* ── roadmap grid ── */
+.rd-roadmap-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+.rd-card--roadmap { padding: 0.9rem 1rem; gap: 0.4rem; }
+
+/* ── card header / title row ── */
+.rd-card-header { display: flex; flex-direction: column; gap: 0.35rem; }
+.rd-card-title-row {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 0.4rem;
+}
+.rd-eyebrow {
+  color: oklch(0.78 0.15 162);
+  font-size: 0.70rem;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin: 0;
+}
+.rd-eyebrow--pre {
+  color: oklch(0.62 0.02 230);
+}
+.rd-version {
+  color: #fff;
+  font-size: 1.35rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+.rd-version--sm { font-size: 0.95rem; font-weight: 700; }
+.rd-headline {
+  color: oklch(0.72 0.02 230);
+  font-size: 0.83rem;
+  line-height: 1.5;
+  margin: 0;
+}
+.rd-label {
+  color: #94a3b8;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  margin: 0;
+}
+.rd-docs-link { margin: 0; font-size: 0.78rem; }
+
+/* ── badge row (view=badge) ── */
+.rd-badge-row {
+  display: inline-flex; align-items: center; flex-wrap: wrap;
+  gap: 0.45rem;
+  padding: 0.55rem 0.9rem;
+  background: oklch(0.16 0.015 250);
+  border: 1px solid oklch(0.28 0.04 162 / 0.45);
+  border-radius: 999px;
+}
+.rd-badge-ver {
+  color: #fff;
+  font-size: 0.88rem;
+  font-weight: 700;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+}
+.rd-badge-tests {
+  color: oklch(0.62 0.02 230);
+  font-size: 0.72rem;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+}
+
+/* ── status badges ── */
+.rd-badge {
+  display: inline-flex; align-items: center;
+  font-size: 0.64rem;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.rd-badge--live {
+  color: oklch(0.78 0.17 162);
+  background: oklch(0.5 0.14 162 / 0.15);
+  border: 1px solid oklch(0.5 0.14 162 / 0.45);
+}
+.rd-badge--done {
+  color: oklch(0.72 0.12 162);
+  background: oklch(0.45 0.1 162 / 0.12);
+  border: 1px solid oklch(0.45 0.1 162 / 0.38);
+}
+.rd-badge--plan {
+  color: oklch(0.75 0.12 220);
+  background: oklch(0.45 0.08 220 / 0.15);
+  border: 1px solid oklch(0.5 0.08 220 / 0.4);
+}
+.rd-badge--future {
+  color: oklch(0.65 0.02 250);
+  background: oklch(0.25 0.02 250 / 0.4);
+  border: 1px solid oklch(0.4 0.02 250 / 0.45);
+}
+.rd-badge--cond {
+  color: oklch(0.72 0.14 60);
+  background: oklch(0.45 0.1 60 / 0.14);
+  border: 1px solid oklch(0.5 0.1 60 / 0.38);
+}
+.rd-badge--tests {
+  color: oklch(0.65 0.02 230);
+  background: oklch(0.22 0.01 250 / 0.6);
+  border: 1px solid oklch(0.35 0.02 250 / 0.45);
+  text-transform: none;
+}
+
+/* ── tags inline ── */
+.rd-tag {
+  display: inline-flex; align-items: center;
+  font-size: 0.65rem;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  white-space: nowrap;
+  color: oklch(0.72 0.17 162);
+  background: oklch(0.5 0.12 162 / 0.12);
+  border: 1px solid oklch(0.5 0.12 162 / 0.38);
+}
+.rd-tag--plan {
+  color: oklch(0.72 0.02 250);
+  background: oklch(0.45 0.02 250 / 0.18);
+  border-color: oklch(0.5 0.02 250 / 0.45);
+}
+.rd-tag--pre {
+  color: oklch(0.62 0.02 250);
+  background: oklch(0.28 0.02 250 / 0.35);
+  border-color: oklch(0.4 0.02 250 / 0.38);
+}
+
+/* ── lists ── */
+.rd-list {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; flex-direction: column; gap: 0.45rem;
+}
+.rd-item {
+  display: flex; align-items: baseline; flex-wrap: wrap;
+  gap: 0.3rem 0.45rem;
+  padding-bottom: 0.45rem;
+  border-bottom: 1px solid oklch(0.26 0.02 250 / 0.6);
+  font-size: 0.84rem; line-height: 1.45;
+}
+.rd-item:last-child { border-bottom: 0; padding-bottom: 0; }
+.rd-item--pre { align-items: flex-start; }
+.rd-item-label { color: #cbd5e1; flex: 1; min-width: 0; }
+.rd-item-sub {
+  width: 100%;
+  color: oklch(0.55 0.02 230);
+  font-size: 0.73rem;
+  margin: 0.15rem 0 0 1rem;
+  line-height: 1.4;
+}
+
+/* ── dots ── */
+.rd-dot-ok  { color: oklch(0.72 0.17 162); font-size: 0.6em; line-height: 1.8; flex-shrink: 0; }
+.rd-dot-pre { color: oklch(0.52 0.02 250); font-size: 0.6em; line-height: 1.8; flex-shrink: 0; }
+
+/* ── links ── */
+.rd-item-link {
+  color: #94a3b8; font-size: 0.78rem;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.rd-item-link:hover { color: #6ee7b7; text-decoration: underline; }
+.rd-item-link:focus-visible {
+  outline: 2px solid #6ee7b7;
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/* ── changelog ── */
+.rd-changelog { display: flex; flex-direction: column; gap: 1.25rem; }
+.rd-cl-entry {
+  border-left: 2px solid oklch(0.5 0.14 162 / 0.4);
+  padding: 0 0 0 1rem;
+  display: flex; flex-direction: column; gap: 0.6rem;
+}
+.rd-cl-meta {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 0.4rem;
+}
+.rd-pre-section {
+  margin-top: 0.5rem;
+  padding: 0.9rem 1rem;
+  background: oklch(0.13 0.01 250);
+  border: 1px solid oklch(0.24 0.02 250 / 0.5);
+  border-radius: 12px;
+  display: flex; flex-direction: column; gap: 0.6rem;
+}
+
+/* ── divider ── */
+.rd-divider {
+  border: 0;
+  border-top: 1px solid oklch(0.24 0.02 250 / 0.5);
+  margin: 1.25rem 0;
+}
+
+/* ── carimbo ── */
+.rd-stamp {
+  display: flex; align-items: center; gap: 0.45rem;
+  justify-content: center;
+  margin: 1.5rem 0 0;
+  font-size: 0.73rem;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  color: oklch(0.6 0.02 230);
+  letter-spacing: 0.02em;
+}
+.rd-stamp-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: oklch(0.72 0.17 162);
+  box-shadow: 0 0 0 0 oklch(0.72 0.17 162 / 0.6);
+  animation: rd-pulse 2.4s ease-out infinite;
+  flex-shrink: 0;
+}
+@keyframes rd-pulse {
+  0%   { box-shadow: 0 0 0 0 oklch(0.72 0.17 162 / 0.5); }
+  70%  { box-shadow: 0 0 0 6px oklch(0.72 0.17 162 / 0); }
+  100% { box-shadow: 0 0 0 0 oklch(0.72 0.17 162 / 0); }
+}
+
+/* ── error ── */
+.rd-error {
+  text-align: center; padding: 2rem 1rem;
+  color: #94a3b8; font-size: 0.9rem;
+}
+.rd-error p { margin: 0 0 0.4rem; }
+.rd-error-sub { font-size: 0.8rem; color: #8595ab; }
+.rd-error a { color: #6ee7b7; }
+
+/* ── reduced-motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .rd-card { transition-duration: 0.01ms !important; }
+  .rd-stamp-dot { animation: none !important; box-shadow: none !important; }
+  .rd-skel-line::after { animation: none !important; }
+}
+</style>
