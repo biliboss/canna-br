@@ -1,0 +1,59 @@
+{
+  "count": 6,
+  "apps": [
+    {
+      "name": "canna_prescription_scatter",
+      "slug": "prescription-expiry-scatter",
+      "title": "Validade de Prescrições",
+      "category": "compliance",
+      "version": "0.1.0",
+      "status": "experimental",
+      "description": "Scatter de validade de prescrições terapêuticas (ANVISA RDC 1.014/2026): cada bolha é uma prescrição ativa de associado "
+    },
+    {
+      "name": "canna_sngpc_aging",
+      "slug": "sngpc-submission-aging",
+      "title": "Fila SNGPC — Envelhecimento de Submissões",
+      "category": "compliance",
+      "version": "0.1.0",
+      "status": "experimental",
+      "description": "Fila SNGPC — Envelhecimento de Submissões: painel admin (DIRETORIA / RT / DPO) que ranqueia os jobs de escrituração SNGP"
+    },
+    {
+      "name": "canna_lot_board",
+      "slug": "inventory-lot-status-board",
+      "title": "Painel de Lotes — Status e Validade",
+      "category": "inventory",
+      "version": "0.1.0",
+      "status": "experimental",
+      "description": "Painel de inventário de lotes de extrato de cannabis para associações terapêuticas (ANVISA RDC 1.014/2026): board kanban"
+    },
+    {
+      "name": "canna_member_board",
+      "slug": "member-lifecycle-board",
+      "title": "Painel de Membros — Ciclo de Vida",
+      "category": "membership",
+      "version": "0.1.0",
+      "status": "experimental",
+      "description": "Painel administrativo (DIRETORIA/RT/DPO) do ciclo de vida de associados de uma associação terapêutica de cannabis (ANVIS"
+    },
+    {
+      "name": "canna_quota_scorecard",
+      "slug": "quota-consumption-scorecard",
+      "title": "Scorecard de Cotas Mensais",
+      "category": "membership",
+      "version": "0.1.0",
+      "status": "experimental",
+      "description": "Control-center de cotas mensais da associação terapêutica: associados ativos, gramas dispensadas no mês, quota média uti"
+    },
+    {
+      "name": "canna_dispensation_throughput",
+      "slug": "dispensation-throughput-bar",
+      "title": "Throughput de Dispensações",
+      "category": "operations",
+      "version": "0.1.0",
+      "status": "experimental",
+      "description": "Throughput de dispensações de uma associação terapêutica de cannabis (ANVISA RDC 1.014/2026) ao longo de 12 semanas, em "
+    }
+  ]
+}

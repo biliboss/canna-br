@@ -8,7 +8,8 @@
     ".": "./src/index.ts",
     "./member-quota-card": "./src/member-quota-card/index.ts",
     "./traceability-timeline": "./src/traceability-timeline/index.ts",
-    "./dispensation-form": "./src/dispensation-form/index.ts"
+    "./dispensation-form": "./src/dispensation-form/index.ts",
+    "./member-lifecycle-board": "./src/member-lifecycle-board/index.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

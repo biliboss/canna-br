@@ -25,6 +25,7 @@ export const BUNDLES = [
   "member-quota-card",
   "traceability-timeline",
   "dispensation-form",
+  "member-lifecycle-board",
 ];
 
 export const MAX_BYTES = 200 * 1024;

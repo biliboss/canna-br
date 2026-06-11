@@ -2,13 +2,14 @@ import { describe, it, expect } from "vitest";
 import { allManifests, manifestByUri } from "./index.js";
 
 describe("@canna/ui-apps / registry", () => {
-  it("ships 3 v0.2.1 MCP Apps", () => {
-    expect(allManifests).toHaveLength(3);
+  it("ships 4 MCP Apps", () => {
+    expect(allManifests).toHaveLength(4);
     const ids = allManifests.map((m) => m.id);
     expect(ids).toEqual([
       "member-quota-card",
       "traceability-timeline",
       "dispensation-form",
+      "member-lifecycle-board",
     ]);
   });
 
@@ -36,6 +37,14 @@ describe("@canna/ui-apps / registry", () => {
     expect(m).toBeDefined();
     expect(m?.secondaryToolNames).toContain("request_record_dispensation");
     expect(m?.riskLevel).toBe(3);
+  });
+
+  it("MemberLifecycleBoard manifest is resolvable by URI", () => {
+    const m = manifestByUri("ui://member-lifecycle-board/app.html");
+    expect(m).toBeDefined();
+    expect(m?.id).toBe("member-lifecycle-board");
+    expect(m?.category).toBe("dashboard");
+    expect(m?.riskLevel).toBe(1);
   });
 
   it("unknown URI returns undefined", () => {

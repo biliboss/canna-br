@@ -1,0 +1,341 @@
+/*
+ * Command Center — visual layer.
+ * Apple-leaning: clarity + deference + depth. Frosted materials (backdrop-blur),
+ * spring-eased motion, restrained density. Built on the shadcn token system
+ * (--background/--border/--muted/--primary/--accent…) so it themes for free in
+ * light, dark, and high-contrast. Every animation has a prefers-reduced-motion
+ * fallback — magic must never cost accessibility.
+ */
+
+:root {
+  --cc-spring: cubic-bezier(0.22, 1, 0.36, 1); /* gentle overshoot, Apple-ish */
+  --cc-fast: 140ms;
+  --cc-med: 240ms;
+  --cc-radius: 0.85rem;
+  --cc-frost: color-mix(in oklch, var(--background) 72%, transparent);
+  --cc-elev: 0 1px 2px oklch(0 0 0 / 0.06), 0 8px 30px oklch(0 0 0 / 0.12);
+}
+
+/* ── Top bar ─────────────────────────────────────────────────────────── */
+.cc-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 3.25rem;
+  padding: 0 0.75rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--cc-frost);
+  -webkit-backdrop-filter: saturate(1.6) blur(14px);
+  backdrop-filter: saturate(1.6) blur(14px);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.cc-context {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--foreground);
+  padding: 0.2rem 0.55rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--accent) 40%, transparent);
+  white-space: nowrap;
+}
+.cc-context-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: oklch(0.72 0.18 150);
+  box-shadow: 0 0 0 3px oklch(0.72 0.18 150 / 0.18);
+}
+
+.cc-bar-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.cc-search {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  height: 2rem;
+  padding: 0 0.5rem 0 0.6rem;
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  transition: border-color var(--cc-fast), box-shadow var(--cc-fast), transform var(--cc-fast) var(--cc-spring);
+}
+.cc-search:hover {
+  border-color: color-mix(in oklch, var(--primary) 45%, var(--border));
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--primary) 16%, transparent);
+}
+.cc-search:active { transform: scale(0.98); }
+.cc-search-txt { font-weight: 500; }
+.cc-search-kbd { margin-left: 0.1rem; }
+@media (max-width: 560px) {
+  .cc-search-txt { display: none; }
+}
+
+.cc-docs {
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+  padding: 0 0.35rem;
+  transition: color var(--cc-fast);
+}
+.cc-docs:hover { color: var(--foreground); }
+
+/* ── Notification bell ───────────────────────────────────────────────── */
+.cc-bell {
+  position: relative;
+  width: 2rem;
+  height: 2rem;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  background: var(--background);
+  font-size: 0.95rem;
+  transition: border-color var(--cc-fast), transform var(--cc-fast) var(--cc-spring);
+}
+.cc-bell:hover { border-color: color-mix(in oklch, var(--primary) 40%, var(--border)); }
+.cc-bell:active { transform: scale(0.94); }
+.cc-bell-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  display: grid;
+  place-items: center;
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: white;
+  background: oklch(0.62 0.23 25);
+  border-radius: 999px;
+  border: 2px solid var(--background);
+  animation: cc-pop var(--cc-med) var(--cc-spring);
+}
+
+.cc-notif-panel {
+  width: 360px;
+  max-width: 92vw;
+  padding: 0;
+  border-radius: var(--cc-radius);
+  box-shadow: var(--cc-elev);
+  overflow: hidden;
+}
+.cc-notif-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.7rem 0.85rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.85rem;
+}
+.cc-notif-count {
+  font-size: 0.7rem;
+  color: var(--muted-foreground);
+  background: var(--muted);
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+}
+.cc-notif-empty {
+  padding: 1.5rem 1rem;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--muted-foreground);
+}
+.cc-notif-list { max-height: 60vh; overflow-y: auto; }
+.cc-notif {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.6rem;
+  padding: 0.7rem 0.85rem;
+  border-bottom: 1px solid color-mix(in oklch, var(--border) 60%, transparent);
+}
+.cc-notif:last-child { border-bottom: none; }
+.cc-notif--urgent { background: color-mix(in oklch, oklch(0.62 0.23 25) 7%, transparent); }
+.cc-notif-ic { font-size: 0.9rem; line-height: 1.4; }
+.cc-notif-title {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.83rem;
+  font-weight: 600;
+}
+.cc-notif-pill {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--primary-foreground);
+  background: var(--primary);
+  padding: 0 0.4rem;
+  border-radius: 999px;
+}
+.cc-notif-body {
+  font-size: 0.78rem;
+  color: var(--muted-foreground);
+  margin-top: 0.15rem;
+}
+.cc-notif-cta {
+  margin-top: 0.4rem;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--primary);
+}
+.cc-notif-cta:hover { text-decoration: underline; }
+.cc-notif-time { font-size: 0.68rem; color: var(--muted-foreground); }
+
+/* ── Quick actions strip ─────────────────────────────────────────────── */
+.cc-quick {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 0.85rem;
+}
+.cc-quick-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted-foreground);
+  margin-right: 0.15rem;
+}
+.cc-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 0.32rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--foreground);
+  background: var(--background);
+  transition: transform var(--cc-fast) var(--cc-spring), border-color var(--cc-fast), background var(--cc-fast);
+}
+.cc-chip:hover {
+  background: var(--accent);
+  border-color: color-mix(in oklch, var(--primary) 40%, var(--border));
+  transform: translateY(-1px);
+}
+.cc-chip:active { transform: translateY(0) scale(0.97); }
+.cc-chip-ic { font-size: 0.85rem; }
+.cc-chip--ghost {
+  color: var(--muted-foreground);
+  background: transparent;
+  border-style: dashed;
+}
+
+/* ── Command palette polish ──────────────────────────────────────────── */
+.cc-palette { box-shadow: var(--cc-elev); }
+.cc-ic {
+  display: inline-grid;
+  place-items: center;
+  width: 1.4rem;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+}
+.cc-it { font-weight: 500; }
+.cc-id {
+  margin-left: auto;
+  font-size: 0.74rem;
+  color: var(--muted-foreground);
+  max-width: 45%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Onboarding coach ────────────────────────────────────────────────── */
+.cc-coach {
+  position: fixed;
+  left: 1rem;
+  bottom: 1rem;
+  z-index: 40;
+  width: 300px;
+  max-width: calc(100vw - 2rem);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.35rem 0.5rem;
+  padding: 0.85rem 0.95rem;
+  border: 1px solid var(--border);
+  border-radius: var(--cc-radius);
+  background: var(--cc-frost);
+  -webkit-backdrop-filter: saturate(1.6) blur(16px);
+  backdrop-filter: saturate(1.6) blur(16px);
+  box-shadow: var(--cc-elev);
+  animation: cc-rise var(--cc-med) var(--cc-spring);
+}
+.cc-coach-prog {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 0.3rem;
+}
+.cc-coach-dot {
+  width: 18px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--muted);
+  transition: background var(--cc-med);
+}
+.cc-coach-dot.is-done { background: oklch(0.72 0.18 150); }
+.cc-coach-dot.is-now { background: var(--primary); }
+.cc-coach-title { font-size: 0.85rem; font-weight: 650; }
+.cc-coach-hint { font-size: 0.78rem; color: var(--muted-foreground); margin-top: 0.15rem; }
+.cc-coach-cta {
+  margin-top: 0.55rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--primary-foreground);
+  background: var(--primary);
+  padding: 0.32rem 0.7rem;
+  border-radius: 0.55rem;
+  transition: transform var(--cc-fast) var(--cc-spring), filter var(--cc-fast);
+}
+.cc-coach-cta:hover { filter: brightness(1.05); }
+.cc-coach-cta:active { transform: scale(0.97); }
+.cc-coach-x {
+  align-self: start;
+  width: 1.4rem;
+  height: 1.4rem;
+  display: grid;
+  place-items: center;
+  font-size: 0.7rem;
+  color: var(--muted-foreground);
+  border-radius: 0.4rem;
+}
+.cc-coach-x:hover { background: var(--accent); color: var(--foreground); }
+
+/* ── Motion keyframes ────────────────────────────────────────────────── */
+@keyframes cc-rise {
+  from { opacity: 0; transform: translateY(10px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes cc-pop {
+  from { transform: scale(0); }
+  to { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cc-bar,
+  .cc-search,
+  .cc-bell,
+  .cc-chip,
+  .cc-coach,
+  .cc-coach-cta,
+  .cc-bell-badge {
+    transition: none;
+    animation: none;
+  }
+}

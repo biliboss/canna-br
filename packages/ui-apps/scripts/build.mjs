@@ -21,6 +21,7 @@ export const SLUGS = [
   "member-quota-card",
   "traceability-timeline",
   "dispensation-form",
+  "member-lifecycle-board",
 ];
 
 const runVite = (slug, { emptyOutDir }) => {

@@ -1,5 +1,6 @@
 packages:
   - "apps/*"
+  - "!apps/agent"  # needs assistant-ui workspace pkgs published; runs from boilerplate for now
   - "packages/*"
   - "tooling/*"
   - "ops/openwebui/scripts"

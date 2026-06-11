@@ -10,6 +10,7 @@ const SLUGS = [
   "member-quota-card",
   "traceability-timeline",
   "dispensation-form",
+  "member-lifecycle-board",
 ] as const;
 export type AppSlug = (typeof SLUGS)[number];
 
