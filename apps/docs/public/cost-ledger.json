@@ -1,0 +1,33 @@
+{
+  "updatedAt": "2026-06-11",
+  "note": "Custos do projeto e quem aportou. Sem investidores; quem paga fica à vista.",
+  "entries": [
+    {
+      "date": "2026-06-11",
+      "item": "Domínio cannabr.org",
+      "category": "infra",
+      "paid_by": "Gabriel Fonseca",
+      "amount": null,
+      "currency": "BRL",
+      "note": "Hostinger — valor a confirmar"
+    },
+    {
+      "date": "2026-06-11",
+      "item": "Email @cannabr.org",
+      "category": "infra",
+      "paid_by": "Gabriel Fonseca",
+      "amount": null,
+      "currency": "BRL",
+      "note": "Hostinger — valor a confirmar"
+    },
+    {
+      "date": "2026-06-11",
+      "item": "IA / coordenação — missão v0.1.0 finalize",
+      "category": "ia",
+      "paid_by": "Gabriel Fonseca",
+      "amount": 2.29,
+      "currency": "USD",
+      "note": "Sonnet · entrada #1 do cost ledger · artifact registrado no governance Circle"
+    }
+  ]
+}

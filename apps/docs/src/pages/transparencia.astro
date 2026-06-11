@@ -18,6 +18,7 @@
 import MarketingLayout from '../components/marketing/MarketingLayout.astro';
 import StateSnapshot from '../components/marketing/widgets/StateSnapshot.astro';
 import ReleasesDashboard from '../components/marketing/widgets/ReleasesDashboard.astro';
+import CostLedger from '../components/marketing/widgets/CostLedger.astro';
 ---
 
 <MarketingLayout
@@ -163,6 +164,23 @@ import ReleasesDashboard from '../components/marketing/widgets/ReleasesDashboard
 
       <div class="transp-widget-wrap">
         <ReleasesDashboard view="changelog" />
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       CUSTOS & QUEM PAGOU
+  ============================================================ -->
+  <section class="transp-section transp-section--alt" id="custos" aria-labelledby="custos-heading">
+    <div class="transp-container">
+      <p class="transp-eyebrow-sm">Custos &amp; quem pagou</p>
+      <h2 class="transp-h2" id="custos-heading">Sem investidores — cada custo à vista</h2>
+      <p class="transp-section-lead">
+        Sem investidores e sem receita ainda — cada custo do projeto e quem o pagou ficam
+        registrados aqui. Transparência também sobre o dinheiro.
+      </p>
+      <div class="transp-widget-wrap">
+        <CostLedger />
       </div>
     </div>
   </section>

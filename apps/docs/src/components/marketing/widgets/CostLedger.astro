@@ -1,0 +1,479 @@
+---
+/**
+ * CostLedger — ledger público de custos do projeto.
+ *
+ * Contrato (espelha ReleasesDashboard / StateSnapshot):
+ *   - Lê `data-src` (default: "/cost-ledger.json") no cliente (fetch).
+ *   - Skeleton enquanto carrega; erro honesto se fetch falhar.
+ *   - Carimbo "atualizado em" visível.
+ *   - Multi-instância segura via flag __cl_init.
+ *   - Totais por moeda no rodapé; "a confirmar" quando amount é null.
+ *   - Zero dependências externas.
+ *
+ * Design: dark #020617 + emerald + amber (totais). WCAG AA. Reduced-motion safe.
+ */
+export interface Props {
+  /** URL do JSON. Default "/cost-ledger.json". */
+  dataSrc?: string;
+  /** id do elemento raiz. Default "cost-ledger". */
+  id?: string;
+}
+
+const {
+  dataSrc = '/cost-ledger.json',
+  id = 'cost-ledger',
+} = Astro.props;
+---
+
+<div
+  class="cl-root"
+  id={id}
+  data-src={dataSrc}
+  aria-busy="true"
+>
+  <!-- Skeleton -->
+  <div class="cl-skeleton" data-skeleton aria-hidden="true">
+    {Array.from({ length: 3 }).map(() => (
+      <div class="cl-row-skel">
+        <div class="cl-skel-line cl-skel-line--title"></div>
+        <div class="cl-skel-line"></div>
+        <div class="cl-skel-line cl-skel-line--short"></div>
+      </div>
+    ))}
+  </div>
+
+  <!-- Conteúdo vivo -->
+  <div class="cl-content" data-content hidden aria-live="polite"></div>
+
+  <!-- Erro honesto -->
+  <div class="cl-error" data-error hidden role="status">
+    <p>Não foi possível carregar o ledger de custos agora.</p>
+    <p class="cl-error-sub">O arquivo <code>/cost-ledger.json</code> é a fonte canônica.</p>
+  </div>
+
+  <!-- Carimbo -->
+  <p class="cl-stamp" data-stamp hidden>
+    <span class="cl-stamp-dot" aria-hidden="true"></span>
+    <span data-stamp-text></span>
+  </p>
+</div>
+
+<script is:inline>
+(function () {
+  document.querySelectorAll('.cl-root[data-src]').forEach(function (root) {
+    if (root.__cl_init) return;
+    root.__cl_init = true;
+
+    var content  = root.querySelector('[data-content]');
+    var skeleton = root.querySelector('[data-skeleton]');
+    var errorBox = root.querySelector('[data-error]');
+    var stamp    = root.querySelector('[data-stamp]');
+    var stampTxt = root.querySelector('[data-stamp-text]');
+    var src      = root.getAttribute('data-src') || '/cost-ledger.json';
+
+    /* ── helpers ── */
+    function esc(s) {
+      return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+        return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+      });
+    }
+
+    function fmtDate(iso) {
+      if (!iso) return '';
+      try {
+        var d = new Date(iso + (iso.length === 10 ? 'T00:00:00' : ''));
+        if (isNaN(d.getTime())) return iso;
+        var m = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+        return d.getDate() + ' ' + m[d.getMonth()] + ' ' + d.getFullYear();
+      } catch (e) { return iso; }
+    }
+
+    /* ── category badge ── */
+    var CAT = {
+      'infra': { label: 'infra',  cls: 'cl-cat--infra' },
+      'ia':    { label: 'ia',     cls: 'cl-cat--ia' },
+    };
+    function catBadge(cat) {
+      var c = CAT[cat] || { label: esc(cat), cls: '' };
+      return '<span class="cl-cat ' + c.cls + '">' + c.label + '</span>';
+    }
+
+    /* ── format amount ── */
+    function fmtAmount(amount, currency) {
+      if (amount == null) {
+        return '<span class="cl-amt cl-amt--pending">a confirmar</span>';
+      }
+      var sym = currency === 'USD' ? 'US$ ' : (currency === 'BRL' ? 'R$ ' : currency + ' ');
+      var val = Number(amount).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      return '<span class="cl-amt">' + sym + val + '</span>';
+    }
+
+    /* ── totals per currency ── */
+    function buildTotals(entries) {
+      var totals = {};   /* currency -> { sum, pending } */
+      var payers = {};   /* payer -> bool */
+      entries.forEach(function (e) {
+        var cur = e.currency || 'BRL';
+        if (!totals[cur]) totals[cur] = { sum: 0, pending: 0 };
+        if (e.amount == null) {
+          totals[cur].pending++;
+        } else {
+          totals[cur].sum += Number(e.amount);
+        }
+        if (e.paid_by) payers[e.paid_by] = true;
+      });
+      return { totals: totals, payers: Object.keys(payers) };
+    }
+
+    /* ── render ── */
+    function render(data) {
+      var entries = Array.isArray(data.entries) ? data.entries : [];
+      var html = '';
+
+      /* table header */
+      html += '<div class="cl-table" role="table" aria-label="Ledger de custos do projeto">'
+        + '<div class="cl-thead" role="rowgroup">'
+        +   '<div class="cl-tr cl-tr--head" role="row">'
+        +     '<div class="cl-th" role="columnheader">Item</div>'
+        +     '<div class="cl-th cl-th--cat" role="columnheader">Categoria</div>'
+        +     '<div class="cl-th" role="columnheader">Pago por</div>'
+        +     '<div class="cl-th cl-th--num" role="columnheader">Valor</div>'
+        +   '</div>'
+        + '</div>'
+        + '<div class="cl-tbody" role="rowgroup">';
+
+      if (entries.length === 0) {
+        html += '<div class="cl-empty" role="row"><div role="cell">Nenhum custo registrado ainda.</div></div>';
+      } else {
+        entries.forEach(function (e) {
+          html += '<div class="cl-tr" role="row">'
+            + '<div class="cl-td cl-td--item" role="cell">'
+            +   '<span class="cl-item-name">' + esc(e.item) + '</span>'
+            +   (e.note ? '<span class="cl-item-note">' + esc(e.note) + '</span>' : '')
+            +   (e.date ? '<span class="cl-item-date">' + esc(fmtDate(e.date)) + '</span>' : '')
+            + '</div>'
+            + '<div class="cl-td cl-td--cat" role="cell">' + catBadge(e.category) + '</div>'
+            + '<div class="cl-td cl-td--payer" role="cell"><span class="cl-payer">' + esc(e.paid_by || '—') + '</span></div>'
+            + '<div class="cl-td cl-td--amt" role="cell">' + fmtAmount(e.amount, e.currency) + '</div>'
+            + '</div>';
+        });
+      }
+
+      html += '</div></div>'; /* close tbody + table */
+
+      /* totals footer */
+      if (entries.length > 0) {
+        var t = buildTotals(entries);
+        var totalLines = Object.keys(t.totals).map(function (cur) {
+          var info = t.totals[cur];
+          var sym = cur === 'USD' ? 'US$ ' : (cur === 'BRL' ? 'R$ ' : cur + ' ');
+          var val = info.sum.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+          var pending = info.pending > 0 ? ' <span class="cl-total-pending">(+ ' + info.pending + ' a confirmar)</span>' : '';
+          return '<span class="cl-total-item">' + sym + val + pending + '</span>';
+        }).join('');
+
+        var payerStr = t.payers.length ? t.payers.join(', ') : '—';
+
+        html += '<div class="cl-footer">'
+          + '<span class="cl-footer-label">Total aportado por ' + esc(payerStr) + ':</span>'
+          + '<span class="cl-footer-totals">' + totalLines + '</span>'
+          + '</div>';
+      }
+
+      content.innerHTML = html;
+      if (skeleton) skeleton.hidden = true;
+      content.hidden = false;
+      root.setAttribute('aria-busy', 'false');
+
+      if (data.updatedAt && stamp && stampTxt) {
+        stampTxt.textContent = 'Atualizado em ' + fmtDate(data.updatedAt) + ' · fonte canonical cost-ledger.json';
+        stamp.hidden = false;
+      }
+    }
+
+    function fail() {
+      if (skeleton) skeleton.hidden = true;
+      if (errorBox) errorBox.hidden = false;
+      root.setAttribute('aria-busy', 'false');
+    }
+
+    fetch(src, { headers: { 'Accept': 'application/json' } })
+      .then(function (r) { if (!r.ok) throw new Error(String(r.status)); return r.json(); })
+      .then(render)
+      .catch(fail);
+  });
+})();
+</script>
+
+<!-- is:global: HTML injetado via innerHTML não recebe estilos com escopo Astro -->
+<style is:global>
+/* ====================================================================
+   COST LEDGER — dark #020617 + emerald + amber para totais
+   Tokens espelham ReleasesDashboard / StateSnapshot.
+==================================================================== */
+
+.cl-root { width: 100%; }
+
+/* ── skeleton ── */
+.cl-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.cl-row-skel {
+  background: oklch(0.16 0.015 250);
+  border: 1px solid oklch(0.28 0.04 162 / 0.45);
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+.cl-skel-line {
+  height: 9px; border-radius: 4px;
+  background: oklch(0.26 0.02 250);
+  position: relative; overflow: hidden;
+  width: 80%;
+}
+.cl-skel-line--title { width: 45%; height: 11px; }
+.cl-skel-line--short { width: 30%; }
+.cl-skel-line::after {
+  content: ""; position: absolute; inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, oklch(0.4 0.03 250 / 0.5), transparent);
+  animation: cl-shimmer 1.4s infinite;
+}
+@keyframes cl-shimmer { 100% { transform: translateX(100%); } }
+
+/* ── table ── */
+.cl-table {
+  width: 100%;
+  border: 1px solid oklch(0.28 0.04 162 / 0.4);
+  border-radius: 14px;
+  overflow: hidden;
+  background: oklch(0.13 0.01 250);
+}
+
+.cl-thead { background: oklch(0.16 0.015 250); }
+
+.cl-tr {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  align-items: center;
+  border-bottom: 1px solid oklch(0.24 0.02 250 / 0.55);
+}
+.cl-tr:last-child { border-bottom: 0; }
+.cl-tr--head {}
+
+.cl-th {
+  padding: 0.6rem 0.85rem;
+  font-size: 0.65rem;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: oklch(0.62 0.02 230);
+  white-space: nowrap;
+}
+.cl-th--cat { min-width: 5.5rem; }
+.cl-th--num { text-align: right; min-width: 8rem; }
+
+.cl-td {
+  padding: 0.75rem 0.85rem;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  vertical-align: top;
+}
+.cl-td--item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+.cl-td--cat { min-width: 5.5rem; }
+.cl-td--payer {}
+.cl-td--amt { text-align: right; min-width: 8rem; white-space: nowrap; }
+
+/* row hover — card elevation dark (#4) */
+.cl-tbody .cl-tr {
+  transition: background 0.15s ease-out;
+}
+.cl-tbody .cl-tr:hover {
+  background: oklch(0.17 0.015 250);
+}
+
+/* ── item cell ── */
+.cl-item-name {
+  color: #e2e8f0;
+  font-weight: 500;
+}
+.cl-item-note {
+  color: #8595ab;
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+.cl-item-date {
+  color: oklch(0.55 0.02 230);
+  font-size: 0.7rem;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  letter-spacing: 0.02em;
+}
+
+/* ── category badges ── */
+.cl-cat {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.63rem;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.12rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+.cl-cat--infra {
+  color: oklch(0.78 0.15 162);
+  background: oklch(0.5 0.12 162 / 0.13);
+  border-color: oklch(0.5 0.12 162 / 0.4);
+}
+.cl-cat--ia {
+  color: oklch(0.82 0.12 75);
+  background: oklch(0.55 0.1 75 / 0.13);
+  border-color: oklch(0.55 0.1 75 / 0.4);
+}
+
+/* ── payer ── */
+.cl-payer {
+  color: #94a3b8;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+/* ── amount ── */
+.cl-amt {
+  color: #e2e8f0;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.88rem;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-weight: 600;
+}
+.cl-amt--pending {
+  color: oklch(0.62 0.02 230);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 0.78rem;
+  font-family: inherit;
+}
+
+/* ── empty ── */
+.cl-empty {
+  padding: 2rem 1rem;
+  text-align: center;
+  color: #8595ab;
+  font-size: 0.88rem;
+}
+
+/* ── footer totals ── */
+.cl-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.5rem;
+  padding: 0.85rem 1rem;
+  background: oklch(0.16 0.015 250);
+  border-top: 1px solid oklch(0.5 0.1 75 / 0.3);
+}
+.cl-footer-label {
+  font-size: 0.72rem;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: oklch(0.68 0.02 230);
+}
+.cl-footer-totals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+}
+.cl-total-item {
+  font-variant-numeric: tabular-nums;
+  font-size: 0.92rem;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-weight: 700;
+  color: oklch(0.82 0.12 75);
+}
+.cl-total-pending {
+  font-weight: 400;
+  color: oklch(0.62 0.02 230);
+  font-style: italic;
+  font-size: 0.75em;
+}
+
+/* ── carimbo ── */
+.cl-stamp {
+  display: flex; align-items: center; gap: 0.45rem;
+  justify-content: center;
+  margin: 1.25rem 0 0;
+  font-size: 0.73rem;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  color: oklch(0.6 0.02 230);
+  letter-spacing: 0.02em;
+}
+.cl-stamp-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: oklch(0.82 0.12 75);
+  box-shadow: 0 0 0 0 oklch(0.82 0.12 75 / 0.5);
+  animation: cl-pulse 2.4s ease-out infinite;
+  flex-shrink: 0;
+}
+@keyframes cl-pulse {
+  0%   { box-shadow: 0 0 0 0 oklch(0.82 0.12 75 / 0.45); }
+  70%  { box-shadow: 0 0 0 6px oklch(0.82 0.12 75 / 0); }
+  100% { box-shadow: 0 0 0 0 oklch(0.82 0.12 75 / 0); }
+}
+
+/* ── error ── */
+.cl-error {
+  text-align: center; padding: 2rem 1rem;
+  color: #94a3b8; font-size: 0.9rem;
+}
+.cl-error p { margin: 0 0 0.4rem; }
+.cl-error-sub { font-size: 0.8rem; color: #8595ab; }
+.cl-error code {
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 0.9em;
+  color: oklch(0.72 0.17 162);
+  background: oklch(0.5 0.12 162 / 0.1);
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+}
+
+/* ── responsive: mobile collapse to stacked cards ── */
+@media (max-width: 640px) {
+  .cl-thead { display: none; }
+  .cl-tr {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.85rem;
+    border-radius: 0;
+  }
+  .cl-td { padding: 0; }
+  .cl-td--amt { text-align: left; }
+  .cl-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+  }
+}
+
+/* ── reduced-motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .cl-tbody .cl-tr { transition-duration: 0.01ms !important; }
+  .cl-stamp-dot { animation: none !important; box-shadow: none !important; }
+  .cl-skel-line::after { animation: none !important; }
+}
+</style>
