@@ -1,11 +1,38 @@
 ---
 title: "Throughput de Dispensações"
-description: "Throughput de dispensações em 12 semanas (2026-W15–2026-W26): 179 dispensações no total (132 cultivo próprio · 41 compra externa · 6 doação). Média 14.9/sem, última semana 15."
+description: "Gráfico de barras semanal mostrando volume de dispensações por origem (cultivo próprio, compra externa, doação). Identifica tendências de fluxo para gestão da associação."
 ---
 
 import { Aside } from '@astrojs/starlight/components';
 
-Throughput de dispensações em 12 semanas (2026-W15–2026-W26): 179 dispensações no total (132 cultivo próprio · 41 compra externa · 6 doação). Média 14.9/sem, última semana 15.
+<div class="app-meta-block">
+  <dl>
+    <div class="app-meta-row">
+      <dt>O que faz</dt>
+      <dd>Barras semanais de dispensações por origem (cultivo próprio · compra externa · doação) com média móvel e tendência — identifica gargalos de fluxo operacional.</dd>
+    </div>
+    <div class="app-meta-row">
+      <dt>Audiência</dt>
+      <dd>RT, Diretoria, Gestão</dd>
+    </div>
+    <div class="app-meta-row">
+      <dt>Passo do fluxo</dt>
+      <dd>Análise de throughput — revisão semanal/mensal de volume operacional</dd>
+    </div>
+    <div class="app-meta-row">
+      <dt>Tool MCP</dt>
+      <dd><code>get_dispensation_metrics</code> (tool em desenvolvimento)</dd>
+    </div>
+    <div class="app-meta-row">
+      <dt>Nível de acesso</dt>
+      <dd>Nível 1 — Leitura (dados agregados, sem PII)</dd>
+    </div>
+    <div class="app-meta-row">
+      <dt>Status</dt>
+      <dd><span class="status-badge status-stub">⚠ App pronto, tool falta</span></dd>
+    </div>
+  </dl>
+</div>
 
 <Aside type="tip" title="Exemplo ao vivo">Este é o app real, com dados de exemplo. No produto ele é aberto pela ferramenta <code>canna_dispensation_throughput</code> e recebe os dados reais.</Aside>
 

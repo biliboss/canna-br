@@ -1,13 +1,412 @@
 ---
-title: "Aplicativos"
-description: "Aplicativos interativos — exemplos ao vivo da mesma fonte do produto."
+title: "Aplicativos — Galeria"
+description: "Catálogo visual dos MCP Apps do canna-br: 10 apps agrupados por Operação e Gestão. Cada card mostra o que o app faz, audiência, passo do fluxo regulatório e status."
 ---
 
-Componentes interativos do produto, renderizados ao vivo a partir da mesma fonte (component library v0.1.0). Cada página mostra o app real com dados de exemplo.
+<div class="apps-intro">
+  <p>Cada app = um <strong>par tool + UI</strong> embeddável em chat agêntico, docsite ou Open WebUI — mesmo artefato, N superfícies. Clique em qualquer card para ver o app ao vivo com dados de exemplo.</p>
+  <p class="apps-legend">
+    <span class="status-badge status-ready">✓ Pronto</span>
+    <span>app + tool prontos</span>
+    <span style="margin-left:16px"></span>
+    <span class="status-badge status-stub">⚠ Stub</span>
+    <span>app existe, tool em desenvolvimento</span>
+  </p>
+</div>
 
-- [**Painel de Membros — Ciclo de Vida**](/apps/member-lifecycle-board/) — Painel de Membros — Ciclo de Vida: 16 associados em 5 estados (Aguardando 6 · Ativo 5 · Suspenso 3 · Revogado 1 · Anonimizado 1); Aguardando Consentimento acima do limite de fila (6/5); 3 suspensos (RT) e 3 consentimentos fora do SLA. Dados sintéticos — associados em iniciais + hash de CPF (LGPD).
-- [**Scorecard de Cotas Mensais**](/apps/quota-consumption-scorecard/) — Cotas mensais (competência 2026-06): 47 associados ativos, 1840.5 g dispensados no mês, quota média utilizada 61%, 9 membros acima de 80% da cota, 3 prescrições pendentes de aprovação. Watchlist de estouro: 5 membros &gt;=82% (LGPD: iniciais + hash de CPF).
-- [**Throughput de Dispensações**](/apps/dispensation-throughput-bar/) — Throughput de dispensações em 12 semanas (2026-W15–2026-W26): 179 dispensações no total (132 cultivo próprio · 41 compra externa · 6 doação). Média 14.9/sem, última semana 15.
-- [**Painel de Lotes — Status e Validade**](/apps/inventory-lot-status-board/) — Painel de Lotes (em 2026-06-10): 12 lotes — Quarentena 3, Disponível 5, Esgotado 2, Recolhido 2; 305g disponíveis; 1 com vencimento crítico (&lt;7d); 2 recolhido(s). Clique num lote para detalhe e rastreabilidade SNGPC.
-- [**Fila SNGPC — Envelhecimento de Submissões**](/apps/sngpc-submission-aging/) — Fila SNGPC: 8 submissões pendentes (até 2026-06-10); 2 bloqueadas (&gt;120h), 4 em risco (&gt;48h). Mais antiga: DISP-90711 (A. S. Oliveira, 143h, FAILED). ANVISA exige escrituração no mesmo dia útil.
-- [**Validade de Prescrições**](/apps/prescription-expiry-scatter/) — 12 prescrições ativas (validade, ref 2026-06-10): 2 vencendo &lt;30 dias, 5 em 30-60 dias, 5 &gt;60 dias. Renovar até 2026-07-10 (janela ANVISA RDC 1.014/2026).
+<section class="apps-group">
+  <div class="apps-group-header">
+    <div class="apps-group-icon">⚡</div>
+    <div>
+      <h2 class="apps-group-title">Operação</h2>
+      <p class="apps-group-desc">Spine transacional da associação. Audiência: dispensador, RT, DPO. Fluxo: Membro → Prescrição → Quota → Lote → Dispensação → Audit.</p>
+    </div>
+  </div>
+
+  <div class="apps-grid">
+
+    <a href="/apps/member-quota-card/" class="app-card">
+      <div class="app-card-header">
+        <span class="app-card-icon">👤</span>
+        <span class="status-badge status-ready">✓ Pronto</span>
+      </div>
+      <h3 class="app-card-title">Cartão de Cota</h3>
+      <p class="app-card-desc">Cota vigente do associado: gramas prescritas, consumidas e saldo restante com indicador de proximidade ao limite.</p>
+      <div class="app-card-meta">
+        <span class="app-card-tag">Dispensador · RT</span>
+        <span class="app-card-flow">Quota do membro</span>
+      </div>
+      <div class="app-card-tool"><code>get_member_quota</code> · Nível 1 Leitura</div>
+    </a>
+
+    <a href="/apps/member-lifecycle-board/" class="app-card">
+      <div class="app-card-header">
+        <span class="app-card-icon">🗂️</span>
+        <span class="status-badge status-stub">⚠ Tool falta</span>
+      </div>
+      <h3 class="app-card-title">Ciclo de Vida dos Membros</h3>
+      <p class="app-card-desc">Kanban dos associados em 5 estados. Alerta de fila acima do limite e consentimentos fora do SLA.</p>
+      <div class="app-card-meta">
+        <span class="app-card-tag">Dispensador · RT · Gestão</span>
+        <span class="app-card-flow">Intake → Ativo → Suspenso</span>
+      </div>
+      <div class="app-card-tool"><code>list_members</code> · Nível 1 Leitura</div>
+    </a>
+
+    <a href="/apps/inventory-lot-picker/" class="app-card">
+      <div class="app-card-header">
+        <span class="app-card-icon">📦</span>
+        <span class="status-badge status-stub">⚠ Tool stub</span>
+      </div>
+      <h3 class="app-card-title">Seletor de Lotes (FIFO)</h3>
+      <p class="app-card-desc">Lista lotes disponíveis em ordem FIFO com validade e quantidade. Dispensador escolhe o lote antes de registrar.</p>
+      <div class="app-card-meta">
+        <span class="app-card-tag">Dispensador · RT</span>
+        <span class="app-card-flow">Seleção de lote</span>
+      </div>
+      <div class="app-card-tool"><code>list_available_lots</code> · Nível 1 Leitura</div>
+    </a>
+
+    <a href="/apps/dispensation-form/" class="app-card">
+      <div class="app-card-header">
+        <span class="app-card-icon">📝</span>
+        <span class="status-badge status-stub">⚠ Tool 3 stub</span>
+      </div>
+      <h3 class="app-card-title">Formulário de Dispensação</h3>
+      <p class="app-card-desc">Registra a dispensação: membro, lote, quantidade. Gera rascunho para aprovação do RT (RDC 1.014: dispensador ≠ aprovador).</p>
+      <div class="app-card-meta">
+        <span class="app-card-tag">Dispensador → RT aprova</span>
+        <span class="app-card-flow">Registro + aprovação</span>
+      </div>
+      <div class="app-card-tool"><code>draft_dispensation</code> · Nível 2+3 Escrita</div>
+    </a>
+
+    <a href="/apps/traceability-timeline/" class="app-card">
+      <div class="app-card-header">
+        <span class="app-card-icon">🔗</span>
+        <span class="status-badge status-stub">⚠ Tool stub</span>
+      </div>
+      <h3 class="app-card-title">Timeline de Rastreabilidade</h3>
+      <p class="app-card-desc">Chain-of-custody visual de uma dispensação: cada evento com timestamp, ator e hash de integridade para auditoria regulatória.</p>
+      <div class="app-card-meta">
+        <span class="app-card-tag">RT · DPO · Auditor</span>
+        <span class="app-card-flow">Audit trail pós-dispensação</span>
+      </div>
+      <div class="app-card-tool"><code>generate_traceability_report</code> · Nível 1 Leitura</div>
+    </a>
+
+  </div>
+</section>
+
+<section class="apps-group">
+  <div class="apps-group-header">
+    <div class="apps-group-icon">📊</div>
+    <div>
+      <h2 class="apps-group-title">Gestão</h2>
+      <p class="apps-group-desc">Dashboards e métricas para diretoria e RT. Read-heavy, dados agregados, sem PII nas visualizações.</p>
+    </div>
+  </div>
+
+  <div class="apps-grid">
+
+    <a href="/apps/quota-consumption-scorecard/" class="app-card">
+      <div class="app-card-header">
+        <span class="app-card-icon">🎯</span>
+        <span class="status-badge status-stub">⚠ Tool falta</span>
+      </div>
+      <h3 class="app-card-title">Scorecard de Cotas Mensais</h3>
+      <p class="app-card-desc">Visão agregada: total dispensado vs teto regulatório, uso médio, watchlist de membros próximos ao limite.</p>
+      <div class="app-card-meta">
+        <span class="app-card-tag">RT · Diretoria</span>
+        <span class="app-card-flow">Monitoramento mensal</span>
+      </div>
+      <div class="app-card-tool"><code>get_quota_summary</code> · Nível 1 Leitura</div>
+    </a>
+
+    <a href="/apps/dispensation-throughput-bar/" class="app-card">
+      <div class="app-card-header">
+        <span class="app-card-icon">📈</span>
+        <span class="status-badge status-stub">⚠ Tool falta</span>
+      </div>
+      <h3 class="app-card-title">Throughput de Dispensações</h3>
+      <p class="app-card-desc">Barras semanais por origem (cultivo · compra · doação) com média móvel. Identifica gargalos de fluxo operacional.</p>
+      <div class="app-card-meta">
+        <span class="app-card-tag">RT · Diretoria</span>
+        <span class="app-card-flow">Análise de throughput</span>
+      </div>
+      <div class="app-card-tool"><code>get_dispensation_metrics</code> · Nível 1 Leitura</div>
+    </a>
+
+    <a href="/apps/sngpc-submission-aging/" class="app-card">
+      <div class="app-card-header">
+        <span class="app-card-icon">⏱️</span>
+        <span class="status-badge status-stub">⚠ Tool falta</span>
+      </div>
+      <h3 class="app-card-title">Fila SNGPC — Envelhecimento</h3>
+      <p class="app-card-desc">Submissões ao SNGPC por idade: bloqueadas (&gt;120h), em risco (&gt;48h) e ok. Alerta antes do vencimento ANVISA.</p>
+      <div class="app-card-meta">
+        <span class="app-card-tag">RT · DPO · Compliance</span>
+        <span class="app-card-flow">Compliance SNGPC diário</span>
+      </div>
+      <div class="app-card-tool"><code>list_sngpc_queue</code> · Nível 1 Leitura</div>
+    </a>
+
+    <a href="/apps/prescription-expiry-scatter/" class="app-card">
+      <div class="app-card-header">
+        <span class="app-card-icon">💊</span>
+        <span class="status-badge status-stub">⚠ Tool falta</span>
+      </div>
+      <h3 class="app-card-title">Validade de Prescrições</h3>
+      <p class="app-card-desc">Scatter das prescrições ativas por vencimento: urgentes (&lt;30d), atenção (30-60d) e ok (&gt;60d). Aciona renovação proativa.</p>
+      <div class="app-card-meta">
+        <span class="app-card-tag">RT · Gestão</span>
+        <span class="app-card-flow">Monitoramento de prescrições</span>
+      </div>
+      <div class="app-card-tool"><code>list_expiring_prescriptions</code> · Nível 1 Leitura</div>
+    </a>
+
+    <a href="/apps/inventory-lot-status-board/" class="app-card">
+      <div class="app-card-header">
+        <span class="app-card-icon">🏭</span>
+        <span class="status-badge status-ready">✓ Pronto</span>
+      </div>
+      <h3 class="app-card-title">Painel de Lotes — Status</h3>
+      <p class="app-card-desc">Todos os lotes por status (quarentena · disponível · esgotado · recolhido) com alertas de vencimento crítico e drill-down SNGPC.</p>
+      <div class="app-card-meta">
+        <span class="app-card-tag">RT · Dispensador · Gestão</span>
+        <span class="app-card-flow">Gestão de estoque</span>
+      </div>
+      <div class="app-card-tool"><code>canna_lot_board</code> · Nível 1 Leitura</div>
+    </a>
+
+  </div>
+</section>
+
+<style>{`
+  /* ── Apps gallery — approval surface ────────────────────────── */
+  .apps-intro {
+    margin-bottom: 32px;
+    padding: 16px 20px;
+    background: rgba(16, 185, 129, 0.06);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    border-radius: 10px;
+  }
+  .apps-intro p { margin: 0 0 8px; }
+  .apps-intro p:last-child { margin-bottom: 0; }
+  .apps-legend {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    font-size: 0.8125rem;
+    color: var(--sl-color-gray-2);
+  }
+
+  /* ── Group headers ──────────────────────────────────────────── */
+  .apps-group { margin-bottom: 48px; }
+
+  .apps-group-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(16, 185, 129, 0.2);
+  }
+  .apps-group-icon {
+    font-size: 1.75rem;
+    line-height: 1;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .apps-group-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin: 0 0 4px;
+    color: var(--sl-color-white);
+    /* override Starlight .sl-markdown-content h2 margin */
+    border-top: none;
+    padding-top: 0;
+  }
+  .apps-group-desc {
+    font-size: 0.875rem;
+    color: var(--sl-color-gray-2);
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  /* ── Card grid — fluid, no breakpoint needed ────────────────── */
+  .apps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+    gap: 16px;
+  }
+
+  /* ── Individual app card ────────────────────────────────────── */
+  .app-card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 18px 20px;
+    background: var(--sl-color-bg-nav, rgba(15, 23, 42, 0.6));
+    border: 1px solid rgba(16, 185, 129, 0.15);
+    border-radius: 10px;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 150ms ease-out, border-color 150ms ease-out, background 150ms ease-out;
+  }
+  .app-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(16, 185, 129, 0.45);
+    background: rgba(16, 185, 129, 0.07);
+    text-decoration: none;
+    color: inherit;
+  }
+  .app-card:focus-visible {
+    outline: 2px solid #10b981;
+    outline-offset: 3px;
+    border-radius: 10px;
+  }
+
+  .app-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .app-card-icon {
+    font-size: 1.375rem;
+    line-height: 1;
+  }
+
+  .app-card-title {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 0;
+    color: var(--sl-color-white);
+    text-wrap: balance;
+  }
+  .app-card-desc {
+    font-size: 0.8125rem;
+    line-height: 1.55;
+    color: var(--sl-color-gray-2);
+    margin: 0;
+    flex: 1;
+  }
+  .app-card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 2px;
+  }
+  .app-card-tag {
+    display: inline-block;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(16, 185, 129, 0.1);
+    color: #6ee7b7;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    white-space: nowrap;
+  }
+  .app-card-flow {
+    display: inline-block;
+    font-size: 0.6875rem;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(148, 163, 184, 0.08);
+    color: var(--sl-color-gray-3);
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    white-space: nowrap;
+  }
+  .app-card-tool {
+    font-size: 0.75rem;
+    color: var(--sl-color-gray-3);
+    margin-top: 2px;
+    font-family: var(--sl-font-mono);
+  }
+  .app-card-tool code {
+    background: rgba(16, 185, 129, 0.1);
+    color: #6ee7b7;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+  }
+
+  /* ── Status badges (shared with app pages) ──────────────────── */
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 999px;
+    white-space: nowrap;
+    letter-spacing: 0.01em;
+  }
+  .status-ready {
+    background: rgba(16, 185, 129, 0.12);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+  }
+  .status-stub {
+    background: rgba(245, 158, 11, 0.1);
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.25);
+  }
+
+  /* ── App meta block (detail pages) ─────────────────────────── */
+  .app-meta-block {
+    margin-bottom: 24px;
+    padding: 16px 20px;
+    background: rgba(16, 185, 129, 0.04);
+    border: 1px solid rgba(16, 185, 129, 0.15);
+    border-radius: 10px;
+  }
+  .app-meta-block dl { margin: 0; }
+  .app-meta-row {
+    display: grid;
+    grid-template-columns: 9rem 1fr;
+    gap: 4px 16px;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(16, 185, 129, 0.08);
+    align-items: baseline;
+  }
+  .app-meta-row:last-child { border-bottom: none; }
+  .app-meta-row dt {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--sl-color-gray-3);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .app-meta-row dd {
+    font-size: 0.8125rem;
+    color: var(--sl-color-gray-1);
+    margin: 0;
+  }
+  .app-meta-row dd code {
+    font-size: 0.75rem;
+    background: rgba(16, 185, 129, 0.1);
+    color: #6ee7b7;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    padding: 1px 5px;
+    border-radius: 4px;
+  }
+
+  /* Mobile: stack meta rows ──────────────────────────────────── */
+  @media (max-width: 480px) {
+    .app-meta-row { grid-template-columns: 1fr; gap: 2px; }
+    .apps-grid { grid-template-columns: 1fr; }
+    .apps-group-header { gap: 10px; }
+  }
+
+  /* Reduced motion ───────────────────────────────────────────── */
+  @media (prefers-reduced-motion: reduce) {
+    .app-card { transition: none; }
+  }
+`}</style>

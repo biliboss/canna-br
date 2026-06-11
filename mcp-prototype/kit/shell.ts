@@ -14,6 +14,7 @@ import { MOLECULES_CSS } from "./molecules.js";
 import { BRIDGE_JS } from "./bridge.js";
 import { CHARTS_JS } from "./charts.js";
 import { ECHARTS_JS, ECHARTS_THEME_JS } from "./echarts.js";
+import { FORMS_CSS } from "./forms.js";
 
 export interface ShellOptions {
   /** widget title shown in the header */
@@ -34,6 +35,8 @@ export interface ShellOptions {
   echarts?: boolean;
   /** full-bleed: drop the 760px max-width (e.g. for full-width chat embeds) */
   wide?: boolean;
+  /** inject the CRUD forms CSS (inputs/select/table/dialog/toast/inline-edit/…) */
+  forms?: boolean;
 }
 
 /** Embed JSON safely inside a <script> tag (escape < and the JS line terminators). */
@@ -58,6 +61,7 @@ export function htmlShell(opts: ShellOptions): string {
 ${TOKENS_CSS}
 ${ATOMS_CSS}
 ${MOLECULES_CSS}
+${opts.forms ? FORMS_CSS : ""}
 ${opts.extraCss ?? ""}
 </style>
 </head>

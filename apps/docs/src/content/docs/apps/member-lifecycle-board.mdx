@@ -1,11 +1,38 @@
 ---
 title: "Painel de Membros — Ciclo de Vida"
-description: "Painel de Membros — Ciclo de Vida: 16 associados em 5 estados (Aguardando 6 · Ativo 5 · Suspenso 3 · Revogado 1 · Anonimizado 1); Aguardando Consentimento acima do limite de fila (6/5); 3 suspensos (RT) e 3 consentimentos fora do SLA. Dados sintéticos — associados em iniciais + hash de CPF (LGPD)."
+description: "Painel kanban dos associados em 5 estados (Aguardando → Ativo → Suspenso → Revogado → Anonimizado). Identifica filas acima do limite e consentimentos fora do SLA."
 ---
 
 import { Aside } from '@astrojs/starlight/components';
 
-Painel de Membros — Ciclo de Vida: 16 associados em 5 estados (Aguardando 6 · Ativo 5 · Suspenso 3 · Revogado 1 · Anonimizado 1); Aguardando Consentimento acima do limite de fila (6/5); 3 suspensos (RT) e 3 consentimentos fora do SLA. Dados sintéticos — associados em iniciais + hash de CPF (LGPD).
+<div class="app-meta-block">
+  <dl>
+    <div class="app-meta-row">
+      <dt>O que faz</dt>
+      <dd>Painel kanban dos associados em 5 estados do ciclo de vida. Identifica fila de aguardando acima do limite e consentimentos fora do SLA.</dd>
+    </div>
+    <div class="app-meta-row">
+      <dt>Audiência</dt>
+      <dd>Dispensador, RT, Gestão</dd>
+    </div>
+    <div class="app-meta-row">
+      <dt>Passo do fluxo</dt>
+      <dd>Intake → intake ativo → renovação → suspensão — visão operacional de toda a base</dd>
+    </div>
+    <div class="app-meta-row">
+      <dt>Tool MCP</dt>
+      <dd><code>list_members</code> (tool em desenvolvimento)</dd>
+    </div>
+    <div class="app-meta-row">
+      <dt>Nível de acesso</dt>
+      <dd>Nível 1 — Leitura</dd>
+    </div>
+    <div class="app-meta-row">
+      <dt>Status</dt>
+      <dd><span class="status-badge status-stub">⚠ App pronto, tool falta</span></dd>
+    </div>
+  </dl>
+</div>
 
 <Aside type="tip" title="Exemplo ao vivo">Este é o app real, com dados de exemplo. No produto ele é aberto pela ferramenta <code>canna_member_board</code> e recebe os dados reais.</Aside>
 

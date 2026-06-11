@@ -1,0 +1,40 @@
+---
+title: "Formulário de Dispensação"
+description: "Formulário estruturado para registrar uma dispensação: membro, lote, quantidade, forma farmacêutica e observações. Gera rascunho para aprovação do RT (RDC 1.014: dispensador ≠ aprovador)."
+---
+
+import { Aside, Badge } from '@astrojs/starlight/components';
+
+<div class="app-meta-block">
+  <dl>
+    <div class="app-meta-row">
+      <dt>O que faz</dt>
+      <dd>Formulário para registrar dispensação: membro, lote, quantidade e forma farmacêutica. Gera rascunho que requer aprovação do RT antes de ser efetivado.</dd>
+    </div>
+    <div class="app-meta-row">
+      <dt>Audiência</dt>
+      <dd>Dispensador (preenchimento) → RT (aprovação)</dd>
+    </div>
+    <div class="app-meta-row">
+      <dt>Passo do fluxo</dt>
+      <dd>Registro de dispensação — após seleção de lote, gera pending action para o RT</dd>
+    </div>
+    <div class="app-meta-row">
+      <dt>Tool MCP</dt>
+      <dd><code>draft_dispensation</code> + <code>request_record_dispensation</code></dd>
+    </div>
+    <div class="app-meta-row">
+      <dt>Nível de acesso</dt>
+      <dd>Nível 2+3 — Rascunho + Aprovação (escrita com guarda)</dd>
+    </div>
+    <div class="app-meta-row">
+      <dt>Status</dt>
+      <dd><span class="status-badge status-stub">⚠ Tool 3 stub</span></dd>
+    </div>
+  </dl>
+</div>
+
+<Aside type="caution" title="Fluxo de aprovação">O dispensador preenche e envia o rascunho. O RT recebe via <code>list_pending_actions</code> e aprova/rejeita separadamente — conforme RDC 1.014 (dispensador ≠ aprovador).</Aside>
+
+<iframe data-app src="/apps/dispensation-form.html" title="Formulário de Dispensação" loading="lazy" sandbox="allow-scripts allow-same-origin" style="width:100%;height:620px;border:1px solid var(--sl-color-gray-5);border-radius:12px;background:transparent;display:block"></iframe>
+<script src="/apps/_resize.js" is:inline></script>

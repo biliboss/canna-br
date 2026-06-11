@@ -76,7 +76,67 @@
   background: rgba(16, 185, 129, 0.12);
 }
 
-/* Mobile table wrappers — all docs tables get horizontal scroll on small viewports */
+/* ── MCP Apps gallery + detail pages ──────────────────────────────── */
+
+/* Status badges */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+}
+.status-ready {
+  background: rgba(16, 185, 129, 0.12);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+.status-stub {
+  background: rgba(245, 158, 11, 0.1);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+/* App meta block — structured caption on each detail page */
+.app-meta-block {
+  margin-bottom: 24px;
+  padding: 16px 20px;
+  background: rgba(16, 185, 129, 0.04);
+  border: 1px solid rgba(16, 185, 129, 0.15);
+  border-radius: 10px;
+}
+.app-meta-block dl { margin: 0; }
+.app-meta-row {
+  display: grid;
+  grid-template-columns: 9rem 1fr;
+  gap: 4px 16px;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(16, 185, 129, 0.08);
+  align-items: baseline;
+}
+.app-meta-row:last-child { border-bottom: none; }
+.app-meta-row dt {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--sl-color-gray-3);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.app-meta-row dd {
+  font-size: 0.8125rem;
+  color: var(--sl-color-gray-1);
+  margin: 0;
+}
+
+/* Mobile: stack meta rows */
+@media (max-width: 480px) {
+  .app-meta-row { grid-template-columns: 1fr; gap: 2px; }
+}
+
+/* ── Mobile table wrappers — all docs tables get horizontal scroll on small viewports */
 @media (max-width: 768px) {
   .sl-markdown-content table {
     display: block;

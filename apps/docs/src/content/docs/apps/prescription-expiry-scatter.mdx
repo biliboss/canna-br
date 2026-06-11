@@ -1,11 +1,38 @@
 ---
 title: "Validade de Prescrições"
-description: "12 prescrições ativas (validade, ref 2026-06-10): 2 vencendo <30 dias, 5 em 30-60 dias, 5 >60 dias. Renovar até 2026-07-10 (janela ANVISA RDC 1.014/2026)."
+description: "Scatter das prescrições ativas por data de vencimento: identifica quais precisam de renovação urgente (<30 dias), em atenção (30-60 dias) e ok (>60 dias)."
 ---
 
 import { Aside } from '@astrojs/starlight/components';
 
-12 prescrições ativas (validade, ref 2026-06-10): 2 vencendo &lt;30 dias, 5 em 30-60 dias, 5 &gt;60 dias. Renovar até 2026-07-10 (janela ANVISA RDC 1.014/2026).
+<div class="app-meta-block">
+  <dl>
+    <div class="app-meta-row">
+      <dt>O que faz</dt>
+      <dd>Scatter das prescrições ativas por data de vencimento — identifica urgentes (&lt;30d), atenção (30-60d) e ok (&gt;60d). Aciona renovação antes da janela ANVISA.</dd>
+    </div>
+    <div class="app-meta-row">
+      <dt>Audiência</dt>
+      <dd>RT, Gestão, Dispensador</dd>
+    </div>
+    <div class="app-meta-row">
+      <dt>Passo do fluxo</dt>
+      <dd>Gestão de prescrições — monitoramento proativo de vencimentos, pré-renovação</dd>
+    </div>
+    <div class="app-meta-row">
+      <dt>Tool MCP</dt>
+      <dd><code>list_expiring_prescriptions</code> (tool em desenvolvimento)</dd>
+    </div>
+    <div class="app-meta-row">
+      <dt>Nível de acesso</dt>
+      <dd>Nível 1 — Leitura (dados LGPD: iniciais)</dd>
+    </div>
+    <div class="app-meta-row">
+      <dt>Status</dt>
+      <dd><span class="status-badge status-stub">⚠ App pronto, tool falta</span></dd>
+    </div>
+  </dl>
+</div>
 
 <Aside type="tip" title="Exemplo ao vivo">Este é o app real, com dados de exemplo. No produto ele é aberto pela ferramenta <code>canna_prescription_scatter</code> e recebe os dados reais.</Aside>
 

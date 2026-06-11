@@ -1,0 +1,40 @@
+---
+title: "Timeline de Rastreabilidade"
+description: "Chain-of-custody visual de uma dispensação: cada evento (prescrição → quota → lote → dispensação → SNGPC) com timestamp, ator e hash de integridade. Auditoria e defesa regulatória."
+---
+
+import { Aside, Badge } from '@astrojs/starlight/components';
+
+<div class="app-meta-block">
+  <dl>
+    <div class="app-meta-row">
+      <dt>O que faz</dt>
+      <dd>Chain-of-custody visual de uma dispensação — cada evento com timestamp, ator responsável e hash de integridade para auditoria regulatória e SNGPC.</dd>
+    </div>
+    <div class="app-meta-row">
+      <dt>Audiência</dt>
+      <dd>RT, DPO, Auditor externo</dd>
+    </div>
+    <div class="app-meta-row">
+      <dt>Passo do fluxo</dt>
+      <dd>Audit trail — pós-dispensação, consulta retrospectiva a qualquer momento</dd>
+    </div>
+    <div class="app-meta-row">
+      <dt>Tool MCP</dt>
+      <dd><code>generate_traceability_report</code></dd>
+    </div>
+    <div class="app-meta-row">
+      <dt>Nível de acesso</dt>
+      <dd>Nível 1 — Leitura (imutável)</dd>
+    </div>
+    <div class="app-meta-row">
+      <dt>Status</dt>
+      <dd><span class="status-badge status-stub">⚠ Tool stub</span></dd>
+    </div>
+  </dl>
+</div>
+
+<Aside type="tip" title="Exemplo ao vivo">Este é o app real, com dados de exemplo. No produto ele é aberto pela ferramenta <code>generate_traceability_report</code> com o ID da dispensação como parâmetro.</Aside>
+
+<iframe data-app src="/apps/traceability-timeline.html" title="Timeline de Rastreabilidade" loading="lazy" sandbox="allow-scripts allow-same-origin" style="width:100%;height:520px;border:1px solid var(--sl-color-gray-5);border-radius:12px;background:transparent;display:block"></iframe>
+<script src="/apps/_resize.js" is:inline></script>

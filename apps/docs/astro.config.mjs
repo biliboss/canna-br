@@ -175,7 +175,35 @@ export default defineConfig({
         {
           label: 'Aplicativos',
           translations: { en: 'Apps', es: 'Aplicaciones' },
-          autogenerate: { directory: 'apps' },
+          items: [
+            {
+              label: 'Galeria',
+              translations: { en: 'Gallery', es: 'Galería' },
+              link: '/apps/',
+            },
+            {
+              label: 'Operação',
+              translations: { en: 'Operations', es: 'Operación' },
+              items: [
+                { label: 'Cartão de Cota', translations: { en: 'Quota Card', es: 'Tarjeta de Cuota' }, link: '/apps/member-quota-card/' },
+                { label: 'Ciclo de Vida dos Membros', translations: { en: 'Member Lifecycle', es: 'Ciclo de Vida Miembros' }, link: '/apps/member-lifecycle-board/' },
+                { label: 'Seletor de Lotes (FIFO)', translations: { en: 'Lot Picker (FIFO)', es: 'Selector de Lotes (FIFO)' }, link: '/apps/inventory-lot-picker/' },
+                { label: 'Formulário de Dispensação', translations: { en: 'Dispensation Form', es: 'Formulario de Dispensación' }, link: '/apps/dispensation-form/' },
+                { label: 'Timeline de Rastreabilidade', translations: { en: 'Traceability Timeline', es: 'Línea de Tiempo Trazabilidad' }, link: '/apps/traceability-timeline/' },
+              ],
+            },
+            {
+              label: 'Gestão',
+              translations: { en: 'Management', es: 'Gestión' },
+              items: [
+                { label: 'Scorecard de Cotas', translations: { en: 'Quota Scorecard', es: 'Scorecard de Cuotas' }, link: '/apps/quota-consumption-scorecard/' },
+                { label: 'Throughput de Dispensações', translations: { en: 'Dispensation Throughput', es: 'Throughput de Dispensaciones' }, link: '/apps/dispensation-throughput-bar/' },
+                { label: 'Fila SNGPC — Envelhecimento', translations: { en: 'SNGPC Queue Aging', es: 'Cola SNGPC — Antigüedad' }, link: '/apps/sngpc-submission-aging/' },
+                { label: 'Validade de Prescrições', translations: { en: 'Prescription Expiry', es: 'Vencimiento de Recetas' }, link: '/apps/prescription-expiry-scatter/' },
+                { label: 'Painel de Lotes — Status', translations: { en: 'Lot Status Board', es: 'Panel de Lotes — Estado' }, link: '/apps/inventory-lot-status-board/' },
+              ],
+            },
+          ],
         },
         { label: 'Releases', autogenerate: { directory: 'releases' } },
       ],

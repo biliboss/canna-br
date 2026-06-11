@@ -1,11 +1,38 @@
 ---
 title: "Scorecard de Cotas Mensais"
-description: "Cotas mensais (competência 2026-06): 47 associados ativos, 1840.5 g dispensados no mês, quota média utilizada 61%, 9 membros acima de 80% da cota, 3 prescrições pendentes de aprovação. Watchlist de estouro: 5 membros >=82% (LGPD: iniciais + hash de CPF)."
+description: "Visão agregada da associação: gramas dispensadas vs teto, percentual médio de uso, membros próximos ao limite e prescrições pendentes. Dashboard mensal para o RT e diretoria."
 ---
 
 import { Aside } from '@astrojs/starlight/components';
 
-Cotas mensais (competência 2026-06): 47 associados ativos, 1840.5 g dispensados no mês, quota média utilizada 61%, 9 membros acima de 80% da cota, 3 prescrições pendentes de aprovação. Watchlist de estouro: 5 membros &gt;=82% (LGPD: iniciais + hash de CPF).
+<div class="app-meta-block">
+  <dl>
+    <div class="app-meta-row">
+      <dt>O que faz</dt>
+      <dd>Visão agregada da associação: total dispensado vs teto regulatório, uso médio por membro, watchlist de membros próximos ao limite e prescrições pendentes.</dd>
+    </div>
+    <div class="app-meta-row">
+      <dt>Audiência</dt>
+      <dd>RT, Diretoria, Gestão</dd>
+    </div>
+    <div class="app-meta-row">
+      <dt>Passo do fluxo</dt>
+      <dd>Monitoramento mensal de cotas — revisão periódica e alerta de estouro</dd>
+    </div>
+    <div class="app-meta-row">
+      <dt>Tool MCP</dt>
+      <dd><code>get_quota_summary</code> (tool em desenvolvimento)</dd>
+    </div>
+    <div class="app-meta-row">
+      <dt>Nível de acesso</dt>
+      <dd>Nível 1 — Leitura (dados LGPD: iniciais + hash de CPF)</dd>
+    </div>
+    <div class="app-meta-row">
+      <dt>Status</dt>
+      <dd><span class="status-badge status-stub">⚠ App pronto, tool falta</span></dd>
+    </div>
+  </dl>
+</div>
 
 <Aside type="tip" title="Exemplo ao vivo">Este é o app real, com dados de exemplo. No produto ele é aberto pela ferramenta <code>canna_quota_scorecard</code> e recebe os dados reais.</Aside>
 

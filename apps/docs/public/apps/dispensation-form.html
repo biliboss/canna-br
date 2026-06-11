@@ -1,0 +1,2881 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Registrar Dispensação</title>
+<style>
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TIER 1 — PRIMITIVE PALETTE
+   Raw OKLCH ramps. Never consume these in components; use semantic aliases.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root {
+
+  /* ── typography + scale (theme-agnostic) ─────────────────────────────── */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+
+  --radius:    0.5rem;
+  --radius-sm: 0.375rem;
+  --radius-lg: 0.75rem;
+
+  --text-xs:   0.6875rem;
+  --text-sm:   0.8125rem;
+  --text-base: 0.9375rem;
+  --text-lg:   1.0625rem;
+
+  /* ── spacing ladder (4-base) ─────────────────────────────────────────── */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  /* ── z-index ladder ──────────────────────────────────────────────────── */
+  --z-base:     1;
+  --z-sticky:   10;
+  --z-dropdown: 40;
+  --z-overlay:  50;
+  --z-toast:    60;
+
+  /* ── density hook ────────────────────────────────────────────────────── */
+  --density:    1;
+  --space-pad:  calc(var(--space-3) * var(--density));   /* opt-in derived token */
+
+  /* ── gray ramp ───────────────────────────────────────────────────────── */
+  /* Hue 260 (blue-gray, same as design system base hue) */
+  --gray-50:  oklch(0.98 0.002 260);
+  --gray-100: oklch(0.96 0.003 260);
+  --gray-200: oklch(0.92 0.005 260);
+  --gray-300: oklch(0.82 0.008 260);
+  --gray-400: oklch(0.70 0.012 260);
+  --gray-500: oklch(0.58 0.016 260);
+  --gray-600: oklch(0.46 0.020 260);
+  --gray-700: oklch(0.36 0.018 260);
+  --gray-800: oklch(0.27 0.012 260);
+  --gray-900: oklch(0.20 0.008 260);
+  --gray-950: oklch(0.14 0.006 260);
+
+  /* ── blue ramp (hue 250) ─────────────────────────────────────────────── */
+  --blue-50:  oklch(0.97 0.02  250);
+  --blue-100: oklch(0.94 0.04  250);
+  --blue-200: oklch(0.88 0.07  250);
+  --blue-300: oklch(0.78 0.11  250);
+  --blue-400: oklch(0.70 0.15  250);
+  --blue-500: oklch(0.62 0.18  250);
+  --blue-600: oklch(0.52 0.20  250);
+  --blue-700: oklch(0.44 0.18  250);
+  --blue-800: oklch(0.36 0.14  250);
+  --blue-900: oklch(0.28 0.10  250);
+
+  /* ── teal ramp (hue 175) ─────────────────────────────────────────────── */
+  --teal-50:  oklch(0.97 0.02  175);
+  --teal-100: oklch(0.93 0.05  175);
+  --teal-200: oklch(0.86 0.09  175);
+  --teal-300: oklch(0.76 0.13  175);
+  --teal-400: oklch(0.68 0.16  175);
+  --teal-500: oklch(0.60 0.17  175);
+  --teal-600: oklch(0.50 0.16  175);
+  --teal-700: oklch(0.42 0.14  175);
+  --teal-800: oklch(0.34 0.11  175);
+  --teal-900: oklch(0.26 0.08  175);
+
+  /* ── cyan-green ramp (hue 148) ───────────────────────────────────────── */
+  --cyan-50:  oklch(0.97 0.02  148);
+  --cyan-100: oklch(0.93 0.05  148);
+  --cyan-200: oklch(0.87 0.09  148);
+  --cyan-300: oklch(0.78 0.13  148);
+  --cyan-400: oklch(0.70 0.15  148);
+  --cyan-500: oklch(0.62 0.15  148);
+  --cyan-600: oklch(0.52 0.14  148);
+  --cyan-700: oklch(0.44 0.12  148);
+  --cyan-800: oklch(0.36 0.09  148);
+  --cyan-900: oklch(0.28 0.07  148);
+
+  /* ── green ramp (hue 150) ────────────────────────────────────────────── */
+  --green-50:  oklch(0.97 0.03  150);
+  --green-100: oklch(0.93 0.06  150);
+  --green-200: oklch(0.87 0.10  150);
+  --green-300: oklch(0.78 0.15  150);
+  --green-400: oklch(0.70 0.18  150);
+  --green-500: oklch(0.62 0.19  150);
+  --green-600: oklch(0.50 0.18  150);
+  --green-700: oklch(0.42 0.16  150);
+  --green-800: oklch(0.34 0.12  150);
+  --green-900: oklch(0.26 0.08  150);
+
+  /* ── amber-green ramp (hue 95) ───────────────────────────────────────── */
+  --amber-green-50:  oklch(0.97 0.03   95);
+  --amber-green-100: oklch(0.93 0.07   95);
+  --amber-green-200: oklch(0.87 0.12   95);
+  --amber-green-300: oklch(0.78 0.15   95);
+  --amber-green-400: oklch(0.70 0.15   95);
+  --amber-green-500: oklch(0.62 0.14   95);
+  --amber-green-600: oklch(0.52 0.13   95);
+  --amber-green-700: oklch(0.44 0.11   95);
+  --amber-green-800: oklch(0.36 0.09   95);
+  --amber-green-900: oklch(0.28 0.06   95);
+
+  /* ── amber ramp (hue 80) ─────────────────────────────────────────────── */
+  --amber-50:  oklch(0.97 0.04   80);
+  --amber-100: oklch(0.93 0.08   80);
+  --amber-200: oklch(0.88 0.13   80);
+  --amber-300: oklch(0.82 0.17   80);
+  --amber-400: oklch(0.76 0.17   80);
+  --amber-500: oklch(0.68 0.16   80);
+  --amber-600: oklch(0.60 0.17   75);
+  --amber-700: oklch(0.50 0.16   75);
+  --amber-800: oklch(0.42 0.13   75);
+  --amber-900: oklch(0.34 0.09   75);
+
+  /* ── orange ramp (hue 45) ────────────────────────────────────────────── */
+  --orange-50:  oklch(0.97 0.04   45);
+  --orange-100: oklch(0.93 0.08   45);
+  --orange-200: oklch(0.87 0.13   45);
+  --orange-300: oklch(0.80 0.18   45);
+  --orange-400: oklch(0.74 0.21   45);
+  --orange-500: oklch(0.68 0.20   45);
+  --orange-600: oklch(0.56 0.20   45);
+  --orange-700: oklch(0.46 0.18   45);
+  --orange-800: oklch(0.38 0.14   45);
+  --orange-900: oklch(0.30 0.10   45);
+
+  /* ── red ramp (hue 25) ───────────────────────────────────────────────── */
+  --red-50:  oklch(0.97 0.03   25);
+  --red-100: oklch(0.93 0.07   25);
+  --red-200: oklch(0.87 0.12   25);
+  --red-300: oklch(0.78 0.18   25);
+  --red-400: oklch(0.70 0.22   25);
+  --red-500: oklch(0.62 0.22   25);
+  --red-600: oklch(0.52 0.24   25);
+  --red-700: oklch(0.44 0.22   25);
+  --red-800: oklch(0.36 0.18   25);
+  --red-900: oklch(0.28 0.13   25);
+
+  /* ── violet ramp (hue 305) ───────────────────────────────────────────── */
+  --violet-50:  oklch(0.97 0.02  305);
+  --violet-100: oklch(0.93 0.05  305);
+  --violet-200: oklch(0.87 0.09  305);
+  --violet-300: oklch(0.78 0.13  305);
+  --violet-400: oklch(0.70 0.16  305);
+  --violet-500: oklch(0.62 0.18  305);
+  --violet-600: oklch(0.52 0.18  305);
+  --violet-700: oklch(0.44 0.16  305);
+  --violet-800: oklch(0.36 0.12  305);
+  --violet-900: oklch(0.28 0.09  305);
+
+  /* ── slate ramp (hue 270) ────────────────────────────────────────────── */
+  --slate-50:  oklch(0.97 0.01  270);
+  --slate-100: oklch(0.93 0.02  270);
+  --slate-200: oklch(0.87 0.03  270);
+  --slate-300: oklch(0.78 0.05  270);
+  --slate-400: oklch(0.70 0.08  270);
+  --slate-500: oklch(0.62 0.10  270);
+  --slate-600: oklch(0.52 0.10  270);
+  --slate-700: oklch(0.44 0.09  270);
+  --slate-800: oklch(0.36 0.07  270);
+  --slate-900: oklch(0.28 0.05  270);
+
+  /* ── aqua ramp (hue 200) ─────────────────────────────────────────────── */
+  --aqua-50:  oklch(0.97 0.02  200);
+  --aqua-100: oklch(0.93 0.05  200);
+  --aqua-200: oklch(0.87 0.09  200);
+  --aqua-300: oklch(0.78 0.13  200);
+  --aqua-400: oklch(0.70 0.14  200);
+  --aqua-500: oklch(0.62 0.14  200);
+  --aqua-600: oklch(0.52 0.13  200);
+  --aqua-700: oklch(0.44 0.11  200);
+  --aqua-800: oklch(0.36 0.09  200);
+  --aqua-900: oklch(0.28 0.07  200);
+}
+
+/* ── density compact override ─────────────────────────────────────────────── */
+[data-density="compact"] {
+  --density: 0.75;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TIER 2 — DARK THEME (default)
+   Semantic aliases referencing primitives. Near-Linear: near-black bg,
+   elevation via lightness steps (+0.05/+0.10), not shadow.
+   ═══════════════════════════════════════════════════════════════════════════ */
+[data-theme="dark"] {
+
+  /* surfaces */
+  --background:        var(--gray-950);         /* oklch(0.14 0.006 260) */
+  --foreground:        oklch(0.95 0.004 260);   /* near-white + slight blue tint */
+  --card:              oklch(0.18 0.007 260);   /* gray-950 +L0.04 */
+  --card-foreground:   oklch(0.95 0.004 260);
+  --muted:             oklch(0.22 0.008 260);   /* +L0.08 from bg */
+  --muted-foreground:  oklch(0.62 0.018 260);
+  --border:            oklch(0.27 0.010 260);   /* --gray-800 ish */
+  --input:             oklch(0.27 0.010 260);
+  --ring:              var(--blue-500);         /* oklch(0.62 0.18 250) */
+  --focus-ring:        oklch(0.80 0.16 250);    /* higher-L = higher contrast on dark bg */
+
+  /* brand */
+  --primary:           var(--blue-500);         /* oklch(0.62 0.18 250) */
+  --primary-foreground:oklch(0.97 0.005 260);
+  --accent:            oklch(0.23 0.012 260);   /* card +L0.05 */
+  --accent-foreground: oklch(0.95 0.004 260);
+
+  /* shadows — dark elevates via bg lightness, shadow is secondary */
+  --shadow:    0 1px 3px oklch(0 0 0 / 0.40), 0 1px 2px oklch(0 0 0 / 0.24);
+  --shadow-lg: 0 8px 24px oklch(0 0 0 / 0.55), 0 2px 8px oklch(0 0 0 / 0.30);
+
+  /* scrim / overlay — dialog backdrop */
+  --scrim:   oklch(0 0 0 / 0.60);
+  --overlay: oklch(0 0 0 / 0.55);
+
+  /* status */
+  --success:              var(--green-400);     /* oklch(0.70 0.18 150) */
+  --success-foreground:   oklch(0.97 0.01 150);
+  --warning:              var(--amber-400);     /* oklch(0.76 0.17 80) */
+  --warning-foreground:   oklch(0.18 0.04  80);
+  --destructive:          var(--red-500);       /* oklch(0.62 0.22 25) */
+  --destructive-foreground: oklch(0.97 0.01 25);
+
+  /* kanban */
+  --on-track: var(--green-400);                 /* oklch(0.70 0.18 150) */
+  --at-risk:  var(--amber-400);                 /* oklch(0.76 0.17 80) */
+  --aging:    var(--orange-500);                /* oklch(0.68 0.20 45) */
+  --done:     oklch(0.58 0.04 260);             /* muted slate — no primitive needed */
+  --blocked:  var(--red-500);                   /* oklch(0.62 0.22 25) */
+
+  /* class of service */
+  --cos-expedite:   var(--red-500);             /* oklch(0.62 0.22 25) */
+  --cos-fixed-date: var(--amber-400);           /* oklch(0.76 0.17 80) */
+  --cos-standard:   var(--blue-500);            /* oklch(0.62 0.18 250) */
+  --cos-intangible: oklch(0.58 0.04 260);
+
+  /* ── chart ramp — dark, same-L arc (0.58–0.68) ──────────────────────────
+   * s0 Done    → blue      — bottom CFD band (largest)
+   * s1 In Test → teal
+   * s2 In Dev  → cyan-green
+   * s3 Analysis→ amber-green
+   * s4 Backlog → violet    — top band (shows growth pressure)
+   * s5–s7      → extra series: scatter / histogram / forecast
+   * Uniform L across hues = equal perceptual weight in stacked CFD.
+   * ────────────────────────────────────────────────────────────────────── */
+  --chart-1: var(--blue-500);                   /* oklch(0.62 0.18 250) */
+  --chart-2: oklch(0.64 0.16 175);              /* teal-400 ish */
+  --chart-3: oklch(0.66 0.15 148);              /* cyan-400 ish */
+  --chart-4: oklch(0.68 0.14  95);              /* amber-green-400 ish */
+  --chart-5: var(--violet-500);                 /* oklch(0.62 0.18 305) */
+  --chart-6: oklch(0.64 0.13  35);              /* warm amber extra */
+  --chart-7: var(--slate-500);                  /* oklch(0.62 0.10 270) */
+  --chart-8: var(--aqua-500);                   /* oklch(0.62 0.14 200) */
+
+  /* flight levels — dark */
+  --fl-1: oklch(0.64 0.16 175);                 /* teal   — operational FL1 */
+  --fl-2: var(--blue-500);                      /* blue   — coordination FL2 */
+  --fl-3: var(--violet-500);                    /* violet — strategic FL3 */
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TIER 2 — LIGHT THEME
+   Semantic aliases referencing primitives. Near-Vercel/shadcn:
+   warm near-white bg, card = pure white + box-shadow elevation.
+   Primary shifted to blue-600 for AA on white (≥4.5:1).
+   ═══════════════════════════════════════════════════════════════════════════ */
+[data-theme="light"] {
+
+  /* surfaces */
+  --background:        var(--gray-50);          /* oklch(0.98 0.002 260) */
+  --foreground:        oklch(0.18 0.012 260);
+  --card:              oklch(1.00 0.000   0);   /* pure white */
+  --card-foreground:   oklch(0.18 0.012 260);
+  --muted:             var(--gray-100);         /* oklch(0.96 0.003 260) */
+  --muted-foreground:  oklch(0.46 0.022 260);
+  --border:            var(--gray-200);         /* oklch(0.92 0.005 260) ish */
+  --input:             var(--gray-200);
+  --ring:              var(--blue-600);         /* oklch(0.52 0.20 250) */
+  --focus-ring:        oklch(0.40 0.22 250);    /* deeper blue = higher contrast on white */
+
+  /* brand */
+  --primary:           var(--blue-600);         /* oklch(0.52 0.20 250) */
+  --primary-foreground:oklch(0.99 0.004 260);
+  --accent:            var(--gray-100);         /* oklch(0.96 0.003 260) ish */
+  --accent-foreground: oklch(0.22 0.015 260);
+
+  /* shadows — light uses actual shadow for elevation */
+  --shadow:    0 1px 3px oklch(0.18 0.01 260 / 0.10), 0 1px 2px oklch(0.18 0.01 260 / 0.06);
+  --shadow-lg: 0 8px 24px oklch(0.18 0.01 260 / 0.14), 0 2px 8px oklch(0.18 0.01 260 / 0.08);
+
+  /* scrim / overlay — dialog backdrop, still dark but less opaque on light bg */
+  --scrim:   oklch(0.10 0.01 260 / 0.50);
+  --overlay: oklch(0.10 0.01 260 / 0.45);
+
+  /* status */
+  --success:              var(--green-600);     /* oklch(0.50 0.18 150) — AA on white */
+  --success-foreground:   oklch(0.99 0.01 150);
+  --warning:              var(--amber-600);     /* oklch(0.60 0.17 75) */
+  --warning-foreground:   oklch(0.99 0.01  75);
+  --destructive:          var(--red-600);       /* oklch(0.52 0.24 25) */
+  --destructive-foreground: oklch(0.99 0.01 25);
+
+  /* kanban */
+  --on-track: var(--green-600);                 /* oklch(0.50 0.18 150) */
+  --at-risk:  var(--amber-600);                 /* oklch(0.60 0.17 75) */
+  --aging:    var(--orange-600);                /* oklch(0.56 0.20 45) */
+  --done:     oklch(0.48 0.04 260);
+  --blocked:  var(--red-600);                   /* oklch(0.52 0.24 25) */
+
+  /* class of service */
+  --cos-expedite:   var(--red-600);
+  --cos-fixed-date: var(--amber-600);
+  --cos-standard:   var(--blue-600);
+  --cos-intangible: oklch(0.48 0.04 260);
+
+  /* ── chart ramp — light theme, lower-L for legibility on near-white ─────
+   * L range: 0.42–0.56 (vs 0.58–0.68 in dark).
+   * +0.02 chroma vs dark counterparts = more saturation compensates for
+   *   lighter bg washing out mid-L hues.
+   * Hue arc preserved (blue→teal→cyan-green→amber-green→violet) so CFD
+   *   band identity is consistent with dark theme at a glance.
+   * ────────────────────────────────────────────────────────────────────── */
+  --chart-1: oklch(0.46 0.20 250);   /* blue       — Done / primary series */
+  --chart-2: oklch(0.48 0.18 175);   /* teal       — In Test */
+  --chart-3: oklch(0.50 0.17 148);   /* cyan-green — In Dev */
+  --chart-4: oklch(0.52 0.16  95);   /* amber-green— In Analysis */
+  --chart-5: oklch(0.44 0.20 305);   /* violet     — Backlog */
+  --chart-6: oklch(0.50 0.15  35);   /* amber      — extra */
+  --chart-7: oklch(0.44 0.12 270);   /* slate      — extra */
+  --chart-8: oklch(0.48 0.15 200);   /* aqua       — extra */
+
+  /* flight levels — light */
+  --fl-1: oklch(0.48 0.18 175);      /* teal   — operational FL1 */
+  --fl-2: oklch(0.46 0.20 250);      /* blue   — coordination FL2 */
+  --fl-3: oklch(0.44 0.20 305);      /* violet — strategic FL3 */
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TIER 2 — HIGH-CONTRAST THEME
+   Proof that two-tier pays off: only alias overrides, no new leaf math.
+   Near-black/near-white extremes + max border + saturated unambiguous status.
+   Rationale: AAA contrast (7:1+) for users with low vision, harsh environments,
+   or OLED glare. Inspired by WCAG 2.2 §1.4.6 Enhanced Contrast.
+   ═══════════════════════════════════════════════════════════════════════════ */
+[data-theme="high-contrast"] {
+
+  /* surfaces — near-black bg, pure white fg */
+  --background:        oklch(0.06 0.003 260);   /* near-black */
+  --foreground:        oklch(0.99 0.000   0);   /* pure white */
+  --card:              oklch(0.10 0.004 260);   /* slightly lighter than bg */
+  --card-foreground:   oklch(0.99 0.000   0);
+  --muted:             oklch(0.14 0.005 260);
+  --muted-foreground:  oklch(0.82 0.005 260);   /* high-contrast muted: still legible */
+  --border:            oklch(0.50 0.008 260);   /* thick visual border */
+  --input:             oklch(0.50 0.008 260);
+  --ring:              oklch(1.00 0.000   0);   /* white ring on near-black */
+  --focus-ring:        oklch(0.96 0.06  100);   /* vivid yellow-green for max visibility */
+
+  /* brand */
+  --primary:           oklch(0.72 0.20 250);    /* brighter blue for max contrast on near-black */
+  --primary-foreground:oklch(0.04 0.002 260);   /* near-black text on bright primary */
+  --accent:            oklch(0.18 0.006 260);
+  --accent-foreground: oklch(0.99 0.000   0);
+
+  /* shadows — near-invisible on near-black; border carries the elevation signal */
+  --shadow:    0 0 0 1px oklch(0.50 0.008 260);
+  --shadow-lg: 0 0 0 2px oklch(0.50 0.008 260);
+
+  /* scrim / overlay */
+  --scrim:   oklch(0 0 0 / 0.80);
+  --overlay: oklch(0 0 0 / 0.75);
+
+  /* status — fully saturated, maximum chroma for each hue */
+  --success:              oklch(0.80 0.22 150);  /* bright green */
+  --success-foreground:   oklch(0.06 0.01 150);
+  --warning:              oklch(0.88 0.20  80);  /* vivid amber */
+  --warning-foreground:   oklch(0.06 0.02  80);
+  --destructive:          oklch(0.72 0.28  25);  /* vivid red */
+  --destructive-foreground: oklch(0.06 0.01 25);
+
+  /* kanban — each hue distinct + vivid */
+  --on-track: oklch(0.80 0.22 150);             /* bright green */
+  --at-risk:  oklch(0.88 0.20  80);             /* vivid amber */
+  --aging:    oklch(0.82 0.24  45);             /* vivid orange */
+  --done:     oklch(0.72 0.06 260);             /* bright slate */
+  --blocked:  oklch(0.72 0.28  25);             /* vivid red */
+
+  /* class of service — same saturated approach */
+  --cos-expedite:   oklch(0.72 0.28  25);
+  --cos-fixed-date: oklch(0.88 0.20  80);
+  --cos-standard:   oklch(0.72 0.20 250);
+  --cos-intangible: oklch(0.72 0.06 260);
+
+  /* chart ramp — max-contrast arc on near-black, vivid chroma */
+  --chart-1: oklch(0.72 0.22 250);   /* vivid blue */
+  --chart-2: oklch(0.74 0.20 175);   /* vivid teal */
+  --chart-3: oklch(0.76 0.19 148);   /* vivid cyan-green */
+  --chart-4: oklch(0.78 0.18  95);   /* vivid amber-green */
+  --chart-5: oklch(0.70 0.22 305);   /* vivid violet */
+  --chart-6: oklch(0.76 0.18  35);   /* vivid amber */
+  --chart-7: oklch(0.68 0.14 270);   /* bright slate */
+  --chart-8: oklch(0.74 0.18 200);   /* vivid aqua */
+
+  /* flight levels — high-contrast */
+  --fl-1: oklch(0.74 0.20 175);      /* vivid teal */
+  --fl-2: oklch(0.72 0.22 250);      /* vivid blue */
+  --fl-3: oklch(0.70 0.22 305);      /* vivid violet */
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BASE RESET
+   ═══════════════════════════════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── density proof surface: statcard uses --space-pad ───────────────────── */
+.aui-statcard {
+  padding: var(--space-pad, var(--space-3)) calc(var(--space-pad, var(--space-3)) + 4px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+
+/* ── widget chrome ───────────────────────────────────────────────────────── */
+.aui-widget {
+  background: var(--background);
+  padding: var(--space-5) var(--space-4);
+  max-width: 760px;
+  margin: 0 auto;
+}
+.aui-widget[data-wide] { max-width: none; }
+.aui-widget__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+.aui-widget__heading {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.aui-widget__title {
+  font-size: var(--text-lg);
+  font-weight: 650;
+  letter-spacing: -0.025em;
+  line-height: 1.25;
+}
+.aui-widget__subtitle {
+  color: var(--muted-foreground);
+  font-size: var(--text-sm);
+  line-height: 1.4;
+}
+.aui-widget__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* ── badge / label ───────────────────────────────────────────────────────────
+ * Visual taxonomy:
+ *   status     — pill + filled dot + tinted bg + colored border  (3 simultaneous cues)
+ *   class-of-service — solid-fill pill, no dot, uppercase tiny text
+ *   flight-level — outline pill (ring only, transparent bg)
+ *   category   — muted capsule, uppercase, no dot
+ *   semantic   — neutral/primary/success/warning/destructive with dot
+ * ────────────────────────────────────────────────────────────────────────── */
+.aui-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+  border: 1px solid var(--border);
+  color: var(--muted-foreground);
+  background: var(--muted);
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+/* default dot */
+.aui-badge::before {
+  content: "";
+  flex-shrink: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* ── category — no dot, uppercase micro-label */
+.aui-badge--category {
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-size: 0.625rem;
+  font-weight: 700;
+  background: transparent;
+  border-color: var(--border);
+  color: var(--muted-foreground);
+}
+.aui-badge--category::before { display: none; }
+
+/* ── semantic variants (dot style) */
+.aui-badge--neutral {
+  color: var(--muted-foreground);
+  background: var(--muted);
+  border-color: var(--border);
+}
+.aui-badge--primary {
+  color: var(--primary);
+  background: color-mix(in oklch, var(--primary) 12%, transparent);
+  border-color: color-mix(in oklch, var(--primary) 30%, transparent);
+}
+.aui-badge--success {
+  color: var(--success);
+  background: color-mix(in oklch, var(--success) 12%, transparent);
+  border-color: color-mix(in oklch, var(--success) 28%, transparent);
+}
+.aui-badge--warning {
+  color: var(--warning);
+  background: color-mix(in oklch, var(--warning) 14%, transparent);
+  border-color: color-mix(in oklch, var(--warning) 32%, transparent);
+}
+.aui-badge--destructive {
+  color: var(--destructive);
+  background: color-mix(in oklch, var(--destructive) 14%, transparent);
+  border-color: color-mix(in oklch, var(--destructive) 32%, transparent);
+}
+
+/* ── status variants (kanban workflow states)
+ * Same dot+tinted formula; each maps to its semantic color token.
+ * The coloured border provides the 3rd visual cue for colorblind accessibility. */
+.aui-badge--on-track {
+  color: var(--on-track);
+  background: color-mix(in oklch, var(--on-track) 12%, transparent);
+  border-color: color-mix(in oklch, var(--on-track) 30%, transparent);
+}
+.aui-badge--at-risk {
+  color: var(--at-risk);
+  background: color-mix(in oklch, var(--at-risk) 14%, transparent);
+  border-color: color-mix(in oklch, var(--at-risk) 34%, transparent);
+}
+.aui-badge--aging {
+  color: var(--aging);
+  background: color-mix(in oklch, var(--aging) 14%, transparent);
+  border-color: color-mix(in oklch, var(--aging) 34%, transparent);
+}
+.aui-badge--blocked {
+  color: var(--blocked);
+  background: color-mix(in oklch, var(--blocked) 14%, transparent);
+  border-color: color-mix(in oklch, var(--blocked) 34%, transparent);
+}
+.aui-badge--done {
+  color: var(--done);
+  background: color-mix(in oklch, var(--done) 14%, transparent);
+  border-color: color-mix(in oklch, var(--done) 28%, transparent);
+}
+
+/* ── class-of-service variants
+ * Solid fill + no dot = different visual language from status (priority signal, not state).
+ * Uses more opaque fill so CoS reads as "category tag" not "status indicator". */
+.aui-badge--expedite {
+  color: var(--cos-expedite);
+  background: color-mix(in oklch, var(--cos-expedite) 18%, transparent);
+  border-color: color-mix(in oklch, var(--cos-expedite) 40%, transparent);
+  font-weight: 700;
+}
+.aui-badge--fixed-date {
+  color: var(--cos-fixed-date);
+  background: color-mix(in oklch, var(--cos-fixed-date) 16%, transparent);
+  border-color: color-mix(in oklch, var(--cos-fixed-date) 38%, transparent);
+}
+.aui-badge--standard {
+  color: var(--cos-standard);
+  background: color-mix(in oklch, var(--cos-standard) 12%, transparent);
+  border-color: color-mix(in oklch, var(--cos-standard) 28%, transparent);
+}
+.aui-badge--intangible {
+  color: var(--cos-intangible);
+  background: color-mix(in oklch, var(--cos-intangible) 14%, transparent);
+  border-color: color-mix(in oklch, var(--cos-intangible) 26%, transparent);
+}
+
+/* ── flight-level variants
+ * Outline/ring style — transparent bg, colored border only.
+ * Visual language = "level marker" (structural), distinct from status (workflow state). */
+.aui-badge--fl1,
+.aui-badge--fl2,
+.aui-badge--fl3 {
+  background: transparent;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+.aui-badge--fl1::before { display: none; }
+.aui-badge--fl2::before { display: none; }
+.aui-badge--fl3::before { display: none; }
+.aui-badge--fl1 {
+  color: var(--fl-1);
+  border-color: color-mix(in oklch, var(--fl-1) 50%, transparent);
+}
+.aui-badge--fl2 {
+  color: var(--fl-2);
+  border-color: color-mix(in oklch, var(--fl-2) 50%, transparent);
+}
+.aui-badge--fl3 {
+  color: var(--fl-3);
+  border-color: color-mix(in oklch, var(--fl-3) 50%, transparent);
+}
+
+/* ── button ──────────────────────────────────────────────────────────────── */
+.aui-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  font-weight: 550;
+  font-family: inherit;
+  letter-spacing: 0.01em;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--foreground);
+  cursor: pointer;
+  transition: background 0.15s ease-out,
+              border-color 0.15s ease-out,
+              box-shadow 0.15s ease-out,
+              opacity 0.15s ease-out,
+              transform 0.12s ease-out;
+  user-select: none;
+}
+.aui-btn:hover {
+  background: var(--accent);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
+}
+.aui-btn:active { transform: translateY(0); }
+.aui-btn:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+.aui-btn:disabled { opacity: 0.45; cursor: default; pointer-events: none; }
+.aui-btn--primary {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border-color: transparent;
+}
+.aui-btn--primary:hover {
+  background: color-mix(in oklch, var(--primary) 88%, var(--foreground));
+  opacity: 1;
+}
+.aui-btn--ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--muted-foreground);
+}
+.aui-btn--ghost:hover {
+  background: var(--accent);
+  color: var(--foreground);
+}
+.aui-btn--sm {
+  padding: 4px 10px;
+  font-size: var(--text-xs);
+  border-radius: calc(var(--radius-sm) - 1px);
+}
+
+/* ── card ────────────────────────────────────────────────────────────────── */
+.aui-card {
+  background: var(--card);
+  color: var(--card-foreground);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-4);
+  box-shadow: var(--shadow);
+}
+
+/* ── stat ─────────────────────────────────────────────────────────────────
+ * tabular-nums on all numeric values (Linear/Stripe dashboard convention).
+ * letter-spacing -0.03em on large values prevents optical spreading. */
+.aui-stat { display: flex; flex-direction: column; gap: 3px; }
+.aui-stat__label {
+  font-size: var(--text-xs);
+  color: var(--muted-foreground);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-weight: 650;
+  line-height: 1.3;
+}
+.aui-stat__value {
+  font-size: 1.625rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+.aui-stat__unit {
+  font-size: var(--text-sm);
+  color: var(--muted-foreground);
+  font-weight: 500;
+  margin-left: 3px;
+  letter-spacing: 0;
+}
+.aui-stat__delta {
+  font-size: var(--text-xs);
+  font-weight: 650;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-variant-numeric: tabular-nums;
+}
+.aui-stat--up   .aui-stat__delta { color: var(--on-track); }
+.aui-stat--down .aui-stat__delta { color: var(--blocked); }
+
+/* ── chip ────────────────────────────────────────────────────────────────── */
+.aui-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: var(--radius-sm);
+  background: var(--muted);
+  color: var(--muted-foreground);
+  font-size: var(--text-xs);
+  font-weight: 550;
+  border: 1px solid transparent;
+}
+
+/* ── progress ────────────────────────────────────────────────────────────── */
+.aui-progress {
+  height: 5px;
+  border-radius: 999px;
+  background: var(--muted);
+  overflow: hidden;
+}
+.aui-progress__bar {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--primary);
+  transition: width 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.aui-progress--over .aui-progress__bar { background: var(--blocked); }
+
+/* ── misc atoms ───────────────────────────────────────────────────────────── */
+.aui-divider {
+  height: 1px;
+  background: var(--border);
+  border: 0;
+  margin: var(--space-3) 0;
+}
+.aui-kbd {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  background: var(--muted);
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  padding: 1px 5px;
+  letter-spacing: 0.02em;
+}
+
+
+/* ── KPI grid + statcard ─────────────────────────────────────────────────── */
+.aui-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 130px), 1fr));
+  gap: var(--space-3);
+}
+.aui-statcard {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  box-shadow: var(--shadow);
+  overflow: hidden; /* clips sparkline SVG overflow:visible paths */
+  transition: box-shadow 0.15s ease-out, transform 0.12s ease-out;
+}
+.aui-statcard:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-1px);
+}
+.aui-statcard__row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+.aui-statcard__spark {
+  opacity: 0.85;
+  flex-shrink: 0;
+  /* Constrain sparkline host — prevents SVG style.width:100% from expanding */
+  width: 64px;
+  overflow: hidden;
+}
+.aui-statcard__spark svg {
+  display: block;
+  width: 64px !important;
+  height: 26px !important;
+}
+
+/* ── legend ──────────────────────────────────────────────────────────────── */
+.aui-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  font-size: var(--text-xs);
+  color: var(--muted-foreground);
+}
+.aui-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: default;
+}
+.aui-legend__swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+/* ── tooltip ─────────────────────────────────────────────────────────────────
+ * Frosted glass effect — backdrop-filter blur works in CSP-sandboxed iframes.
+ * Position is managed by charts.ts (fixed, pointer-events: none). */
+.aui-tooltip {
+  background: color-mix(in oklch, var(--card) 90%, transparent);
+  backdrop-filter: blur(12px) saturate(1.5);
+  -webkit-backdrop-filter: blur(12px) saturate(1.5);
+  color: var(--card-foreground);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: var(--text-xs);
+  line-height: 1.55;
+  box-shadow: var(--shadow-lg);
+  max-width: 240px;
+  pointer-events: none;
+}
+.aui-tooltip b   { font-weight: 700; }
+.aui-tooltip .k  { color: var(--muted-foreground); font-weight: 500; }
+.aui-tooltip hr  { border: none; border-top: 1px solid var(--border); margin: 5px 0; }
+
+/* ── empty state ─────────────────────────────────────────────────────────── */
+.aui-empty {
+  color: var(--muted-foreground);
+  font-size: var(--text-sm);
+  text-align: center;
+  padding: var(--space-6);
+  line-height: 1.6;
+}
+
+/* ── controls ────────────────────────────────────────────────────────────── */
+.aui-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+.aui-segment {
+  display: inline-flex;
+  background: var(--muted);
+  border-radius: var(--radius-sm);
+  padding: 2px;
+  gap: 1px;
+  border: 1px solid var(--border);
+}
+.aui-segment__btn {
+  border: 0;
+  background: transparent;
+  color: var(--muted-foreground);
+  font: inherit;
+  font-size: var(--text-xs);
+  font-weight: 550;
+  padding: 4px 10px;
+  border-radius: calc(var(--radius-sm) - 2px);
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s, box-shadow 0.12s;
+  white-space: nowrap;
+}
+.aui-segment__btn:hover { color: var(--foreground); }
+.aui-segment__btn.is-active {
+  background: var(--card);
+  color: var(--foreground);
+  box-shadow: 0 1px 3px oklch(0 0 0 / 0.22), 0 0 0 1px var(--border);
+}
+.aui-segment__btn:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 1px;
+}
+.aui-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.aui-field__label {
+  font-size: var(--text-xs);
+  color: var(--muted-foreground);
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  letter-spacing: 0.01em;
+}
+.aui-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--muted);
+  outline: none;
+  cursor: pointer;
+}
+.aui-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--primary);
+  cursor: pointer;
+  border: 2px solid var(--card);
+  box-shadow: 0 0 0 1px var(--primary);
+  transition: box-shadow 0.12s;
+}
+.aui-slider:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 35%, transparent);
+}
+.aui-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--primary);
+  cursor: pointer;
+  border: 2px solid var(--card);
+}
+
+/* ── chart SVG ───────────────────────────────────────────────────────────────
+ * All SVG elements emitted by charts.ts; styled here by class.
+ * Grid: very subtle (opacity 0.4, dash 2 3) — structure without noise.
+ * Rules: full-opacity stroke for warning/danger — must read over band fill.
+ * Bands: slightly transparent so stroke seams show between CFD layers. */
+/* overflow visible allows axes/labels to breathe outside chart bounds;
+ * sparklines are clipped by their host via overflow:hidden */
+.aui-chart { overflow: visible; }
+.aui-spark { overflow: hidden; }
+
+.aui-axis .aui-tick {
+  fill: var(--muted-foreground);
+  font-size: 10px;
+  font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums;
+}
+.aui-tickline {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+.aui-grid {
+  stroke: var(--border);
+  stroke-width: 1;
+  stroke-dasharray: 2 3;
+  opacity: 0.40;
+}
+.aui-axis-label {
+  fill: var(--muted-foreground);
+  font-size: 10px;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+/* lines + areas */
+.aui-line {
+  stroke: var(--chart-1);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  fill: none;
+}
+.aui-area {
+  fill: var(--chart-1);
+  opacity: 0.15;
+}
+
+/* CFD stacked bands — opacity 0.92 keeps colors vivid while seams stay legible */
+.aui-band {
+  stroke: var(--background);
+  stroke-width: 0.75;
+  opacity: 0.92;
+}
+.aui-band.s0 { fill: var(--chart-1); }
+.aui-band.s1 { fill: var(--chart-2); }
+.aui-band.s2 { fill: var(--chart-3); }
+.aui-band.s3 { fill: var(--chart-4); }
+.aui-band.s4 { fill: var(--chart-5); }
+.aui-band.s5 { fill: var(--chart-6); }
+.aui-band.s6 { fill: var(--chart-7); }
+.aui-band.s7 { fill: var(--chart-8); }
+
+/* bars */
+.aui-bars { }
+.aui-bar         { fill: var(--chart-1); }
+.aui-bar.muted   { fill: var(--muted); }
+.aui-bar.accent  { fill: var(--chart-2); }
+
+/* scatter dots */
+.aui-dots { }
+.aui-dot {
+  fill: var(--chart-1);
+  opacity: 0.80;
+  transition: opacity 0.10s, r 0.10s;
+  cursor: pointer;
+}
+.aui-dot:hover        { opacity: 1; }
+.aui-dot.at-risk      { fill: var(--at-risk); }
+.aui-dot.blocked      { fill: var(--blocked); }
+.aui-dot.on-track     { fill: var(--on-track); }
+
+/* percentile / reference rules
+ * Default = muted dashed; p85/warn = amber solid; p95/danger = red solid.
+ * Solid stroke (no dash) for warning/danger so they override the grid visually. */
+.aui-rule-line {
+  stroke: var(--muted-foreground);
+  stroke-width: 1;
+  stroke-dasharray: 4 3;
+  opacity: 0.60;
+}
+.aui-rule-label {
+  fill: var(--muted-foreground);
+  font-size: 9.5px;
+  font-family: var(--font-sans);
+  font-weight: 650;
+}
+.aui-rule.p85 .aui-rule-line,
+.aui-rule.warn .aui-rule-line {
+  stroke: var(--at-risk);
+  stroke-dasharray: none;
+  opacity: 1;
+  stroke-width: 1.5;
+}
+.aui-rule.p95 .aui-rule-line,
+.aui-rule.danger .aui-rule-line {
+  stroke: var(--blocked);
+  stroke-dasharray: none;
+  opacity: 1;
+  stroke-width: 1.5;
+}
+.aui-rule.p85 .aui-rule-label,
+.aui-rule.warn .aui-rule-label   { fill: var(--at-risk); }
+.aui-rule.p95 .aui-rule-label,
+.aui-rule.danger .aui-rule-label { fill: var(--blocked); }
+
+/* sparkline */
+.aui-spark { display: block; }
+.aui-spark .spark {
+  stroke: var(--primary);
+  stroke-width: 1.75;
+  fill: none;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.aui-spark-end { fill: var(--primary); }
+
+/* ── board organism ───────────────────────────────────────────────────────── */
+.aui-board {
+  display: flex;
+  gap: var(--space-3);
+  overflow-x: auto;
+  padding-bottom: var(--space-3);
+  /* overflow contract for iframe/generative UI */
+  max-width: 100%;
+}
+.aui-col {
+  flex: 1 1 0;
+  min-width: 145px;
+  background: var(--muted);
+  border-radius: var(--radius);
+  padding: var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  border: 1px solid var(--border);
+}
+.aui-col__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: 3px 5px;
+}
+.aui-col__title {
+  font-size: var(--text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted-foreground);
+}
+.aui-col__count {
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--muted-foreground);
+  font-weight: 650;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0 6px;
+  min-width: 20px;
+  text-align: center;
+}
+.aui-col__count.over {
+  color: var(--blocked);
+  border-color: color-mix(in oklch, var(--blocked) 40%, transparent);
+  background: color-mix(in oklch, var(--blocked) 12%, transparent);
+}
+
+/* cardlet — Linear-style: left accent 3px, hover lift + shadow */
+.aui-cardlet {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--cos-standard);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-3);
+  cursor: pointer;
+  transition: border-color 0.12s, transform 0.10s ease-out, box-shadow 0.12s ease-out;
+}
+.aui-cardlet:hover {
+  border-color: color-mix(in oklch, var(--ring) 60%, var(--border));
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
+}
+.aui-cardlet:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 1px;
+}
+.aui-cardlet.cos-expedite   { border-left-color: var(--cos-expedite); }
+.aui-cardlet.cos-fixed-date { border-left-color: var(--cos-fixed-date); }
+.aui-cardlet.cos-intangible { border-left-color: var(--cos-intangible); }
+.aui-cardlet.blocked        { border-left-color: var(--blocked); }
+.aui-cardlet__title {
+  font-size: var(--text-sm);
+  font-weight: 550;
+  line-height: 1.35;
+  margin-bottom: 5px;
+}
+.aui-cardlet__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+}
+
+/* ── flight levels ───────────────────────────────────────────────────────── */
+.aui-fl {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.aui-fl__lane {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-3) var(--space-4);
+  background: var(--card);
+  border-left-width: 3px;
+  box-shadow: var(--shadow);
+}
+.aui-fl__lane.fl3 { border-left-color: var(--fl-3); }
+.aui-fl__lane.fl2 { border-left-color: var(--fl-2); }
+.aui-fl__lane.fl1 { border-left-color: var(--fl-1); }
+.aui-fl__lane-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+.aui-fl__lane-head h3 {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.aui-fl__lane-head .sub {
+  font-size: var(--text-xs);
+  color: var(--muted-foreground);
+}
+.aui-fl__items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   INPUTS / FORM CONTROLS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── base input (text / email / number / password / search / url / tel) ─── */
+.aui-input {
+  display: block;
+  width: 100%;
+  min-height: 40px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--input);
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  transition: border-color 0.15s ease-out, box-shadow 0.15s ease-out;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.aui-input::placeholder { color: var(--muted-foreground); }
+.aui-input:focus-visible {
+  border-color: var(--ring);
+  box-shadow: 0 0 0 2px color-mix(in oklch, var(--ring) 30%, transparent);
+}
+.aui-input:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.aui-input.is-invalid {
+  border-color: var(--destructive);
+  box-shadow: 0 0 0 2px color-mix(in oklch, var(--destructive) 25%, transparent);
+}
+.aui-input[type="number"] { font-variant-numeric: tabular-nums; }
+
+/* ── textarea ─────────────────────────────────────────────────────────────── */
+.aui-textarea {
+  display: block;
+  width: 100%;
+  min-height: 96px;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--input);
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  resize: vertical;
+  transition: border-color 0.15s ease-out, box-shadow 0.15s ease-out;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.aui-textarea::placeholder { color: var(--muted-foreground); }
+.aui-textarea:focus-visible {
+  border-color: var(--ring);
+  box-shadow: 0 0 0 2px color-mix(in oklch, var(--ring) 30%, transparent);
+}
+.aui-textarea:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.aui-textarea.is-invalid {
+  border-color: var(--destructive);
+  box-shadow: 0 0 0 2px color-mix(in oklch, var(--destructive) 25%, transparent);
+}
+
+/* ── select — styled native with chevron (no JS) ──────────────────────────
+ * Chevron is base64-encoded inline SVG, theme-aware via CSS mask.
+ * Padding-right reserves space so text never overlaps the arrow.
+ * appearance:none removes native arrow on all browsers. */
+.aui-select {
+  display: block;
+  width: 100%;
+  min-height: 40px;
+  padding: 0 var(--space-6) 0 var(--space-3);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--input);
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  cursor: pointer;
+  transition: border-color 0.15s ease-out, box-shadow 0.15s ease-out;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  /* Chevron via CSS mask on a pseudo — but <select> has no pseudo.
+     Use background-image with SVG data-uri. currentColor workaround: embed
+     explicit stroke color matching muted-foreground hsl(240 5% 64.9%) */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='none' stroke='%23a0a0b0' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' d='M2.5 4.5L6 8l3.5-3.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--space-3) center;
+  background-size: 12px 12px;
+}
+.aui-select:focus-visible {
+  border-color: var(--ring);
+  box-shadow: 0 0 0 2px color-mix(in oklch, var(--ring) 30%, transparent);
+}
+.aui-select:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.aui-select.is-invalid {
+  border-color: var(--destructive);
+  box-shadow: 0 0 0 2px color-mix(in oklch, var(--destructive) 25%, transparent);
+}
+
+/* ── input group (prefix/suffix addons) ──────────────────────────────────── */
+.aui-input-group {
+  display: flex;
+  align-items: stretch;
+}
+.aui-input-group .aui-input {
+  flex: 1 1 0;
+  border-radius: 0;
+  min-width: 0;
+}
+.aui-input-group .aui-input:first-child { border-radius: var(--radius-sm) 0 0 var(--radius-sm); }
+.aui-input-group .aui-input:last-child  { border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+.aui-input-group .aui-input:only-child  { border-radius: var(--radius-sm); }
+.aui-input-group__addon {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 var(--space-3);
+  background: var(--muted);
+  border: 1px solid var(--input);
+  color: var(--muted-foreground);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.aui-input-group__addon:first-child {
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+  border-right: none;
+}
+.aui-input-group__addon:last-child {
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  border-left: none;
+}
+/* Adjacent input loses its shared border */
+.aui-input-group__addon:first-child + .aui-input { border-left: none; }
+.aui-input-group .aui-input + .aui-input-group__addon { border-left: none; }
+
+/* ── checkbox ─────────────────────────────────────────────────────────────── */
+.aui-checkbox {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  border-radius: 4px;
+  border: 1.5px solid var(--input);
+  background: var(--background);
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, box-shadow 0.12s;
+  display: inline-block;
+  vertical-align: middle;
+  position: relative;
+  flex-shrink: 0;
+}
+.aui-checkbox:checked {
+  background: var(--primary);
+  border-color: var(--primary);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='none' stroke='%23ffffff' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round' d='M1.5 5l2.5 2.5L8.5 2.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 10px 10px;
+}
+.aui-checkbox:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+.aui-checkbox:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.aui-checkbox:indeterminate {
+  background: var(--primary);
+  border-color: var(--primary);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' d='M2 5h6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 10px 10px;
+}
+
+/* ── radio ────────────────────────────────────────────────────────────────── */
+.aui-radio {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  border-radius: 50%;
+  border: 1.5px solid var(--input);
+  background: var(--background);
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, box-shadow 0.12s;
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+.aui-radio:checked {
+  background: var(--primary);
+  border-color: var(--primary);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Ccircle cx='5' cy='5' r='2.5' fill='%23ffffff'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 10px 10px;
+}
+.aui-radio:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+.aui-radio:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ── switch (toggle) — pure CSS, no JS ──────────────────────────────────────
+ * <input type="checkbox" class="aui-switch">
+ * Track: 36×20px pill. Knob: 14px circle, CSS left transition on :checked.
+ * Full keyboard operable (Space toggles, Tab focuses). */
+.aui-switch {
+  -webkit-appearance: none;
+  appearance: none;
+  position: relative;
+  width: 36px;
+  height: 20px;
+  min-width: 36px;
+  border-radius: 999px;
+  border: 1.5px solid var(--input);
+  background: var(--muted);
+  cursor: pointer;
+  transition: background 0.18s ease-out, border-color 0.18s ease-out, box-shadow 0.18s ease-out;
+  flex-shrink: 0;
+}
+.aui-switch::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--muted-foreground);
+  transition: left 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+              background 0.18s ease-out;
+}
+.aui-switch:checked {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+.aui-switch:checked::after {
+  left: calc(100% - 14px);
+  background: var(--primary-foreground);
+}
+.aui-switch:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+.aui-switch:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .aui-switch, .aui-switch::after { transition-duration: 0.01ms !important; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FIELD WRAPPERS (EXTENDS molecules.ts .aui-field / .aui-field__label)
+   — do not redefine base .aui-field or .aui-field__label; only ADD slots.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Help text — secondary context, below input */
+.aui-field__help {
+  font-size: var(--text-xs);
+  color: var(--muted-foreground);
+  line-height: 1.5;
+  margin-top: 2px;
+}
+
+/* Error message — destructive color, inline below input */
+.aui-field__error {
+  font-size: var(--text-xs);
+  color: var(--destructive);
+  line-height: 1.5;
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+/* Error icon: inline SVG via ::before */
+.aui-field__error::before {
+  content: "";
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  min-width: 12px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Ccircle cx='6' cy='6' r='5' fill='none' stroke='%23e5534b' stroke-width='1.25'/%3E%3Cpath fill='%23e5534b' d='M5.45 3.5h1.1l-.15 3.2H5.6zm0 4h1.1v1.1H5.45z'/%3E%3C/svg%3E") no-repeat center / 12px;
+}
+
+/* Hint text — optional/additional guidance, lighter than help */
+.aui-field__hint {
+  font-size: var(--text-xs);
+  color: var(--muted-foreground);
+  line-height: 1.5;
+  font-style: italic;
+  opacity: 0.85;
+}
+
+/* Required asterisk — appended via .aui-field--required on the .aui-field wrapper */
+.aui-field--required .aui-field__label::after {
+  content: " *";
+  color: var(--destructive);
+  font-weight: 700;
+  margin-left: 1px;
+}
+
+/* Inline checkbox / radio row (label + control horizontal) */
+.aui-field--inline {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-2);
+}
+.aui-field--inline .aui-field__label {
+  font-size: var(--text-sm);
+  color: var(--foreground);
+  font-weight: 500;
+  letter-spacing: 0;
+  margin-bottom: 0;
+  cursor: pointer;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FORM LAYOUT
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Form root — vertical stack with consistent gap */
+.aui-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* Responsive 2-col grid — collapses to 1-col on narrow containers.
+ * Container query aware (container-type: inline-size on parent).
+ * Fallback: fluid grid with auto-fit. */
+.aui-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: var(--space-4);
+  align-items: start;
+}
+/* Full-width span helper inside grid */
+.aui-form-grid > .aui-field--full { grid-column: 1 / -1; }
+
+/* Fieldset — groups related controls with optional legend */
+.aui-fieldset {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.aui-fieldset__legend {
+  font-size: var(--text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted-foreground);
+  padding: 0 var(--space-2);
+  /* Legend uses float trick for proper HTML legend positioning */
+  float: left;
+  width: 100%;
+  margin-bottom: var(--space-3);
+}
+/* Reset float spacing */
+.aui-fieldset::after {
+  content: "";
+  display: block;
+  clear: both;
+}
+
+/* Form actions row — right-aligned by default, wraps on mobile */
+.aui-form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  padding-top: var(--space-2);
+}
+/* Left-align variant */
+.aui-form-actions--left { justify-content: flex-start; }
+/* Spread variant */
+.aui-form-actions--spread { justify-content: space-between; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BUTTON EXTENSIONS (extends atoms.ts .aui-btn)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Destructive — red bg, white text */
+.aui-btn--destructive {
+  background: var(--destructive);
+  color: var(--destructive-foreground);
+  border-color: transparent;
+}
+.aui-btn--destructive:hover {
+  background: color-mix(in oklch, var(--destructive) 88%, var(--foreground));
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
+}
+
+/* Outline — transparent bg, colored border */
+.aui-btn--outline {
+  background: transparent;
+  border-color: var(--border);
+  color: var(--foreground);
+}
+.aui-btn--outline:hover {
+  background: var(--accent);
+  border-color: color-mix(in oklch, var(--ring) 50%, var(--border));
+  transform: translateY(-1px);
+}
+
+/* Block — full width */
+.aui-btn--block {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+}
+
+/* Icon-only button — square, no text */
+.aui-btn--icon {
+  padding: 0;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+}
+.aui-btn--icon.aui-btn--sm {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+}
+
+/* Button group — connected siblings, shared borders */
+.aui-btn-group {
+  display: inline-flex;
+  align-items: stretch;
+}
+.aui-btn-group .aui-btn {
+  border-radius: 0;
+  margin-left: -1px;
+  position: relative;
+}
+.aui-btn-group .aui-btn:first-child {
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+  margin-left: 0;
+}
+.aui-btn-group .aui-btn:last-child {
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+.aui-btn-group .aui-btn:focus-visible {
+  z-index: 1;
+}
+.aui-btn-group .aui-btn.is-active {
+  background: var(--accent);
+  color: var(--accent-foreground);
+  z-index: 1;
+}
+
+/* Loading state — spinner via border animation, text hidden via color:transparent.
+ * Width is preserved (no layout shift). Spinner: spinning pseudo-element. */
+.aui-btn.is-loading {
+  cursor: wait;
+  pointer-events: none;
+  color: transparent;
+  position: relative;
+}
+.aui-btn.is-loading::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-top-color: currentColor;
+  border-right-color: currentColor;
+  animation: aui-spin 0.6s linear infinite;
+}
+/* For primary button, spinner uses primary-foreground */
+.aui-btn--primary.is-loading::after { border-top-color: var(--primary-foreground); border-right-color: var(--primary-foreground); }
+/* For destructive */
+.aui-btn--destructive.is-loading::after { border-top-color: var(--destructive-foreground); border-right-color: var(--destructive-foreground); }
+
+@keyframes aui-spin {
+  to { transform: rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .aui-btn.is-loading::after { animation: none; opacity: 0.6; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DATA TABLE
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Table container — horizontal scroll on overflow */
+.aui-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
+.aui-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Header */
+.aui-table thead tr {
+  border-bottom: 1px solid var(--border);
+}
+.aui-table th {
+  padding: var(--space-2) var(--space-3);
+  text-align: left;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted-foreground);
+  background: var(--muted);
+  white-space: nowrap;
+  /* Sticky header with frosted glass — Linear table pattern */
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Body */
+.aui-table td {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--border);
+  color: var(--foreground);
+  vertical-align: middle;
+  line-height: 1.45;
+}
+.aui-table tbody tr:last-child td { border-bottom: none; }
+
+/* Row hover */
+.aui-table tbody tr {
+  transition: background 0.10s ease-out;
+}
+.aui-table tbody tr:hover td {
+  background: var(--accent);
+}
+
+/* Zebra striping */
+.aui-table--zebra tbody tr:nth-child(even) td {
+  background: color-mix(in oklch, var(--muted) 40%, transparent);
+}
+.aui-table--zebra tbody tr:nth-child(even):hover td {
+  background: var(--accent);
+}
+
+/* Numeric cells — right-aligned tabular */
+.aui-table td.aui-td--num,
+.aui-table th.aui-th--num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+
+/* Sortable header — caret via ::after, no JS needed for caret visual */
+.aui-th--sortable {
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  padding-right: calc(var(--space-3) + 14px);
+  transition: color 0.12s;
+}
+.aui-th--sortable:hover { color: var(--foreground); }
+.aui-th--sortable:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
+/* Default unsorted caret */
+.aui-th--sortable::after {
+  content: "";
+  position: absolute;
+  right: var(--space-3);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 10px;
+  height: 10px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%23a0a0b0' d='M5 1.5l2.5 3H2.5zm0 7L2.5 5.5h5z'/%3E%3C/svg%3E") no-repeat center / 10px;
+  opacity: 0.5;
+}
+/* Sorted ascending — up caret, full opacity */
+.aui-th--sortable.is-sorted-asc::after {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%236b9ef8' d='M5 1.5l2.5 3.5H2.5z'/%3E%3C/svg%3E") no-repeat center / 10px;
+  opacity: 1;
+}
+/* Sorted descending — down caret */
+.aui-th--sortable.is-sorted-desc::after {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%236b9ef8' d='M2.5 4.5l2.5 3.5 2.5-3.5z'/%3E%3C/svg%3E") no-repeat center / 10px;
+  opacity: 1;
+}
+
+/* Empty state row */
+.aui-table__empty td {
+  text-align: center;
+  padding: var(--space-6);
+  color: var(--muted-foreground);
+  font-size: var(--text-sm);
+}
+
+/* Cell actions — right-aligned slot for action buttons, hidden until row hover */
+.aui-table__cell-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  opacity: 0;
+  transition: opacity 0.12s ease-out;
+}
+.aui-table tbody tr:hover .aui-table__cell-actions { opacity: 1; }
+
+/* ── pagination ──────────────────────────────────────────────────────────── */
+.aui-pagination {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex-wrap: wrap;
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+}
+.aui-pagination__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--foreground);
+  font-family: inherit;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.12s ease-out, border-color 0.12s ease-out;
+  line-height: 1;
+}
+.aui-pagination__btn:hover:not(:disabled):not(.is-current) {
+  background: var(--accent);
+  border-color: color-mix(in oklch, var(--ring) 40%, var(--border));
+}
+.aui-pagination__btn:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+.aui-pagination__btn.is-current {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border-color: var(--primary);
+  font-weight: 700;
+  cursor: default;
+}
+.aui-pagination__btn:disabled {
+  opacity: 0.40;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.aui-pagination__ellipsis {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  color: var(--muted-foreground);
+  font-size: var(--text-sm);
+  letter-spacing: 0.05em;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   OVERLAY / FEEDBACK
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── dialog (modal) — native <dialog> scaffold ───────────────────────────
+ * Uses native <dialog> open attribute / showModal().
+ * [data-open] class provided as fallback for polyfill hosts that toggle attr.
+ * Backdrop + panel sizing + entry animation. */
+.aui-dialog {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-dropdown);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-5);
+}
+/* Host sets [data-open] on .aui-dialog or uses native <dialog open> */
+.aui-dialog[data-open],
+dialog.aui-dialog[open] {
+  display: flex;
+}
+.aui-dialog__backdrop {
+  position: fixed;
+  inset: 0;
+  background: var(--scrim);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  z-index: var(--z-dropdown);
+  animation: aui-fade-in 0.18s ease-out;
+}
+@keyframes aui-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes aui-slide-up {
+  from { opacity: 0; transform: translateY(12px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0)   scale(1); }
+}
+.aui-dialog__panel {
+  position: relative;
+  z-index: var(--z-overlay);
+  background: var(--card);
+  color: var(--card-foreground);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 480px;
+  max-height: calc(100vh - var(--space-6) * 2);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  animation: aui-slide-up 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.aui-dialog__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.aui-dialog__title {
+  font-size: var(--text-lg);
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+.aui-dialog__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: transparent;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  transition: background 0.12s, color 0.12s;
+  flex-shrink: 0;
+}
+.aui-dialog__close:hover {
+  background: var(--accent);
+  color: var(--foreground);
+}
+.aui-dialog__close:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 1px;
+}
+.aui-dialog__body {
+  padding: var(--space-5);
+  flex: 1 1 auto;
+  overflow-y: auto;
+}
+.aui-dialog__foot {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+@media (prefers-reduced-motion: reduce) {
+  .aui-dialog__backdrop { animation: none; }
+  .aui-dialog__panel    { animation: none; }
+}
+
+/* ── toast ────────────────────────────────────────────────────────────────
+ * z-index 60 (toast layer in ladder).
+ * Variants: success / warning / destructive / info.
+ * Stack: flex-column-reverse so newest appears at bottom.
+ * Host manages adding/removing .aui-toast elements. */
+.aui-toast-stack {
+  position: fixed;
+  bottom: var(--space-5);
+  right: var(--space-5);
+  z-index: var(--z-toast);
+  display: flex;
+  flex-direction: column-reverse;
+  gap: var(--space-2);
+  max-width: 360px;
+  width: calc(100vw - var(--space-5) * 2);
+  pointer-events: none;
+}
+.aui-toast {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--card-foreground);
+  box-shadow: var(--shadow-lg);
+  pointer-events: all;
+  animation: aui-toast-in 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes aui-toast-in {
+  from { opacity: 0; transform: translateX(16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .aui-toast { animation: none; }
+}
+.aui-toast__icon {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+}
+.aui-toast__body { flex: 1 1 auto; min-width: 0; }
+.aui-toast__title {
+  font-size: var(--text-sm);
+  font-weight: 650;
+  line-height: 1.3;
+  margin-bottom: 2px;
+}
+.aui-toast__desc {
+  font-size: var(--text-xs);
+  color: var(--muted-foreground);
+  line-height: 1.5;
+}
+
+/* Toast variants — border-left accent + icon tint */
+.aui-toast--success {
+  border-left: 3px solid var(--success);
+}
+.aui-toast--success .aui-toast__icon {
+  background: color-mix(in oklch, var(--success) 16%, transparent);
+  color: var(--success);
+}
+.aui-toast--warning {
+  border-left: 3px solid var(--warning);
+}
+.aui-toast--warning .aui-toast__icon {
+  background: color-mix(in oklch, var(--warning) 16%, transparent);
+  color: var(--warning);
+}
+.aui-toast--destructive {
+  border-left: 3px solid var(--destructive);
+}
+.aui-toast--destructive .aui-toast__icon {
+  background: color-mix(in oklch, var(--destructive) 16%, transparent);
+  color: var(--destructive);
+}
+.aui-toast--info {
+  border-left: 3px solid var(--primary);
+}
+.aui-toast--info .aui-toast__icon {
+  background: color-mix(in oklch, var(--primary) 16%, transparent);
+  color: var(--primary);
+}
+
+/* ── alert (inline) ──────────────────────────────────────────────────────
+ * Same variant taxonomy as toast but inline (no position:fixed).
+ * Left accent stripe + tinted background. */
+.aui-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--card-foreground);
+  border-left-width: 3px;
+}
+.aui-alert__icon {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  font-size: 14px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.aui-alert__body { flex: 1 1 auto; min-width: 0; }
+.aui-alert__title {
+  font-size: var(--text-sm);
+  font-weight: 650;
+  line-height: 1.3;
+  margin-bottom: 2px;
+}
+.aui-alert__desc {
+  font-size: var(--text-xs);
+  color: var(--muted-foreground);
+  line-height: 1.55;
+}
+
+.aui-alert--success {
+  border-left-color: var(--success);
+  background: color-mix(in oklch, var(--success) 8%, var(--card));
+}
+.aui-alert--success .aui-alert__icon { color: var(--success); }
+.aui-alert--warning {
+  border-left-color: var(--warning);
+  background: color-mix(in oklch, var(--warning) 8%, var(--card));
+}
+.aui-alert--warning .aui-alert__icon { color: var(--warning); }
+.aui-alert--destructive {
+  border-left-color: var(--destructive);
+  background: color-mix(in oklch, var(--destructive) 8%, var(--card));
+}
+.aui-alert--destructive .aui-alert__icon { color: var(--destructive); }
+.aui-alert--info {
+  border-left-color: var(--primary);
+  background: color-mix(in oklch, var(--primary) 8%, var(--card));
+}
+.aui-alert--info .aui-alert__icon { color: var(--primary); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MISC CRUD PATTERNS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── inline edit ─────────────────────────────────────────────────────────
+ * Display value shows by default. Host adds .is-editing to swap to input.
+ * CSS provides the swap hook — JS decides when to toggle. */
+.aui-inline-edit { display: inline-block; position: relative; }
+.aui-inline-edit__display {
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  padding: 2px 6px;
+  border: 1px solid transparent;
+  transition: border-color 0.12s, background 0.12s;
+  line-height: 1.5;
+  min-height: 28px;
+  display: flex;
+  align-items: center;
+}
+.aui-inline-edit__display:hover {
+  border-color: var(--border);
+  background: var(--accent);
+}
+.aui-inline-edit__input {
+  display: none;
+  width: 100%;
+}
+/* Editing state: hide display, show input */
+.aui-inline-edit.is-editing .aui-inline-edit__display { display: none; }
+.aui-inline-edit.is-editing .aui-inline-edit__input   { display: block; }
+
+/* ── tag input (chips + live input) ────────────────────────────────────── */
+.aui-tag-input {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 6px var(--space-2);
+  border: 1px solid var(--input);
+  border-radius: var(--radius-sm);
+  background: var(--background);
+  min-height: 40px;
+  cursor: text;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.aui-tag-input:focus-within {
+  border-color: var(--ring);
+  box-shadow: 0 0 0 2px color-mix(in oklch, var(--ring) 30%, transparent);
+}
+.aui-tag-input.is-invalid {
+  border-color: var(--destructive);
+  box-shadow: 0 0 0 2px color-mix(in oklch, var(--destructive) 25%, transparent);
+}
+/* Individual chip/tag */
+.aui-tag-input__tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--primary) 14%, transparent);
+  color: var(--primary);
+  border: 1px solid color-mix(in oklch, var(--primary) 28%, transparent);
+  font-size: var(--text-xs);
+  font-weight: 550;
+  white-space: nowrap;
+  max-width: 160px;
+}
+.aui-tag-input__tag-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.aui-tag-input__tag-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1;
+  opacity: 0.70;
+  padding: 0;
+  flex-shrink: 0;
+  transition: opacity 0.10s, background 0.10s;
+}
+.aui-tag-input__tag-remove:hover { opacity: 1; background: color-mix(in oklch, var(--primary) 20%, transparent); }
+.aui-tag-input__tag-remove:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; }
+/* Live input inside tag list */
+.aui-tag-input__field {
+  flex: 1 1 80px;
+  min-width: 60px;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  padding: 0 var(--space-1);
+  line-height: 1.5;
+}
+.aui-tag-input__field::placeholder { color: var(--muted-foreground); }
+
+/* ── checkbox list ───────────────────────────────────────────────────────── */
+.aui-checkbox-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.aui-checkbox-list__item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  padding: var(--space-2);
+  border: 1px solid transparent;
+  transition: background 0.10s, border-color 0.10s;
+}
+.aui-checkbox-list__item:hover {
+  background: var(--accent);
+  border-color: var(--border);
+}
+.aui-checkbox-list__item:has(.aui-checkbox:focus-visible) {
+  outline: 2px solid var(--ring);
+  outline-offset: 1px;
+}
+.aui-checkbox-list__item-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 0;
+}
+.aui-checkbox-list__item-label {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--foreground);
+  line-height: 1.35;
+}
+.aui-checkbox-list__item-desc {
+  font-size: var(--text-xs);
+  color: var(--muted-foreground);
+  line-height: 1.45;
+}
+
+
+</style>
+</head>
+<body>
+<main class="aui-widget" data-category="Dispensação">
+  <header class="aui-widget__head">
+    <div class="aui-widget__heading">
+      <h1 class="aui-widget__title">Registrar Dispensação</h1>
+      <p class="aui-widget__subtitle">Fluxo nível 3 (RDC 1.014) — dispensador ≠ aprovador · pré-visualize um rascunho e solicite a aprovação do RT · em 2026-06-10</p>
+    </div>
+    <span class="aui-badge aui-badge--category">Dispensação</span>
+  </header>
+  <div id="aui-body" class="aui-widget__body">
+
+<form class="aui-form" id="dispensation-form" autocomplete="off" novalidate
+      style="max-width:440px;margin:0 auto;">
+
+  <div class="aui-field aui-field--required">
+    <label class="aui-field__label" for="memberId">Associado (ULID)</label>
+    <input class="aui-input" id="memberId" name="memberId" type="text"
+           inputmode="text" autocomplete="off"
+           placeholder="ASSOC-…" aria-describedby="memberId-help" />
+    <span class="aui-field__help" id="memberId-help">Identificador pseudônimo do associado — sem nome/CPF (LGPD).</span>
+  </div>
+
+  <div class="aui-field aui-field--required">
+    <label class="aui-field__label" for="lotId">Lote (FIFO)</label>
+    <input class="aui-input" id="lotId" name="lotId" type="text"
+           autocomplete="off"
+           placeholder="LOTE-…" aria-describedby="lotId-help" />
+    <span class="aui-field__help" id="lotId-help">Lote liberado com vencimento mais próximo (regra FIFO).</span>
+  </div>
+
+  <div class="aui-field aui-field--required">
+    <label class="aui-field__label" for="quantityG">Quantidade</label>
+    <div class="aui-input-group">
+      <input class="aui-input" id="quantityG" name="quantityG" type="number"
+             step="0.01" min="0.01" inputmode="decimal"
+             placeholder="0,00" aria-describedby="quantityG-help" />
+      <span class="aui-input-group__addon">g</span>
+    </div>
+    <span class="aui-field__help" id="quantityG-help">Gramas a dispensar (passo de 0,01g).</span>
+  </div>
+
+  <div class="aui-form-actions aui-form-actions--spread">
+    <button class="aui-btn aui-btn--ghost" id="previewBtn" type="button"
+            title="Gera um rascunho somente-leitura (draft_dispensation)">
+      Pré-visualizar (draft)
+    </button>
+    <button class="aui-btn aui-btn--primary" id="submitBtn" type="button" disabled
+            title="Cria uma PendingAction para o RT aprovar — não executa a dispensação">
+      Solicitar aprovação
+    </button>
+  </div>
+
+  <aside class="aui-alert aui-alert--info" role="note">
+    <span class="aui-alert__icon" aria-hidden="true">ℹ︎</span>
+    <div class="aui-alert__body">
+      <div class="aui-alert__title">Nível 3 — aprovação obrigatória</div>
+      <p class="aui-alert__desc">
+        Pela RDC 1.014/2026 o dispensador não pode ser o aprovador. Solicitar aprovação
+        cria uma <strong>PendingAction</strong> para o Responsável Técnico (RT) revisar —
+        a dispensação <strong>não é executada</strong> no envio.
+      </p>
+    </div>
+  </aside>
+
+  <div class="aui-field" id="previewWrap" hidden>
+    <span class="aui-field__label">Pré-visualização (draft)</span>
+    <pre class="aui-card" id="preview"
+         style="margin:0;padding:var(--space-3);white-space:pre-wrap;word-break:break-word;font-family:var(--font-mono,ui-monospace,monospace);font-size:var(--text-xs);color:var(--muted-foreground);line-height:1.5;"></pre>
+  </div>
+
+</form>
+
+  </div>
+</main>
+<script>window.__DATA__ = {"asOf":"2026-06-10","memberId":"ASSOC-01J8Z4K2M9","lotId":"LOTE-2500","quantityG":12,"note":null,"text":null};</script>
+<script>(function () {
+  var NS = 'http://www.w3.org/2000/svg';
+
+  function el(tag, attrs, parent) {
+    var e = document.createElementNS(NS, tag);
+    if (attrs) for (var k in attrs) {
+      if (attrs[k] == null) continue;
+      if (k === 'text') { e.textContent = attrs[k]; }
+      else if (k === 'cls') { e.setAttribute('class', attrs[k]); }
+      else { e.setAttribute(k, String(attrs[k])); }
+    }
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+
+  function frame(host, opts) {
+    opts = opts || {};
+    var width = opts.width || 640;
+    var height = opts.height || 320;
+    var m = opts.margin || { top: 16, right: 16, bottom: 34, left: 44 };
+    var svg = el('svg', {
+      cls: 'aui-chart',
+      viewBox: '0 0 ' + width + ' ' + height,
+      preserveAspectRatio: 'xMidYMid meet',
+      role: 'img'
+    });
+    svg.style.width = '100%';
+    svg.style.height = 'auto';
+    svg.style.display = 'block';
+    var plot = el('g', { transform: 'translate(' + m.left + ',' + m.top + ')' }, svg);
+    if (host) host.appendChild(svg);
+    return {
+      svg: svg, plot: plot, m: m,
+      iw: width - m.left - m.right,
+      ih: height - m.top - m.bottom,
+      width: width, height: height
+    };
+  }
+
+  function scaleLinear(domain, range) {
+    var d0 = domain[0], d1 = domain[1], r0 = range[0], r1 = range[1];
+    var span = (d1 - d0) || 1;
+    var fn = function (v) { return r0 + (v - d0) / span * (r1 - r0); };
+    fn.invert = function (px) { return d0 + (px - r0) / (r1 - r0) * span; };
+    fn.domain = domain; fn.range = range;
+    return fn;
+  }
+
+  function scaleBand(keys, range, pad) {
+    pad = pad == null ? 0.2 : pad;
+    var r0 = range[0], r1 = range[1];
+    var step = (r1 - r0) / Math.max(keys.length, 1);
+    var bw = step * (1 - pad);
+    var index = {};
+    for (var i = 0; i < keys.length; i++) index[keys[i]] = i;
+    return {
+      x: function (k) { return r0 + index[k] * step + (step - bw) / 2; },
+      center: function (k) { return r0 + index[k] * step + step / 2; },
+      bw: bw, step: step, keys: keys
+    };
+  }
+
+  function niceTicks(d0, d1, count) {
+    count = count || 5;
+    var span = (d1 - d0) || 1;
+    var raw = span / count;
+    var mag = Math.pow(10, Math.floor(Math.log(raw) / Math.LN10));
+    var norm = raw / mag;
+    var step = (norm >= 5 ? 10 : norm >= 2 ? 5 : norm >= 1 ? 2 : 1) * mag;
+    if (step < 1 && d0 >= 0 && d1 <= 10) step = 1;
+    var start = Math.ceil(d0 / step) * step;
+    var ticks = [];
+    for (var v = start; v <= d1 + 1e-9; v += step) ticks.push(Math.round(v * 1e6) / 1e6);
+    return ticks;
+  }
+
+  function axisBottom(plot, scale, o) {
+    o = o || {};
+    var y = o.y;
+    var g = el('g', { cls: 'aui-axis aui-axis-x' }, plot);
+    if (o.band) {
+      var keys = scale.keys;
+      for (var i = 0; i < keys.length; i++) {
+        el('text', { cls: 'aui-tick', x: scale.center(keys[i]), y: y + 18, 'text-anchor': 'middle', text: o.fmt ? o.fmt(keys[i]) : keys[i] }, g);
+      }
+    } else {
+      var ticks = o.ticks || niceTicks(scale.domain[0], scale.domain[1], o.count || 6);
+      for (var j = 0; j < ticks.length; j++) {
+        var x = scale(ticks[j]);
+        el('line', { cls: 'aui-tickline', x1: x, x2: x, y1: y, y2: y + 5 }, g);
+        el('text', { cls: 'aui-tick', x: x, y: y + 18, 'text-anchor': 'middle', text: o.fmt ? o.fmt(ticks[j]) : ticks[j] }, g);
+      }
+    }
+    return g;
+  }
+
+  function axisLeft(plot, scale, o) {
+    o = o || {};
+    var x = o.x || 0;
+    var g = el('g', { cls: 'aui-axis aui-axis-y' }, plot);
+    var ticks = o.ticks || niceTicks(scale.domain[0], scale.domain[1], o.count || 5);
+    for (var i = 0; i < ticks.length; i++) {
+      var y = scale(ticks[i]);
+      if (o.grid) el('line', { cls: 'aui-grid', x1: x, x2: o.gridW, y1: y, y2: y }, g);
+      el('text', { cls: 'aui-tick', x: x - 8, y: y + 4, 'text-anchor': 'end', text: o.fmt ? o.fmt(ticks[i]) : ticks[i] }, g);
+    }
+    if (o.label) el('text', { cls: 'aui-axis-label', x: x - 34, y: -4, text: o.label }, g);
+    return g;
+  }
+
+  function path(pts, close) {
+    var d = '';
+    for (var i = 0; i < pts.length; i++) d += (i === 0 ? 'M' : 'L') + pts[i].x.toFixed(2) + ' ' + pts[i].y.toFixed(2) + ' ';
+    if (close) d += 'Z';
+    return d;
+  }
+
+  function line(plot, pts, o) {
+    o = o || {};
+    if (!pts.length) return null;
+    return el('path', { cls: 'aui-line ' + (o.cls || ''), d: path(pts, false), fill: 'none' }, plot);
+  }
+
+  function area(plot, pts, y0, o) {
+    o = o || {};
+    if (!pts.length) return null;
+    var d = path(pts, false) + 'L' + pts[pts.length - 1].x.toFixed(2) + ' ' + y0.toFixed(2) + ' L' + pts[0].x.toFixed(2) + ' ' + y0.toFixed(2) + ' Z';
+    return el('path', { cls: 'aui-area ' + (o.cls || ''), d: d }, plot);
+  }
+
+  function stackBands(plot, bands) {
+    var g = el('g', { cls: 'aui-stack' }, plot);
+    for (var b = 0; b < bands.length; b++) {
+      var band = bands[b];
+      var top = band.pts.map(function (p) { return { x: p.x, y: p.yTop }; });
+      var bot = band.pts.map(function (p) { return { x: p.x, y: p.yBot }; }).reverse();
+      el('path', { cls: 'aui-band ' + (band.cls || ('s' + b)), d: path(top.concat(bot), true) }, g);
+    }
+    return g;
+  }
+
+  function bars(plot, items) {
+    var g = el('g', { cls: 'aui-bars' }, plot);
+    for (var i = 0; i < items.length; i++) {
+      var it = items[i];
+      var r = el('rect', { cls: 'aui-bar ' + (it.cls || ''), x: it.x, y: it.y, width: Math.max(0, it.w), height: Math.max(0, it.h), rx: it.rx == null ? 2 : it.rx }, g);
+      if (it.data) r.__data = it.data;
+    }
+    return g;
+  }
+
+  function dots(plot, pts, o) {
+    o = o || {};
+    var g = el('g', { cls: 'aui-dots' }, plot);
+    for (var i = 0; i < pts.length; i++) {
+      var p = pts[i];
+      var cls = 'aui-dot ' + (o.clsFn ? o.clsFn(p.data, p) : (o.cls || ''));
+      var c = el('circle', { cls: cls, cx: p.x, cy: p.y, r: p.r || o.r || 4 }, g);
+      if (p.data) c.__data = p.data;
+    }
+    return g;
+  }
+
+  function hRule(plot, y, x0, x1, o) {
+    o = o || {};
+    var g = el('g', { cls: 'aui-rule ' + (o.cls || '') }, plot);
+    el('line', { cls: 'aui-rule-line', x1: x0, x2: x1, y1: y, y2: y }, g);
+    if (o.label) el('text', { cls: 'aui-rule-label', x: x1 - 4, y: y - 4, 'text-anchor': 'end', text: o.label }, g);
+    return g;
+  }
+
+  function sparkline(host, values, o) {
+    o = o || {};
+    var w = o.width || 80, h = o.height || 24, pad = 2;
+    if (!values.length) return null;
+    var min = Math.min.apply(null, values), max = Math.max.apply(null, values);
+    var sx = scaleLinear([0, values.length - 1], [pad, w - pad]);
+    var sy = scaleLinear([min, max], [h - pad, pad]);
+    var f = frame(null, { width: w, height: h, margin: { top: 0, right: 0, bottom: 0, left: 0 } });
+    f.svg.setAttribute('class', 'aui-spark');
+    var pts = values.map(function (v, i) { return { x: sx(i), y: sy(v) }; });
+    line(f.svg, pts, { cls: o.cls || 'spark' });
+    el('circle', { cls: 'aui-spark-end ' + (o.cls || ''), cx: pts[pts.length - 1].x, cy: pts[pts.length - 1].y, r: 2 }, f.svg);
+    if (host) host.appendChild(f.svg);
+    return f.svg;
+  }
+
+  function tooltip(host) {
+    var tip = document.createElement('div');
+    tip.className = 'aui-tooltip';
+    tip.style.position = 'fixed';
+    tip.style.display = 'none';
+    tip.style.pointerEvents = 'none';
+    tip.style.zIndex = '9999';
+    document.body.appendChild(tip);
+    function show(html, cx, cy) {
+      tip.innerHTML = html;
+      tip.style.display = 'block';
+      var r = tip.getBoundingClientRect();
+      var x = cx + 12, y = cy + 12;
+      if (x + r.width > window.innerWidth) x = cx - r.width - 12;
+      if (y + r.height > window.innerHeight) y = cy - r.height - 12;
+      tip.style.left = Math.max(4, x) + 'px';
+      tip.style.top = Math.max(4, y) + 'px';
+    }
+    function hide() { tip.style.display = 'none'; }
+    function bind(el2, htmlFn) {
+      el2.addEventListener('mousemove', function (ev) {
+        var t = ev.target;
+        var d = t && t.__data;
+        if (d == null) { hide(); return; }
+        show(htmlFn(d, t), ev.clientX, ev.clientY);
+      });
+      el2.addEventListener('mouseleave', hide);
+    }
+    return { show: show, hide: hide, bind: bind, node: tip };
+  }
+
+  window.AuiCharts = {
+    el: el, frame: frame, scaleLinear: scaleLinear, scaleBand: scaleBand,
+    niceTicks: niceTicks, axisBottom: axisBottom, axisLeft: axisLeft,
+    line: line, area: area, stackBands: stackBands, bars: bars, dots: dots,
+    hRule: hRule, sparkline: sparkline, tooltip: tooltip, path: path
+  };
+})();</script>
+<script>(function () {
+  var pending = {};
+  var cb = { onData: null, onInput: null, onTheme: null };
+  var rpcId = 1;
+  var lastH = 0, lastW = 0;
+
+  function post(msg) { window.parent.postMessage(msg, '*'); }
+
+  function request(method, params) {
+    var id = 'aui-' + (rpcId++);
+    return new Promise(function (resolve, reject) {
+      pending[id] = { resolve: resolve, reject: reject };
+      post({ jsonrpc: '2.0', id: id, method: method, params: params || {} });
+    });
+  }
+
+  function notifySize() {
+    var h = Math.ceil(document.documentElement.scrollHeight);
+    var w = Math.ceil(document.documentElement.scrollWidth);
+    if (h === lastH && w === lastW) return;
+    lastH = h; lastW = w;
+    post({ jsonrpc: '2.0', method: 'notifications/size_changed', params: { width: w, height: h } });
+  }
+
+  function applyTheme(theme) {
+    var t = (theme === 'light' || theme === 'dark') ? theme : 'dark';
+    document.documentElement.setAttribute('data-theme', t);
+    if (cb.onTheme) { try { cb.onTheme(t); } catch (e) {} }
+  }
+
+  function resolveThemeFromContext(ctx) {
+    if (!ctx || typeof ctx !== 'object') return null;
+    if (typeof ctx.theme === 'string') return ctx.theme;
+    if (typeof ctx.colorScheme === 'string') return ctx.colorScheme;
+    if (ctx.appearance && typeof ctx.appearance.theme === 'string') return ctx.appearance.theme;
+    return null;
+  }
+
+  function parseToolResult(params) {
+    if (!params || typeof params !== 'object') return null;
+    if (params.structuredContent && typeof params.structuredContent === 'object') {
+      return params.structuredContent;
+    }
+    var content = params.content || (params.result && params.result.content);
+    if (Array.isArray(content)) {
+      for (var i = 0; i < content.length; i++) {
+        var c = content[i];
+        if (c && c.type === 'text' && typeof c.text === 'string') {
+          try { return JSON.parse(c.text); } catch (e) {}
+        }
+      }
+    }
+    return null;
+  }
+
+  function fireData(data) {
+    if (!data || !cb.onData) return;
+    try { cb.onData(data); } catch (e) { console.error('[aui] onData error', e); }
+    requestAnimationFrame(notifySize);
+  }
+
+  window.addEventListener('message', function (event) {
+    var msg = event.data;
+    if (!msg || typeof msg !== 'object') return;
+
+    // response to one of our requests (ui/initialize, tools/call)
+    if (msg.id !== undefined && pending[msg.id]) {
+      var p = pending[msg.id]; delete pending[msg.id];
+      if (msg.error) { p.reject(msg.error); }
+      else {
+        if (msg.result && msg.result.hostContext) {
+          var th = resolveThemeFromContext(msg.result.hostContext);
+          if (th) applyTheme(th);
+        }
+        p.resolve(msg.result);
+      }
+      return;
+    }
+
+    var method = msg.method || msg.type;
+    if (!method) return;
+
+    if (method === 'ui/notifications/tool-result' || method === 'notifications/tools/call/result') {
+      var rp = msg.params && msg.params.result ? msg.params.result : msg.params;
+      var data = parseToolResult(rp);
+      if (data) fireData(data);
+      return;
+    }
+    if (method === 'ui/notifications/tool-input' || method === 'notifications/tools/call/input') {
+      if (cb.onInput) { try { cb.onInput((msg.params && msg.params.arguments) || msg.params); } catch (e) {} }
+      return;
+    }
+    if (method === 'ui/notifications/host-context-changed' || method === 'notifications/host_context/changed') {
+      var th2 = resolveThemeFromContext(msg.params);
+      if (th2) applyTheme(th2);
+      return;
+    }
+  });
+
+  function handshake() {
+    // 1. negotiate (gets hostContext incl. theme)
+    request('ui/initialize', { protocolVersion: '2026-01-26' }).catch(function () {});
+    // 2. signal ready → host flushes the queued tool-input / tool-result
+    post({ jsonrpc: '2.0', method: 'notifications/initialized' });
+    requestAnimationFrame(notifySize);
+  }
+
+  var AuiBridge = {
+    init: function (opts) {
+      opts = opts || {};
+      cb.onData = opts.onData || null;
+      cb.onInput = opts.onInput || null;
+      cb.onTheme = opts.onTheme || null;
+      // honour ?theme= override (preview/gallery)
+      try {
+        var qp = new URLSearchParams(location.search).get('theme');
+        if (qp) applyTheme(qp);
+      } catch (e) {}
+      var boot = function () {
+        handshake();
+        if (typeof window.__DATA__ !== 'undefined') fireData(window.__DATA__);
+        if (window.ResizeObserver) {
+          var ro = new ResizeObserver(function () { notifySize(); });
+          ro.observe(document.documentElement);
+        }
+        window.addEventListener('resize', notifySize);
+      };
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', boot);
+      } else { boot(); }
+    },
+    callTool: function (name, args) { return request('tools/call', { name: name, arguments: args || {} }); },
+    sendMessage: function (text) { return request('ui/message', { text: text }); },
+    openLink: function (url) { return request('ui/open-link', { url: url }); },
+    requestDisplayMode: function (mode) { return request('ui/request-display-mode', { mode: mode }); },
+    notifySize: notifySize,
+    applyTheme: applyTheme
+  };
+  window.AuiBridge = AuiBridge;
+})();</script>
+
+<script>
+
+function render(data) {
+  data = data || {};
+
+  // ── element handles (built once in bodyHtml; render() only updates state) ──
+  var memberEl = document.getElementById('memberId');
+  var lotEl = document.getElementById('lotId');
+  var qtyEl = document.getElementById('quantityG');
+  var previewBtn = document.getElementById('previewBtn');
+  var submitBtn = document.getElementById('submitBtn');
+  var previewPane = document.getElementById('preview');
+  var previewWrap = document.getElementById('previewWrap');
+  if (!memberEl || !lotEl || !qtyEl || !previewBtn || !submitBtn) return;
+
+  // ── pre-fill fields from baked/live data (idempotent: only when present) ──
+  if (typeof data.memberId === 'string' && data.memberId) memberEl.value = data.memberId;
+  if (typeof data.lotId === 'string' && data.lotId) lotEl.value = data.lotId;
+  if (typeof data.quantityG === 'number' && isFinite(data.quantityG)) qtyEl.value = String(data.quantityG);
+
+  // ── if a draft preview arrived, fill the pane + unlock submit ──
+  var previewText = (typeof data.text === 'string' && data.text)
+    ? data.text
+    : (typeof data.note === 'string' && data.note ? data.note : null);
+  if (previewText) {
+    if (previewPane) previewPane.textContent = previewText;
+    if (previewWrap) previewWrap.hidden = false;
+    submitBtn.disabled = false;
+  }
+
+  // ── wire actions once (guard against re-render double-binding) ──
+  if (previewBtn.dataset.wired === '1') return;
+  previewBtn.dataset.wired = '1';
+
+  function collect() {
+    return {
+      memberId: (memberEl.value || '').trim(),
+      lotId: (lotEl.value || '').trim(),
+      quantityG: Number(qtyEl.value)
+    };
+  }
+
+  function call(name, args) {
+    try {
+      if (window.AuiBridge && typeof window.AuiBridge.callTool === 'function') {
+        return window.AuiBridge.callTool(name, args);
+      }
+    } catch (e) { /* no host in raw preview */ }
+    return null;
+  }
+
+  previewBtn.addEventListener('click', function () {
+    var btn = previewBtn;
+    btn.classList.add('is-loading');
+    var p = call('draft_dispensation', collect());
+    var done = function () { btn.classList.remove('is-loading'); };
+    if (p && typeof p.then === 'function') { p.then(done, done); }
+    else { done(); }
+  });
+
+  submitBtn.addEventListener('click', function () {
+    if (submitBtn.disabled) return;
+    var btn = submitBtn;
+    btn.classList.add('is-loading');
+    var p = call('request_record_dispensation', collect());
+    var done = function () {
+      btn.classList.remove('is-loading');
+      btn.textContent = 'Aprovação solicitada ✓';
+      btn.disabled = true;
+    };
+    if (p && typeof p.then === 'function') { p.then(done, done); }
+    else { done(); }
+  });
+}
+
+</script>
+<script>
+AuiBridge.init({
+  onData: (typeof render === 'function') ? render : null,
+  onInput: (typeof onInput === 'function') ? onInput : null,
+  onTheme: (typeof onTheme === 'function') ? onTheme : null
+});
+</script>
+</body>
+</html>

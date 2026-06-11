@@ -1,11 +1,38 @@
 ---
 title: "Painel de Lotes — Status e Validade"
-description: "Painel de Lotes (em 2026-06-10): 12 lotes — Quarentena 3, Disponível 5, Esgotado 2, Recolhido 2; 305g disponíveis; 1 com vencimento crítico (<7d); 2 recolhido(s). Clique num lote para detalhe e rastreabilidade SNGPC."
+description: "Visão de todos os lotes do estoque: quarentena, disponível, esgotado, recolhido. Destaca lotes com vencimento crítico (<7 dias) e permite drill-down de rastreabilidade SNGPC."
 ---
 
 import { Aside } from '@astrojs/starlight/components';
 
-Painel de Lotes (em 2026-06-10): 12 lotes — Quarentena 3, Disponível 5, Esgotado 2, Recolhido 2; 305g disponíveis; 1 com vencimento crítico (&lt;7d); 2 recolhido(s). Clique num lote para detalhe e rastreabilidade SNGPC.
+<div class="app-meta-block">
+  <dl>
+    <div class="app-meta-row">
+      <dt>O que faz</dt>
+      <dd>Painel de todos os lotes do estoque por status (quarentena · disponível · esgotado · recolhido) com alertas de vencimento crítico e drill-down de rastreabilidade SNGPC.</dd>
+    </div>
+    <div class="app-meta-row">
+      <dt>Audiência</dt>
+      <dd>RT, Dispensador, Gestão</dd>
+    </div>
+    <div class="app-meta-row">
+      <dt>Passo do fluxo</dt>
+      <dd>Gestão de estoque — visão geral do inventário, identifica lotes bloqueados ou críticos</dd>
+    </div>
+    <div class="app-meta-row">
+      <dt>Tool MCP</dt>
+      <dd><code>canna_lot_board</code></dd>
+    </div>
+    <div class="app-meta-row">
+      <dt>Nível de acesso</dt>
+      <dd>Nível 1 — Leitura</dd>
+    </div>
+    <div class="app-meta-row">
+      <dt>Status</dt>
+      <dd><span class="status-badge status-ready">✓ Pronto</span></dd>
+    </div>
+  </dl>
+</div>
 
 <Aside type="tip" title="Exemplo ao vivo">Este é o app real, com dados de exemplo. No produto ele é aberto pela ferramenta <code>canna_lot_board</code> e recebe os dados reais.</Aside>
 

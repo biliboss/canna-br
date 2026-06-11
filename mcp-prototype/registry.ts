@@ -7,6 +7,10 @@ import { def as dispensationThroughputBar } from "./widgets/admin/dispensation-t
 import { def as inventoryLotStatusBoard } from "./widgets/admin/inventory-lot-status-board.js";
 import { def as sngpcSubmissionAging } from "./widgets/admin/sngpc-submission-aging.js";
 import { def as prescriptionExpiryScatter } from "./widgets/admin/prescription-expiry-scatter.js";
+import { def as inventoryLotPicker } from "./widgets/admin/inventory-lot-picker.js";
+import { def as memberQuotaCard } from "./widgets/admin/member-quota-card.js";
+import { def as dispensationForm } from "./widgets/admin/dispensation-form.js";
+import { def as traceabilityTimeline } from "./widgets/admin/traceability-timeline.js";
 // <mcp-apps:imports> — `library new` inserts new app imports above this line
 
 export const WIDGETS: WidgetDef[] = [
@@ -16,6 +20,10 @@ export const WIDGETS: WidgetDef[] = [
   inventoryLotStatusBoard,
   sngpcSubmissionAging,
   prescriptionExpiryScatter,
+  inventoryLotPicker,
+  memberQuotaCard,
+  dispensationForm,
+  traceabilityTimeline,
   // <mcp-apps:widgets> — `library new` inserts new app entries above this line
 ];
 

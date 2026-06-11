@@ -1,0 +1,40 @@
+---
+title: "Cartão de Cota do Associado"
+description: "Exibe a cota vigente de um associado — gramas prescritas, consumidas e saldo disponível — com indicador visual de proximidade ao limite. Usado pelo dispensador antes de liberar o lote."
+---
+
+import { Aside, Badge } from '@astrojs/starlight/components';
+
+<div class="app-meta-block">
+  <dl>
+    <div class="app-meta-row">
+      <dt>O que faz</dt>
+      <dd>Exibe cota vigente de um associado: gramas prescritas, consumidas e saldo restante com indicador de proximidade ao limite regulatório.</dd>
+    </div>
+    <div class="app-meta-row">
+      <dt>Audiência</dt>
+      <dd>Dispensador, RT (Responsável Técnico)</dd>
+    </div>
+    <div class="app-meta-row">
+      <dt>Passo do fluxo</dt>
+      <dd>Quota do membro — verificação pré-dispensação</dd>
+    </div>
+    <div class="app-meta-row">
+      <dt>Tool MCP</dt>
+      <dd><code>get_member_quota</code></dd>
+    </div>
+    <div class="app-meta-row">
+      <dt>Nível de acesso</dt>
+      <dd>Nível 1 — Leitura</dd>
+    </div>
+    <div class="app-meta-row">
+      <dt>Status</dt>
+      <dd><span class="status-badge status-ready">✓ Pronto</span></dd>
+    </div>
+  </dl>
+</div>
+
+<Aside type="tip" title="Exemplo ao vivo">Este é o app real, com dados de exemplo. No produto ele é aberto pela ferramenta <code>get_member_quota</code> e recebe os dados reais do associado.</Aside>
+
+<iframe data-app src="/apps/member-quota-card.html" title="Cartão de Cota do Associado" loading="lazy" sandbox="allow-scripts allow-same-origin" style="width:100%;height:520px;border:1px solid var(--sl-color-gray-5);border-radius:12px;background:transparent;display:block"></iframe>
+<script src="/apps/_resize.js" is:inline></script>
