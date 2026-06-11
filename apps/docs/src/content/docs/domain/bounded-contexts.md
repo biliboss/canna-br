@@ -191,6 +191,16 @@ Lê projeções de todos os outros contextos. Não emite commands — apenas ger
 
 ---
 
+## 9. StrainCatalog _(futuro / planejado)_
+
+**Modelo:** Catálogo de referência — sem aggregate de escrita próprio no ledger.
+
+Bounded context separado do ledger; expõe apenas leitura. Lido por [Chain of Custody](/architecture/chain-of-custody/) (campo `strain_id` em `cultivation_batch`), referenciado no SNGPC para nomenclatura canônica, e consumível pelo agente AI para recomendação baseada em canabinoides/terpenos. Nunca acoplado à contabilidade.
+
+Gatilho de implementação: início do Chain of Custody OU primeira associação piloto cultivando variedade própria. Detalhes em [Strain Databases](/research/strain-databases/).
+
+---
+
 ## 8. Identity & Access
 
 **Aggregate root:** `User`

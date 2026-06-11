@@ -1,6 +1,27 @@
 /* Brand unification: kill Starlight indigo default, align with emerald landing */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+/* Self-hosted VARIABLE fonts (one file / all weights — ~110 KB vs ~320 KB for
+   the 5 static Inter cuts the Google import pulled, and it eliminates the
+   between-weight FOUT). `font-weight: 100 900` declares the full variable axis.
+   `font-display: swap` keeps text visible during load.
+   - Inter Variable replaces the old `@import` of 5 static Google weights.
+   - JetBrains Mono Variable was referenced in `--sl-font-mono` but had no
+     @font-face, so every mono surface (dates, eyebrows, tag pills, numerics)
+     silently fell back to ui-monospace. This loads it for real. */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/fonts/inter-latin-variable.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 100 800;
+  font-display: swap;
+  src: url('/fonts/jetbrains-mono-latin-variable.woff2') format('woff2');
+}
 
 :root {
   --sl-font: 'Inter', system-ui, sans-serif;

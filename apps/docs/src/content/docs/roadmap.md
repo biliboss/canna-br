@@ -159,6 +159,7 @@ Objetivo: produto completo. Cultivo, processing, lab, financeiro full. Federaç�
 Apostas que dependem de premissas *Especulativas* ou exigem validação prévia. Não entram no roadmap até a aposta ser validada com 1 cliente real.
 
 - **Admin Next.js standalone** — descartado em 2026-06-08. Caso surja necessidade (ex: associação sem condições de operar via chat), avaliar como fallback PWA; até lá, MCP Apps cobrem o universo operacional.
+- **StrainCatalog** — catálogo de strains medicinal BR (bounded context separado; seed OpenTHC/vdb + Kushy). Gatilho: implementação do Chain of Custody OU primeira associação piloto cultivando variedade própria. [research](/research/strain-databases/)
 - App mobile PWA para membros (dispensação self-service com assinatura digital)
 - IoT integration para cultivo (sensores temperatura/umidade)
 - AI compliance alerts (análogo ao "Hanna" da Cannanas DE)

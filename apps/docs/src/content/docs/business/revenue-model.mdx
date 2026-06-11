@@ -1,0 +1,165 @@
+---
+title: "Revenue Model"
+description: "Self-host grátis (AGPL) + managed hosting: Essencial R$ 490, Profissional R$ 990, Rede R$ 2.200/mês. Preço derivado do custo de um time saudável com remuneração globalmente competitiva."
+---
+
+import { SITE, DISPLAY, fmtBRL, fmtUSD, fmtBRLRange, fmtPctRange } from "../../../data/site-constants";
+
+> **Premissa inegociável:** organização saudável nos moldes O2, com remuneração competitiva **mundialmente** — todos os envolvidos prosperam. O preço é consequência do custo da dignidade do time, não do teto de dor do cliente.
+
+## Modelo Base
+
+```
+Self-host (AGPL)          → Grátis para sempre
+Managed hosting           → Pago (infra + suporte + SLA)
+Professional services     → Limitado (hard limit: max 20% receita)
+```
+
+O código é livre, a conveniência é paga. Quem não pode pagar faz self-host — a associação paga pela conveniência, não pelo software.
+
+---
+
+## Planos Managed Hosting
+
+| Plano | Preço/mês | ~US$ | Limite Membros | Diferencial |
+|---|---|---|---|---|
+| **Essencial** | {fmtBRL(SITE.pricing.essencial.brl)} | {fmtUSD(SITE.pricing.essencial.usd)} | Até {SITE.pricing.essencial.membersLimit} | Âncora de acessibilidade, honesta |
+| **Profissional** | {fmtBRL(SITE.pricing.profissional.brl)} | {fmtUSD(SITE.pricing.profissional.usd)} | Até {SITE.pricing.profissional.membersLimit} | Suporte prioritário |
+| **Rede / Enterprise** | {fmtBRL(SITE.pricing.rede.brl)} | {fmtUSD(SITE.pricing.rede.usd)} | Ilimitado | SLA contratual + dashboard federação |
+| **Self-host (AGPL)** | {SITE.pricing.selfHost.displayBRL} | 0 | — | Grátis para sempre |
+
+### Incluso em Todos os Planos
+
+- Sistema completo (cultivo, membros, dispensação, financeiro)
+- SNGPC XML automático + BSPO gerado automaticamente
+- Backups diários (Restic → S3 cifrado), TLS automático (Caddy), atualizações automáticas
+- Domínio próprio da associação (`app.suaassociacao.com.br`)
+
+### Setup Fees (mantidos, com justificativa)
+
+| Serviço | Justificativa |
+|---|---|
+| Migração de dados | Sistema anterior → canna-br |
+| Treinamento | Onboarding da equipe da associação |
+| Customização | White-label, integrações específicas |
+
+Benchmark mundial: implementação de US$ 10k–50k é padrão no mercado cannabis. Setup fee aqui é fração disso.
+
+---
+
+## Reconciliação com a Infraeconomics
+
+> Os números da tese [Infraeconomics](/business/tokenomics/) ({SITE.thesisCeiling.displayRevPerAssoc}; {SITE.thesisCeiling.displayRefRevenue}) são o **cenário-teto** de referência: associação madura consumindo todas as camadas A–F (marco v0.6–v0.8). A receita contratada **real** hoje é a da Camada A (managed hosting, v0.1–v0.4): planos de {fmtBRL(SITE.pricing.essencial.brl)}–{fmtBRL(SITE.pricing.rede.brl)}/mês. A ponte entre chão e teto é o roadmap econômico: cada camada ativada (compliance, compras, equipamentos, crédito) move a associação do plano base em direção ao teto. Um número é o chão contratado, o outro é o teto da tese — complementares, não contraditórios.
+
+---
+
+## Base de Custo: O Que "Competitivo Mundialmente" Custa
+
+| Referência | Valor |
+|---|---|
+| Salário mediano global eng. software (Stack Overflow 2024) | US$ 60–75k/ano |
+| Senior LatAm remoto p/ empresa internacional | ~US$ 46–50k/ano |
+| Senior local BR (comparação) | ~US$ 32k/ano |
+| **Custo-pessoa fully loaded usado** | **{fmtUSD(SITE.team.costPerPersonUSDYearly / 1000)}k/ano (~{fmtBRL(SITE.team.costPerPersonBRLMonthly)}/mês @ R${SITE.usdRate}/US$)** |
+
+```
+Time fundador (3 pessoas):
+  eng + produto/compliance + ops/comercial   ~R$ 75k/mês
++ cloud / jurídico / contábil / reserva
+────────────────────────────────────────────
+Organização mínima saudável                  R$ 90–95k/mês
+```
+
+### Infra por Tenant (schema isolation)
+
+```
+PostgreSQL schema isolado:   R$ 20–30/mês (instância compartilhada)
+MinIO storage (laudos/docs): R$ 15–25/mês (estimativa 10 GB/mês)
+Redis (cache + BullMQ):      R$ 10/mês (compartilhado)
+Backup Restic:               R$ 5–10/mês (S3 Hetzner)
+Caddy + rede:                R$ 5/mês
+Monitoramento:               R$ 5/mês
+────────────────────────────────────
+Total estimado:              R$ 60–R$ 85/mês por tenant
+```
+
+Custo honesto, battle-tested → gross margin {fmtPctRange(Math.round(SITE.infra.grossMarginLow * 100), Math.round(SITE.infra.grossMarginHigh * 100))}. A margem operacional depende de gente, não de servidor.
+
+---
+
+## Break-Even por Estágio
+
+Ticket médio ponderado: **{SITE.breakeven.displayAvgTicket}** (mix dos 3 planos). Churn mensal: {SITE.breakeven.displayChurn} (conservador para nicho regulado).
+
+| Estágio | Receita ativa | Associações p/ break-even (time de 3, salário global) |
+|---|---|---|
+| Só Camada A (mensalidade) | Managed hosting | **~{SITE.breakeven.assocLayerAOnly} pagantes** |
+| Camadas C–E ativas | + fee 2,5% compras coletivas + servicing 1% carteira (3–5× receita/associada) | **~{SITE.breakeven.assocLayersCE.low}–{SITE.breakeven.assocLayersCE.high} pagantes** |
+
+```
+20 assoc × ~R$ 900  = R$ 18.000 MRR  ≈ R$ 216.000 ARR
+~35 assoc + C–E     = break-even   (alcançável via deal FACT: 36)
+105 assoc só Camada A = break-even
+```
+
+Benchmark de eficiência: Plausible — 8 pessoas / $3.1M ARR.
+
+---
+
+## Benchmark Mundial
+
+| Referência | Mercado | Preço |
+|---|---|---|
+| Metrc | Rastreabilidade mandatória EUA | US$ 40/mês por licença |
+| Wild Apricot | Membership | US$ 40–63/mês starter |
+| Glue Up | Associações até 1k membros | US$ 125–210/mês |
+| MemberClicks | Enterprise membership | ~US$ 375/mês |
+| Cova / Flowhub | Cannabis POS | a partir de US$ 349/mês |
+| Cannabis POS consolidado | POS + compliance + pagamentos | US$ 500–1.500/mês por loja + setup US$ 10k–50k + contratos 12–36m |
+| ERP BR pequena empresa | Generalista | R$ 99–900/mês |
+| Ongsys | Software terceiro setor BR | R$ 890/mês |
+
+Metrc a US$ 40/mês prova que compliance pura é commodity — o dinheiro está nas camadas ao redor.
+
+> **Posicionamento canna-br:** acima do ERP commodity, abaixo do vertical mundial — software vertical especializado com compliance regulatório real.
+
+---
+
+## Travessia: O2 + CONTRIB (sem maquiagem)
+
+> Remuneração diferida e auditável ≠ trabalho de graça. É o que separa organização saudável de exploração de entusiasmo.
+
+- Entre v0.1 e ~{SITE.breakeven.assocLayersCE.high} associações pagantes **não há** receita para salário global. Vale realista: 12–24 meses.
+- Durante o vale: cada hora vira posição CONTRIB no [ledger](/business/dao/), a **valor de mercado competitivo** (não descontado), pública e auditável.
+- Quando a receita cruza o break-even, a cascata (waterfall) converte CONTRIB acumulado em pagamento real, em ordem transparente.
+
+Princípios O2 embutidos:
+
+| Princípio | Como |
+|---|---|
+| Transparência total | Remuneração pública no ledger |
+| Distribuição justa | Por papel e contribuição |
+| Sustentabilidade antes de retorno | Break-even primeiro, waterfall depois |
+
+---
+
+## Mercado (SAM canônico)
+
+**{SITE.market.displayMapped}; SAM {SITE.market.displaySAM}.** Todo número de mercado nesta documentação deriva do {SITE.market.mapped} — nunca oscila.
+
+---
+
+## FACT Deal
+
+A FACT (Federação das Associações Cannabis Terapêutica) representa {SITE.factDeal.assocCount} associações membros. Um contrato federação permite:
+
+```
+Modelo B — Fixed + Per Member (preferido)
+  R$ 1.500/mês fixo (suporte federação + dashboard consolidado)
+  + R$ 8/membro/mês (média 40 membros/associação = R$ 320/assoc)
+  36 associações × R$ 320 = R$ 11.520 + R$ 1.500 = R$ 13.020/mês → R$ 156.000 ARR
+```
+
+**{SITE.factDeal.modelLabel} alinha incentivos:** canna-br ganha quando a associação cresce em membros, e é mais previsível para a FACT (preço fixo de base).
+
+O dashboard consolidado federação (view agregada across todas as {SITE.factDeal.assocCount} associações) é o diferencial do contrato — exclusivo do plano Rede/Enterprise.

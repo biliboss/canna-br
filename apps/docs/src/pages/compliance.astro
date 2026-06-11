@@ -1,0 +1,1333 @@
+---
+import Layout from '../components/marketing/MarketingLayout.astro';
+
+const title = "Compliance — canna-br";
+const description = "LGPD-by-design, minimização de dados, trilhas de auditoria imutáveis, SNGPC em desenvolvimento e aderência arquitetural à RDC 1.014/2026. Documentação completa de conformidade do canna-br.";
+---
+
+<Layout title={title} description={description}>
+
+  <!-- ============================================================
+       HERO — compliance
+  ============================================================ -->
+  <section class="comp-hero">
+    <div class="comp-container comp-hero-inner">
+      <p class="comp-eyebrow">Compliance</p>
+      <h1 class="comp-hero-title">
+        Conformidade construída na arquitetura, não adicionada depois.
+      </h1>
+      <p class="comp-hero-sub">
+        LGPD-by-design. Trilhas de auditoria imutáveis. SNGPC em desenvolvimento. Aderência arquitetural à RDC 1.014/2026. Documentação completa e código aberto para inspeção.
+      </p>
+      <div class="comp-hero-ctas">
+        <a href="/build/compliance/" class="comp-cta-primary">Ler documentação técnica →</a>
+        <a href="/trust/" class="comp-cta-secondary">Ver documentos jurídicos</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       DISCLAIMER — honestidade institucional
+  ============================================================ -->
+  <section class="comp-section comp-disclaimer-section">
+    <div class="comp-container">
+      <div class="comp-disclaimer-card">
+        <div class="comp-disclaimer-header">
+          <svg class="comp-disclaimer-icon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <p class="comp-disclaimer-title">Aviso institucional — leia antes de avaliar</p>
+        </div>
+        <p class="comp-disclaimer-body">
+          O canna-br é software. Conformidade legal (LGPD, RDC 1.014/2026, Portaria 344/98) é responsabilidade integral da associação adotante e seus advogados, DPO e Responsável Técnico farmacêutico. Nenhum mecanismo técnico substitui parecer jurídico próprio, designação formal de RT ou DPO conforme exigido em lei.
+        </p>
+        <p class="comp-disclaimer-body" style="margin-bottom:0;">
+          Esta página documenta o que existe hoje e o que ainda falta — sem omitir lacunas. Associações que precisam de auditoria de segurança independente, DPO terceirizado ou SNGPC homologado encontrarão abaixo o estado atual de cada requisito.
+        </p>
+        <div class="comp-disclaimer-links">
+          <a href="/trust/" class="comp-doc-link">Política de Privacidade →</a>
+          <a href="/trust/dpo/" class="comp-doc-link">DPO — Encarregado de Dados →</a>
+          <a href="/trust/terms-of-service/" class="comp-doc-link">Termos de Uso →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       LGPD-by-design
+  ============================================================ -->
+  <section class="comp-section" style="background: rgba(15,23,42,0.85);">
+    <div class="comp-container">
+      <p class="comp-eyebrow">LGPD-by-design</p>
+      <h2 class="comp-section-title">Proteção de dados de saúde como propriedade técnica, não declaração.</h2>
+      <p class="comp-section-sub">
+        Dados sensíveis de membros — condição médica, prescrições, prontuário — são protegidos por controles técnicos que não dependem de configuração correta ou disciplina operacional.
+        Documentação: <a href="/build/compliance/" class="comp-inline-link">build/compliance →</a>
+      </p>
+
+      <div class="comp-grid-3">
+
+        <div class="comp-principle-card">
+          <div class="comp-principle-header">
+            <div class="comp-principle-icon" aria-hidden="true">
+              <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
+              </svg>
+            </div>
+            <h3 class="comp-principle-title">Envelope encryption por membro</h3>
+          </div>
+          <p class="comp-body-text">
+            Cada membro tem sua própria chave de criptografia (DEK aleatória de 256 bits), cifrada por uma KEK de tenant. Os campos <code class="comp-code">name</code>, <code class="comp-code">dob</code>, <code class="comp-code">address</code>, <code class="comp-code">medical_condition</code>, <code class="comp-code">prescription_text</code> e demais dados sensíveis só são decifráveis com a DEK individual.
+          </p>
+          <p class="comp-body-text">
+            O CPF nunca é armazenado em claro — apenas como <code class="comp-code">SHA-256(cpf + site_salt)</code>, com salt diferente por tenant. O mesmo CPF não é correlacionável entre associações distintas.
+          </p>
+          <a href="/build/compliance/#modelo-de-criptografia-lgpd" class="comp-doc-ref">Ver arquitetura de criptografia →</a>
+        </div>
+
+        <div class="comp-principle-card">
+          <div class="comp-principle-header">
+            <div class="comp-principle-icon" aria-hidden="true">
+              <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6m5 0V4a1 1 0 011-1h2a1 1 0 011 1v2"/>
+              </svg>
+            </div>
+            <h3 class="comp-principle-title">Crypto-deletion (Art. 18 IV LGPD)</h3>
+          </div>
+          <p class="comp-body-text">
+            Ao receber pedido de eliminação, a DEK individual do membro é destruída irreversivelmente. Sem a DEK, todos os campos cifrados tornam-se computacionalmente irrecuperáveis — mesmo que o armazenamento físico persista para preservar a integridade da trilha de auditoria.
+          </p>
+          <p class="comp-body-text">
+            O registro permanece com <code class="comp-code">status = crypto_deleted</code>. A eliminação é concluída em até 7 dias úteis após o pedido ao DPO.
+          </p>
+          <a href="/trust/privacy-policy/#crypto-deletion-garantida-art-18-iv-lgpd" class="comp-doc-ref">Ver política de eliminação →</a>
+        </div>
+
+        <div class="comp-principle-card">
+          <div class="comp-principle-header">
+            <div class="comp-principle-icon" aria-hidden="true">
+              <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="22" y1="11" x2="22" y2="17"/><line x1="19" y1="14" x2="25" y2="14"/>
+              </svg>
+            </div>
+            <h3 class="comp-principle-title">Minimização e RBAC</h3>
+          </div>
+          <p class="comp-body-text">
+            Cada papel acessa apenas os dados necessários à sua função. Um dispensador consulta cota e histórico — não prontuário médico completo. O auditor vê trilhas de eventos — não dados pessoais decifrados. O DPO tem acesso aos registros de consentimento — não ao conteúdo das prescrições.
+          </p>
+          <p class="comp-body-text">
+            TOTP obrigatório para operações de alto risco (anonimização, aprovação de laudo, gestão de papéis).
+          </p>
+          <a href="/build/compliance/#rbac-por-relatório" class="comp-doc-ref">Ver tabela de permissões →</a>
+        </div>
+
+      </div>
+
+      <!-- O que existe / o que falta -->
+      <div class="comp-status-table-wrap">
+        <p class="comp-subsection-label">Estado atual dos requisitos LGPD</p>
+        <div class="comp-status-table">
+          <div class="comp-status-row comp-status-row-header">
+            <span>Requisito</span>
+            <span>Status</span>
+            <span>Observação</span>
+          </div>
+          <div class="comp-status-row">
+            <span>Envelope encryption AES-256-GCM</span>
+            <span class="comp-badge-done">Implementado</span>
+            <span>Por membro, DEK aleatória</span>
+          </div>
+          <div class="comp-status-row">
+            <span>Crypto-deletion Art. 18 IV</span>
+            <span class="comp-badge-done">Implementado</span>
+            <span>Destruição irreversível da DEK</span>
+          </div>
+          <div class="comp-status-row">
+            <span>RBAC com segregação de funções</span>
+            <span class="comp-badge-done">Implementado</span>
+            <span>5 roles; TOTP nível 4</span>
+          </div>
+          <div class="comp-status-row">
+            <span>DPO designado</span>
+            <span class="comp-badge-partial">Interino</span>
+            <span>Gabriel Fonseca, acumulado — ver <a href="/trust/dpo/" class="comp-inline-link">trust/dpo</a></span>
+          </div>
+          <div class="comp-status-row">
+            <span>DPA (Data Processing Agreement)</span>
+            <span class="comp-badge-pending">Previsto v0.3</span>
+            <span>Template para associações adotantes</span>
+          </div>
+          <div class="comp-status-row">
+            <span>RIPD (Art. 38 LGPD)</span>
+            <span class="comp-badge-pending">Previsto v0.4</span>
+            <span>Obrigatório antes de dados em produção real</span>
+          </div>
+          <div class="comp-status-row">
+            <span>Auditoria de segurança independente</span>
+            <span class="comp-badge-pending">Previsto v1.0</span>
+            <span>Código público (AGPL-3.0) mas sem terceiro contratado</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       TRILHA DE AUDITORIA IMUTÁVEL
+  ============================================================ -->
+  <section class="comp-section" style="background: rgba(2,6,23,0.96);">
+    <div class="comp-container">
+      <p class="comp-eyebrow">Trilhas de auditoria</p>
+      <h2 class="comp-section-title">O que aconteceu não pode ser apagado. Nem pela aplicação.</h2>
+      <p class="comp-section-sub">
+        O audit log do canna-br é protegido por regras no próprio PostgreSQL — fora do alcance da camada de aplicação. Mesmo uma vulnerabilidade no código não pode alterar ou deletar o histórico.
+      </p>
+
+      <div class="comp-grid-2">
+
+        <div class="comp-audit-card">
+          <h3 class="comp-audit-title">Imutabilidade técnica</h3>
+          <p class="comp-body-text">
+            A tabela <code class="comp-code">event_log</code> tem uma RULE do PostgreSQL que descarta silenciosamente qualquer instrução UPDATE ou DELETE. A proteção existe no banco — independente do código da aplicação.
+          </p>
+          <div class="comp-code-block" aria-label="Regras SQL de imutabilidade">
+            <p class="comp-code-comment">-- PostgreSQL RULE na tabela event_log</p>
+            <p class="comp-code-line">CREATE RULE no_update_event_log</p>
+            <p class="comp-code-line">  AS ON UPDATE TO event_log</p>
+            <p class="comp-code-line comp-code-emphasis">  DO INSTEAD NOTHING;</p>
+            <p class="comp-code-line">&nbsp;</p>
+            <p class="comp-code-line">CREATE RULE no_delete_event_log</p>
+            <p class="comp-code-line">  AS ON DELETE TO event_log</p>
+            <p class="comp-code-line comp-code-emphasis">  DO INSTEAD NOTHING;</p>
+          </div>
+          <p class="comp-body-text" style="font-size:0.82rem; color:#64748b;">
+            Segunda camada: pgAudit registra eventos DDL diretamente nos logs do PostgreSQL — fora do alcance da aplicação e auditável por terceiros independentemente.
+          </p>
+        </div>
+
+        <div class="comp-audit-card">
+          <h3 class="comp-audit-title">O que a trilha cobre</h3>
+          <div class="comp-audit-event-list">
+            <div class="comp-audit-event">
+              <span class="comp-audit-event-tag comp-tag-membership">Membro</span>
+              <div>
+                <p class="comp-audit-event-name">MemberRegistered · MemberAnonymized</p>
+                <p class="comp-audit-event-detail">Cadastro com consentimento + anonimização LGPD</p>
+              </div>
+            </div>
+            <div class="comp-audit-event">
+              <span class="comp-audit-event-tag comp-tag-dispensation">Dispensação</span>
+              <div>
+                <p class="comp-audit-event-name">DispensationRecorded · QuotaConsumed · LotDeducted</p>
+                <p class="comp-audit-event-detail">Registro atômico — três eventos ligados</p>
+              </div>
+            </div>
+            <div class="comp-audit-event">
+              <span class="comp-audit-event-tag comp-tag-inventory">Inventário</span>
+              <div>
+                <p class="comp-audit-event-name">LotCreated · LotQuarantined · LotRecalled</p>
+                <p class="comp-audit-event-detail">Ciclo completo do lote com cadeia de custódia</p>
+              </div>
+            </div>
+            <div class="comp-audit-event">
+              <span class="comp-audit-event-tag comp-tag-compliance">Compliance</span>
+              <div>
+                <p class="comp-audit-event-name">SngpcSubmitted · BspoGenerated · RipdApproved</p>
+                <p class="comp-audit-event-detail">Artefatos regulatórios com hash imutável</p>
+              </div>
+            </div>
+            <div class="comp-audit-event">
+              <span class="comp-audit-event-tag comp-tag-auth">Acesso</span>
+              <div>
+                <p class="comp-audit-event-name">RoleAssigned · UserAuthenticated · TotpVerified</p>
+                <p class="comp-audit-event-detail">Quem fez o quê, quando e com qual papel</p>
+              </div>
+            </div>
+          </div>
+          <a href="/build/compliance/" class="comp-doc-ref" style="margin-top:1rem; display:inline-block;">Ver documentação completa de eventos →</a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       RDC 1.014/2026
+  ============================================================ -->
+  <section class="comp-section" style="background: rgba(15,23,42,0.88);">
+    <div class="comp-container">
+      <p class="comp-eyebrow">RDC 1.014/2026</p>
+      <h2 class="comp-section-title">O primeiro regime administrativo formal para associações de cannabis no Brasil.</h2>
+      <p class="comp-section-sub">
+        A vigência começa em 4 de agosto de 2026. Associações que entrarem no sandbox ANVISA passam a operar sob autorização administrativa, não apenas judicial. A fiscalização direta da ANVISA exige rastreabilidade técnica documentável.
+        Referência: <a href="/research/legal-framework/" class="comp-inline-link">Marco Legal Brasil →</a>
+      </p>
+
+      <div class="comp-rdc-timeline">
+        <div class="comp-rdc-event comp-rdc-done">
+          <div class="comp-rdc-marker comp-rdc-marker-done" aria-label="Marco passado"></div>
+          <div class="comp-rdc-content">
+            <p class="comp-rdc-date">2023</p>
+            <p class="comp-rdc-title">STJ Tema 16 IAC</p>
+            <p class="comp-rdc-desc">Salvo-conduto coletivo via Habeas Corpus para associações. Regime judicial — sem fiscalização ANVISA direta.</p>
+          </div>
+        </div>
+        <div class="comp-rdc-event comp-rdc-done">
+          <div class="comp-rdc-marker comp-rdc-marker-done" aria-label="Marco passado"></div>
+          <div class="comp-rdc-content">
+            <p class="comp-rdc-date">2026 — publicação</p>
+            <p class="comp-rdc-title">RDC 1.014/2026 publicada</p>
+            <p class="comp-rdc-desc">Sandbox regulatório ANVISA. Primeiro regime administrativo formal. Requisitos técnicos definidos: SNGPC, RBAC, rastreabilidade, RIPD.</p>
+          </div>
+        </div>
+        <div class="comp-rdc-event comp-rdc-upcoming">
+          <div class="comp-rdc-marker comp-rdc-marker-upcoming" aria-label="Marco próximo">
+            <span class="comp-rdc-pulse"></span>
+          </div>
+          <div class="comp-rdc-content">
+            <p class="comp-rdc-date">4 agosto 2026 — vigência</p>
+            <p class="comp-rdc-title">Fiscalização ANVISA ativa</p>
+            <p class="comp-rdc-desc">Associações aprovadas no sandbox operam sob autorização administrativa. Audit trail imutável, SNGPC integrado e RBAC com segregação de funções tornam-se exigíveis.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="comp-rdc-requirements">
+        <p class="comp-subsection-label">Exigências técnicas RDC 1.014 × estado canna-br</p>
+        <div class="comp-req-grid">
+          <div class="comp-req-card">
+            <div class="comp-req-header">
+              <span class="comp-badge-done">Implementado</span>
+              <h4 class="comp-req-title">Audit trail imutável</h4>
+            </div>
+            <p class="comp-req-body">PostgreSQL RULE + pgAudit. Toda dispensação, transferência de lote e evento de membro registrado e protegido contra alteração.</p>
+            <a href="/build/compliance/#audit-log-imutável" class="comp-doc-ref" style="font-size:0.78rem;">Ver detalhes →</a>
+          </div>
+
+          <div class="comp-req-card">
+            <div class="comp-req-header">
+              <span class="comp-badge-done">Implementado</span>
+              <h4 class="comp-req-title">RBAC com segregação</h4>
+            </div>
+            <p class="comp-req-body">5 papéis distintos (Membro, Dispensador, RT, Auditor, Admin). TOTP obrigatório para operações de alto risco. Log de quem fez o quê.</p>
+            <a href="/build/domain/" class="comp-doc-ref" style="font-size:0.78rem;">Ver modelo de domínio →</a>
+          </div>
+
+          <div class="comp-req-card">
+            <div class="comp-req-header">
+              <span class="comp-badge-done">Implementado</span>
+              <h4 class="comp-req-title">Rastreabilidade seed-to-disp.</h4>
+            </div>
+            <p class="comp-req-body">Cadeia de custódia completa: planta matriz → clone → cultivo → colheita → laudo COA → estoque → dispensação. Cada elo registrado com identificador permanente (ULID).</p>
+            <a href="/build/compliance/" class="comp-doc-ref" style="font-size:0.78rem;">Ver trilha →</a>
+          </div>
+
+          <div class="comp-req-card">
+            <div class="comp-req-header">
+              <span class="comp-badge-partial">Em desenvolvimento</span>
+              <h4 class="comp-req-title">SNGPC integrado</h4>
+            </div>
+            <p class="comp-req-body">Arquitetura de envio implementada. XML por dispensação e batch diário configurados. Homologação aguarda schema XSD específico para associações de pacientes — não publicado pela ANVISA até junho de 2026.</p>
+            <a href="/research/sngpc/" class="comp-doc-ref" style="font-size:0.78rem;">Ver estado SNGPC →</a>
+          </div>
+
+          <div class="comp-req-card">
+            <div class="comp-req-header">
+              <span class="comp-badge-partial">Interino</span>
+              <h4 class="comp-req-title">LGPD — dados sensíveis</h4>
+            </div>
+            <p class="comp-req-body">Envelope encryption + crypto-deletion implementados. DPO: Gabriel Fonseca interino (acumulado com papéis técnicos). DPA e RIPD formais previstos em v0.3/v0.4 — exigidos antes de dados de membros em produção real.</p>
+            <a href="/trust/dpo/" class="comp-doc-ref" style="font-size:0.78rem;">Ver designação DPO →</a>
+          </div>
+
+          <div class="comp-req-card">
+            <div class="comp-req-header">
+              <span class="comp-badge-pending">Roadmap</span>
+              <h4 class="comp-req-title">BSPO — Relatório trimestral</h4>
+            </div>
+            <p class="comp-req-body">Geração automática de BSPO (Balanço de Substâncias Psicoativas e Outras) trimestral e anual, assinado pelo RT, com PDF armazenado e hash registrado em evento. Previsto para v0.4.</p>
+            <a href="/build/compliance/#bspo-verificação-de-saldo" class="comp-doc-ref" style="font-size:0.78rem;">Ver especificação →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SNGPC — estado detalhado
+  ============================================================ -->
+  <section class="comp-section" style="background: rgba(2,6,23,0.95);">
+    <div class="comp-container">
+      <p class="comp-eyebrow">SNGPC</p>
+      <h2 class="comp-section-title">Mock implementado. Homologação real aguarda publicação do XSD pela ANVISA.</h2>
+
+      <div class="comp-split">
+        <div>
+          <p class="comp-body-text">
+            O Sistema Nacional de Gerenciamento de Produtos Controlados (SNGPC) exige que cada dispensação de substância controlada seja comunicada à RNDS/ANVISA em até 24 horas.
+          </p>
+          <p class="comp-body-text">
+            O canna-br tem a arquitetura de envio completamente implementada: geração do XML individual por dispensação, batch diário às 23h45, retry automático três vezes com fila de mensagens mortas e alerta ao RT em caso de falha persistente.
+          </p>
+          <p class="comp-body-text">
+            O que aguarda é o schema XSD específico para associações de pacientes — as associações tem natureza jurídica e regime operacional distintos das farmácias e clínicas para as quais o SNGPC foi originalmente desenhado. A ANVISA ainda não publicou o XSD adaptado até junho de 2026.
+          </p>
+          <div class="comp-sngpc-status">
+            <div class="comp-sngpc-item">
+              <span class="comp-badge-done">Implementado</span>
+              <span>Geração XML individual por dispensação</span>
+            </div>
+            <div class="comp-sngpc-item">
+              <span class="comp-badge-done">Implementado</span>
+              <span>Batch diário consolidado às 23h45</span>
+            </div>
+            <div class="comp-sngpc-item">
+              <span class="comp-badge-done">Implementado</span>
+              <span>Retry 3× + fila de mensagens mortas</span>
+            </div>
+            <div class="comp-sngpc-item">
+              <span class="comp-badge-done">Implementado</span>
+              <span>Alerta ao RT em falha persistente</span>
+            </div>
+            <div class="comp-sngpc-item">
+              <span class="comp-badge-partial">Aguardando</span>
+              <span>Schema XSD ANVISA para associações</span>
+            </div>
+            <div class="comp-sngpc-item">
+              <span class="comp-badge-pending">Previsto v0.5</span>
+              <span>Homologação RNDS em ambiente real</span>
+            </div>
+          </div>
+          <a href="/research/sngpc/" class="comp-doc-ref">Pesquisa completa sobre SNGPC →</a>
+        </div>
+
+        <div class="comp-sngpc-flow-card">
+          <p class="comp-flow-label">Fluxo SNGPC — arquitetura atual</p>
+          <div class="comp-flow-list">
+            <div class="comp-flow-item">
+              <span class="comp-flow-num">1</span>
+              <div>
+                <p class="comp-flow-step-title">DispensationRecorded</p>
+                <p class="comp-flow-step-desc">Evento imutável appendado no event log</p>
+              </div>
+            </div>
+            <div class="comp-flow-connector"></div>
+            <div class="comp-flow-item">
+              <span class="comp-flow-num">2</span>
+              <div>
+                <p class="comp-flow-step-title">Worker SNGPC (BullMQ)</p>
+                <p class="comp-flow-step-desc">Consome evento → gera XML individual</p>
+              </div>
+            </div>
+            <div class="comp-flow-connector"></div>
+            <div class="comp-flow-item">
+              <span class="comp-flow-num">3</span>
+              <div>
+                <p class="comp-flow-step-title">Batch diário 23h45</p>
+                <p class="comp-flow-step-desc">Consolida XMLs → envia à RNDS</p>
+              </div>
+            </div>
+            <div class="comp-flow-connector"></div>
+            <div class="comp-flow-item">
+              <span class="comp-flow-num">4</span>
+              <div>
+                <p class="comp-flow-step-title">Resposta armazenada</p>
+                <p class="comp-flow-step-desc">Sucesso ou falha registrado em <code class="comp-code">sngpc_submissions</code></p>
+              </div>
+            </div>
+          </div>
+          <p class="comp-flow-note">Falha de envio não invalida a dispensação. O fluxo SNGPC é assíncrono e desacoplado do estado operacional crítico.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       RELATÓRIOS REGULATÓRIOS
+  ============================================================ -->
+  <section class="comp-section" style="background: rgba(15,23,42,0.82);">
+    <div class="comp-container">
+      <p class="comp-eyebrow">Relatórios regulatórios</p>
+      <h2 class="comp-section-title">Artefatos regulatórios como saída automática do sistema, não trabalho manual.</h2>
+      <p class="comp-section-sub">
+        Cada dispensação, transferência e evento regulatório gera automaticamente os artefatos necessários — sem reprocessamento manual quando o fiscal chegar.
+      </p>
+
+      <div class="comp-reports-table-wrap">
+        <div class="comp-reports-table">
+          <div class="comp-reports-row comp-reports-header">
+            <span>Relatório</span>
+            <span>Periodicidade</span>
+            <span>Destinatário</span>
+            <span>Status</span>
+          </div>
+          <div class="comp-reports-row">
+            <span><strong class="comp-text-white">SNGPC XML</strong><br/><span class="comp-text-muted">Dispensações controladas</span></span>
+            <span>Por dispensação + batch diário</span>
+            <span>ANVISA (RNDS)</span>
+            <span><span class="comp-badge-partial">Mock — v0.5 real</span></span>
+          </div>
+          <div class="comp-reports-row">
+            <span><strong class="comp-text-white">BSPO Trimestral</strong><br/><span class="comp-text-muted">Balanço de Substâncias</span></span>
+            <span>15 jan · 15 abr · 15 jul · 15 out</span>
+            <span>ANVISA</span>
+            <span><span class="comp-badge-pending">Previsto v0.4</span></span>
+          </div>
+          <div class="comp-reports-row">
+            <span><strong class="comp-text-white">BSPO Anual</strong></span>
+            <span>31 janeiro</span>
+            <span>ANVISA</span>
+            <span><span class="comp-badge-pending">Previsto v0.4</span></span>
+          </div>
+          <div class="comp-reports-row">
+            <span><strong class="comp-text-white">KPI Dashboard</strong><br/><span class="comp-text-muted">7 indicadores ANVISA</span></span>
+            <span>Mensal</span>
+            <span>Diretoria</span>
+            <span><span class="comp-badge-done">Implementado</span></span>
+          </div>
+          <div class="comp-reports-row">
+            <span><strong class="comp-text-white">Rastreabilidade Full</strong><br/><span class="comp-text-muted">Seed-to-dispensação</span></span>
+            <span>Sob demanda</span>
+            <span>Auditoria / Fiscalização</span>
+            <span><span class="comp-badge-done">Implementado</span></span>
+          </div>
+          <div class="comp-reports-row">
+            <span><strong class="comp-text-white">DRE + Balanço</strong><br/><span class="comp-text-muted">CPC 29</span></span>
+            <span>Mensal (até dia 10)</span>
+            <span>Tesouraria / Contador</span>
+            <span><span class="comp-badge-pending">Previsto v0.5</span></span>
+          </div>
+        </div>
+      </div>
+
+      <a href="/build/compliance/#relatórios-regulatórios" class="comp-doc-ref">Ver especificação completa →</a>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       DOCUMENTOS JURÍDICOS
+  ============================================================ -->
+  <section class="comp-section" style="background: rgba(2,6,23,0.97);">
+    <div class="comp-container">
+      <p class="comp-eyebrow">Documentação jurídica</p>
+      <h2 class="comp-section-title">O que está publicado. O que ainda falta.</h2>
+      <p class="comp-section-sub">
+        Esta lista é deliberadamente explícita. Uma associação que adotar o canna-br precisa saber com o que pode e com o que não pode contar hoje.
+      </p>
+
+      <div class="comp-docs-grid">
+
+        <div class="comp-doc-card comp-doc-card-published">
+          <div class="comp-doc-card-header">
+            <span class="comp-badge-done">Publicado</span>
+            <h3 class="comp-doc-card-title">Política de Privacidade</h3>
+          </div>
+          <p class="comp-doc-card-body">Tratamento de dados do processo de candidatura ao piloto. Bases legais LGPD, transferência internacional, direitos dos titulares, prazo de retenção e canal exclusivo LGPD.</p>
+          <a href="/trust/privacy-policy/" class="comp-cta-secondary" style="font-size:0.85rem; padding:0.5rem 1.25rem; display:inline-flex; margin-top:1rem;">Ler política →</a>
+        </div>
+
+        <div class="comp-doc-card comp-doc-card-published">
+          <div class="comp-doc-card-header">
+            <span class="comp-badge-done">Publicado</span>
+            <h3 class="comp-doc-card-title">Termos de Uso</h3>
+          </div>
+          <p class="comp-doc-card-body">Condições de uso do serviço durante o período piloto. Responsabilidades, limitações e contato para disputas.</p>
+          <a href="/trust/terms-of-service/" class="comp-cta-secondary" style="font-size:0.85rem; padding:0.5rem 1.25rem; display:inline-flex; margin-top:1rem;">Ler termos →</a>
+        </div>
+
+        <div class="comp-doc-card comp-doc-card-published">
+          <div class="comp-doc-card-header">
+            <span class="comp-badge-partial">Interino</span>
+            <h3 class="comp-doc-card-title">DPO — Encarregado</h3>
+          </div>
+          <p class="comp-doc-card-body">Designação Art. 37 LGPD: Gabriel Fonseca como DPO interino durante o período piloto. Documento honesto sobre as limitações da designação acumulada e roadmap para DPO independente.</p>
+          <a href="/trust/dpo/" class="comp-cta-secondary" style="font-size:0.85rem; padding:0.5rem 1.25rem; display:inline-flex; margin-top:1rem;">Ver designação →</a>
+        </div>
+
+        <div class="comp-doc-card comp-doc-card-pending">
+          <div class="comp-doc-card-header">
+            <span class="comp-badge-pending">Previsto v0.3</span>
+            <h3 class="comp-doc-card-title">DPA — Data Processing Agreement</h3>
+          </div>
+          <p class="comp-doc-card-body">Template de contrato de processamento de dados entre o canna-br (operador) e cada associação adotante (controladora). Necessário antes de dados de membros em produção real.</p>
+          <span class="comp-doc-unavailable">Não disponível ainda</span>
+        </div>
+
+        <div class="comp-doc-card comp-doc-card-pending">
+          <div class="comp-doc-card-header">
+            <span class="comp-badge-pending">Previsto v0.4</span>
+            <h3 class="comp-doc-card-title">RIPD — Relatório de Impacto</h3>
+          </div>
+          <p class="comp-doc-card-body">Relatório de Impacto à Proteção de Dados (Art. 38 LGPD) para dados de saúde de membros de associações. Obrigatório antes de processar dados sensíveis em produção.</p>
+          <span class="comp-doc-unavailable">Não disponível ainda</span>
+        </div>
+
+        <div class="comp-doc-card comp-doc-card-pending">
+          <div class="comp-doc-card-header">
+            <span class="comp-badge-pending">Previsto v1.0</span>
+            <h3 class="comp-doc-card-title">Auditoria de segurança independente</h3>
+          </div>
+          <p class="comp-doc-card-body">O código é público (AGPL-3.0) e auditável por qualquer parte, mas nenhum terceiro independente foi formalmente contratado até esta data. Previsto como gate de v1.0.</p>
+          <span class="comp-doc-unavailable">Não disponível ainda</span>
+        </div>
+
+      </div>
+
+      <div class="comp-trust-cta">
+        <p>Para o índice completo de documentos, lacunas declaradas e roadmap de compliance:</p>
+        <a href="/trust/" class="comp-cta-primary">Ver /trust/ — Confiança &amp; LGPD →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       CTA FINAL
+  ============================================================ -->
+  <section class="comp-section comp-cta-section">
+    <div class="comp-container" style="text-align:center;">
+      <h2 class="comp-section-title">Associações que queiram construir esse padrão desde o início.</h2>
+      <p class="comp-section-sub" style="margin-left:auto; margin-right:auto;">
+        Estamos selecionando pilotos com associações dispostas a validar a conformidade técnica em operação real antes da vigência de agosto. Vagas limitadas.
+      </p>
+      <div class="comp-hero-ctas" style="justify-content:center;">
+        <a href="/piloto/" class="comp-cta-primary">Entrar como piloto →</a>
+        <a href="/produto/" class="comp-cta-secondary">Ver o produto</a>
+      </div>
+    </div>
+  </section>
+
+</Layout>
+
+<style>
+  /* ================================================================
+     COMPLIANCE.ASTRO — design system dark slate + emerald
+     Mesmo sistema de tokens que index.astro / produto.astro
+  ================================================================ */
+
+  .comp-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  .comp-section {
+    padding: 5rem 0;
+  }
+
+  .comp-eyebrow {
+    font-size: 0.7rem;
+    font-family: ui-monospace, 'JetBrains Mono', monospace;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #10b981;
+    margin: 0 0 1rem;
+  }
+
+  /* Hero */
+  .comp-hero {
+    background: linear-gradient(160deg, #060a14 0%, #020617 70%);
+    padding: 7rem 0 5rem;
+  }
+  .comp-hero-inner { text-align: center; }
+  .comp-hero-title {
+    font-size: clamp(1.8rem, 4.5vw, 3.2rem);
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    margin: 0 0 1.25rem;
+    max-width: 42rem;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .comp-hero-sub {
+    font-size: 1.05rem;
+    color: #94a3b8;
+    max-width: 40rem;
+    margin: 0 auto 2.5rem;
+    line-height: 1.7;
+  }
+  .comp-hero-ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: center;
+    align-items: center;
+  }
+
+  /* Section typography */
+  .comp-section-title {
+    font-size: clamp(1.5rem, 3vw, 2.2rem);
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    margin: 0 0 1rem;
+  }
+  .comp-section-sub {
+    font-size: 0.95rem;
+    color: #94a3b8;
+    max-width: 42rem;
+    margin: 0 0 3rem;
+    line-height: 1.7;
+  }
+  .comp-body-text {
+    font-size: 0.9rem;
+    color: #94a3b8;
+    line-height: 1.75;
+    margin: 0 0 0.85rem;
+  }
+  .comp-subsection-label {
+    font-size: 0.7rem;
+    font-family: ui-monospace, monospace;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #8595ab;
+    margin: 2.5rem 0 1rem;
+  }
+  .comp-inline-link {
+    color: #6ee7b7;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: color 0.15s;
+  }
+  .comp-inline-link:hover { color: #a7f3d0; }
+  .comp-doc-ref {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #6ee7b7;
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+  .comp-doc-ref:hover { color: #a7f3d0; }
+
+  /* Buttons */
+  .comp-cta-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.75rem;
+    border-radius: 999px;
+    background: #10b981;
+    color: #020617;
+    font-weight: 700;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: background 0.15s;
+  }
+  .comp-cta-primary:hover { background: #6ee7b7; }
+  .comp-cta-primary:focus-visible { outline: 3px solid #6ee7b7; outline-offset: 3px; }
+
+  .comp-cta-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.75rem;
+    border-radius: 999px;
+    border: 1px solid rgba(16,185,129,0.4);
+    color: #6ee7b7;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .comp-cta-secondary:hover { background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.7); }
+  .comp-cta-secondary:focus-visible { outline: 3px solid #6ee7b7; outline-offset: 3px; }
+
+  /* Code styling */
+  .comp-code {
+    font-family: ui-monospace, 'JetBrains Mono', monospace;
+    font-size: 0.82em;
+    color: #6ee7b7;
+    background: rgba(16,185,129,0.08);
+    padding: 0.1em 0.35em;
+    border-radius: 3px;
+  }
+
+  /* Disclaimer card */
+  .comp-disclaimer-section {
+    background: rgba(15,23,42,0.9);
+    padding: 2.5rem 0;
+  }
+  .comp-disclaimer-card {
+    background: rgba(30,41,59,0.6);
+    border: 1px solid rgba(148,163,184,0.15);
+    border-left: 3px solid rgba(148,163,184,0.4);
+    border-radius: 0.75rem;
+    padding: 1.5rem 1.75rem;
+    max-width: 56rem;
+  }
+  .comp-disclaimer-header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.75rem;
+  }
+  .comp-disclaimer-icon { color: #94a3b8; flex-shrink: 0; }
+  .comp-disclaimer-title {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #cbd5e1;
+    margin: 0;
+  }
+  .comp-disclaimer-body {
+    font-size: 0.85rem;
+    color: #8595ab;
+    line-height: 1.7;
+    margin: 0 0 0.75rem;
+  }
+  .comp-disclaimer-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.25rem;
+    margin-top: 1rem;
+  }
+  .comp-doc-link {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #6ee7b7;
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+  .comp-doc-link:hover { color: #a7f3d0; }
+
+  /* Grids */
+  .comp-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+    gap: 1.25rem;
+  }
+  .comp-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+    gap: 1.5rem;
+  }
+
+  /* Principle cards */
+  .comp-principle-card {
+    background: rgba(2,6,23,0.6);
+    border: 1px solid rgba(16,185,129,0.12);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    transition: border-color 0.15s;
+  }
+  .comp-principle-card:hover { border-color: rgba(16,185,129,0.3); }
+  .comp-principle-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .comp-principle-icon {
+    width: 2rem;
+    height: 2rem;
+    min-width: 2rem;
+    border-radius: 0.5rem;
+    background: rgba(16,185,129,0.1);
+    border: 1px solid rgba(16,185,129,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #10b981;
+  }
+  .comp-principle-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0;
+    line-height: 1.35;
+    padding-top: 0.25rem;
+  }
+
+  /* Status table */
+  .comp-status-table-wrap { overflow-x: auto; }
+  .comp-status-table {
+    width: 100%;
+    min-width: 540px;
+    border: 1px solid rgba(16,185,129,0.1);
+    border-radius: 0.75rem;
+    overflow: hidden;
+  }
+  .comp-status-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 2fr;
+    gap: 1rem;
+    padding: 0.75rem 1.25rem;
+    border-bottom: 1px solid rgba(15,23,42,0.8);
+    font-size: 0.82rem;
+    color: #94a3b8;
+    align-items: center;
+  }
+  .comp-status-row:last-child { border-bottom: none; }
+  .comp-status-row-header {
+    background: rgba(15,23,42,0.6);
+    font-size: 0.68rem;
+    font-family: ui-monospace, monospace;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #8595ab;
+  }
+  .comp-status-row:not(.comp-status-row-header) {
+    background: rgba(2,6,23,0.4);
+  }
+  .comp-status-row:not(.comp-status-row-header):hover {
+    background: rgba(15,23,42,0.5);
+  }
+
+  /* Badges */
+  .comp-badge-done {
+    display: inline-block;
+    font-size: 0.6rem;
+    font-family: ui-monospace, monospace;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #10b981;
+    background: rgba(16,185,129,0.1);
+    border: 1px solid rgba(16,185,129,0.3);
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .comp-badge-partial {
+    display: inline-block;
+    font-size: 0.6rem;
+    font-family: ui-monospace, monospace;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #fbbf24;
+    background: rgba(245,158,11,0.1);
+    border: 1px solid rgba(245,158,11,0.3);
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .comp-badge-pending {
+    display: inline-block;
+    font-size: 0.6rem;
+    font-family: ui-monospace, monospace;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #8595ab;
+    background: rgba(71,85,105,0.15);
+    border: 1px solid rgba(71,85,105,0.3);
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+
+  /* Audit cards */
+  .comp-audit-card {
+    background: rgba(15,23,42,0.6);
+    border: 1px solid rgba(16,185,129,0.12);
+    border-radius: 1rem;
+    padding: 1.75rem;
+    transition: border-color 0.15s;
+  }
+  .comp-audit-card:hover { border-color: rgba(16,185,129,0.25); }
+  .comp-audit-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 1rem;
+  }
+
+  /* Code block */
+  .comp-code-block {
+    background: rgba(2,6,23,0.8);
+    border: 1px solid rgba(16,185,129,0.12);
+    border-radius: 0.5rem;
+    padding: 1rem 1.25rem;
+    margin: 1rem 0;
+    font-family: ui-monospace, 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    line-height: 1.7;
+  }
+  .comp-code-comment { color: #748396; margin: 0; }
+  .comp-code-line { color: #94a3b8; margin: 0; }
+  .comp-code-emphasis { color: #6ee7b7; }
+
+  /* Audit event list */
+  .comp-audit-event-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .comp-audit-event {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  .comp-audit-event-tag {
+    font-size: 0.6rem;
+    font-family: ui-monospace, monospace;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    white-space: nowrap;
+    margin-top: 0.1rem;
+  }
+  .comp-tag-membership { color: #6ee7b7; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.25); }
+  .comp-tag-dispensation { color: #a5b4fc; background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.25); }
+  .comp-tag-inventory { color: #fcd34d; background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.25); }
+  .comp-tag-compliance { color: #f9a8d4; background: rgba(244,114,182,0.08); border: 1px solid rgba(244,114,182,0.2); }
+  .comp-tag-auth { color: #94a3b8; background: rgba(148,163,184,0.08); border: 1px solid rgba(148,163,184,0.2); }
+  .comp-audit-event-name {
+    font-size: 0.78rem;
+    font-family: ui-monospace, monospace;
+    color: #e2e8f0;
+    font-weight: 600;
+    margin: 0;
+    line-height: 1.35;
+  }
+  .comp-audit-event-detail {
+    font-size: 0.72rem;
+    color: #8595ab;
+    margin: 0.15rem 0 0;
+    line-height: 1.4;
+  }
+
+  /* RDC timeline */
+  .comp-rdc-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    max-width: 42rem;
+    margin-bottom: 3.5rem;
+    position: relative;
+  }
+  .comp-rdc-event {
+    display: flex;
+    gap: 1.5rem;
+    padding: 1.25rem 0;
+    border-left: 2px solid rgba(16,185,129,0.12);
+    margin-left: 0.85rem;
+    padding-left: 1.75rem;
+    position: relative;
+  }
+  .comp-rdc-done { border-left-color: rgba(16,185,129,0.4); }
+  .comp-rdc-upcoming { border-left-color: rgba(245,158,11,0.5); }
+  .comp-rdc-marker {
+    position: absolute;
+    left: -0.55rem;
+    top: 1.5rem;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    background: rgba(15,23,42,1);
+    border: 2px solid rgba(16,185,129,0.2);
+  }
+  .comp-rdc-marker-done {
+    background: rgba(16,185,129,0.2);
+    border-color: rgba(16,185,129,0.6);
+  }
+  .comp-rdc-marker-upcoming {
+    background: rgba(245,158,11,0.1);
+    border-color: rgba(245,158,11,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .comp-rdc-pulse {
+    width: 0.4rem;
+    height: 0.4rem;
+    border-radius: 50%;
+    background: #fbbf24;
+    animation: rdcpulse 1.8s ease-in-out infinite;
+  }
+  @keyframes rdcpulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+  .comp-rdc-content { flex: 1; }
+  .comp-rdc-date {
+    font-size: 0.68rem;
+    font-family: ui-monospace, monospace;
+    font-weight: 700;
+    color: #748396;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin: 0 0 0.25rem;
+  }
+  .comp-rdc-title {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 0.35rem;
+  }
+  .comp-rdc-desc {
+    font-size: 0.82rem;
+    color: #8595ab;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  /* RDC requirements grid */
+  .comp-req-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+    gap: 1rem;
+  }
+  .comp-req-card {
+    background: rgba(2,6,23,0.5);
+    border: 1px solid rgba(16,185,129,0.1);
+    border-radius: 0.875rem;
+    padding: 1.25rem;
+    transition: border-color 0.15s;
+  }
+  .comp-req-card:hover { border-color: rgba(16,185,129,0.25); }
+  .comp-req-header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.6rem;
+  }
+  .comp-req-title {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #e2e8f0;
+    margin: 0;
+    line-height: 1.3;
+  }
+  .comp-req-body {
+    font-size: 0.8rem;
+    color: #8595ab;
+    line-height: 1.6;
+    margin: 0 0 0.5rem;
+  }
+
+  /* SNGPC */
+  .comp-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3.5rem;
+    align-items: start;
+  }
+  @media (max-width: 900px) {
+    .comp-split { grid-template-columns: 1fr; gap: 2rem; }
+  }
+
+  .comp-sngpc-status {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 1.5rem 0;
+  }
+  .comp-sngpc-item {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    font-size: 0.82rem;
+    color: #94a3b8;
+  }
+
+  /* SNGPC flow card */
+  .comp-sngpc-flow-card {
+    background: rgba(15,23,42,0.6);
+    border: 1px solid rgba(16,185,129,0.12);
+    border-radius: 1rem;
+    padding: 1.5rem;
+  }
+  .comp-flow-label {
+    font-size: 0.68rem;
+    font-family: ui-monospace, monospace;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #10b981;
+    margin: 0 0 1.25rem;
+  }
+  .comp-flow-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .comp-flow-item {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+  }
+  .comp-flow-num {
+    width: 1.6rem;
+    height: 1.6rem;
+    min-width: 1.6rem;
+    border-radius: 50%;
+    background: rgba(16,185,129,0.12);
+    border: 1px solid rgba(16,185,129,0.25);
+    color: #10b981;
+    font-size: 0.68rem;
+    font-weight: 800;
+    font-family: ui-monospace, monospace;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .comp-flow-step-title {
+    font-size: 0.82rem;
+    font-family: ui-monospace, monospace;
+    font-weight: 700;
+    color: #e2e8f0;
+    margin: 0 0 0.15rem;
+    line-height: 1.3;
+  }
+  .comp-flow-step-desc {
+    font-size: 0.75rem;
+    color: #8595ab;
+    margin: 0;
+    line-height: 1.45;
+  }
+  .comp-flow-connector {
+    width: 2px;
+    height: 1.25rem;
+    background: rgba(16,185,129,0.15);
+    margin-left: 0.75rem;
+  }
+  .comp-flow-note {
+    font-size: 0.72rem;
+    color: #748396;
+    font-style: italic;
+    margin: 1.25rem 0 0;
+  }
+
+  /* Reports table */
+  .comp-reports-table-wrap { overflow-x: auto; margin-bottom: 1.5rem; }
+  .comp-reports-table {
+    width: 100%;
+    min-width: 600px;
+    border: 1px solid rgba(16,185,129,0.1);
+    border-radius: 0.75rem;
+    overflow: hidden;
+  }
+  .comp-reports-row {
+    display: grid;
+    grid-template-columns: 2fr 1.5fr 1.2fr 1fr;
+    gap: 1rem;
+    padding: 0.85rem 1.25rem;
+    border-bottom: 1px solid rgba(15,23,42,0.8);
+    font-size: 0.8rem;
+    color: #94a3b8;
+    align-items: center;
+    line-height: 1.45;
+  }
+  .comp-reports-row:last-child { border-bottom: none; }
+  .comp-reports-header {
+    background: rgba(15,23,42,0.6);
+    font-size: 0.65rem;
+    font-family: ui-monospace, monospace;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #8595ab;
+  }
+  .comp-reports-row:not(.comp-reports-header) {
+    background: rgba(2,6,23,0.4);
+  }
+  .comp-reports-row:not(.comp-reports-header):hover {
+    background: rgba(15,23,42,0.4);
+  }
+  .comp-text-white { color: #e2e8f0; }
+  .comp-text-muted { color: #748396; font-size: 0.72rem; display: block; }
+
+  /* Docs grid */
+  .comp-docs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+    gap: 1.25rem;
+    margin-bottom: 2.5rem;
+  }
+  .comp-doc-card {
+    border-radius: 1rem;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+  }
+  .comp-doc-card-published {
+    background: rgba(15,23,42,0.6);
+    border: 1px solid rgba(16,185,129,0.15);
+  }
+  .comp-doc-card-published:hover { border-color: rgba(16,185,129,0.35); }
+  .comp-doc-card-pending {
+    background: rgba(15,23,42,0.3);
+    border: 1px dashed rgba(71,85,105,0.3);
+  }
+  .comp-doc-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    margin-bottom: 0.75rem;
+  }
+  .comp-doc-card-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0;
+  }
+  .comp-doc-card-body {
+    font-size: 0.82rem;
+    color: #8595ab;
+    line-height: 1.65;
+    margin: 0;
+    flex: 1;
+  }
+  .comp-doc-unavailable {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-family: ui-monospace, monospace;
+    color: #748396;
+    margin-top: 1rem;
+  }
+
+  /* Trust CTA */
+  .comp-trust-cta {
+    background: rgba(15,23,42,0.5);
+    border: 1px solid rgba(16,185,129,0.1);
+    border-radius: 0.875rem;
+    padding: 1.5rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .comp-trust-cta p {
+    font-size: 0.875rem;
+    color: #94a3b8;
+    margin: 0;
+  }
+
+  /* CTA section */
+  .comp-cta-section {
+    background: linear-gradient(160deg, rgba(2,6,23,0.98) 0%, rgba(4,20,18,0.95) 100%);
+  }
+  .comp-cta-section .comp-section-title { max-width: 36rem; margin: 0 auto 0.75rem; text-align: center; }
+  .comp-cta-section .comp-section-sub { margin: 0 auto 2.5rem; text-align: center; }
+
+  /* Responsive */
+  @media (max-width: 640px) {
+    .comp-hero { padding: 5rem 0 3.5rem; }
+    .comp-section { padding: 3.5rem 0; }
+    .comp-hero-ctas { flex-direction: column; }
+    /* Rows stack vertically — tables no longer need the scroll min-width */
+    .comp-status-table, .comp-reports-table { min-width: 0; }
+    .comp-status-row { grid-template-columns: 1fr; gap: 0.3rem; }
+    .comp-reports-row { grid-template-columns: 1fr; }
+    .comp-trust-cta { flex-direction: column; align-items: flex-start; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .comp-rdc-pulse { animation-duration: 0.01ms; }
+    .comp-principle-card,
+    .comp-audit-card,
+    .comp-req-card,
+    .comp-doc-card,
+    .comp-cta-primary,
+    .comp-cta-secondary { transition-duration: 0.01ms !important; }
+  }
+</style>

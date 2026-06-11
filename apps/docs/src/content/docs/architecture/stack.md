@@ -53,6 +53,16 @@ description: "Domain kernel (Emmett) + MCP Server + MCP Apps + Open WebUI sideca
 | Redis 7 | Cache de sessão + filas |
 | BullMQ | Worker de jobs assíncronos |
 
+### Token-Ledger (camada econômica)
+
+> Mesmo padrão do kernel: log imutável + engine pronto + projeções. Não é um mundo separado. Ver [Token-Ledger (arquitetura)](/architecture/token-ledger/).
+
+| Tecnologia | Papel |
+|---|---|
+| NATS JetStream | Event log imutável — fonte da verdade do ledger |
+| Formance Ledger (MIT) — candidato | Engine de dupla-entrada pronto — débito/crédito não se reimplementam |
+| SurrealDB | Projeções / read-models do ledger |
+
 ### Arquivos & PDFs
 
 | Tecnologia | Papel |

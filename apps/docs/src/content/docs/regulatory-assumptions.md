@@ -24,7 +24,7 @@ Premissas com texto legal/normativo publicado e vigente.
 | ANPD Resolução 2/2022 dispensa pequeno porte de nomear encarregado | [ANPD Resolução CD/ANPD 2/2022](https://www.gov.br/anpd/pt-br/acesso-a-informacao/institucional/atos-normativos/regulamentacoes_anpd/resolucao-cd-anpd-no-2-de-27-de-janeiro-de-2022) | Canal de comunicação com titulares ainda obrigatório |
 | SNCR não substitui SNGPC | [Anvisa 2026](https://www.gov.br/anvisa/pt-br/assuntos/noticias-anvisa/2026/SNCR-o-que-muda-para-farmacias-e-drogarias-com-o-novo-sistema-de-controle-de-receitas) | SNGPC = movimentação/estoque; SNCR = prescrição. Coexistem. |
 | SNCR API com documentação técnica a partir de junho/2026 | [Anvisa 2026-06-03](https://www.gov.br/anvisa/pt-br/assuntos/noticias-anvisa/2026/sncr-anvisa-inicia-etapa-de-integracao-com-sistemas-de-prescricao-eletronica-e-amplia-prazo-para-implementacao) | Prazo de implementação ampliado para **30/09/2026**. |
-| Associação opera sob HC judicial enquanto não certificada no sandbox | RDC 1.014 + jurisprudência STJ | 315 associações ativas em jun/2026 |
+| Associação opera sob HC judicial enquanto não certificada no sandbox | RDC 1.014 + jurisprudência STJ | 400+ associações mapeadas no Brasil; SAM ~315 endereçáveis em jun/2026 |
 | ANVISA certifica associações, não software | RDC 1.014 + análise interna | Software fornece **evidência operacional** — não é homologado isoladamente |
 
 ---
@@ -52,8 +52,8 @@ Hipóteses comerciais e de adoção. **Devem ser flag de produto, não premissa 
 | Aposta | Risco se errada | Plano B |
 |---|---|---|
 | Associações pagam R$450–R$780/mês em managed hosting | ARR projection cai 60–80% | Pivotar para services-light (consultoria de implementação) ou foco em poucos enterprise (FACT, top-20 associações) |
-| 38% das 315 associações migram para canna-oss em 3 anos | SOM 2030 cai para R$5–10M | Reduzir time, otimizar para nicho high-touch |
-| Mercado expande de 315 → 800 associações até 2030 | Pool de adoção menor | Foco em retenção e upsell vs aquisição |
+| 38% das ~315 associações endereçáveis (SAM) migram para canna-oss em 3 anos | SOM 2030 cai para R$5–10M | Reduzir time, otimizar para nicho high-touch |
+| Mercado expande de ~315 endereçáveis → 800 associações até 2030 | Pool de adoção menor | Foco em retenção e upsell vs aquisição |
 | AGPL não afasta associações (advogado da associação aprova) | Bloqueio de venda em 30%+ dos casos | Dual licensing — oferecer licença comercial para casos restritos |
 | OSS audit é argumento de venda decisivo vs Cannanas/XURU | Trust moat fraco na prática | Compete em features (compliance engine, integração SNGPC) |
 | ANVISA não exigirá homologação formal de software no edital | Reescrever roadmap inteiro com camada de certificação | Compliance Adapter Layer já está pronta para receber regra de homologação como capability |

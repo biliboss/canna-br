@@ -16,7 +16,7 @@ description: "Lei 11.343, STF Tema 506, STJ Tema 16 IAC, RDC 1.014/2026 — evol
 
 ## Situação Atual
 
-- **315 associações** operam sob Habeas Corpus judicial (HC coletivo derivado do Tema 16 IAC).
+- **400+ associações** mapeadas no Brasil; **SAM ~315 endereçáveis** operam sob Habeas Corpus judicial (HC coletivo derivado do Tema 16 IAC).
 - Compliance é **informal**: cada associação negocia seu HC com o judiciário local.
 - **Risco para diretores**: responsabilidade penal individual persiste enquanto não há legitimidade administrativa formal.
 - A RDC 1.014/2026 muda o paradigma: operação **legitimada** via sandbox regulatório, com **fiscalização ANVISA direta**.

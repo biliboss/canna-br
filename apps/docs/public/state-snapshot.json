@@ -1,0 +1,61 @@
+{
+  "updatedAt": "2026-06-10",
+  "version": "v0.2.1.2",
+  "note": "Snapshot estático commitado. Quando o sistema entra em operação, um adaptador troca este arquivo por leitura de API — sem mudar a interface.",
+  "pilots": {
+    "active": 0,
+    "note": "vagas abertas — 5 slots seed disponíveis até 30 set 2026"
+  },
+  "openCollectivePurchases": 0,
+  "modulesDelivered": [
+    { "name": "Cadastro e gestão de membros", "since": "v0.2.0a" },
+    { "name": "Registro de dispensação com gate de aprovação", "since": "v0.2.0a" },
+    { "name": "Rastreabilidade de lote — cadeia de custódia", "since": "v0.2.0a" },
+    { "name": "Trilha de auditoria imutável (event sourcing)", "since": "v0.2.0a" },
+    { "name": "Controle de cotas por prescrição", "since": "v0.2.0a" },
+    { "name": "Criptografia por membro — LGPD Art. 18 IV", "since": "v0.2.1" },
+    { "name": "Mock SNGPC — XML schema (schema XSD ANVISA pendente)", "since": "v0.2.1" },
+    { "name": "MCP server — 3 apps inline no chat operacional", "since": "v0.2.1" }
+  ],
+  "recentReleases": [
+    {
+      "version": "v0.2.1.2",
+      "date": "2026-06-10",
+      "headline": "154/154 testes verdes — renomeação canna-oss → canna-br + deploy VPS live",
+      "href": "/releases/v021/"
+    },
+    {
+      "version": "v0.2.1",
+      "date": "2026-06-08",
+      "headline": "Compliance Spine + MCP-First — 146 testes, smoke OWUI validado end-to-end",
+      "href": "/releases/v021/"
+    },
+    {
+      "version": "v0.2.0b",
+      "date": "2026-06-08",
+      "headline": "Emmett Postgres adapter — spike gate PASSED, parallel writers verdes em PG real"
+    },
+    {
+      "version": "v0.1.0",
+      "date": "2026-06-08",
+      "headline": "Domain Blueprint — DDD 8 bounded contexts + event storming + ADR-001 + business model"
+    }
+  ],
+  "nextMilestones": [
+    {
+      "label": "v0.3 — Pilot Ready",
+      "window": "set/2026 → dez/2026",
+      "description": "RBAC, TOTP, LGPD consent versionado, crypto-deletion, CSV import — pronto para associação real"
+    },
+    {
+      "label": "Integração SNGPC produção",
+      "window": "quando ANVISA publicar o schema XSD",
+      "description": "Mock já existe; adapter troca para produção quando regulação exigir"
+    },
+    {
+      "label": "v0.4 — Sandbox Dossier Ready",
+      "window": "jan/2027 → mai/2027",
+      "description": "Dossier ANVISA, KPI dashboard, BSPO trimestral assinado, RIPD"
+    }
+  ]
+}

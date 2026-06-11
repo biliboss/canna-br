@@ -1,0 +1,1010 @@
+---
+import Layout from '../components/marketing/MarketingLayout.astro';
+
+const title = "Para Associações — canna-br";
+const description = "Menos improviso operacional. Mais controle, transparência e continuidade. Sistema completo para associações de cannabis medicinal: membros, dispensação, rastreabilidade e prestação de contas auditável.";
+---
+
+<Layout title={title} description={description}>
+
+  <!-- ============================================================
+       HERO
+  ============================================================ -->
+  <section class="assoc-hero">
+    <div class="assoc-container assoc-hero-inner">
+      <p class="assoc-eyebrow">Para associações</p>
+      <h1 class="assoc-h1">
+        Menos improviso operacional.<br />
+        Mais controle, transparência e continuidade.
+      </h1>
+      <p class="assoc-sub">
+        Quando a associação cresce, planilhas e fluxos manuais deixam de dar conta.
+        O canna-br organiza a operação com mais rastreabilidade, governança e clareza
+        para equipe, diretoria e associados.
+      </p>
+      <div class="assoc-hero-ctas">
+        <a href="/piloto/" class="assoc-cta-primary">Entrar como piloto</a>
+        <a href="/about/" class="assoc-cta-ghost">Ler a documentação</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       PARA QUEM É
+  ============================================================ -->
+  <section class="assoc-section assoc-section--alt">
+    <div class="assoc-container">
+      <p class="assoc-eyebrow">Para quem é</p>
+      <h2 class="assoc-h2">Construído para a realidade das associações brasileiras.</h2>
+      <p class="assoc-body">
+        O canna-br é para associações de cannabis medicinal já operantes — com dispensação
+        ativa, Responsável Técnico farmacêutico, e uma diretoria que quer substituir
+        planilhas por um sistema auditável e confiável.
+      </p>
+
+      <div class="assoc-cards-3">
+        <div class="assoc-card">
+          <div class="assoc-card-icon" aria-hidden="true">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+          </div>
+          <h3 class="assoc-card-title">Associações com membros ativos</h3>
+          <p class="assoc-card-body">
+            Dispensação recorrente, cadastro de pacientes, controle de cotas e prescrições —
+            tudo em um lugar, com histórico completo e rastreável.
+          </p>
+        </div>
+
+        <div class="assoc-card">
+          <div class="assoc-card-icon" aria-hidden="true">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+            </svg>
+          </div>
+          <h3 class="assoc-card-title">Diretorias que precisam de transparência</h3>
+          <p class="assoc-card-body">
+            Prestação de contas clara para associados, auditoria pronta para fiscais,
+            e relatórios que não dependem de uma pessoa específica montá-los.
+          </p>
+        </div>
+
+        <div class="assoc-card">
+          <div class="assoc-card-icon" aria-hidden="true">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+            </svg>
+          </div>
+          <h3 class="assoc-card-title">Operações que precisam de conformidade</h3>
+          <p class="assoc-card-body">
+            Arquitetura preparada para RDC 1.014/2026. LGPD-by-design com criptografia
+            por membro. SNGPC em desenvolvimento (mock atual, aguarda XSD ANVISA).
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       PROBLEMAS RESOLVIDOS
+  ============================================================ -->
+  <section class="assoc-section">
+    <div class="assoc-container">
+      <p class="assoc-eyebrow">Problemas resolvidos</p>
+      <h2 class="assoc-h2">O que o canna-br substitui e resolve.</h2>
+      <p class="assoc-body">
+        Cada item abaixo é um ponto de atrito real que associações enfrentam antes de
+        ter um sistema dedicado.
+      </p>
+
+      <div class="assoc-problems">
+
+        <div class="assoc-problem-row">
+          <div class="assoc-problem-badge" aria-hidden="true">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+          </div>
+          <div>
+            <h3 class="assoc-problem-title">Planilhas como sistema central</h3>
+            <p class="assoc-problem-body">
+              Planilhas não têm trilha de auditoria, não controlam acesso por papel,
+              e dependem de uma pessoa para não se tornar um caos. O canna-br substitui
+              a planilha por fluxos estruturados — dispensação, cotas, estoque — com
+              histórico imutável de quem fez o quê e quando.
+            </p>
+          </div>
+        </div>
+
+        <div class="assoc-problem-row">
+          <div class="assoc-problem-badge" aria-hidden="true">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+            </svg>
+          </div>
+          <div>
+            <h3 class="assoc-problem-title">Opacidade para diretoria e associados</h3>
+            <p class="assoc-problem-body">
+              Quando o histórico de dispensações, estoque e movimentações existe só na
+              cabeça de quem opera, a diretoria não consegue governar e os associados
+              não conseguem confiar. O canna-br torna cada operação visível e consultável
+              — sem depender de quem fez o registro estar disponível.
+            </p>
+          </div>
+        </div>
+
+        <div class="assoc-problem-row">
+          <div class="assoc-problem-badge" aria-hidden="true">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+            </svg>
+          </div>
+          <div>
+            <h3 class="assoc-problem-title">Retrabalho na hora da prestação de contas</h3>
+            <p class="assoc-problem-body">
+              Montar relatório para assembleia, responder fiscal ANVISA ou gerar
+              demonstrativo de cotas consumidas não deveria levar dias de caça em
+              arquivos espalhados. O sistema gera esses documentos a partir do que
+              já foi registrado no dia a dia — sem trabalho extra.
+            </p>
+          </div>
+        </div>
+
+        <div class="assoc-problem-row">
+          <div class="assoc-problem-badge" aria-hidden="true">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+          </div>
+          <div>
+            <h3 class="assoc-problem-title">Baixa rastreabilidade de lotes e dispensações</h3>
+            <p class="assoc-problem-body">
+              "De onde veio esse lote?", "quem recebeu e quanto?", "qual a prescrição
+              que autorizou?" — perguntas simples que, sem sistema, levam horas de
+              investigação. O canna-br registra cada evento da cadeia — da entrada do
+              lote à dispensação individual — com identificação de responsável e carimbo
+              de tempo imutável.
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       FLUXOS ATENDIDOS
+  ============================================================ -->
+  <section class="assoc-section assoc-section--alt">
+    <div class="assoc-container">
+      <p class="assoc-eyebrow">Fluxos atendidos</p>
+      <h2 class="assoc-h2">O que o sistema cobre hoje.</h2>
+      <p class="assoc-body">
+        Cada módulo abaixo corresponde a um fluxo real da operação da associação,
+        integrado a uma trilha auditável compartilhada.
+      </p>
+
+      <div class="assoc-flows">
+
+        <div class="assoc-flow-card">
+          <div class="assoc-flow-num" aria-hidden="true">01</div>
+          <div>
+            <h3 class="assoc-flow-title">Gestão de associados</h3>
+            <p class="assoc-flow-body">
+              Cadastro de membros-pacientes com dados criptografados individualmente.
+              Controle de cotas mensais, prescrições médicas vigentes, histórico de
+              atendimento e contatos. Alterações registradas com responsável e data.
+            </p>
+          </div>
+        </div>
+
+        <div class="assoc-flow-card">
+          <div class="assoc-flow-num" aria-hidden="true">02</div>
+          <div>
+            <h3 class="assoc-flow-title">Controle de estoque e lotes</h3>
+            <p class="assoc-flow-body">
+              Entrada de lotes com origem, laudo COA, peso e validade. Rastreabilidade
+              completa de cada grama — de qual lote saiu, para qual membro foi,
+              em qual dispensação. Saldo sempre atualizado, sem divergências silenciosas.
+            </p>
+          </div>
+        </div>
+
+        <div class="assoc-flow-card">
+          <div class="assoc-flow-num" aria-hidden="true">03</div>
+          <div>
+            <h3 class="assoc-flow-title">Dispensação registrada</h3>
+            <p class="assoc-flow-body">
+              Registro de cada dispensação com lote, quantidade, RT responsável e
+              gate de aprovação. Sistema valida cota disponível, deduz do estoque
+              e gera evento imutável. Sem dispensações "fora do sistema".
+            </p>
+          </div>
+        </div>
+
+        <div class="assoc-flow-card">
+          <div class="assoc-flow-num" aria-hidden="true">04</div>
+          <div>
+            <h3 class="assoc-flow-title">Prestação de contas e trilha auditável</h3>
+            <p class="assoc-flow-body">
+              Relatórios de período gerados a partir do registro operacional — sem
+              retrabalho. Trilha de auditoria completa: cada ação tem responsável,
+              data e contexto. Fiscal ANVISA chega? O dossier está pronto em minutos.
+            </p>
+          </div>
+        </div>
+
+        <div class="assoc-flow-card">
+          <div class="assoc-flow-num" aria-hidden="true">05</div>
+          <div>
+            <h3 class="assoc-flow-title">SNGPC em desenvolvimento</h3>
+            <p class="assoc-flow-body">
+              Arquitetura preparada para gerar o XML de dispensação conforme exigido
+              pela RDC 1.014/2026. Mock ativo durante o piloto — integração real
+              será ativada quando a ANVISA publicar o schema específico para
+              associações (aguardado jun/2026).
+            </p>
+          </div>
+        </div>
+
+        <div class="assoc-flow-card">
+          <div class="assoc-flow-num" aria-hidden="true">06</div>
+          <div>
+            <h3 class="assoc-flow-title">Soberania e controle dos dados</h3>
+            <p class="assoc-flow-body">
+              Cada membro tem sua própria chave de criptografia. Os dados pertencem
+              à associação — não ao sistema que os hospeda. Exportação completa
+              a qualquer momento, sem burocracia. Self-host disponível para quem
+              quer controle total da infraestrutura.
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       BENEFICIOS GESTAO
+  ============================================================ -->
+  <section class="assoc-section">
+    <div class="assoc-container assoc-split">
+
+      <div class="assoc-split-col">
+        <p class="assoc-eyebrow">Para a gestão</p>
+        <h2 class="assoc-h2-sm">Operação com mais clareza, menos dependência de pessoas.</h2>
+
+        <ul class="assoc-checklist">
+          <li>
+            <span class="assoc-check" aria-hidden="true">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+              </svg>
+            </span>
+            <span>Histórico completo de dispensações, cotas e membros — consultável a qualquer hora, por qualquer responsável autorizado.</span>
+          </li>
+          <li>
+            <span class="assoc-check" aria-hidden="true">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+              </svg>
+            </span>
+            <span>Controle de acesso por papel — RT, diretoria, voluntário: cada função vê e faz o que deve, sem exposição indevida.</span>
+          </li>
+          <li>
+            <span class="assoc-check" aria-hidden="true">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+              </svg>
+            </span>
+            <span>Relatórios de assembleia e prestação de contas gerados diretamente do sistema — sem compilação manual de planilhas.</span>
+          </li>
+          <li>
+            <span class="assoc-check" aria-hidden="true">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+              </svg>
+            </span>
+            <span>Operação que não depende de uma única pessoa — qualquer RT treinado continua a partir de onde o anterior parou.</span>
+          </li>
+          <li>
+            <span class="assoc-check" aria-hidden="true">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+              </svg>
+            </span>
+            <span>Código aberto (AGPL-3.0) — a diretoria e o advogado da associação podem auditar cada linha que processa os dados dos membros.</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="assoc-split-col">
+        <p class="assoc-eyebrow">Para compliance</p>
+        <h2 class="assoc-h2-sm">Preparado para o ambiente regulatório atual e futuro.</h2>
+
+        <ul class="assoc-checklist">
+          <li>
+            <span class="assoc-check" aria-hidden="true">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+              </svg>
+            </span>
+            <span>Trilha de auditoria imutável — cada evento registrado tem data, responsável e contexto. Impossível editar sem deixar rastro.</span>
+          </li>
+          <li>
+            <span class="assoc-check" aria-hidden="true">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+              </svg>
+            </span>
+            <span>LGPD-by-design — criptografia AES-256-GCM por membro, crypto-deletion real (Art. 18 IV): destruição da chave torna dados irrecuperáveis.</span>
+          </li>
+          <li>
+            <span class="assoc-check" aria-hidden="true">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+              </svg>
+            </span>
+            <span>Arquitetura preparada para RDC 1.014/2026 — rastreabilidade seed-to-dispensação, segregação de funções e gestão de autorizações.</span>
+          </li>
+          <li>
+            <span class="assoc-check" aria-hidden="true">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+              </svg>
+            </span>
+            <span>SNGPC em desenvolvimento — XML de dispensação já implementado em mock; integração real será ativada quando a ANVISA publicar o schema.</span>
+          </li>
+          <li>
+            <span class="assoc-check" aria-hidden="true">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+              </svg>
+            </span>
+            <span>Self-host disponível — nenhuma dependência de terceiro processando dados de saúde dos seus membros. Você controla o servidor.</span>
+          </li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============================================================
+       PRICING
+  ============================================================ -->
+  <section class="assoc-section assoc-section--alt">
+    <div class="assoc-container">
+      <p class="assoc-eyebrow">Planos</p>
+      <h2 class="assoc-h2">Software livre. Hospedagem é o que você paga.</h2>
+      <p class="assoc-body">
+        O código é AGPL-3.0 — gratuito para sempre para quem fizer self-host.
+        O managed hosting (infraestrutura, suporte e atualizações automáticas)
+        é o serviço pago.
+      </p>
+
+      <div class="assoc-pricing">
+
+        <div class="assoc-price-card">
+          <p class="assoc-price-plan">Essencial</p>
+          <p class="assoc-price-value">R$ 490<span>/mês</span></p>
+          <p class="assoc-price-limit">Até 50 membros</p>
+          <ul class="assoc-price-features">
+            <li>Sistema completo (membros, dispensação, rastreabilidade, audit trail)</li>
+            <li>SNGPC XML automático</li>
+            <li>Backups diários cifrados</li>
+            <li>TLS automático + domínio próprio</li>
+            <li>Atualizações automáticas</li>
+          </ul>
+          <a href="/piloto/" class="assoc-price-cta assoc-price-cta--ghost">Entrar como piloto</a>
+        </div>
+
+        <div class="assoc-price-card assoc-price-card--featured">
+          <p class="assoc-price-badge">Mais escolhido</p>
+          <p class="assoc-price-plan">Profissional</p>
+          <p class="assoc-price-value">R$ 990<span>/mês</span></p>
+          <p class="assoc-price-limit">Até 200 membros</p>
+          <ul class="assoc-price-features">
+            <li>Tudo do Essencial</li>
+            <li>Suporte prioritário</li>
+            <li>Onboarding dedicado</li>
+          </ul>
+          <a href="/piloto/" class="assoc-price-cta assoc-price-cta--primary">Entrar como piloto</a>
+        </div>
+
+        <div class="assoc-price-card">
+          <p class="assoc-price-plan">Rede</p>
+          <p class="assoc-price-value">R$ 2.200<span>/mês</span></p>
+          <p class="assoc-price-limit">Membros ilimitados</p>
+          <ul class="assoc-price-features">
+            <li>Tudo do Profissional</li>
+            <li>SLA contratual</li>
+            <li>Dashboard de federação (visão agregada multi-associação)</li>
+          </ul>
+          <a href="/piloto/" class="assoc-price-cta assoc-price-cta--ghost">Falar sobre o plano Rede</a>
+        </div>
+
+        <div class="assoc-price-card assoc-price-card--selfhost">
+          <p class="assoc-price-plan">Self-host</p>
+          <p class="assoc-price-value">R$ 0<span>/mês</span></p>
+          <p class="assoc-price-limit">Gratuito para sempre</p>
+          <ul class="assoc-price-features">
+            <li>Código AGPL-3.0 — tudo público e auditável</li>
+            <li>Docker Compose + documentação de deploy</li>
+            <li>Você controla o servidor e os dados</li>
+          </ul>
+          <a href="/about/" class="assoc-price-cta assoc-price-cta--ghost">Ver documentação</a>
+        </div>
+
+      </div>
+
+      <p class="assoc-pricing-note">
+        Valores de referência para o período pós-piloto.
+        Associações que participam do piloto têm acesso gratuito durante as 14 semanas do programa.
+        <a href="/business/revenue-model/">Ver modelo de preços completo na documentação.</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       COMO ENTRAR — CTA
+  ============================================================ -->
+  <section class="assoc-section">
+    <div class="assoc-container assoc-cta-section">
+      <p class="assoc-eyebrow">Como entrar</p>
+      <h2 class="assoc-h2">
+        Estamos estruturando pilotos com associações que queiram construir esse padrão desde o início.
+      </h2>
+      <p class="assoc-body">
+        O programa piloto é gratuito, com suporte direto e sem fila de suporte.
+        São 5 vagas neste ciclo. A adesão começa por uma conversa — sem formulário complexo,
+        sem processo formal.
+      </p>
+      <div class="assoc-cta-row">
+        <a href="/piloto/" class="assoc-cta-primary assoc-cta-primary--lg">
+          Ver o programa piloto
+        </a>
+        <a href="mailto:gabriel@devmagic.com.br?subject=[canna-br]%20Interesse%20de%20associa%C3%A7%C3%A3o" class="assoc-cta-ghost">
+          Falar diretamente com Gabriel
+        </a>
+      </div>
+    </div>
+  </section>
+
+</Layout>
+
+<style>
+  /* ================================================================
+     ASSOCIAÇÕES PAGE — design system: dark slate + emerald accents
+     Mirrors index.astro tokens: #020617 base, emerald-500 accent,
+     slate-300/400/900 for copy and surfaces.
+  ================================================================ */
+
+  /* -- Layout utilities -- */
+  .assoc-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  .assoc-section {
+    padding: 5rem 0;
+    background: rgba(15, 23, 42, 0.6);
+  }
+
+  .assoc-section--alt {
+    background: rgba(2, 6, 23, 0.85);
+  }
+
+  /* -- Eyebrow / labels -- */
+  .assoc-eyebrow {
+    font-size: 0.7rem;
+    font-family: ui-monospace, 'JetBrains Mono', monospace;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #10b981;
+    margin: 0 0 0.75rem;
+  }
+
+  /* -- Headings -- */
+  .assoc-h1 {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    color: #fff;
+    margin: 0 0 1.25rem;
+  }
+
+  .assoc-h2 {
+    font-size: clamp(1.5rem, 3vw, 2.25rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    color: #fff;
+    margin: 0 0 1rem;
+  }
+
+  .assoc-h2-sm {
+    font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+    color: #fff;
+    margin: 0 0 1.25rem;
+  }
+
+  /* -- Body copy -- */
+  .assoc-sub {
+    font-size: clamp(1rem, 2vw, 1.2rem);
+    color: #94a3b8;
+    line-height: 1.65;
+    margin: 0 0 2rem;
+    max-width: 640px;
+  }
+
+  .assoc-body {
+    font-size: 1rem;
+    color: #94a3b8;
+    line-height: 1.7;
+    margin: 0 0 2.5rem;
+    max-width: 680px;
+  }
+
+  /* -- Hero -- */
+  .assoc-hero {
+    background: linear-gradient(180deg, rgba(4, 28, 20, 0.95) 0%, rgba(15, 23, 42, 0.9) 100%);
+    padding: 7rem 0 5rem;
+    border-bottom: 1px solid rgba(16, 185, 129, 0.12);
+  }
+
+  .assoc-hero-inner {
+    max-width: 760px;
+  }
+
+  .assoc-hero-ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+  }
+
+  /* -- CTAs -- */
+  .assoc-cta-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.8rem 2rem;
+    border-radius: 999px;
+    background: #10b981;
+    color: #020617;
+    font-weight: 700;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: background 0.15s, box-shadow 0.15s;
+    white-space: nowrap;
+  }
+  .assoc-cta-primary:hover {
+    background: #34d399;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3);
+  }
+  .assoc-cta-primary:focus-visible {
+    outline: 2px solid #6ee7b7;
+    outline-offset: 2px;
+  }
+  .assoc-cta-primary--lg {
+    padding: 1rem 2.5rem;
+    font-size: 1.05rem;
+  }
+
+  .assoc-cta-ghost {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    border-radius: 999px;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    background: rgba(16, 185, 129, 0.06);
+    color: #6ee7b7;
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-decoration: none;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+    white-space: nowrap;
+  }
+  .assoc-cta-ghost:hover {
+    background: rgba(16, 185, 129, 0.14);
+    border-color: rgba(16, 185, 129, 0.55);
+    color: #fff;
+  }
+  .assoc-cta-ghost:focus-visible {
+    outline: 2px solid #6ee7b7;
+    outline-offset: 2px;
+  }
+
+  /* -- Cards 3-col -- */
+  .assoc-cards-3 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+    gap: 1.25rem;
+    margin-top: 2rem;
+  }
+
+  .assoc-card {
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid rgba(16, 185, 129, 0.15);
+    border-radius: 16px;
+    padding: 1.75rem;
+    transition: border-color 0.15s;
+  }
+  .assoc-card:hover { border-color: rgba(16, 185, 129, 0.45); }
+
+  .assoc-card-icon {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 10px;
+    background: rgba(16, 185, 129, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #10b981;
+    margin-bottom: 1rem;
+  }
+
+  .assoc-card-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 0.5rem;
+    line-height: 1.3;
+  }
+
+  .assoc-card-body {
+    font-size: 0.875rem;
+    color: #94a3b8;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  /* -- Problems list -- */
+  .assoc-problems {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .assoc-problem-row {
+    display: flex;
+    gap: 1.25rem;
+    padding: 1.5rem;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(16, 185, 129, 0.1);
+    border-radius: 14px;
+    transition: border-color 0.15s;
+  }
+  .assoc-problem-row:hover { border-color: rgba(16, 185, 129, 0.3); }
+
+  .assoc-problem-badge {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 8px;
+    background: rgba(16, 185, 129, 0.12);
+    color: #10b981;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 0.125rem;
+  }
+
+  .assoc-problem-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #e2e8f0;
+    margin: 0 0 0.5rem;
+  }
+
+  .assoc-problem-body {
+    font-size: 0.875rem;
+    color: #94a3b8;
+    line-height: 1.65;
+    margin: 0;
+  }
+
+  /* -- Flows grid -- */
+  .assoc-flows {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  .assoc-flow-card {
+    display: flex;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: rgba(15, 23, 42, 0.5);
+    border: 1px solid rgba(16, 185, 129, 0.12);
+    border-radius: 14px;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .assoc-flow-card:hover {
+    background: rgba(15, 23, 42, 0.8);
+    border-color: rgba(16, 185, 129, 0.35);
+  }
+
+  .assoc-flow-num {
+    font-size: 0.7rem;
+    font-family: ui-monospace, monospace;
+    font-weight: 800;
+    color: #10b981;
+    background: rgba(16, 185, 129, 0.1);
+    border-radius: 6px;
+    padding: 0.2rem 0.5rem;
+    height: fit-content;
+    flex-shrink: 0;
+    letter-spacing: 0.04em;
+  }
+
+  .assoc-flow-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #e2e8f0;
+    margin: 0 0 0.4rem;
+  }
+
+  .assoc-flow-body {
+    font-size: 0.825rem;
+    color: #94a3b8;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  /* -- Split layout -- */
+  .assoc-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: start;
+  }
+
+  @media (max-width: 768px) {
+    .assoc-split {
+      grid-template-columns: 1fr;
+      gap: 3rem;
+    }
+  }
+
+  /* -- Checklist -- */
+  .assoc-checklist {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .assoc-checklist li {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+  }
+
+  .assoc-check {
+    width: 1.375rem;
+    height: 1.375rem;
+    border-radius: 50%;
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    color: #10b981;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 0.125rem;
+  }
+
+  .assoc-checklist li span:last-child {
+    font-size: 0.875rem;
+    color: #cbd5e1;
+    line-height: 1.6;
+  }
+
+  /* -- Pricing -- */
+  .assoc-pricing {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  .assoc-price-card {
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid rgba(16, 185, 129, 0.15);
+    border-radius: 16px;
+    padding: 1.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    transition: border-color 0.15s;
+    position: relative;
+  }
+  .assoc-price-card:hover { border-color: rgba(16, 185, 129, 0.4); }
+
+  .assoc-price-card--featured {
+    border-color: rgba(16, 185, 129, 0.5);
+    background: rgba(4, 28, 20, 0.8);
+  }
+
+  .assoc-price-card--selfhost {
+    border-color: rgba(71, 85, 105, 0.4);
+    background: rgba(15, 23, 42, 0.4);
+  }
+
+  .assoc-price-badge {
+    font-size: 0.65rem;
+    font-family: ui-monospace, monospace;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #020617;
+    background: #10b981;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    width: fit-content;
+    margin-bottom: -0.25rem;
+  }
+
+  .assoc-price-plan {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #6ee7b7;
+    margin: 0;
+  }
+
+  .assoc-price-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    margin: 0;
+  }
+  .assoc-price-value span {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #8595ab;
+    letter-spacing: 0;
+  }
+
+  .assoc-price-limit {
+    font-size: 0.8rem;
+    color: #8595ab;
+    margin: 0;
+  }
+
+  .assoc-price-features {
+    list-style: none;
+    margin: 0.5rem 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    flex: 1;
+  }
+
+  .assoc-price-features li {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    line-height: 1.4;
+    padding-left: 1rem;
+    position: relative;
+  }
+  .assoc-price-features li::before {
+    content: "·";
+    position: absolute;
+    left: 0;
+    color: #10b981;
+    font-weight: 700;
+  }
+
+  .assoc-price-cta {
+    display: block;
+    text-align: center;
+    padding: 0.65rem 1rem;
+    border-radius: 999px;
+    font-size: 0.825rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
+    margin-top: 0.5rem;
+  }
+  .assoc-price-cta:focus-visible {
+    outline: 2px solid #6ee7b7;
+    outline-offset: 2px;
+  }
+
+  .assoc-price-cta--primary {
+    background: #10b981;
+    color: #020617;
+    border: 1px solid transparent;
+  }
+  .assoc-price-cta--primary:hover {
+    background: #34d399;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+  }
+
+  .assoc-price-cta--ghost {
+    background: rgba(16, 185, 129, 0.07);
+    color: #6ee7b7;
+    border: 1px solid rgba(16, 185, 129, 0.28);
+  }
+  .assoc-price-cta--ghost:hover {
+    background: rgba(16, 185, 129, 0.16);
+    border-color: rgba(16, 185, 129, 0.55);
+    color: #fff;
+  }
+
+  .assoc-pricing-note {
+    font-size: 0.8rem;
+    color: #8595ab;
+    margin-top: 1.5rem;
+    line-height: 1.6;
+  }
+  .assoc-pricing-note a {
+    color: #6ee7b7;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .assoc-pricing-note a:hover { color: #fff; }
+
+  /* -- CTA section bottom -- */
+  .assoc-cta-section {
+    text-align: center;
+    max-width: 760px;
+  }
+
+  .assoc-cta-section .assoc-h2 {
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .assoc-cta-section .assoc-body {
+    max-width: 580px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .assoc-cta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: center;
+    margin-top: 0.5rem;
+  }
+
+  /* -- Reduced motion -- */
+  @media (prefers-reduced-motion: reduce) {
+    .assoc-card,
+    .assoc-problem-row,
+    .assoc-flow-card,
+    .assoc-price-card,
+    .assoc-cta-primary,
+    .assoc-cta-ghost,
+    .assoc-price-cta {
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>

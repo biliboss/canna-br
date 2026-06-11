@@ -1,0 +1,1354 @@
+---
+import Layout from '../components/marketing/MarketingLayout.astro';
+
+const title = "Produto — canna-br";
+const description = "Visão geral dos módulos, rastreabilidade, integrações, mock SNGPC e roadmap de versões do canna-br — sistema OSS de gestão para associações de cannabis medicinal.";
+---
+
+<Layout title={title} description={description}>
+
+  <!-- ============================================================
+       HERO — produto overview
+  ============================================================ -->
+  <section class="prod-hero">
+    <div class="prod-container prod-hero-inner">
+      <p class="prod-eyebrow">Produto</p>
+      <h1 class="prod-hero-title">
+        Operação da associação com rastreabilidade, governança e clareza.
+      </h1>
+      <p class="prod-hero-sub">
+        Gestão de membros, dispensação, controle de inventário e trilha auditável em um sistema aberto — preparado para as exigências da RDC 1.014/2026.
+      </p>
+      <div class="prod-hero-ctas">
+        <a href="#demo" class="prod-cta-primary">Ver demonstração</a>
+        <a href="/piloto/" class="prod-cta-secondary">Entrar como piloto</a>
+        <a href="/build/capacidades/" class="prod-cta-ghost">Documentação técnica →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       VISÃO GERAL — o que o sistema resolve
+  ============================================================ -->
+  <section class="prod-section" style="background: rgba(15,23,42,0.85);">
+    <div class="prod-container">
+      <p class="prod-eyebrow">O que o sistema resolve</p>
+      <h2 class="prod-section-title">Quando a operação cresce, planilhas e fluxos manuais deixam de dar conta.</h2>
+      <p class="prod-section-sub">
+        O canna-br organiza a operação da associação com mais rastreabilidade, governança e clareza para equipe, diretoria e associados — sem depender de planilhas paralelas ou controles manuais que não escalam.
+      </p>
+
+      <div class="prod-grid-3">
+        <div class="prod-card">
+          <div class="prod-card-icon" aria-hidden="true">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>
+            </svg>
+          </div>
+          <h3 class="prod-card-title">Gestão de membros</h3>
+          <p class="prod-card-body">Cadastro com consentimento LGPD, prescrições vigentes, cotas mensais e histórico de dispensações — tudo rastreado e acessível pela equipe autorizada.</p>
+        </div>
+
+        <div class="prod-card">
+          <div class="prod-card-icon" aria-hidden="true">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+            </svg>
+          </div>
+          <h3 class="prod-card-title">Dispensação rastreável</h3>
+          <p class="prod-card-body">Cada dispensação gera registro imutável com lote de origem, quantidade, dispensador responsável e verificação de cota — em milissegundos, sem planilha paralela.</p>
+        </div>
+
+        <div class="prod-card">
+          <div class="prod-card-icon" aria-hidden="true">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+            </svg>
+          </div>
+          <h3 class="prod-card-title">Auditoria sob demanda</h3>
+          <p class="prod-card-body">Diretoria ou fiscal da ANVISA solicita trilha completa de um lote ou membro — relatório gerado em segundos, com cadeia de custódia desde a origem.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       MÓDULOS — 4 grupos de capacidades
+  ============================================================ -->
+  <section class="prod-section" style="background: rgba(2,6,23,0.95);">
+    <div class="prod-container">
+      <p class="prod-eyebrow">Módulos</p>
+      <h2 class="prod-section-title">12 workspaces, 12 capacidades operacionais.</h2>
+      <p class="prod-section-sub">
+        Cada módulo cobre um fluxo real da operação. Documentação detalhada disponível em <a href="/build/capacidades/" class="prod-inline-link">Capacidades →</a>
+      </p>
+
+      <div class="prod-grid-2 prod-modules-grid">
+
+        <!-- G1 — Membership -->
+        <div class="prod-module-card">
+          <div class="prod-module-header">
+            <span class="prod-module-badge">Membros</span>
+            <h3 class="prod-module-title">Gestão de Membros</h3>
+          </div>
+          <ul class="prod-module-list">
+            <li>Cadastro com consentimento e prescrição válidos</li>
+            <li>Consulta de cota e prontuário pelo próprio membro ou dispensador</li>
+            <li>Revogação de consentimento com anonimização garantida (LGPD Art. 18)</li>
+          </ul>
+          <p class="prod-module-status">Disponível em v0.3</p>
+        </div>
+
+        <!-- G2 — Dispensation -->
+        <div class="prod-module-card">
+          <div class="prod-module-header">
+            <span class="prod-module-badge">Dispensação</span>
+            <h3 class="prod-module-title">Controle de Dispensação</h3>
+          </div>
+          <ul class="prod-module-list">
+            <li>Registro atômico: dispensação + cota consumida + lote deduzido</li>
+            <li>Histórico completo por membro, lote ou período</li>
+            <li>Geração automática do XML para o SNGPC (em desenvolvimento)</li>
+          </ul>
+          <p class="prod-module-status prod-module-status-active">Parcialmente ativo em v0.2.1</p>
+        </div>
+
+        <!-- G3 — Cultivo -->
+        <div class="prod-module-card">
+          <div class="prod-module-header">
+            <span class="prod-module-badge">Cultivo</span>
+            <h3 class="prod-module-title">Cultivo e Processamento</h3>
+          </div>
+          <ul class="prod-module-list">
+            <li>Registro de planta com identificador permanente e QR físico</li>
+            <li>Progressão de estágio com trilha imutável</li>
+            <li>Aprovação de laudo COA com hash registrado em evento</li>
+          </ul>
+          <p class="prod-module-status">Disponível em v1.0</p>
+        </div>
+
+        <!-- G4 — Compliance -->
+        <div class="prod-module-card">
+          <div class="prod-module-header">
+            <span class="prod-module-badge">Compliance</span>
+            <h3 class="prod-module-title">Relatórios e Governança</h3>
+          </div>
+          <ul class="prod-module-list">
+            <li>BSPO trimestral e anual assinado pelo RT</li>
+            <li>Dashboard com 7 KPIs regulatórios ANVISA</li>
+            <li>Configuração de papéis (RBAC) com segregação de funções</li>
+          </ul>
+          <p class="prod-module-status">BSPO disponível em v0.4</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       RASTREABILIDADE — ledger interno
+  ============================================================ -->
+  <section class="prod-section" style="background: rgba(15,23,42,0.8);">
+    <div class="prod-container">
+      <div class="prod-split">
+        <div class="prod-split-text">
+          <p class="prod-eyebrow">Rastreabilidade</p>
+          <h2 class="prod-section-title" style="text-align:left;">Infraestrutura interna de rastreabilidade e contabilidade programável.</h2>
+          <p class="prod-body-text">
+            Por baixo de cada dispensação, transferência de lote e evento de membro existe um registro sequencial imutável. Não é uma tabela de log — é o estado do sistema derivado de eventos que nunca podem ser editados ou deletados.
+          </p>
+          <p class="prod-body-text">
+            Isso significa que qualquer estado passado pode ser reconstituído. O auditor pode verificar o estoque em qualquer data. O responsável técnico pode rastrear cada grama desde a planta matriz até o paciente. A diretoria pode gerar BSPO sem correr atrás de planilhas.
+          </p>
+          <div class="prod-guarantee-list">
+            <div class="prod-guarantee-item">
+              <span class="prod-guarantee-check" aria-hidden="true">
+                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              </span>
+              <span>PostgreSQL com regras que bloqueiam UPDATE e DELETE no event log</span>
+            </div>
+            <div class="prod-guarantee-item">
+              <span class="prod-guarantee-check" aria-hidden="true">
+                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              </span>
+              <span>pgAudit registra eventos DDL fora do alcance da aplicação</span>
+            </div>
+            <div class="prod-guarantee-item">
+              <span class="prod-guarantee-check" aria-hidden="true">
+                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              </span>
+              <span>Trilha seed-to-dispensação completa consultável em tempo real</span>
+            </div>
+            <div class="prod-guarantee-item">
+              <span class="prod-guarantee-check" aria-hidden="true">
+                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              </span>
+              <span>Código-fonte AGPL-3.0 — qualquer advogado pode inspecionar</span>
+            </div>
+          </div>
+          <a href="/build/compliance/" class="prod-cta-link">Ver arquitetura de compliance →</a>
+        </div>
+
+        <div class="prod-split-visual">
+          <div class="prod-trace-card">
+            <p class="prod-trace-label">Exemplo — trilha de lote LT-001</p>
+            <div class="prod-trace-timeline">
+              <div class="prod-trace-event prod-trace-event-done">
+                <span class="prod-trace-dot"></span>
+                <div>
+                  <p class="prod-trace-event-name">PlantaRegistrada</p>
+                  <p class="prod-trace-event-meta">15 jan · Cultivador · Planta PL-0042</p>
+                </div>
+              </div>
+              <div class="prod-trace-event prod-trace-event-done">
+                <span class="prod-trace-dot"></span>
+                <div>
+                  <p class="prod-trace-event-name">ColheitaRegistrada</p>
+                  <p class="prod-trace-event-meta">10 mar · RT · 1.250 g dry weight</p>
+                </div>
+              </div>
+              <div class="prod-trace-event prod-trace-event-done">
+                <span class="prod-trace-dot"></span>
+                <div>
+                  <p class="prod-trace-event-name">LaudoCOAAprovado</p>
+                  <p class="prod-trace-event-meta">18 mar · RT · Hash COA gravado</p>
+                </div>
+              </div>
+              <div class="prod-trace-event prod-trace-event-done">
+                <span class="prod-trace-dot"></span>
+                <div>
+                  <p class="prod-trace-event-name">DispensacaoRegistrada</p>
+                  <p class="prod-trace-event-meta">22 mar · Dispensador D2 · 5 g · Membro M-117</p>
+                </div>
+              </div>
+              <div class="prod-trace-event prod-trace-event-current">
+                <span class="prod-trace-dot prod-trace-dot-current"></span>
+                <div>
+                  <p class="prod-trace-event-name">CotaConsumidasAtualizada</p>
+                  <p class="prod-trace-event-meta">22 mar · Sistema · 45 g / 60 g mês</p>
+                </div>
+              </div>
+            </div>
+            <p class="prod-trace-note">Cada evento é imutável e ligado ao anterior por ULID sequencial.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       DEMO — screenshots
+  ============================================================ -->
+  <section id="demo" class="prod-section" style="background: rgba(2,6,23,0.98);">
+    <div class="prod-container">
+      <p class="prod-eyebrow">Demonstração</p>
+      <h2 class="prod-section-title">O sistema em operação real.</h2>
+      <p class="prod-section-sub">
+        Capturas reais do Open WebUI v0.9.6 + MCP server canna-br, validados em 2026-06-08. A operação acontece dentro do chat — sem tela de CRUD separada.
+      </p>
+
+      <div class="prod-screenshots-grid">
+
+        <div class="prod-shot-card">
+          <div class="prod-shot-img-wrap">
+            <img
+              src="/screenshots/owui/06-member-quota-rendered.png"
+              alt="MemberQuotaCardApp renderizado dentro do chat — quota mensal, dispensações usadas, histórico"
+              width="1280"
+              height="800"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+          <div class="prod-shot-meta">
+            <p class="prod-shot-eyebrow">Membro · Cota</p>
+            <p class="prod-shot-title">Consulta de cota no chat</p>
+            <p class="prod-shot-desc">Dispensador pergunta "qual a cota do João?" — app inline mostra prescrição vigente, cota restante e histórico do mês.</p>
+          </div>
+        </div>
+
+        <div class="prod-shot-card">
+          <div class="prod-shot-img-wrap">
+            <img
+              src="/screenshots/owui/07-dispensation-form.png"
+              alt="DispensationFormApp — formulário inline com seleção de lote, quantidade e confirmação em 2 passos"
+              width="1280"
+              height="800"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+          <div class="prod-shot-meta">
+            <p class="prod-shot-eyebrow">Dispensação · Formulário</p>
+            <p class="prod-shot-title">Registro de dispensação</p>
+            <p class="prod-shot-desc">Formulário com gate de confirmação. O commit gera três registros atômicos: dispensação, cota consumida e lote deduzido.</p>
+          </div>
+        </div>
+
+        <div class="prod-shot-card">
+          <div class="prod-shot-img-wrap">
+            <img
+              src="/screenshots/owui/08-traceability-timeline.png"
+              alt="TraceabilityTimelineApp — linha do tempo seed-to-dispensação com hashes de eventos"
+              width="1280"
+              height="800"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+          <div class="prod-shot-meta">
+            <p class="prod-shot-eyebrow">Auditoria · Rastreabilidade</p>
+            <p class="prod-shot-title">Cadeia de custódia completa</p>
+            <p class="prod-shot-desc">Auditor pergunta "rastreia o lote LT-001" — timeline do cultivo até a dispensação, com trilha imutável de eventos.</p>
+          </div>
+        </div>
+
+        <div class="prod-shot-card">
+          <div class="prod-shot-img-wrap">
+            <img
+              src="/screenshots/owui/02-mcp-servers.png"
+              alt="Lista de MCP servers conectados ao Open WebUI mostrando canna-br"
+              width="1280"
+              height="800"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+          <div class="prod-shot-meta">
+            <p class="prod-shot-eyebrow">Admin · Integrações</p>
+            <p class="prod-shot-title">MCP server conectado</p>
+            <p class="prod-shot-desc">Open WebUI com o servidor canna-br registrado, ferramentas enumeradas e healthcheck ativo.</p>
+          </div>
+        </div>
+
+        <div class="prod-shot-card">
+          <div class="prod-shot-img-wrap">
+            <img
+              src="/screenshots/owui/02-logged-in.png"
+              alt="Open WebUI logado mostrando interface principal com modelos e ferramentas MCP habilitadas"
+              width="1280"
+              height="800"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+          <div class="prod-shot-meta">
+            <p class="prod-shot-eyebrow">Operação · Chat</p>
+            <p class="prod-shot-title">Interface principal</p>
+            <p class="prod-shot-desc">Open WebUI v0.9.6 — mesma UX familiar de chat, com todo o poder operacional da associação disponível via ferramentas.</p>
+          </div>
+        </div>
+
+        <div class="prod-shot-card">
+          <div class="prod-shot-img-wrap">
+            <img
+              src="/screenshots/owui/09-summary.png"
+              alt="Resumo do smoke test mostrando 3 MCP Apps validados end-to-end"
+              width="1280"
+              height="800"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+          <div class="prod-shot-meta">
+            <p class="prod-shot-eyebrow">Validação · 2026-06-08</p>
+            <p class="prod-shot-title">3 fluxos validados ponta a ponta</p>
+            <p class="prod-shot-desc">Stack: Postgres 16 + Redis 7 + OWUI v0.9.6 + canna-br MCP. Cold start 44s, 3 GB RAM steady. Contratos de interface verificados.</p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="prod-demo-notice">
+        <p>
+          <strong class="prod-notice-strong">Honestidade sobre o estágio:</strong>
+          estas são capturas reais do sistema rodando, não mockups. O produto está em alpha — a estética interna e os textos de interface serão refinados até v1.0. Consulte o <a href="/releases/v021/" class="prod-inline-link">release v0.2.1</a> para o relato técnico completo.
+        </p>
+      </div>
+
+      <div class="prod-demo-video-placeholder">
+        <p class="prod-eyebrow" style="text-align:center;">Demo em vídeo</p>
+        <p class="prod-body-text" style="text-align:center; max-width:36rem; margin:0 auto 1.5rem;">
+          Walkthrough completo — RT dispensando, auditor rastreando lote, diretoria gerando relatório RDC — previsto para Q3 2026 após onboarding da primeira associação piloto.
+        </p>
+        <div style="display:flex; justify-content:center;">
+          <a href="/piloto/" class="prod-cta-primary">Entrar na fila do piloto →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       INTEGRAÇÕES E SNGPC
+  ============================================================ -->
+  <section class="prod-section" style="background: rgba(15,23,42,0.9);">
+    <div class="prod-container">
+      <p class="prod-eyebrow">Integrações</p>
+      <h2 class="prod-section-title">Mock SNGPC pronto, integração real aguardando schema ANVISA.</h2>
+      <p class="prod-section-sub">
+        A arquitetura de envio ao SNGPC está implementada. O XML por dispensação é gerado, o batch diário está configurado e o retry automático está ativo. O que aguarda é o schema XSD específico para associações de pacientes — não publicado pela ANVISA até junho de 2026.
+      </p>
+
+      <div class="prod-grid-3">
+        <div class="prod-integration-card">
+          <div class="prod-integration-header">
+            <span class="prod-badge-amber">Em desenvolvimento</span>
+            <h3 class="prod-integration-title">SNGPC / RNDS</h3>
+          </div>
+          <p class="prod-card-body">XML gerado por dispensação + batch diário às 23h45. Retry 3× com fila de mensagens mortas e alerta ao RT. Homologação aguarda XSD ANVISA para associações.</p>
+          <a href="/research/sngpc/" class="prod-cta-link" style="font-size:0.8rem;">Ver detalhes →</a>
+        </div>
+
+        <div class="prod-integration-card">
+          <div class="prod-integration-header">
+            <span class="prod-badge-emerald">Disponível</span>
+            <h3 class="prod-integration-title">Open WebUI + MCP</h3>
+          </div>
+          <p class="prod-card-body">Toda operação exposta como ferramenta MCP antes de qualquer UI. Compatível com Open WebUI v0.9.6+. Integrável com qualquer cliente MCP.</p>
+          <a href="/build/mapa-telas/" class="prod-cta-link" style="font-size:0.8rem;">Ver mapa de interfaces →</a>
+        </div>
+
+        <div class="prod-integration-card">
+          <div class="prod-integration-header">
+            <span class="prod-badge-slate">Roadmap</span>
+            <h3 class="prod-integration-title">REST API pública</h3>
+          </div>
+          <p class="prod-card-body">API REST Fastify 5 com documentação Swagger gerada automaticamente por schemas Zod. Usada por integradores e automações externas. API pública v1 prevista para v0.5.</p>
+          <a href="/build/application-layer/" class="prod-cta-link" style="font-size:0.8rem;">Ver camada de aplicação →</a>
+        </div>
+      </div>
+
+      <div class="prod-sngpc-flow">
+        <p class="prod-flow-label">Fluxo SNGPC — quando ativo</p>
+        <div class="prod-flow-steps">
+          <div class="prod-flow-step">
+            <span class="prod-flow-num">1</span>
+            <p class="prod-flow-desc">Dispensação registrada no sistema</p>
+          </div>
+          <span class="prod-flow-arrow" aria-hidden="true">→</span>
+          <div class="prod-flow-step">
+            <span class="prod-flow-num">2</span>
+            <p class="prod-flow-desc">Worker gera XML individual</p>
+          </div>
+          <span class="prod-flow-arrow" aria-hidden="true">→</span>
+          <div class="prod-flow-step">
+            <span class="prod-flow-num">3</span>
+            <p class="prod-flow-desc">Batch diário consolida e envia à RNDS</p>
+          </div>
+          <span class="prod-flow-arrow" aria-hidden="true">→</span>
+          <div class="prod-flow-step">
+            <span class="prod-flow-num">4</span>
+            <p class="prod-flow-desc">Resposta armazenada; falha aciona retry + alerta</p>
+          </div>
+        </div>
+        <p class="prod-flow-note">Falha de envio não invalida a dispensação — fluxo assíncrono separado.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       ARQUITETURA — link para docs
+  ============================================================ -->
+  <section class="prod-section" style="background: rgba(2,6,23,0.96);">
+    <div class="prod-container">
+      <p class="prod-eyebrow">Arquitetura</p>
+      <h2 class="prod-section-title">Código aberto. Decisões documentadas. Sem caixa-preta.</h2>
+      <p class="prod-section-sub">
+        Toda decisão de arquitetura relevante está registrada em ADRs públicos. O código é AGPL-3.0 — qualquer advogado ou especialista técnico da associação pode revisar cada linha que processa dados dos membros.
+      </p>
+
+      <div class="prod-grid-2 prod-arch-grid">
+        <a href="/build/stack/" class="prod-arch-card">
+          <div class="prod-arch-card-inner">
+            <p class="prod-arch-card-eyebrow">Stack completo</p>
+            <h3 class="prod-arch-card-title">Tecnologias e infraestrutura</h3>
+            <p class="prod-arch-card-body">Node.js 22, PostgreSQL 16, Redis 7, BullMQ, Fastify 5, Zod, Drizzle ORM, MinIO, Open WebUI, Docker Compose + Kamal.</p>
+            <span class="prod-arch-link">Ver stack →</span>
+          </div>
+        </a>
+
+        <a href="/build/domain/" class="prod-arch-card">
+          <div class="prod-arch-card-inner">
+            <p class="prod-arch-card-eyebrow">Domain kernel</p>
+            <h3 class="prod-arch-card-title">Modelo de domínio e regras</h3>
+            <p class="prod-arch-card-body">Funções puras sem efeitos colaterais. Cada regra de negócio (cota, RBAC, SNGPC) testável isoladamente, sem banco de dados.</p>
+            <span class="prod-arch-link">Ver domínio →</span>
+          </div>
+        </a>
+
+        <a href="/build/compliance/" class="prod-arch-card">
+          <div class="prod-arch-card-inner">
+            <p class="prod-arch-card-eyebrow">Compliance e criptografia</p>
+            <h3 class="prod-arch-card-title">LGPD, crypto-deletion e auditoria</h3>
+            <p class="prod-arch-card-body">Envelope encryption AES-256-GCM por membro. Crypto-deletion garantida. Audit log imutável via PostgreSQL RULE. pgAudit como segunda camada.</p>
+            <span class="prod-arch-link">Ver compliance →</span>
+          </div>
+        </a>
+
+        <a href="/build/big-picture/" class="prod-arch-card">
+          <div class="prod-arch-card-inner">
+            <p class="prod-arch-card-eyebrow">Visão macro</p>
+            <h3 class="prod-arch-card-title">Big picture e decisões estratégicas</h3>
+            <p class="prod-arch-card-body">Por que AGPL e não MIT. Por que MCP-first e não admin Next.js. Por que self-host como padrão. Raciocínio completo documentado.</p>
+            <span class="prod-arch-link">Ver big picture →</span>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       ROADMAP — versões v0.x
+  ============================================================ -->
+  <section class="prod-section" style="background: rgba(15,23,42,0.85);">
+    <div class="prod-container">
+      <p class="prod-eyebrow">Roadmap</p>
+      <h2 class="prod-section-title">Evolução pública, entrega por versão.</h2>
+      <p class="prod-section-sub">
+        Software aberto, evolução pública e indicadores visíveis. Cada versão tem capacidades definidas — sem datas artificiais.
+      </p>
+
+      <div class="prod-roadmap">
+
+        <div class="prod-roadmap-item prod-roadmap-done">
+          <div class="prod-roadmap-marker prod-roadmap-marker-done" aria-label="Entregue">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="prod-roadmap-content">
+            <div class="prod-roadmap-header">
+              <span class="prod-roadmap-version">v0.2.1</span>
+              <span class="prod-roadmap-tag prod-roadmap-tag-done">Entregue</span>
+            </div>
+            <h3 class="prod-roadmap-title">Dispensação + MCP Apps parciais</h3>
+            <p class="prod-roadmap-body">Ferramentas MCP nível 1–3 operacionais. MemberQuotaCardApp e DispensationFormApp em smoke validation. 154/154 testes passando. Stack completo em VPS.</p>
+          </div>
+        </div>
+
+        <div class="prod-roadmap-item prod-roadmap-active">
+          <div class="prod-roadmap-marker prod-roadmap-marker-active" aria-label="Em progresso">
+            <span class="prod-roadmap-pulse"></span>
+          </div>
+          <div class="prod-roadmap-content">
+            <div class="prod-roadmap-header">
+              <span class="prod-roadmap-version">v0.3</span>
+              <span class="prod-roadmap-tag prod-roadmap-tag-active">Em progresso</span>
+            </div>
+            <h3 class="prod-roadmap-title">Membros + LGPD hardening</h3>
+            <p class="prod-roadmap-body">Cadastro de membros com consentimento LGPD completo. MemberQuotaCardApp finalizado. Roles Auditor e Federation. CSV import via MCP App.</p>
+          </div>
+        </div>
+
+        <div class="prod-roadmap-item">
+          <div class="prod-roadmap-marker" aria-hidden="true"></div>
+          <div class="prod-roadmap-content">
+            <div class="prod-roadmap-header">
+              <span class="prod-roadmap-version">v0.4</span>
+              <span class="prod-roadmap-tag">Planejado</span>
+            </div>
+            <h3 class="prod-roadmap-title">BSPO + DPO view</h3>
+            <p class="prod-roadmap-body">Relatório BSPO gerado e assinado pelo RT. RipdReviewApp para revisão de RIPD. Visão completa do DPO. Compliance auditável pela diretoria sem TI.</p>
+          </div>
+        </div>
+
+        <div class="prod-roadmap-item">
+          <div class="prod-roadmap-marker" aria-hidden="true"></div>
+          <div class="prod-roadmap-content">
+            <div class="prod-roadmap-header">
+              <span class="prod-roadmap-version">v0.5</span>
+              <span class="prod-roadmap-tag">Planejado</span>
+            </div>
+            <h3 class="prod-roadmap-title">SNGPC real + API pública v1</h3>
+            <p class="prod-roadmap-body">Integração SNGPC/SNCR com schema XSD ANVISA (quando publicado). REST API pública v1 com OpenAPI completo. Retry/DLQ robusto.</p>
+          </div>
+        </div>
+
+        <div class="prod-roadmap-item">
+          <div class="prod-roadmap-marker" aria-hidden="true"></div>
+          <div class="prod-roadmap-content">
+            <div class="prod-roadmap-header">
+              <span class="prod-roadmap-version">v1.0</span>
+              <span class="prod-roadmap-tag">Horizonte</span>
+            </div>
+            <h3 class="prod-roadmap-title">Cultivo + multi-tenant + UX polida</h3>
+            <p class="prod-roadmap-body">Módulo de cultivo completo (seed-to-dispensação end-to-end). Multi-tenant com billing. UX gate "awesome" atingido. Auditoria de segurança independente.</p>
+          </div>
+        </div>
+
+      </div>
+
+      <div style="text-align:center; margin-top:3rem;">
+        <a href="/transparencia/" class="prod-cta-secondary">Ver transparência e métricas públicas →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       CTA FINAL
+  ============================================================ -->
+  <section class="prod-section prod-cta-section">
+    <div class="prod-container" style="text-align:center;">
+      <h2 class="prod-section-title">Estamos estruturando pilotos com associações que queiram construir esse padrão desde o início.</h2>
+      <p class="prod-section-sub">
+        Vagas limitadas. Onboarding guiado. Sem custo na fase piloto.
+      </p>
+      <div class="prod-hero-ctas" style="justify-content:center;">
+        <a href="/piloto/" class="prod-cta-primary">Entrar como piloto →</a>
+        <a href="/compliance/" class="prod-cta-secondary">Ver conformidade LGPD</a>
+      </div>
+    </div>
+  </section>
+
+</Layout>
+
+<style>
+  /* ================================================================
+     PRODUTO.ASTRO — design system dark slate + emerald
+     Tokens derivados de index.astro (mesma paleta)
+  ================================================================ */
+
+  /* Container */
+  .prod-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  /* Section base */
+  .prod-section {
+    padding: 5rem 0;
+  }
+
+  /* Eyebrow label */
+  .prod-eyebrow {
+    font-size: 0.7rem;
+    font-family: ui-monospace, 'JetBrains Mono', monospace;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #10b981;
+    margin: 0 0 1rem;
+  }
+
+  /* Hero */
+  .prod-hero {
+    background: linear-gradient(160deg, #022c22 0%, #020617 60%);
+    padding: 7rem 0 5rem;
+  }
+  .prod-hero-inner {
+    text-align: center;
+  }
+  .prod-hero-title {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    margin: 0 0 1.25rem;
+  }
+  .prod-hero-sub {
+    font-size: 1.15rem;
+    color: #a7f3d0;
+    opacity: 0.85;
+    max-width: 40rem;
+    margin: 0 auto 2.5rem;
+    line-height: 1.65;
+  }
+  .prod-hero-ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: center;
+    align-items: center;
+  }
+
+  /* Section typography */
+  .prod-section-title {
+    font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    margin: 0 0 1rem;
+  }
+  .prod-section-sub {
+    font-size: 1rem;
+    color: #94a3b8;
+    max-width: 42rem;
+    margin: 0 0 3rem;
+    line-height: 1.7;
+  }
+  .prod-body-text {
+    font-size: 0.95rem;
+    color: #94a3b8;
+    line-height: 1.75;
+    margin: 0 0 1rem;
+  }
+  .prod-inline-link {
+    color: #6ee7b7;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: color 0.15s;
+  }
+  .prod-inline-link:hover { color: #a7f3d0; }
+
+  /* Buttons */
+  .prod-cta-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.75rem;
+    border-radius: 999px;
+    background: #10b981;
+    color: #020617;
+    font-weight: 700;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: background 0.15s, color 0.15s;
+  }
+  .prod-cta-primary:hover { background: #6ee7b7; }
+  .prod-cta-primary:focus-visible { outline: 3px solid #6ee7b7; outline-offset: 3px; }
+
+  .prod-cta-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.75rem;
+    border-radius: 999px;
+    border: 1px solid rgba(16,185,129,0.4);
+    color: #6ee7b7;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .prod-cta-secondary:hover { background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.7); }
+  .prod-cta-secondary:focus-visible { outline: 3px solid #6ee7b7; outline-offset: 3px; }
+
+  .prod-cta-ghost {
+    color: #8595ab;
+    font-size: 0.875rem;
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+  .prod-cta-ghost:hover { color: #94a3b8; }
+
+  .prod-cta-link {
+    display: inline-block;
+    color: #6ee7b7;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    margin-top: 1.25rem;
+    transition: color 0.15s;
+  }
+  .prod-cta-link:hover { color: #a7f3d0; }
+
+  /* Grids */
+  .prod-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+    gap: 1.25rem;
+  }
+  .prod-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+    gap: 1.25rem;
+  }
+
+  /* Generic card */
+  .prod-card {
+    background: rgba(15,23,42,0.7);
+    border: 1px solid rgba(16,185,129,0.15);
+    border-radius: 1rem;
+    padding: 1.75rem;
+    transition: border-color 0.15s;
+  }
+  .prod-card:hover { border-color: rgba(16,185,129,0.4); }
+
+  .prod-card-icon {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 0.6rem;
+    background: rgba(16,185,129,0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    color: #10b981;
+  }
+  .prod-card-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 0.5rem;
+  }
+  .prod-card-body {
+    font-size: 0.875rem;
+    color: #94a3b8;
+    line-height: 1.65;
+    margin: 0;
+  }
+
+  /* Module cards */
+  .prod-modules-grid {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  }
+  .prod-module-card {
+    background: rgba(15,23,42,0.6);
+    border: 1px solid rgba(16,185,129,0.12);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    transition: border-color 0.15s;
+  }
+  .prod-module-card:hover { border-color: rgba(16,185,129,0.35); }
+  .prod-module-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .prod-module-badge {
+    font-size: 0.65rem;
+    font-family: ui-monospace, monospace;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #10b981;
+    background: rgba(16,185,129,0.12);
+    border: 1px solid rgba(16,185,129,0.25);
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .prod-module-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0;
+  }
+  .prod-module-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+  .prod-module-list li {
+    font-size: 0.82rem;
+    color: #94a3b8;
+    line-height: 1.55;
+    padding-left: 1rem;
+    position: relative;
+  }
+  .prod-module-list li::before {
+    content: "·";
+    position: absolute;
+    left: 0;
+    color: #10b981;
+  }
+  .prod-module-status {
+    font-size: 0.72rem;
+    font-family: ui-monospace, monospace;
+    color: #748396;
+    margin: 0;
+  }
+  .prod-module-status-active {
+    color: #10b981;
+  }
+
+  /* Split layout */
+  .prod-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+  }
+  @media (max-width: 900px) {
+    .prod-split { grid-template-columns: 1fr; gap: 2.5rem; }
+  }
+
+  /* Guarantees list */
+  .prod-guarantee-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin: 1.5rem 0;
+  }
+  .prod-guarantee-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    font-size: 0.875rem;
+    color: #94a3b8;
+    line-height: 1.55;
+  }
+  .prod-guarantee-check {
+    width: 1.2rem;
+    height: 1.2rem;
+    min-width: 1.2rem;
+    border-radius: 50%;
+    background: rgba(16,185,129,0.15);
+    border: 1px solid rgba(16,185,129,0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #10b981;
+    margin-top: 0.1rem;
+  }
+
+  /* Traceability timeline card */
+  .prod-trace-card {
+    background: rgba(2,6,23,0.8);
+    border: 1px solid rgba(16,185,129,0.2);
+    border-radius: 1rem;
+    padding: 1.5rem;
+  }
+  .prod-trace-label {
+    font-size: 0.7rem;
+    font-family: ui-monospace, monospace;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #10b981;
+    margin: 0 0 1.25rem;
+  }
+  .prod-trace-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .prod-trace-event {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.6rem 0;
+    border-left: 2px solid rgba(16,185,129,0.15);
+    margin-left: 0.35rem;
+    padding-left: 1rem;
+    position: relative;
+  }
+  .prod-trace-event-done { border-left-color: rgba(16,185,129,0.4); }
+  .prod-trace-event-current { border-left-color: rgba(16,185,129,0.7); }
+  .prod-trace-dot {
+    position: absolute;
+    left: -0.45rem;
+    top: 0.8rem;
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 50%;
+    background: rgba(16,185,129,0.5);
+    border: 1px solid rgba(16,185,129,0.8);
+    flex-shrink: 0;
+  }
+  .prod-trace-dot-current {
+    background: #10b981;
+    box-shadow: 0 0 6px rgba(16,185,129,0.5);
+  }
+  .prod-trace-event-name {
+    font-size: 0.78rem;
+    font-family: ui-monospace, monospace;
+    color: #6ee7b7;
+    font-weight: 600;
+    margin: 0;
+    line-height: 1.3;
+  }
+  .prod-trace-event-meta {
+    font-size: 0.72rem;
+    color: #8595ab;
+    margin: 0;
+    line-height: 1.4;
+    margin-top: 0.15rem;
+  }
+  .prod-trace-note {
+    font-size: 0.7rem;
+    color: #748396;
+    margin: 1rem 0 0;
+    font-style: italic;
+  }
+
+  /* Screenshots grid */
+  .prod-screenshots-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+  }
+  .prod-shot-card {
+    background: rgba(15,23,42,0.7);
+    border: 1px solid rgba(16,185,129,0.15);
+    border-radius: 1rem;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: border-color 0.15s;
+  }
+  .prod-shot-card:hover { border-color: rgba(16,185,129,0.4); }
+  .prod-shot-img-wrap {
+    width: 100%;
+    aspect-ratio: 16/10;
+    overflow: hidden;
+    background: rgba(2,6,23,0.8);
+    border-bottom: 1px solid rgba(16,185,129,0.08);
+  }
+  .prod-shot-img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top;
+    display: block;
+  }
+  .prod-shot-meta {
+    padding: 1rem;
+  }
+  .prod-shot-eyebrow {
+    font-size: 0.65rem;
+    font-family: ui-monospace, monospace;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #10b981;
+    margin: 0 0 0.3rem;
+  }
+  .prod-shot-title {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 0.35rem;
+    line-height: 1.35;
+  }
+  .prod-shot-desc {
+    font-size: 0.78rem;
+    color: #8595ab;
+    line-height: 1.55;
+    margin: 0;
+  }
+
+  /* Demo notice + video placeholder */
+  .prod-demo-notice {
+    background: rgba(245,158,11,0.06);
+    border: 1px solid rgba(245,158,11,0.2);
+    border-radius: 0.75rem;
+    padding: 1rem 1.25rem;
+    font-size: 0.85rem;
+    color: #fcd34d;
+    opacity: 0.9;
+    line-height: 1.6;
+    max-width: 48rem;
+    margin: 0 auto 3rem;
+  }
+  .prod-notice-strong { color: #fbbf24; }
+  .prod-demo-notice a { color: #fcd34d; text-decoration: underline; }
+
+  .prod-demo-video-placeholder {
+    background: rgba(15,23,42,0.5);
+    border: 1px dashed rgba(16,185,129,0.2);
+    border-radius: 1rem;
+    padding: 3rem 2rem;
+    text-align: center;
+    max-width: 44rem;
+    margin: 0 auto;
+  }
+  .prod-demo-video-placeholder .prod-eyebrow { margin-bottom: 0.75rem; }
+
+  /* Integration cards */
+  .prod-integration-card {
+    background: rgba(15,23,42,0.6);
+    border: 1px solid rgba(16,185,129,0.12);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    transition: border-color 0.15s;
+  }
+  .prod-integration-card:hover { border-color: rgba(16,185,129,0.3); }
+  .prod-integration-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+  .prod-integration-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0;
+  }
+  .prod-badge-amber {
+    font-size: 0.62rem;
+    font-family: ui-monospace, monospace;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #fbbf24;
+    background: rgba(245,158,11,0.12);
+    border: 1px solid rgba(245,158,11,0.25);
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .prod-badge-emerald {
+    font-size: 0.62rem;
+    font-family: ui-monospace, monospace;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #10b981;
+    background: rgba(16,185,129,0.12);
+    border: 1px solid rgba(16,185,129,0.3);
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .prod-badge-slate {
+    font-size: 0.62rem;
+    font-family: ui-monospace, monospace;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #8595ab;
+    background: rgba(71,85,105,0.15);
+    border: 1px solid rgba(71,85,105,0.3);
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+
+  /* SNGPC flow */
+  .prod-sngpc-flow {
+    margin-top: 3rem;
+    background: rgba(2,6,23,0.7);
+    border: 1px solid rgba(16,185,129,0.12);
+    border-radius: 1rem;
+    padding: 1.5rem 2rem;
+  }
+  .prod-flow-label {
+    font-size: 0.7rem;
+    font-family: ui-monospace, monospace;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #10b981;
+    margin: 0 0 1.25rem;
+  }
+  .prod-flow-steps {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 0;
+  }
+  .prod-flow-step {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .prod-flow-num {
+    width: 1.75rem;
+    height: 1.75rem;
+    min-width: 1.75rem;
+    border-radius: 50%;
+    background: rgba(16,185,129,0.15);
+    border: 1px solid rgba(16,185,129,0.3);
+    color: #10b981;
+    font-size: 0.72rem;
+    font-weight: 800;
+    font-family: ui-monospace, monospace;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .prod-flow-desc {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    margin: 0;
+    max-width: 12rem;
+    line-height: 1.4;
+  }
+  .prod-flow-arrow {
+    color: rgba(16,185,129,0.4);
+    font-size: 1.1rem;
+    padding: 0 0.25rem;
+  }
+  .prod-flow-note {
+    font-size: 0.75rem;
+    color: #748396;
+    margin: 1rem 0 0;
+    font-style: italic;
+  }
+
+  /* Architecture cards */
+  .prod-arch-grid {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+  }
+  .prod-arch-card {
+    display: block;
+    text-decoration: none;
+    background: rgba(15,23,42,0.6);
+    border: 1px solid rgba(16,185,129,0.12);
+    border-radius: 1rem;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .prod-arch-card:hover { background: rgba(15,23,42,0.9); border-color: rgba(16,185,129,0.35); }
+  .prod-arch-card:focus-visible { outline: 3px solid #6ee7b7; outline-offset: 3px; border-radius: 1rem; }
+  .prod-arch-card-inner { padding: 1.5rem; }
+  .prod-arch-card-eyebrow {
+    font-size: 0.65rem;
+    font-family: ui-monospace, monospace;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #10b981;
+    margin: 0 0 0.4rem;
+  }
+  .prod-arch-card-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 0.5rem;
+    line-height: 1.3;
+  }
+  .prod-arch-card-body {
+    font-size: 0.8rem;
+    color: #8595ab;
+    line-height: 1.6;
+    margin: 0 0 1rem;
+  }
+  .prod-arch-link {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #6ee7b7;
+  }
+
+  /* Roadmap */
+  .prod-roadmap {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    max-width: 52rem;
+    position: relative;
+  }
+  .prod-roadmap-item {
+    display: flex;
+    gap: 1.5rem;
+    padding: 1.5rem 0;
+    border-left: 2px solid rgba(16,185,129,0.12);
+    margin-left: 0.85rem;
+    padding-left: 1.75rem;
+    position: relative;
+  }
+  .prod-roadmap-done { border-left-color: rgba(16,185,129,0.5); }
+  .prod-roadmap-active { border-left-color: rgba(16,185,129,0.7); }
+
+  .prod-roadmap-marker {
+    position: absolute;
+    left: -0.65rem;
+    top: 1.75rem;
+    width: 1.15rem;
+    height: 1.15rem;
+    border-radius: 50%;
+    background: rgba(15,23,42,1);
+    border: 2px solid rgba(16,185,129,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .prod-roadmap-marker-done {
+    background: rgba(16,185,129,0.15);
+    border-color: rgba(16,185,129,0.6);
+    color: #10b981;
+  }
+  .prod-roadmap-marker-active {
+    background: rgba(16,185,129,0.2);
+    border-color: #10b981;
+    position: absolute;
+    left: -0.65rem;
+    top: 1.75rem;
+  }
+  .prod-roadmap-pulse {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: #10b981;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.7); }
+  }
+
+  .prod-roadmap-content { flex: 1; }
+  .prod-roadmap-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.4rem;
+  }
+  .prod-roadmap-version {
+    font-size: 0.75rem;
+    font-family: ui-monospace, monospace;
+    font-weight: 800;
+    color: #6ee7b7;
+    letter-spacing: 0.04em;
+  }
+  .prod-roadmap-tag {
+    font-size: 0.62rem;
+    font-family: ui-monospace, monospace;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #8595ab;
+    background: rgba(71,85,105,0.15);
+    border: 1px solid rgba(71,85,105,0.25);
+    padding: 0.12rem 0.5rem;
+    border-radius: 999px;
+  }
+  .prod-roadmap-tag-done {
+    color: #10b981;
+    background: rgba(16,185,129,0.1);
+    border-color: rgba(16,185,129,0.3);
+  }
+  .prod-roadmap-tag-active {
+    color: #fbbf24;
+    background: rgba(245,158,11,0.1);
+    border-color: rgba(245,158,11,0.3);
+  }
+  .prod-roadmap-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 0.4rem;
+    line-height: 1.3;
+  }
+  .prod-roadmap-body {
+    font-size: 0.82rem;
+    color: #8595ab;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  /* CTA section */
+  .prod-cta-section {
+    background: linear-gradient(160deg, rgba(4,20,18,0.95) 0%, rgba(2,6,23,0.98) 100%);
+  }
+  .prod-cta-section .prod-section-title { max-width: 36rem; margin: 0 auto 0.75rem; text-align: center; }
+  .prod-cta-section .prod-section-sub { margin: 0 auto 2.5rem; text-align: center; }
+
+  /* Responsive */
+  @media (max-width: 640px) {
+    .prod-hero { padding: 5rem 0 3.5rem; }
+    .prod-section { padding: 3.5rem 0; }
+    .prod-hero-ctas { flex-direction: column; }
+    .prod-flow-steps { flex-direction: column; align-items: flex-start; }
+    .prod-flow-arrow { display: none; }
+    .prod-sngpc-flow { padding: 1.25rem; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .prod-roadmap-pulse { animation-duration: 0.01ms; }
+    .prod-cta-primary,
+    .prod-cta-secondary,
+    .prod-card,
+    .prod-module-card,
+    .prod-shot-card,
+    .prod-arch-card { transition-duration: 0.01ms !important; }
+  }
+</style>

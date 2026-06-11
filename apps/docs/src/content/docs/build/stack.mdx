@@ -63,6 +63,16 @@ Open WebUI sidecar
 | MinIO | S3-compatible self-hosted (laudos, docs) |
 | Puppeteer headless | Geração de PDFs (relatórios, carteirinhas) |
 
+### Token-Ledger (camada econômica)
+
+| Tecnologia | Papel |
+|---|---|
+| NATS JetStream | Event log imutável — fonte da verdade do ledger |
+| Formance Ledger (MIT) — candidato | Engine de dupla-entrada pronto — débito/crédito não se reimplementam |
+| SurrealDB | Projeções / read-models do ledger |
+
+Detalhes em [Token-Ledger (arquitetura)](/architecture/token-ledger/).
+
 ### Auth e Deploy
 
 | Tecnologia | Papel |

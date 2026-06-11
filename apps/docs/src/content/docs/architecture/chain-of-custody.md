@@ -102,6 +102,12 @@ Adicionalmente, pgAudit registra eventos DDL diretamente nos logs do PostgreSQL,
 
 ## Principais Entidades
 
+### Identificação de Variedade via StrainCatalog
+
+O campo `strain_id` em `cultivation_batch` referencia um UUID canônico do futuro [StrainCatalog](/research/strain-databases/) — bounded context separado, baseado em UUIDs interop OpenTHC/vdb. Sem esse identificador consistente, auditoria de rastreabilidade por variedade (exigida pela RDC 1.014) depende de nomenclatura livre por associação, inviabilizando comparações e relatórios federados.
+
+---
+
 ### `cultivation_batch`
 
 | Campo | Tipo | Descrição |

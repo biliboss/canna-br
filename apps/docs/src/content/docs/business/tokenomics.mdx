@@ -1,0 +1,176 @@
+---
+title: "Infraeconomics"
+description: "A associação não é o negócio. A infraestrutura ao redor dela é. Modelo econômico sem especulação de token e sem margem sobre cannabis."
+---
+
+import { SITE, DISPLAY } from '../../../data/site-constants';
+
+> **Premissa inegociável:** a associação canábica não é o negócio lucrativo. Ela é o núcleo operacional, regulatório e assistencial. O negócio sustentável mora na **infraestrutura** ao redor: software, compliance, compras, equipamentos, crédito e liquidação.
+
+Isso muda o modelo de *tokenomics* para **infraeconomics**.
+
+A base regulatória sustenta a premissa: a [RDC 1.014/2026 da Anvisa](https://www.gov.br/anvisa/pt-br/assuntos/noticias-anvisa/2026/anvisa-publica-regras-para-producao-de-cannabis-medicinal) cria instrumento específico para associações de pacientes **sem fins lucrativos** — sem autorização de comercialização, com monitoramento, controle de qualidade e rastreabilidade até a dispensação. A associação opera a finalidade assistencial. A infraestrutura monetiza ao redor.
+
+## Tese central
+
+O sistema sobrevive **sem especulação de token**, **sem margem na venda da cannabis** e **sem depender de voluntariado**.
+
+| A cannabis é | A infraestrutura é |
+| --- | --- |
+| Produto assistencial regulado | O negócio |
+| Sem lucro distribuível | Receita recorrente legítima |
+| Custo rastreável | Software, hosting, suporte, automação |
+| Dispensação controlada, prestação de contas | Compliance, auditoria, compras, crédito, liquidação |
+
+A rede ganha dinheiro com software, hosting, suporte, compliance, rastreabilidade, auditoria, automação, agentes MCP, gestão de compras coletivas, crédito, cobrança, servicing financeiro e liquidação fiat/USDT. A cannabis cobre custo, garante continuidade assistencial e gera demanda por tudo isso — nunca lucro distribuível.
+
+## Camadas de monetização
+
+Toda monetização fica **fora da margem do produto canábico**. Seis camadas:
+
+| Camada | O que vende | Modelo de preço | Risco regulatório |
+| --- | --- | --- | --- |
+| **A — Software e operação** | Hosting gerenciado do OSS, suporte, implantação, treinamento, SNGPC/rastreabilidade, integrações, agentes MCP | Starter R$ 1.500/mês · Pro R$ 4.000/mês · Rede R$ 8.000–20.000/mês · setup R$ 5.000–50.000 | Baixo |
+| **B — Compliance e auditoria** | Dossiê regulatório, rastreabilidade auditável, logs imutáveis, gestão [LGPD](https://www.gov.br/esporte/pt-br/acesso-a-informacao/lgpd) | Pack R$ 2.000–10.000/mês · auditoria trimestral R$ 5.000–30.000 · relatório automatizado R$ 500–3.000/mês | Baixo |
+| **C — Compras coletivas (não-canábicas)** | Pedidos agregados: embalagens, EPIs, testes laboratoriais, sensores, energia, logística | Fee de gestão 1–5% do pedido · assinatura R$ 500–3.000/mês | Baixo/médio |
+| **D — Equipamentos compartilhados** | Câmara fria, laboratório parceiro, sensores, irrigação, segurança, embalagem | Leasing mensal · pay-per-use · assinatura de acesso · maintenance fee | Médio |
+| **E — Crédito, risco e cobrança** | Análise de risco, originação, servicing, cobrança, gestão de garantias, provisão | Análise R$ 100–500/solicitação · servicing 0,5–2% a.m. sobre carteira · cobrança fee fixo + success fee | Alto |
+| **F — Liquidação fiat/USDT** | Fee de liquidação, spread transparente, conciliação, on/off ramp via parceiro regulado | Por transação / mensal | Alto |
+
+Quatro fronteiras vigiam essas camadas:
+
+- **Camada A:** o core é [AGPL](https://www.gnu.org/licenses/agpl-3.0.en.html) — vende-se hosting, suporte e serviço; modificações servidas via rede exigem código-fonte disponível aos usuários. Embutir o software em outra solução ou oferecer como serviço gerenciado para terceiros sem publicar o código exige licença comercial (ver [OSS Model](/business/oss-model/)).
+- **Camada C:** o fee nunca incide sobre cannabis. Incide sobre infraestrutura, insumos, equipamentos e o serviço de aquisição.
+- **Camada E:** captação pública, pool de crédito ou promessa de retorno entra no perímetro da [CVM](https://www.gov.br/cvm/pt-br/acesso-a-informacao-cvm/perguntas-frequentes-da-cvm/criptoativos-quando-se-aplicam-as) — criptoativos podem ser valores mobiliários. Antes disso, só utility: análise, servicing, cobrança.
+- **Camada F:** USDT é trilho de liquidação, não narrativa de venda. A [Resolução BCB 520](https://www.bcb.gov.br/estabilidadefinanceira/exibenormativo?numero=520&tipo=Resolu%C3%A7%C3%A3o+BCB) disciplina prestadoras de serviços de ativos virtuais — começar com parceiro regulado, sem custódia própria.
+
+## Quem é remunerado
+
+"Sem fins lucrativos" não significa trabalho de graça. Significa que o resultado da atividade associativa não vira lucro privado. Remuneração vem de salários, contratos e serviços:
+
+| Participante | Como recebe de forma justa | Observação |
+| --- | --- | --- |
+| **Associação** | Reembolso de custos, taxa associativa, orçamento operacional | Não lucra com a venda da cannabis |
+| **Profissionais da associação** | Salário, contrato, honorários | Remuneração operacional legítima |
+| **Pacientes/membros** | Economia, acesso, transparência, previsibilidade | Recebem benefício, não lucro financeiro |
+| **InfraCo** | Mensalidade, suporte, implantação, módulos gerenciados | Principal motor econômico |
+| **Maintainers OSS** | Contratos de manutenção, grants, suporte enterprise | AGPL impede captura fechada do core |
+| **Capital providers** | Juros/retorno apenas em estrutura permitida | Alto risco regulatório — só na versão regulada |
+
+## Waterfall: primeiro sustentabilidade, depois retorno
+
+> **Nenhum retorno antes de custo, cobrança, perda, provisão, reserva e compliance.**
+
+Receita confirmada (conciliada) desce nesta ordem:
+
+```text
+1.  Custo operacional
+2.  Time e fornecedores
+3.  Cloud / segurança
+4.  Jurídico / compliance
+5.  Cobrança e perdas realizadas
+6.  Provisão de inadimplência
+7.  Reserva de liquidez
+8.  Reinvestimento OSS
+9.  Remuneração da InfraCo
+10. Buyback / benefícios / retorno permitido
+```
+
+Receita da cannabis nunca entra nesse funil. Fica na associação: custo de produção, profissionais, dispensação, reinvestimento assistencial, prestação de contas. A sobra operacional da associação não vira lucro — vira reserva, melhoria, subsídio de pacientes e redução de custo futuro.
+
+## Unit economics
+
+Uma associação de 500 pacientes gera para a InfraCo, fora da venda da cannabis:
+
+```text
+Hosting OSS gerenciado:      R$ 2.500/mês
+Suporte e manutenção:        R$ 3.000/mês
+Compliance/rastreabilidade:  R$ 2.000/mês
+Agentes MCP:                 R$ 1.500/mês
+Compras coletivas:           R$ 1.000/mês
+Conciliação financeira:      R$   800/mês
+─────────────────────────────────────────
+Receita recorrente:          R$ 10.800/mês por associação
+```
+
+Com 20 associações, somando fees de compras, servicing e auditoria:
+
+```text
+Hosting + suporte:           20 × R$ 5.500        = R$ 110.000
+Compliance/rastreabilidade:  20 × R$ 2.500        = R$  50.000
+Agentes MCP:                 20 × R$ 1.500        = R$  30.000
+Compras coletivas:           R$ 2M volume × 2,5%  = R$  50.000
+Risk/servicing:              R$ 2M carteira × 1%  = R$  20.000
+Auditoria/relatórios:        20 × R$ 1.000        = R$  20.000
+────────────────────────────────────────────────────────────
+Receita total:               R$ 280.000/mês
+Custo total:                 R$ 230.000/mês
+Resultado operacional:       R$  50.000/mês → margem 17,8%
+```
+
+Sustentável, paga gente, mantém o OSS — sem margem sobre cannabis.
+
+> **Nota de reconciliação**
+>
+> - Os números acima ({SITE.thesisCeiling.displayRevPerAssoc}; {SITE.thesisCeiling.displayRefRevenue}) são o **cenário-teto** de referência: associação madura consumindo todas as camadas A–F (marco {SITE.thesisCeiling.scenarioLabel}).
+> - A receita contratada **real** hoje é a da Camada A (managed hosting, v0.1–v0.4): planos de {SITE.pricing.essencial.displayBRL}–{SITE.pricing.rede.displayBRL} — o chão contratado está em [Revenue Model](/business/revenue-model/).
+> - A ponte entre chão e teto é o roadmap econômico: cada camada ativada (compliance, compras, equipamentos, crédito) move a associação do plano base em direção ao teto.
+> - Um número é o **chão contratado**, o outro é o **teto da tese** — complementares, não contraditórios.
+
+## Regra anti-pirâmide
+
+O sistema precisa responder, a qualquer momento:
+
+```text
+1. Quem paga?
+2. Por que paga?
+3. Qual valor real recebeu?
+4. Qual custo real foi reduzido?
+5. Qual risco foi assumido?
+6. Qual perda foi provisionada?
+7. Qual retorno sobrou depois do risco?
+```
+
+Fórmula de sustentabilidade:
+
+```text
+Receita recorrente da infraestrutura
+>
+custo de software + suporte + compliance + risco + cobrança + reservas
+```
+
+Fórmula de distribuição:
+
+```text
+Distribuição permitida =
+  caixa recebido
+  − custos
+  − perdas
+  − provisão
+  − reserva
+  − principal
+  − compliance
+```
+
+Nunca: distribuição baseada em expectativa, em token subindo, antes de cobrança, antes de provisão.
+
+## Como a tese se desdobra
+
+- **Token-ledger desde a v0.1** — toda posição econômica nasce como token interno no backend (saldo, cota, garantia, reputação, voto operacional); nenhum token é vendido como investimento. Ver [Token-Ledger v0.1](/business/token-ledger/).
+- **DAO e economia de contribuição** — trabalho também vira posição tokenizada (CONTRIB, referência contábil em USD), com governança sociocrática por círculos e consentimento. Ver [DAO](/business/dao/).
+- **Estrutura societária mínima** — v0.1 opera com uma única InfraCo LTDA no Brasil (software e serviços). FinanceCo ou parceiro regulado, OSS Foundation e AuditCo nascem depois, quando crédito em escala, comunidade ou certificação exigirem. Sem captação, custódia de cripto ou intermediação financeira no objeto social inicial.
+- **Stack battle-tested** — 100% off-chain na v0.1: NATS JetStream como log de eventos imutável, engine de ledger de dupla-entrada e SurrealDB como read-model, alinhado à ADR-003. Ver [Token-Ledger (arquitetura)](/architecture/token-ledger/).
+
+Mensagem pública sempre: "infraestrutura econômica, operacional e de compliance para associações de cannabis medicinal" — nunca "invista em cannabis tokenizada".
+
+## Frase-mãe
+
+> **Um sistema operacional econômico para associações de cannabis medicinal: aberto no core, sustentável na infraestrutura, invisivelmente tokenizado no backend e regulado onde houver retorno financeiro.**
+
+## Leia mais
+
+- [Token-Ledger v0.1](/business/token-ledger/) — contabilidade programável desde o dia 1, sem especulação
+- [DAO](/business/dao/) — governança sociocrática + ledger de contribuição
+- [Token-Ledger (arquitetura)](/architecture/token-ledger/) — NATS JetStream + ledger engine + SurrealDB
+- [OSS Model](/business/oss-model/) — fronteira AGPL vs comercial
+- [Revenue Model](/business/revenue-model/) — planos managed hosting e projeções ARR

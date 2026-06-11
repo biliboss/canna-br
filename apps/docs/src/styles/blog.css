@@ -1,0 +1,670 @@
+/* ============================================================================
+   canna-br · BLOG SURFACE
+   Restyle starlight-blog 0.25.2 to match the marketing brand
+   (dark slate #020617 + emerald #10b981 / #6ee7b7, JetBrains Mono eyebrows,
+    fluid type, container-query card grid). Light + dark both shipped.
+
+   Scope: every rule is gated behind a blog route. starlight-blog adds
+   `data-template` / specific body context per page; we anchor on the
+   stable `.posts` (index/tag list) and `.post-footer` (single post)
+   structures plus a `body[data-canna-blog]` flag set by an init script
+   in this file's companion <script>. To stay framework-pure and avoid an
+   extra component override, we instead anchor purely on starlight-blog's
+   own DOM hooks (`.posts`, `article.preview`, `.post-footer`) which only
+   exist on blog routes — so these rules can never leak into the docs body.
+
+   Token sources (mirrored from src/pages/index.astro + MarketingNav.astro):
+     emerald-500  #10b981   emerald-300 #6ee7b7   emerald-200 #a7f3d0
+     slate-950    #020617   slate-900   #0f172a   slate-800   #1e293b
+     slate-400    #94a3b8   slate-300   #cbd5e1
+   New OKLCH-derived stops for elevation/glow are noted inline.
+============================================================================ */
+
+/* ----------------------------------------------------------------------------
+   0 · Blog-scoped design tokens (paired light/dark via light-dark())
+   Declared on the blog containers so they never touch the docs body.
+---------------------------------------------------------------------------- */
+.posts,
+.post-footer,
+:root:has(.posts),
+:root:has(.post-footer) {
+  /* Surface elevation — dark lightens bg (heuristic #4), light uses tint+shadow */
+  --canna-blog-card-bg: light-dark(
+    oklch(0.99 0.004 162),
+    oklch(0.205 0.018 256)            /* ~#131a2b — one step above #0f172a */
+  );
+  --canna-blog-card-bg-hover: light-dark(
+    oklch(0.985 0.012 162),
+    oklch(0.245 0.024 256)            /* lighten on hover, no shadow in dark */
+  );
+  --canna-blog-card-border: light-dark(
+    oklch(0.9 0.02 162 / 0.9),
+    oklch(0.55 0.06 220 / 0.35)
+  );
+  --canna-blog-card-border-hover: light-dark(
+    oklch(0.7 0.13 162 / 0.55),
+    oklch(0.72 0.16 162 / 0.45)       /* emerald edge on hover */
+  );
+  --canna-blog-accent: light-dark(#047857, #6ee7b7);     /* link/title accent */
+  --canna-blog-accent-strong: light-dark(#065f46, #34d399);
+  /* light L=0.50 → 5.2:1 on card / 5.4:1 on page bg (WCAG AA for small mono text) */
+  --canna-blog-eyebrow: light-dark(oklch(0.5 0.14 162), oklch(0.82 0.15 162));
+  --canna-blog-muted: light-dark(#475569, #94a3b8);
+  --canna-blog-faint: light-dark(#64748b, #64748b);
+  --canna-blog-card-shadow: light-dark(
+    0 1px 2px rgba(15, 23, 42, 0.06),
+    0 0 0 0 transparent
+  );
+  --canna-blog-card-shadow-hover: light-dark(
+    0 12px 28px rgba(15, 23, 42, 0.12),
+    0 18px 48px rgba(0, 0, 0, 0.45)
+  );
+  --canna-blog-radius: 16px;
+  --canna-blog-radius-sm: 8px;
+}
+
+/* ============================================================================
+   1 · BLOG INDEX — header + responsive card grid
+   The index page renders <h1>Blog</h1> (Starlight content title) followed by
+   `.posts` (the article list). We turn the list into a card grid and dress
+   the content title as a marketing-style hero.
+============================================================================ */
+
+/* --- 1a · Hero header for the list page --------------------------------- */
+/* starlight-blog's Blog.astro route hides the page-title content-panel with
+   `:global(.content-panel:first-of-type){display:none}`. We re-enable it on
+   list/tag-archive pages (anchored on `body:has(.posts)`) and dress the
+   <h1 id="_top">Blog</h1> as a marketing-style hero with eyebrow + lede.    */
+body:has(.posts) .content-panel:first-of-type {
+  display: block;
+  padding-bottom: 0;
+}
+/* The plugin removes the top border on the 2nd panel; keep our own grid rule
+   (`.posts` border-top) as the single divider — drop the panel's own. */
+body:has(.posts) .content-panel:nth-of-type(2) {
+  padding-top: 0;
+}
+
+/* The Starlight page title <h1 id="_top">Blog</h1> lives in that first
+   content-panel. We anchor on `body:has(.posts)` (only true on blog list /
+   tag-archive pages) and the stable PageTitle id, so these rules never leak
+   into the docs body. */
+body:has(.posts) h1#_top {
+  font-size: clamp(2.4rem, 1.5rem + 4vw, 3.6rem);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.04;
+  text-wrap: balance;
+  margin-block: 0 0.4rem;
+}
+
+/* Eyebrow injected above the Blog title on the index only.
+   CSS `content` strings can't go through Starlight's i18n, so the copy is
+   localized here by matching the <html lang> via `:lang()` (which language-
+   range matches, so `:lang(pt)` covers `pt-BR`). The base rule carries every
+   non-text property; per-locale rules only swap `content`. PT is the default
+   fallback for any unlisted locale. */
+body:has(.posts) h1#_top::before {
+  content: "Notas de engenharia · regulação · OSS";
+  display: block;
+  font-family: var(--sl-font-mono, ui-monospace, "JetBrains Mono", monospace);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--canna-blog-eyebrow);
+  margin-bottom: 0.85rem;
+}
+body:has(.posts):lang(en) h1#_top::before {
+  content: "Engineering notes · regulation · OSS";
+}
+body:has(.posts):lang(es) h1#_top::before {
+  content: "Notas de ingeniería · regulación · OSS";
+}
+
+/* Lede injected below the Blog title via the title's content-panel. */
+body:has(.posts) h1#_top::after {
+  content: "Decisões de arquitetura, leitura regulatória e o raciocínio aberto por trás do canna-br.";
+  display: block;
+  max-width: 52ch;
+  margin-top: 0.85rem;
+  font-family: var(--sl-font, "Inter", system-ui, sans-serif);
+  font-size: clamp(1rem, 0.94rem + 0.3vw, 1.15rem);
+  font-weight: 400;
+  letter-spacing: normal;
+  line-height: 1.6;
+  text-transform: none;
+  color: var(--canna-blog-muted);
+}
+body:has(.posts):lang(en) h1#_top::after {
+  content: "Architecture decisions, regulatory reading, and the open reasoning behind canna-br.";
+}
+body:has(.posts):lang(es) h1#_top::after {
+  content: "Decisiones de arquitectura, lectura regulatoria y el razonamiento abierto detrás de canna-br.";
+}
+
+/* A thin emerald rule under the hero header to separate it from the grid */
+.posts {
+  position: relative;
+  padding-top: 2.25rem;
+  margin-top: 2rem;
+  border-top: 1px solid var(--canna-blog-card-border);
+}
+
+/* --- 1b · The card grid -------------------------------------------------- */
+/* Fluid auto-fit grid — no breakpoints needed (heuristic: fluid grids). */
+.posts {
+  display: grid !important;          /* override plugin's flex column */
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+  gap: 1.5rem;
+}
+
+/* Each post becomes an elevated, emerald-edged card */
+.posts > article.preview {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.75rem;
+  background: var(--canna-blog-card-bg);
+  border: 1px solid var(--canna-blog-card-border);
+  border-radius: var(--canna-blog-radius);
+  box-shadow: var(--canna-blog-card-shadow);
+  overflow: hidden;
+  transition:
+    transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.18s ease-out,
+    background-color 0.18s ease-out,
+    box-shadow 0.18s ease-out;
+}
+
+/* Emerald top-edge accent that brightens on hover */
+.posts > article.preview::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  inset-block-start: 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    oklch(0.72 0.16 162 / 0.5) 50%,
+    transparent 100%
+  );
+  opacity: 0;
+  transition: opacity 0.18s ease-out;
+}
+
+.posts > article.preview:hover,
+.posts > article.preview:focus-within {
+  transform: translateY(-3px);
+  border-color: var(--canna-blog-card-border-hover);
+  background: var(--canna-blog-card-bg-hover);
+  box-shadow: var(--canna-blog-card-shadow-hover);
+}
+.posts > article.preview:hover::before,
+.posts > article.preview:focus-within::before {
+  opacity: 1;
+}
+
+/* Card header: title */
+.posts > article.preview > header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.posts > article.preview h2 {
+  margin: 0 !important;
+  font-size: clamp(1.15rem, 1.02rem + 0.6vw, 1.45rem);
+  font-weight: 700;
+  line-height: 1.22;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.posts > article.preview h2 a {
+  color: light-dark(#0f172a, #f1f5f9);
+  text-decoration: none;
+  transition: color 0.15s ease-out;
+}
+.posts > article.preview h2 a:hover {
+  color: var(--canna-blog-accent);
+}
+/* Make the whole card clickable via the title link stretched overlay,
+   while keeping tags/author independently clickable (they sit above z). */
+.posts > article.preview h2 a::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+.posts > article.preview h2 a:focus-visible {
+  outline: 2px solid var(--canna-blog-accent);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+/* Metadata (date + author) on the card */
+.posts > article.preview .metadata {
+  gap: 0.5rem;
+}
+.posts > article.preview .dates {
+  font-family: var(--sl-font-mono, ui-monospace, "JetBrains Mono", monospace);
+  font-size: 0.74rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  color: var(--canna-blog-eyebrow);
+  text-transform: uppercase;
+}
+.posts > article.preview .metadata-alt {
+  color: var(--canna-blog-faint);
+  text-transform: none;
+}
+
+/* Author chip on the card */
+.posts > article.preview .authors {
+  gap: 0.5rem 0.85rem;
+}
+.posts > article.preview .author,
+.post-footer .author {
+  position: relative;
+  z-index: 2;                          /* clickable above the title overlay */
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  text-decoration: none;
+}
+.posts > article.preview .author .name,
+.post-footer .author .name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: light-dark(#334155, #cbd5e1);
+  line-height: 1.2;
+}
+.posts > article.preview .author .title,
+.post-footer .author .title {
+  font-size: 0.72rem;
+  color: var(--canna-blog-muted);
+  line-height: 1.2;
+}
+.posts > article.preview .author img,
+.post-footer .author img {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  border: 1px solid var(--canna-blog-card-border-hover);
+}
+.posts > article.preview .author:hover .name {
+  color: var(--canna-blog-accent);
+}
+
+/* Excerpt body on the card */
+.posts > article.preview > .sl-markdown-content {
+  flex: 1;
+}
+.posts > article.preview > .sl-markdown-content p {
+  margin: 0;
+  color: light-dark(#475569, #94a3b8);
+  font-size: 0.94rem;
+  line-height: 1.6;
+  text-wrap: pretty;
+  /* Clamp to 4 lines so cards stay even in the grid */
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Card footer = tags */
+.posts > article.preview > footer {
+  margin-top: auto;
+}
+
+/* ============================================================================
+   2 · TAGS — pill badges (shared: index cards + post footer)
+   PostTags.astro renders an unclassed <div><b>Tags:</b><ul><li><a>.
+   We anchor inside `.posts article footer` and `.post-footer`.
+============================================================================ */
+.posts > article.preview > footer > div,
+.post-footer > div:has(> b) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  position: relative;
+  z-index: 2;                          /* above card title overlay */
+}
+
+/* "Tags:" label → small mono caption */
+.posts > article.preview > footer > div > b,
+.post-footer > div:has(> b) > b {
+  font-family: var(--sl-font-mono, ui-monospace, "JetBrains Mono", monospace);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--canna-blog-faint);
+  margin-right: 0.25rem;
+}
+
+.posts > article.preview > footer > div ul,
+.post-footer > div:has(> b) ul {
+  display: inline-flex !important;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0 !important;
+  padding: 0;
+  list-style: none;
+}
+.posts > article.preview > footer > div li,
+.post-footer > div:has(> b) li {
+  margin: 0 !important;
+  padding: 0;
+}
+
+/* The actual pill.
+   Touch-target: WCAG / iOS want ≥44px tap height. The pill stays visually
+   compact (small mono caption) but the hit area is expanded to 44px via
+   `min-height` + inline-flex centering, so the visible chip is unchanged while
+   the tappable surface meets the minimum. Horizontal padding stays the primary
+   width driver. */
+.posts > article.preview > footer > div a,
+.post-footer > div:has(> b) a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;                 /* 44px — iOS minimum tap target */
+  margin: 0 !important;
+  padding: 0.2rem 0.6rem 0.25rem !important;
+  border-radius: 999px !important;
+  border: 1px solid oklch(0.72 0.16 162 / 0.3) !important;
+  background: oklch(0.72 0.16 162 / 0.1);
+  color: var(--canna-blog-accent) !important;
+  font-family: var(--sl-font-mono, ui-monospace, "JetBrains Mono", monospace);
+  font-size: 0.72rem !important;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  transition: background-color 0.15s ease-out, border-color 0.15s ease-out, color 0.15s ease-out;
+}
+.posts > article.preview > footer > div a:hover,
+.post-footer > div:has(> b) a:hover {
+  background: oklch(0.72 0.16 162 / 0.2);
+  border-color: oklch(0.72 0.16 162 / 0.55) !important;
+  color: var(--canna-blog-accent-strong) !important;
+}
+.posts > article.preview > footer > div a:focus-visible,
+.post-footer > div:has(> b) a:focus-visible {
+  outline: 2px solid var(--canna-blog-accent);
+  outline-offset: 2px;
+}
+
+/* ============================================================================
+   3 · SINGLE POST — reading typography
+   Standard Starlight `.content-panel` + `.sl-markdown-content`. We anchor
+   post-only rules on the presence of `.post-footer` in the page.
+============================================================================ */
+
+/* --- 3a · Reading measure + post title hero ----------------------------- */
+/* Constrain the reading column to ~70ch for long-form legibility. */
+.content-panel:has(~ .content-panel .post-footer) .sl-markdown-content,
+.main-pane:has(.post-footer) .sl-markdown-content,
+:root:has(.post-footer) .sl-markdown-content {
+  max-width: 70ch;
+  margin-inline: auto;
+}
+
+/* Post title hero. starlight-blog renders the post <h1 id="_top"> as a direct
+   child of `.sl-container` — it is a SIBLING of `.sl-markdown-content`, not a
+   descendant — so a `.sl-markdown-content > h1` selector never matches. Target
+   the real element (`h1#_top`) directly, scoped to post pages via `.post-footer`.
+   Keep the descendant form as a harmless fallback in case the markup changes. */
+:root:has(.post-footer) h1#_top,
+:root:has(.post-footer) .sl-markdown-content > h1 {
+  font-size: clamp(2rem, 1.4rem + 3vw, 3rem);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.08;
+  text-wrap: balance;
+  max-width: 24ch;
+  margin-bottom: 0.5rem;
+}
+
+/* The PageTitle "Blog" h1 (#_top) is redundant on a post — Starlight already
+   hides it visually via the blog plugin; ensure it never adds the eyebrow. */
+:root:has(.post-footer) h1#_top::before,
+:root:has(.post-footer) h1#_top::after { content: none; }
+
+/* Post meta row (date + author) — starlight-blog renders it under the title.
+   Target the in-prose metadata block only, not Starlight's footer .meta. */
+:root:has(.post-footer) .sl-markdown-content .metadata .dates,
+:root:has(.post-footer) .content-panel .metadata .dates {
+  font-family: var(--sl-font-mono, ui-monospace, "JetBrains Mono", monospace);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--canna-blog-eyebrow);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* --- 3b · Prose rhythm --------------------------------------------------- */
+:root:has(.post-footer) .sl-markdown-content {
+  font-size: clamp(1rem, 0.96rem + 0.25vw, 1.075rem);
+  line-height: 1.75;
+}
+
+/* Headings: emerald-tinted, generous space above, tight tracking */
+:root:has(.post-footer) .sl-markdown-content h2 {
+  font-size: clamp(1.45rem, 1.2rem + 1.1vw, 1.85rem);
+  font-weight: 700;
+  letter-spacing: -0.022em;
+  line-height: 1.22;
+  margin-top: 2.75rem !important;
+  margin-bottom: 0.85rem !important;
+  text-wrap: balance;
+  scroll-margin-top: 5rem;
+}
+/* Emerald tick before H2 */
+:root:has(.post-footer) .sl-markdown-content h2::before {
+  content: "";
+  display: block;
+  width: 2.25rem;
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--canna-blog-accent-strong), transparent);
+  margin-bottom: 0.9rem;
+}
+:root:has(.post-footer) .sl-markdown-content h3 {
+  font-size: clamp(1.2rem, 1.05rem + 0.6vw, 1.4rem);
+  font-weight: 700;
+  letter-spacing: -0.018em;
+  margin-top: 2rem !important;
+  margin-bottom: 0.6rem !important;
+  scroll-margin-top: 5rem;
+}
+
+:root:has(.post-footer) .sl-markdown-content p {
+  text-wrap: pretty;
+  margin-block: 1.1rem;
+}
+
+/* --- 3c · Blockquotes — editorial pull-quote ----------------------------- */
+:root:has(.post-footer) .sl-markdown-content blockquote {
+  position: relative;
+  margin: 2rem 0;
+  padding: 1.25rem 1.5rem 1.25rem 2rem;
+  border: none;
+  border-inline-start: 3px solid var(--canna-blog-accent-strong);
+  border-radius: 0 var(--canna-blog-radius-sm) var(--canna-blog-radius-sm) 0;
+  background: light-dark(
+    oklch(0.97 0.03 162 / 0.7),
+    oklch(0.3 0.05 162 / 0.14)
+  );
+  color: light-dark(#1e293b, #cbd5e1);
+  font-size: 1.05em;
+  line-height: 1.7;
+}
+:root:has(.post-footer) .sl-markdown-content blockquote p {
+  margin-block: 0.5rem;
+}
+:root:has(.post-footer) .sl-markdown-content blockquote p:first-child {
+  margin-top: 0;
+}
+:root:has(.post-footer) .sl-markdown-content blockquote p:last-child {
+  margin-bottom: 0;
+}
+/* Italic "subject to review" style notes read as captions */
+:root:has(.post-footer) .sl-markdown-content blockquote em {
+  color: var(--canna-blog-muted);
+}
+
+/* --- 3d · Code: inline already styled in brand.css; harden code blocks --- */
+:root:has(.post-footer) .sl-markdown-content pre {
+  border-radius: var(--canna-blog-radius-sm);
+  border: 1px solid var(--canna-blog-card-border);
+  font-size: 0.875rem;
+  line-height: 1.65;
+}
+
+/* --- 3e · Links in prose ------------------------------------------------- */
+:root:has(.post-footer) .sl-markdown-content :not(pre) > a {
+  color: var(--canna-blog-accent);
+  text-decoration: underline;
+  text-decoration-color: oklch(0.72 0.16 162 / 0.4);
+  text-underline-offset: 0.18em;
+  text-decoration-thickness: 1px;
+  transition: text-decoration-color 0.15s ease-out, color 0.15s ease-out;
+}
+:root:has(.post-footer) .sl-markdown-content :not(pre) > a:hover {
+  color: var(--canna-blog-accent-strong);
+  text-decoration-color: currentColor;
+}
+
+/* --- 3f · Lists ---------------------------------------------------------- */
+:root:has(.post-footer) .sl-markdown-content ul li::marker {
+  color: var(--canna-blog-accent-strong);
+}
+:root:has(.post-footer) .sl-markdown-content ol li::marker {
+  color: var(--canna-blog-eyebrow);
+  font-variant-numeric: tabular-nums;
+}
+:root:has(.post-footer) .sl-markdown-content li {
+  margin-block: 0.4rem;
+}
+
+/* --- 3g · Tables (inherit brand.css emerald header; add measure) -------- */
+:root:has(.post-footer) .sl-markdown-content table {
+  font-size: 0.9rem;
+}
+
+/* --- 3h · Horizontal rule ------------------------------------------------ */
+:root:has(.post-footer) .sl-markdown-content hr {
+  border: none;
+  height: 1px;
+  margin-block: 2.5rem;
+  background: linear-gradient(90deg, transparent, var(--canna-blog-card-border), transparent);
+}
+
+/* ============================================================================
+   4 · POST FOOTER — tags (styled in §2) + prev/next pagination
+============================================================================ */
+.post-footer {
+  margin-top: 3rem !important;
+  padding-top: 2rem;
+  border-top: 1px solid var(--canna-blog-card-border);
+  gap: 2rem !important;
+}
+
+/* Prev/next link cards — match the brand card language.
+   starlight-blog 0.25.2 renders prev/next via Starlight's <LinkCard>, so the
+   DOM is `.post-footer .pagination > .card-grid > .sl-link-card > a`, NOT the
+   `.pagination-links` class older versions used. Style the `.sl-link-card`
+   box (the visible card surface) and keep the `.pagination-links a` legacy
+   selectors as a harmless fallback. */
+.post-footer .pagination .sl-link-card,
+.post-footer .pagination-links a,
+.pagination-links a {
+  border: 1px solid var(--canna-blog-card-border) !important;
+  border-radius: var(--canna-blog-radius-sm) !important;
+  background: var(--canna-blog-card-bg) !important;
+  box-shadow: var(--canna-blog-card-shadow) !important;
+  transition:
+    transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.18s ease-out,
+    background-color 0.18s ease-out,
+    box-shadow 0.18s ease-out;
+}
+.post-footer .pagination .sl-link-card:hover,
+.post-footer .pagination .sl-link-card:focus-within,
+.post-footer .pagination-links a:hover,
+.pagination-links a:hover {
+  transform: translateY(-2px);
+  border-color: var(--canna-blog-card-border-hover) !important;
+  background: var(--canna-blog-card-bg-hover) !important;
+  box-shadow: var(--canna-blog-card-shadow-hover) !important;
+}
+/* The actual anchor inside the LinkCard carries the focus ring */
+.post-footer .pagination .sl-link-card a:focus-visible,
+.pagination-links a:focus-visible {
+  outline: 2px solid var(--canna-blog-accent);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+.post-footer .pagination .sl-link-card .title,
+.pagination-links a .link-title {
+  color: light-dark(#0f172a, #f1f5f9);
+}
+/* The chevron icon Starlight ships adopts the emerald accent on hover */
+.post-footer .pagination .sl-link-card:hover .icon {
+  color: var(--canna-blog-accent);
+}
+
+/* ============================================================================
+   5 · TAG ARCHIVE PAGES (/blog/tags/<tag>/) reuse the .posts grid above.
+   The tag-list header gets the same hero treatment via the generic h1 rule.
+============================================================================ */
+
+/* ============================================================================
+   6 · RESPONSIVE — mobile 320px+
+============================================================================ */
+@media (max-width: 30rem) {
+  .posts {
+    gap: 1.1rem;
+    padding-top: 1.75rem;
+  }
+  .posts > article.preview {
+    padding: 1.35rem;
+  }
+  :root:has(.post-footer) .sl-markdown-content {
+    max-width: 100%;
+  }
+}
+
+/* ============================================================================
+   7 · MOTION — respect prefers-reduced-motion (heuristic: always wrap)
+============================================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .posts > article.preview,
+  .posts > article.preview::before,
+  .posts > article.preview h2 a,
+  .posts > article.preview .author .name,
+  .posts > article.preview > footer > div a,
+  .post-footer > div:has(> b) a,
+  .post-footer .pagination .sl-link-card,
+  .post-footer .pagination-links a,
+  .pagination-links a,
+  :root:has(.post-footer) .sl-markdown-content :not(pre) > a {
+    transition-duration: 0.01ms !important;
+  }
+  .posts > article.preview:hover,
+  .posts > article.preview:focus-within,
+  .post-footer .pagination .sl-link-card:hover,
+  .post-footer .pagination .sl-link-card:focus-within,
+  .post-footer .pagination-links a:hover,
+  .pagination-links a:hover {
+    transform: none !important;
+  }
+}

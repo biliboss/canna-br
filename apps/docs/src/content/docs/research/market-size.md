@@ -7,14 +7,14 @@ description: TAM/SAM/SOM para software de gestão de associações de cannabis n
 
 ## Contexto
 
-873k pacientes estimados pela ANVISA para 2026. 315 associações ativas operando sob HC judicial. Sandbox RDC 1.014 vigente agosto/2026 — janela que legitima e expande o setor.
+873k pacientes estimados pela ANVISA para 2026. 400+ associações mapeadas no Brasil; SAM ~315 endereçáveis, operando sob HC judicial. Sandbox RDC 1.014 vigente agosto/2026 — janela que legitima e expande o setor.
 
 ## Tamanho de Mercado
 
 | Nível | 2026 | 2028 | 2030 | Definição |
 |---|---|---|---|---|
 | **TAM** | R$25M | R$65M | R$130M | Todo software cannabis BR (pharma + B2G + associativo) |
-| **SAM** | R$9M | R$22M | R$47M | Software para associações (315 → ~800 projeção) |
+| **SAM** | R$9M | R$22M | R$47M | Software para associações (~315 endereçáveis de 400+ mapeadas → ~800 projeção) |
 | **SOM** | R$1.8M | R$8M | R$27M | OSS managed hosting ~57% penetração até 2030 |
 
 ## Mercado Pharma Cannabis BR (contexto)

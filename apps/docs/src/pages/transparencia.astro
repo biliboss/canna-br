@@ -1,0 +1,1049 @@
+---
+/**
+ * /transparencia/ — Transparência pública do canna-br.
+ *
+ * Secoes:
+ *   1. Por que transparência — tese OSS + observabilidade pública.
+ *   2. Estado da rede (StateSnapshot widget).
+ *   3. Roadmap — resumo v0.x + link canonical.
+ *   4. Changelog & releases recentes.
+ *   5. ADRs — decisões arquiteturais públicas.
+ *   6. Visão OSS — AGPL, self-host, auditabilidade.
+ *   7. Status do sistema — honesto: pré-piloto.
+ *
+ * MarketingLayout contract. Carimbo em destaque.
+ * ZERO linguagem de investimento/rendimento/retorno financeiro.
+ */
+
+import MarketingLayout from '../components/marketing/MarketingLayout.astro';
+import StateSnapshot from '../components/marketing/widgets/StateSnapshot.astro';
+---
+
+<MarketingLayout
+  title="Transparência — canna-br"
+  description="Roadmap público, changelog, releases, decisões de arquitetura (ADRs) e estado da rede do canna-br. Software aberto, evolução pública e indicadores visíveis."
+  canonical="https://canna-br.fonsecagabriel.com.br/transparencia/"
+>
+
+  <!-- ============================================================
+       HERO
+  ============================================================ -->
+  <section class="transp-hero">
+    <div class="transp-container">
+      <p class="transp-eyebrow">Transparência</p>
+      <h1 class="transp-h1">
+        Software aberto,<br class="hide-mobile" />
+        evolução pública e indicadores visíveis.
+      </h1>
+      <p class="transp-lead">
+        O canna-br não tem investidores. Não tem métricas de crescimento para esconder.
+        Tudo que existe — código, roadmap, decisões, releases, estado atual — está
+        documentado aqui e atualizável por qualquer pessoa.
+      </p>
+      <div class="transp-hero-badges">
+        <span class="transp-badge transp-badge--ok">
+          <span aria-hidden="true">●</span>
+          AGPL-3.0 — código aberto
+        </span>
+        <span class="transp-badge transp-badge--info">
+          <span aria-hidden="true">◐</span>
+          Pré-piloto — 0 associações em operação
+        </span>
+        <span class="transp-badge transp-badge--plan">
+          <span aria-hidden="true">○</span>
+          v0.2.1.2 LIVE · 154/154 testes verdes
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       POR QUE TRANSPARÊNCIA
+  ============================================================ -->
+  <section class="transp-section transp-section--alt">
+    <div class="transp-container">
+      <h2 class="transp-h2">Por que transparência?</h2>
+      <div class="transp-why-grid">
+        <div class="transp-why-card">
+          <div class="transp-why-icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+            </svg>
+          </div>
+          <h3 class="transp-why-title">Código auditável</h3>
+          <p class="transp-why-text">
+            Qualquer pessoa — advogada, diretora, fiscal — pode ler cada linha que
+            processa dados de saúde dos membros. AGPL-3.0: fork permitido, sem lock-in.
+          </p>
+        </div>
+        <div class="transp-why-card">
+          <div class="transp-why-icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+              <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+            </svg>
+          </div>
+          <h3 class="transp-why-title">Evolução declarada</h3>
+          <p class="transp-why-text">
+            Roadmap, releases e ADRs são documentos vivos. O que está pronto,
+            o que está planejado e por que decisões foram tomadas — tudo público.
+          </p>
+        </div>
+        <div class="transp-why-card">
+          <div class="transp-why-icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+          </div>
+          <h3 class="transp-why-title">Estado honesto</h3>
+          <p class="transp-why-text">
+            Não há números inflados. Pilotos ativos: 0. O carimbo de atualização
+            mostra quando os dados foram gerados. Confiar exige saber o que não existe ainda.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       ESTADO DA REDE (StateSnapshot widget)
+  ============================================================ -->
+  <section class="transp-section" id="estado-da-rede" aria-labelledby="estado-heading">
+    <div class="transp-container">
+      <p class="transp-eyebrow-sm">Indicadores públicos</p>
+      <h2 class="transp-h2" id="estado-heading">Estado da rede</h2>
+      <p class="transp-section-lead">
+        Dados gerados a partir do repositório e do roadmap. Quando o sistema entrar
+        em operação, um adaptador substitui este snapshot por leitura de API em tempo real
+        — sem mudar a interface abaixo.
+      </p>
+      <StateSnapshot />
+    </div>
+  </section>
+
+  <!-- ============================================================
+       ROADMAP
+  ============================================================ -->
+  <section class="transp-section transp-section--alt" id="roadmap" aria-labelledby="roadmap-heading">
+    <div class="transp-container">
+      <p class="transp-eyebrow-sm">Roadmap público</p>
+      <h2 class="transp-h2" id="roadmap-heading">O que está sendo construído</h2>
+      <p class="transp-section-lead">
+        Versões declaradas por Slice Vertical — cada entrega tem capability, valor e critério
+        de conclusão. Sem semanas; sem promessas vagas.
+      </p>
+
+      <div class="transp-roadmap-grid">
+        <div class="transp-rm-card transp-rm-card--done">
+          <div class="transp-rm-header">
+            <span class="transp-rm-badge transp-rm-badge--done">concluído</span>
+            <span class="transp-rm-version">v0.1</span>
+          </div>
+          <h3 class="transp-rm-title">Domain Blueprint</h3>
+          <p class="transp-rm-date">2026-06-08</p>
+          <ul class="transp-rm-list">
+            <li>Docs site Astro 5 + Starlight 0.37</li>
+            <li>DDD completo — 8 bounded contexts + 38 domain events</li>
+            <li>Pesquisa: marco legal, SNGPC, mercado, modelos internacionais</li>
+            <li>Business model AGPL-3 + managed hosting</li>
+          </ul>
+        </div>
+
+        <div class="transp-rm-card transp-rm-card--done">
+          <div class="transp-rm-header">
+            <span class="transp-rm-badge transp-rm-badge--done">concluído</span>
+            <span class="transp-rm-version">v0.2.1.2</span>
+          </div>
+          <h3 class="transp-rm-title">Compliance Spine + MCP-First</h3>
+          <p class="transp-rm-date">2026-06-10</p>
+          <ul class="transp-rm-list">
+            <li>154 testes verdes — 11 workspaces</li>
+            <li>Domain Kernel + Emmett PG adapter</li>
+            <li>Criptografia por membro (LGPD Art. 18 IV)</li>
+            <li>Mock SNGPC — XML schema</li>
+            <li>MCP server + 3 apps inline no chat</li>
+            <li>Open WebUI smoke validado end-to-end</li>
+            <li>Deploy VPS live (canna-br.fonsecagabriel.com.br)</li>
+          </ul>
+        </div>
+
+        <div class="transp-rm-card transp-rm-card--next">
+          <div class="transp-rm-header">
+            <span class="transp-rm-badge transp-rm-badge--next">planejado</span>
+            <span class="transp-rm-version">v0.3</span>
+          </div>
+          <h3 class="transp-rm-title">Pilot Ready</h3>
+          <p class="transp-rm-date">set/2026 → dez/2026</p>
+          <ul class="transp-rm-list">
+            <li>RBAC — papéis e segregação de funções</li>
+            <li>TOTP para comandos críticos</li>
+            <li>LGPD consent versionado</li>
+            <li>Crypto-deletion garantida</li>
+            <li>CSV import — migração de planilhas</li>
+          </ul>
+        </div>
+
+        <div class="transp-rm-card transp-rm-card--future">
+          <div class="transp-rm-header">
+            <span class="transp-rm-badge transp-rm-badge--future">futuro</span>
+            <span class="transp-rm-version">v0.4 – v1.0</span>
+          </div>
+          <h3 class="transp-rm-title">Dossier ANVISA → ERP completo</h3>
+          <p class="transp-rm-date">jan/2027 → 2028</p>
+          <ul class="transp-rm-list">
+            <li>v0.4 — Dossier ANVISA, KPI dashboard, BSPO, RIPD</li>
+            <li>v0.5 — SNGPC produção (quando ANVISA publicar XSD)</li>
+            <li>v1.0 — multi-tenant, managed hosting, cultivo e financeiro</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="transp-roadmap-link">
+        <a href="/roadmap/" class="transp-btn-outline">
+          Ver roadmap completo com todos os Slices Verticais →
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       CHANGELOG & RELEASES
+  ============================================================ -->
+  <section class="transp-section" id="releases" aria-labelledby="releases-heading">
+    <div class="transp-container">
+      <p class="transp-eyebrow-sm">Changelog & Releases</p>
+      <h2 class="transp-h2" id="releases-heading">Histórico de entregas</h2>
+      <p class="transp-section-lead">
+        Cada release é documentada com o que mudou, por que mudou e o estado dos testes.
+        Sem marketing retroativo — o que está escrito é o que foi entregue.
+      </p>
+
+      <div class="transp-changelog">
+        <div class="transp-cl-item">
+          <div class="transp-cl-marker" aria-hidden="true"></div>
+          <div class="transp-cl-body">
+            <div class="transp-cl-header">
+              <span class="transp-cl-version">v0.2.1.2</span>
+              <span class="transp-cl-date">2026-06-10</span>
+              <span class="transp-cl-badge transp-cl-badge--current">atual</span>
+            </div>
+            <p class="transp-cl-headline">
+              154/154 testes verdes · Renomeação canna-oss → canna-br · Deploy VPS live
+            </p>
+            <a href="/releases/v021/" class="transp-cl-link">Ver release completa →</a>
+          </div>
+        </div>
+
+        <div class="transp-cl-item">
+          <div class="transp-cl-marker" aria-hidden="true"></div>
+          <div class="transp-cl-body">
+            <div class="transp-cl-header">
+              <span class="transp-cl-version">v0.2.1</span>
+              <span class="transp-cl-date">2026-06-08</span>
+            </div>
+            <p class="transp-cl-headline">
+              Compliance Spine + MCP-First Surface · 146 testes · smoke OWUI validado · ADR-002
+            </p>
+            <a href="/releases/v021/" class="transp-cl-link">Ver release completa →</a>
+          </div>
+        </div>
+
+        <div class="transp-cl-item">
+          <div class="transp-cl-marker transp-cl-marker--mute" aria-hidden="true"></div>
+          <div class="transp-cl-body">
+            <div class="transp-cl-header">
+              <span class="transp-cl-version">v0.2.0b</span>
+              <span class="transp-cl-date">2026-06-08</span>
+            </div>
+            <p class="transp-cl-headline">
+              Emmett Postgres adapter · spike gate PASSED · parallel writers verdes em PG real
+            </p>
+          </div>
+        </div>
+
+        <div class="transp-cl-item">
+          <div class="transp-cl-marker transp-cl-marker--mute" aria-hidden="true"></div>
+          <div class="transp-cl-body">
+            <div class="transp-cl-header">
+              <span class="transp-cl-version">v0.2.0a</span>
+              <span class="transp-cl-date">2026-06-08</span>
+            </div>
+            <p class="transp-cl-headline">
+              Domain Kernel in-memory · 50 specs GIVEN/WHEN/THEN · Membership + Inventory + Dispensation
+            </p>
+          </div>
+        </div>
+
+        <div class="transp-cl-item">
+          <div class="transp-cl-marker transp-cl-marker--mute" aria-hidden="true"></div>
+          <div class="transp-cl-body">
+            <div class="transp-cl-header">
+              <span class="transp-cl-version">v0.1.0</span>
+              <span class="transp-cl-date">2026-06-08</span>
+            </div>
+            <p class="transp-cl-headline">
+              Domain Blueprint · DDD 8 bounded contexts · ADR-001 · business model AGPL-3
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       ADRs
+  ============================================================ -->
+  <section class="transp-section transp-section--alt" id="adrs" aria-labelledby="adrs-heading">
+    <div class="transp-container">
+      <p class="transp-eyebrow-sm">Decisões de arquitetura</p>
+      <h2 class="transp-h2" id="adrs-heading">ADRs — Architecture Decision Records</h2>
+      <p class="transp-section-lead">
+        Cada decisão relevante é registrada com contexto, alternativas consideradas e
+        consequências. ADR não é burocracia — é memória institucional auditável.
+      </p>
+
+      <div class="transp-adr-list">
+        <a href="/adr/0001-domain-kernel-emmett/" class="transp-adr-card">
+          <div class="transp-adr-num">ADR-001</div>
+          <div class="transp-adr-body">
+            <p class="transp-adr-title">Domain Kernel — Emmett event store</p>
+            <p class="transp-adr-desc">
+              Adoção de Emmett como event store — spike gate PASSED em Postgres real com
+              parallel writers + stale version + concurrent dispensation.
+            </p>
+          </div>
+          <div class="transp-adr-arrow" aria-hidden="true">→</div>
+        </a>
+
+        <a href="/adr/0002-mcp-first-surface/" class="transp-adr-card">
+          <div class="transp-adr-num">ADR-002</div>
+          <div class="transp-adr-body">
+            <p class="transp-adr-title">Surface pivot — MCP-First</p>
+            <p class="transp-adr-desc">
+              Admin Next.js descartado. Toda operação via MCP server + MCP Apps + Open WebUI.
+              Cancelou ~3-4 semanas de trabalho; mesma cobertura operacional, menos complexidade.
+            </p>
+          </div>
+          <div class="transp-adr-arrow" aria-hidden="true">→</div>
+        </a>
+
+        <a href="/adr/0003-stack-pivot-nats-surreal-dbos/" class="transp-adr-card">
+          <div class="transp-adr-num">ADR-003</div>
+          <div class="transp-adr-body">
+            <p class="transp-adr-title">Stack pivot — NATS + SurrealDB + DBOS</p>
+            <p class="transp-adr-desc">
+              Decisão sobre infraestrutura de mensageria, banco de dados e orquestração
+              de workflows duráveis.
+            </p>
+          </div>
+          <div class="transp-adr-arrow" aria-hidden="true">→</div>
+        </a>
+
+        <a href="/adr/0004-simulation-vps/" class="transp-adr-card">
+          <div class="transp-adr-num">ADR-004</div>
+          <div class="transp-adr-body">
+            <p class="transp-adr-title">Simulação VPS — validação de deploy</p>
+            <p class="transp-adr-desc">
+              Estratégia de validação de deploy em VPS antes do piloto real —
+              Coolify + Traefik + wildcard TLS.
+            </p>
+          </div>
+          <div class="transp-adr-arrow" aria-hidden="true">→</div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       VISÃO OSS
+  ============================================================ -->
+  <section class="transp-section" id="oss" aria-labelledby="oss-heading">
+    <div class="transp-container">
+      <p class="transp-eyebrow-sm">Visão OSS</p>
+      <h2 class="transp-h2" id="oss-heading">Por que código aberto?</h2>
+
+      <div class="transp-oss-grid">
+        <div class="transp-oss-body">
+          <p class="transp-oss-text">
+            O canna-br é licenciado sob AGPL-3.0. Isso significa que qualquer modificação
+            — inclusive se alguém usar o código para construir um SaaS concorrente — precisa
+            ser devolvida como código aberto.
+          </p>
+          <p class="transp-oss-text">
+            A escolha não é altruísmo; é estratégia. Associações de cannabis operam em
+            território regulatório complexo e precisam de software que possa ser auditado,
+            modificado e entendido pela própria diretoria jurídica — não apenas pela empresa
+            que fornece o produto.
+          </p>
+          <p class="transp-oss-text">
+            Self-host é sempre uma opção. Managed hosting é o modelo sustentável para quem
+            não quer gerenciar infraestrutura — mas o código nunca fica trancado.
+          </p>
+        </div>
+
+        <div class="transp-oss-aside">
+          <div class="transp-oss-item">
+            <span class="transp-oss-label">Licença</span>
+            <span class="transp-oss-value">AGPL-3.0</span>
+          </div>
+          <div class="transp-oss-item">
+            <span class="transp-oss-label">Repositório</span>
+            <a href="https://github.com/biliboss/canna-br" class="transp-oss-link" target="_blank" rel="noopener noreferrer">
+              github.com/biliboss/canna-br
+            </a>
+          </div>
+          <div class="transp-oss-item">
+            <span class="transp-oss-label">Fork permitido?</span>
+            <span class="transp-oss-value">Sim — mantenha a licença AGPL</span>
+          </div>
+          <div class="transp-oss-item">
+            <span class="transp-oss-label">Self-host</span>
+            <span class="transp-oss-value">Sempre disponível</span>
+          </div>
+          <div class="transp-oss-item">
+            <span class="transp-oss-label">Lock-in</span>
+            <span class="transp-oss-value">Zero — dados são seus</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       STATUS DO SISTEMA (honesto: pré-piloto)
+  ============================================================ -->
+  <section class="transp-section transp-section--alt" id="status" aria-labelledby="status-heading">
+    <div class="transp-container">
+      <p class="transp-eyebrow-sm">Status atual</p>
+      <h2 class="transp-h2" id="status-heading">Estado do sistema — pré-piloto</h2>
+
+      <div class="transp-status-grid">
+        <div class="transp-status-card transp-status-card--ok">
+          <div class="transp-status-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+          <p class="transp-status-title">Domain kernel</p>
+          <p class="transp-status-desc">Eventos, invariantes e trilha de auditoria — 154/154 testes verdes</p>
+        </div>
+
+        <div class="transp-status-card transp-status-card--ok">
+          <div class="transp-status-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+          <p class="transp-status-title">MCP server + apps</p>
+          <p class="transp-status-desc">3 apps inline validados — smoke OWUI v0.9.6 end-to-end</p>
+        </div>
+
+        <div class="transp-status-card transp-status-card--ok">
+          <div class="transp-status-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+          <p class="transp-status-title">Deploy VPS</p>
+          <p class="transp-status-desc">canna-br.fonsecagabriel.com.br — Coolify + Traefik, TLS ativo</p>
+        </div>
+
+        <div class="transp-status-card transp-status-card--wait">
+          <div class="transp-status-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+            </svg>
+          </div>
+          <p class="transp-status-title">Piloto com associação real</p>
+          <p class="transp-status-desc">Vagas abertas — critérios e onboarding em <a href="/piloto/" class="transp-status-link">Piloto</a></p>
+        </div>
+
+        <div class="transp-status-card transp-status-card--wait">
+          <div class="transp-status-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+            </svg>
+          </div>
+          <p class="transp-status-title">SNGPC produção</p>
+          <p class="transp-status-desc">Mock XML pronto — aguardando ANVISA publicar schema XSD específico para associações</p>
+        </div>
+
+        <div class="transp-status-card transp-status-card--plan">
+          <div class="transp-status-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+          </div>
+          <p class="transp-status-title">RBAC e autenticação TOTP</p>
+          <p class="transp-status-desc">Planejado para v0.3 (set/2026) — requisito para associações reais</p>
+        </div>
+      </div>
+
+      <div class="transp-honesty-note">
+        <p class="transp-honesty-text">
+          <strong>Honestidade acima de marketing:</strong> o canna-br está em estágio
+          pré-piloto. O código existe, os testes passam, o deploy está no ar — mas nenhuma
+          associação usa em produção ainda. Os indicadores acima refletem isso com precisão.
+        </p>
+        <a href="/piloto/" class="transp-btn-primary">Entrar como piloto →</a>
+      </div>
+    </div>
+  </section>
+
+</MarketingLayout>
+
+<style>
+  /* ================================================================
+     TRANSPARÊNCIA — dark slate + emerald tokens, espelha index.astro
+  ================================================================ */
+
+  /* ── shared ── */
+  .transp-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  .transp-eyebrow {
+    font-size: 0.72rem;
+    font-family: ui-monospace, "JetBrains Mono", monospace;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #10b981;
+    margin: 0 0 1rem;
+  }
+  .transp-eyebrow-sm {
+    font-size: 0.7rem;
+    font-family: ui-monospace, "JetBrains Mono", monospace;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #10b981;
+    margin: 0 0 0.6rem;
+  }
+
+  .transp-h1 {
+    font-size: clamp(2rem, 5vw, 3.25rem);
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    margin: 0 0 1.25rem;
+  }
+  .hide-mobile { display: inline; }
+  @media (max-width: 480px) { .hide-mobile { display: none; } }
+
+  .transp-h2 {
+    font-size: clamp(1.5rem, 3vw, 2.1rem);
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.25;
+    letter-spacing: -0.025em;
+    margin: 0 0 0.75rem;
+  }
+
+  .transp-lead {
+    color: #94a3b8;
+    font-size: 1.05rem;
+    line-height: 1.7;
+    max-width: 680px;
+    margin: 0 0 2rem;
+  }
+
+  .transp-section-lead {
+    color: #94a3b8;
+    font-size: 0.95rem;
+    line-height: 1.65;
+    max-width: 640px;
+    margin: 0 0 2rem;
+  }
+
+  /* ── sections ── */
+  .transp-hero {
+    background: linear-gradient(180deg, oklch(0.12 0.04 162 / 0.9) 0%, #020617 100%);
+    padding: 6rem 0 4rem;
+    border-bottom: 1px solid oklch(0.28 0.04 162 / 0.25);
+  }
+
+  .transp-section {
+    padding: 5rem 0;
+  }
+
+  .transp-section--alt {
+    padding: 5rem 0;
+    background: oklch(0.09 0.01 250 / 0.6);
+    border-top: 1px solid oklch(0.22 0.02 250 / 0.5);
+    border-bottom: 1px solid oklch(0.22 0.02 250 / 0.5);
+  }
+
+  /* ── hero badges ── */
+  .transp-hero-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+  .transp-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.72rem;
+    font-family: ui-monospace, "JetBrains Mono", monospace;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    padding: 0.2rem 0.65rem;
+    border-radius: 999px;
+    border: 1px solid transparent;
+  }
+  .transp-badge--ok   { color: oklch(0.84 0.14 162); background: oklch(0.5 0.12 162 / 0.12); border-color: oklch(0.5 0.12 162 / 0.4); }
+  .transp-badge--info { color: oklch(0.82 0.12 75);  background: oklch(0.55 0.12 75 / 0.12);  border-color: oklch(0.55 0.12 75 / 0.4); }
+  .transp-badge--plan { color: oklch(0.72 0.02 250); background: oklch(0.45 0.02 250 / 0.18); border-color: oklch(0.5 0.02 250 / 0.5); }
+
+  /* ── por que transparência ── */
+  .transp-why-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+    gap: 1.25rem;
+  }
+  .transp-why-card {
+    background: oklch(0.15 0.015 250);
+    border: 1px solid oklch(0.28 0.04 162 / 0.4);
+    border-radius: 16px;
+    padding: 1.5rem;
+  }
+  .transp-why-icon {
+    width: 2.25rem;
+    height: 2.25rem;
+    background: oklch(0.22 0.06 162 / 0.5);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #10b981;
+    margin-bottom: 1rem;
+  }
+  .transp-why-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 0.5rem;
+  }
+  .transp-why-text {
+    font-size: 0.875rem;
+    color: #94a3b8;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  /* ── roadmap grid ── */
+  .transp-roadmap-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .transp-rm-card {
+    border-radius: 16px;
+    padding: 1.25rem;
+    border: 1px solid transparent;
+  }
+  .transp-rm-card--done   { background: oklch(0.16 0.02 162 / 0.4); border-color: oklch(0.45 0.12 162 / 0.5); }
+  .transp-rm-card--next   { background: oklch(0.15 0.015 250);       border-color: oklch(0.55 0.12 162 / 0.6); }
+  .transp-rm-card--future { background: oklch(0.14 0.01 250);        border-color: oklch(0.35 0.02 250 / 0.5); }
+
+  .transp-rm-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.6rem;
+  }
+  .transp-rm-badge {
+    font-size: 0.63rem;
+    font-family: ui-monospace, "JetBrains Mono", monospace;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.1rem 0.45rem;
+    border-radius: 999px;
+    border: 1px solid transparent;
+  }
+  .transp-rm-badge--done   { color: oklch(0.84 0.14 162); background: oklch(0.5 0.12 162 / 0.15); border-color: oklch(0.5 0.12 162 / 0.45); }
+  .transp-rm-badge--next   { color: #fff;                 background: oklch(0.45 0.15 162 / 0.5);  border-color: oklch(0.55 0.15 162 / 0.7); }
+  .transp-rm-badge--future { color: oklch(0.72 0.02 250); background: oklch(0.45 0.02 250 / 0.2);  border-color: oklch(0.5 0.02 250 / 0.5); }
+
+  .transp-rm-version {
+    font-size: 0.72rem;
+    font-family: ui-monospace, "JetBrains Mono", monospace;
+    font-weight: 700;
+    color: #8595ab;
+    letter-spacing: 0.04em;
+  }
+  .transp-rm-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #e2e8f0;
+    margin: 0 0 0.2rem;
+  }
+  .transp-rm-date {
+    font-size: 0.75rem;
+    color: #8595ab;
+    font-family: ui-monospace, "JetBrains Mono", monospace;
+    margin: 0 0 0.75rem;
+  }
+  .transp-rm-list {
+    list-style: none;
+    margin: 0; padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+  .transp-rm-list li {
+    font-size: 0.82rem;
+    color: #94a3b8;
+    padding-left: 1rem;
+    position: relative;
+    line-height: 1.4;
+  }
+  .transp-rm-list li::before {
+    content: "·";
+    position: absolute;
+    left: 0;
+    color: #10b981;
+  }
+
+  .transp-roadmap-link {
+    text-align: center;
+  }
+
+  /* ── changelog ── */
+  .transp-changelog {
+    position: relative;
+    padding-left: 1.5rem;
+    border-left: 2px solid oklch(0.28 0.04 162 / 0.4);
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .transp-cl-item {
+    position: relative;
+    padding: 0 0 2rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+  }
+  .transp-cl-item:last-child { padding-bottom: 0; }
+
+  .transp-cl-marker {
+    position: absolute;
+    left: -0.45rem;
+    top: 0.25rem;
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+    background: oklch(0.72 0.17 162);
+    border: 2px solid #020617;
+  }
+  .transp-cl-marker--mute {
+    background: oklch(0.38 0.02 250);
+  }
+
+  .transp-cl-body { flex: 1; }
+  .transp-cl-header {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.35rem;
+  }
+  .transp-cl-version {
+    font-size: 0.85rem;
+    font-family: ui-monospace, "JetBrains Mono", monospace;
+    font-weight: 700;
+    color: #fff;
+  }
+  .transp-cl-date {
+    font-size: 0.75rem;
+    color: #8595ab;
+    font-family: ui-monospace, "JetBrains Mono", monospace;
+  }
+  .transp-cl-badge {
+    font-size: 0.62rem;
+    font-family: ui-monospace, "JetBrains Mono", monospace;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.08rem 0.4rem;
+    border-radius: 999px;
+    border: 1px solid transparent;
+  }
+  .transp-cl-badge--current {
+    color: oklch(0.84 0.14 162);
+    background: oklch(0.5 0.12 162 / 0.15);
+    border-color: oklch(0.5 0.12 162 / 0.45);
+  }
+  .transp-cl-headline {
+    font-size: 0.875rem;
+    color: #94a3b8;
+    line-height: 1.55;
+    margin: 0 0 0.35rem;
+    max-width: 640px;
+  }
+  .transp-cl-link {
+    font-size: 0.78rem;
+    font-family: ui-monospace, "JetBrains Mono", monospace;
+    color: oklch(0.72 0.17 162);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+  .transp-cl-link:hover { color: #fff; text-decoration: underline; }
+  .transp-cl-link:focus-visible { outline: 2px solid #6ee7b7; outline-offset: 2px; border-radius: 2px; }
+
+  /* ── ADRs ── */
+  .transp-adr-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .transp-adr-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    background: oklch(0.15 0.015 250);
+    border: 1px solid oklch(0.28 0.04 162 / 0.35);
+    border-radius: 12px;
+    padding: 1.1rem 1.25rem;
+    text-decoration: none;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .transp-adr-card:hover {
+    background: oklch(0.18 0.015 250);
+    border-color: oklch(0.55 0.12 162 / 0.6);
+  }
+  .transp-adr-card:focus-visible {
+    outline: 2px solid #6ee7b7;
+    outline-offset: 2px;
+    border-radius: 12px;
+  }
+  .transp-adr-num {
+    font-size: 0.7rem;
+    font-family: ui-monospace, "JetBrains Mono", monospace;
+    font-weight: 700;
+    color: oklch(0.72 0.17 162);
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+    padding-top: 0.1rem;
+    min-width: 4.5rem;
+  }
+  .transp-adr-body { flex: 1; min-width: 0; }
+  .transp-adr-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #e2e8f0;
+    margin: 0 0 0.25rem;
+  }
+  .transp-adr-desc {
+    font-size: 0.8rem;
+    color: #8595ab;
+    line-height: 1.5;
+    margin: 0;
+  }
+  .transp-adr-arrow {
+    color: #748396;
+    font-size: 1rem;
+    padding-top: 0.05rem;
+    flex-shrink: 0;
+    transition: color 0.15s;
+  }
+  .transp-adr-card:hover .transp-adr-arrow { color: oklch(0.72 0.17 162); }
+
+  /* ── visão OSS ── */
+  .transp-oss-grid {
+    display: grid;
+    grid-template-columns: 1fr minmax(min(100%, 260px), 260px);
+    gap: 3rem;
+    align-items: start;
+  }
+  @media (max-width: 760px) {
+    .transp-oss-grid { grid-template-columns: 1fr; gap: 2rem; }
+  }
+  .transp-oss-text {
+    font-size: 0.95rem;
+    color: #94a3b8;
+    line-height: 1.7;
+    margin: 0 0 1rem;
+  }
+  .transp-oss-aside {
+    background: oklch(0.15 0.015 250);
+    border: 1px solid oklch(0.28 0.04 162 / 0.4);
+    border-radius: 14px;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+  .transp-oss-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid oklch(0.26 0.02 250 / 0.5);
+  }
+  .transp-oss-item:last-child { border-bottom: 0; padding-bottom: 0; }
+  .transp-oss-label {
+    font-size: 0.68rem;
+    font-family: ui-monospace, "JetBrains Mono", monospace;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #8595ab;
+  }
+  .transp-oss-value {
+    font-size: 0.85rem;
+    color: #e2e8f0;
+    font-weight: 500;
+  }
+  .transp-oss-link {
+    font-size: 0.85rem;
+    color: oklch(0.72 0.17 162);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+  .transp-oss-link:hover { color: #fff; text-decoration: underline; }
+  .transp-oss-link:focus-visible { outline: 2px solid #6ee7b7; outline-offset: 2px; border-radius: 2px; }
+
+  /* ── status ── */
+  .transp-status-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .transp-status-card {
+    border-radius: 14px;
+    padding: 1.1rem 1.25rem;
+    border: 1px solid transparent;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+  .transp-status-card--ok   { background: oklch(0.16 0.02 162 / 0.35); border-color: oklch(0.45 0.12 162 / 0.45); }
+  .transp-status-card--wait { background: oklch(0.16 0.015 75 / 0.25);  border-color: oklch(0.55 0.1 75 / 0.4); }
+  .transp-status-card--plan { background: oklch(0.14 0.01 250);          border-color: oklch(0.35 0.02 250 / 0.5); }
+
+  .transp-status-icon {
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .transp-status-card--ok   .transp-status-icon { color: #10b981; background: oklch(0.22 0.06 162 / 0.4); }
+  .transp-status-card--wait .transp-status-icon { color: oklch(0.82 0.12 75); background: oklch(0.3 0.08 75 / 0.3); }
+  .transp-status-card--plan .transp-status-icon { color: #64748b; background: oklch(0.25 0.01 250 / 0.5); }
+
+  .transp-status-title {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #e2e8f0;
+    margin: 0;
+  }
+  .transp-status-desc {
+    font-size: 0.78rem;
+    color: #94a3b8;
+    line-height: 1.5;
+    margin: 0;
+  }
+  .transp-status-link {
+    color: oklch(0.82 0.16 162);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    transition: color 0.15s;
+  }
+  .transp-status-link:hover { color: #fff; }
+
+  /* ── honesty note ── */
+  .transp-honesty-note {
+    background: oklch(0.15 0.015 250);
+    border: 1px solid oklch(0.28 0.04 162 / 0.35);
+    border-radius: 16px;
+    padding: 1.75rem 2rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1.5rem;
+    justify-content: space-between;
+  }
+  .transp-honesty-text {
+    font-size: 0.9rem;
+    color: #94a3b8;
+    line-height: 1.65;
+    margin: 0;
+    max-width: 620px;
+    flex: 1;
+  }
+  .transp-honesty-text strong { color: #e2e8f0; }
+
+  /* ── buttons ── */
+  .transp-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.55rem 1.4rem;
+    background: #10b981;
+    color: #020617;
+    font-weight: 700;
+    font-size: 0.88rem;
+    border-radius: 999px;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background 0.15s, box-shadow 0.15s;
+    flex-shrink: 0;
+  }
+  .transp-btn-primary:hover {
+    background: #34d399;
+    box-shadow: 0 0 0 3px oklch(0.72 0.17 162 / 0.25);
+  }
+  .transp-btn-primary:focus-visible {
+    outline: 2px solid #6ee7b7;
+    outline-offset: 2px;
+  }
+
+  .transp-btn-outline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 100%;
+    padding: 0.5rem 1.2rem;
+    border: 1px solid oklch(0.5 0.12 162 / 0.5);
+    background: oklch(0.5 0.12 162 / 0.08);
+    color: oklch(0.82 0.16 162);
+    font-weight: 600;
+    font-size: 0.85rem;
+    border-radius: 999px;
+    text-decoration: none;
+    text-align: center;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+  }
+  .transp-btn-outline:hover {
+    background: oklch(0.5 0.12 162 / 0.18);
+    border-color: oklch(0.5 0.12 162 / 0.8);
+    color: #fff;
+  }
+  .transp-btn-outline:focus-visible {
+    outline: 2px solid #6ee7b7;
+    outline-offset: 2px;
+  }
+
+  /* ── reduced motion ── */
+  @media (prefers-reduced-motion: reduce) {
+    .transp-why-card,
+    .transp-adr-card,
+    .transp-btn-primary,
+    .transp-btn-outline,
+    .transp-cl-link,
+    .transp-oss-link,
+    .transp-status-link {
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>
