@@ -1,0 +1,100 @@
+---
+title: "v0.1.0 — Coordenação Medida + Custo de IA"
+description: "Ledger de métricas de coordenação e custo de IA da missão canna v0.1.0 finalize — lead time, cycle time por lane, WIP, SLA e custo USD pago por Gabriel Fonseca. Entrada #1 do cost ledger da empresa."
+---
+
+import CoordMetrics from '../../../components/CoordMetrics.astro';
+
+Toda missão coordenada do canna-br é **medida** (lead time, cycle time por lane, throughput, WIP, flow efficiency, SLA) e **contabilizada** (custo de IA por lane, pago por Gabriel Fonseca). Esta página é a **Entrada #1 do cost ledger da empresa** — audit trail permanente de quanto custou, quanto levou e como foi organizado o trabalho.
+
+> **Premissa:** _Everything is metrified._ Cada missão rastreada no ledger SurrealDB do manager via task ID. Cada lane com cycle time e custo individualizados.
+
+## Missão: canna v0.1.0 finalize
+
+<table>
+  <tbody>
+    <tr><td><strong>Data</strong></td><td>2026-06-11</td></tr>
+    <tr><td><strong>Task ID</strong></td><td><code>task#7hf358</code></td></tr>
+    <tr><td><strong>Motor</strong></td><td>Claude Code Workflow tool</td></tr>
+    <tr><td><strong>Modelo</strong></td><td><code>claude-sonnet-4-6</code></td></tr>
+    <tr><td><strong>Wall clock</strong></td><td>329.6 s (5 min 29.6 s)</td></tr>
+    <tr><td><strong>Lead time</strong></td><td><strong>9 min</strong> (abertura → fechamento da missão)</td></tr>
+  </tbody>
+</table>
+
+## Fluxo Kanban — Métricas
+
+<CoordMetrics />
+
+## Custo de IA — Cost Ledger
+
+A seção acima já exibe o ledger completo e os gráficos de custo por lane. O custo total de **US$ 2,29** é dominado por **cache writes** — ao inicializar 3 lanes em paralelo com contexto completo do projeto, cada lane paga o custo de primeiro priming do cache. Execuções subsequentes da mesma missão (mesma base de código, mesmo contexto) custariam significativamente menos.
+
+**Cache economics desta missão:**
+
+<ul>
+  <li><strong>widget-html</strong> foi a lane mais cara em tokens (1.112.243) mas também a mais complexa (remoção de campos no DOM + DOM diffing). Custo proporcional.</li>
+  <li><strong>verify</strong> foi a lane mais cara em USD ($0.73) apesar de ter menos tokens — sugere que o verify fez mais leituras de contexto frio (build completo com 288 páginas).</li>
+  <li>As duas lanes de domínio (<code>page-mdx</code> e <code>invite-comp</code>) foram as mais baratas e mais rápidas — escopo cirúrgico.</li>
+</ul>
+
+## Como foi coordenado
+
+A missão usou o **Claude Code Workflow tool** com 3 lanes de trabalho paralelas seguidas de uma lane de verificação sequencial:
+
+<ol>
+  <li><strong>Decomposição</strong> — a missão foi dividida em 3 lanes de arquivo isolado (sem race condition de git): <code>page-mdx</code>, <code>invite-comp</code>, <code>widget-html</code>.</li>
+  <li><strong>Execução paralela</strong> — as 3 lanes work rodaram simultaneamente, cada uma com timebox implícito de &lt;5 min. O speedup medido foi <strong>1.53×</strong> vs execução sequencial.</li>
+  <li><strong>Barrier semântico</strong> — o Workflow tool aguardou todas as 3 lanes work concluírem antes de iniciar a lane verify.</li>
+  <li><strong>Verify sequencial</strong> — <code>verify</code> rodou build completo (288 páginas), grep de sanidade e render check. Resultado: build green ✓.</li>
+</ol>
+
+**Premissas de coordenação aplicadas:**
+
+<ul>
+  <li>Coord roda em Opus — sub-agents (lanes) rodam em Sonnet (custo proporcional ao escopo).</li>
+  <li>Cada lane é stateless e file-isolated — sem conflito de merge entre lanes paralelas.</li>
+  <li>Lead time é medido no manager SurrealDB: <code>MIN(created_at)</code> → <code>MAX(closed_at)</code> da missão.</li>
+  <li>Custo por lane registrado no ledger junto com token breakdown (input / output / cache_write / cache_read).</li>
+</ul>
+
+Referência de arquitetura: [manager skill](/roadmap/v0-1-0/) · ledger SurrealDB em produção · task <code>task#7hf358</code>.
+
+## Próximas entradas do ledger
+
+As entradas #2 e #3 cobrirão despesas de infraestrutura do v0.1.0 (domínio + e-mail), cujos valores estão **pendentes de confirmação com Gabriel Fonseca**:
+
+<table>
+  <thead>
+    <tr>
+      <th>Entrada</th>
+      <th>Item</th>
+      <th>Fornecedor</th>
+      <th>Valor</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>#1</td>
+      <td>IA — missão canna v0.1.0 finalize</td>
+      <td>Anthropic (Claude)</td>
+      <td>US$ 2,29</td>
+      <td><strong>Pago ✓</strong></td>
+    </tr>
+    <tr>
+      <td>#2</td>
+      <td>Domínio <code>cannabr.org</code></td>
+      <td>Hostinger</td>
+      <td>a confirmar</td>
+      <td>Pendente</td>
+    </tr>
+    <tr>
+      <td>#3</td>
+      <td>Plano e-mail Hostinger</td>
+      <td>Hostinger</td>
+      <td>a confirmar</td>
+      <td>Pendente</td>
+    </tr>
+  </tbody>
+</table>

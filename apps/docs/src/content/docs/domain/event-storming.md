@@ -9,7 +9,7 @@ description: Mapeamento completo de domain events, commands, aggregates e polici
 </div>
 
 <div style="width:100%;height:82vh;border:1px solid #3f3f46;border-radius:8px;overflow:hidden;margin-bottom:24px;">
-  <iframe src="/event-storming-board.html" style="width:100%;height:100%;border:none;" title="Event Storming Board — canna-oss" />
+  <iframe src="/event-storming-board.html" style="width:100%;height:100%;border:none;" title="Event Storming Board — canna-br" />
 </div>
 
 <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:28px;">

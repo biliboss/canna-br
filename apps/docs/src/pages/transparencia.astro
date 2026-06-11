@@ -17,6 +17,7 @@
 
 import MarketingLayout from '../components/marketing/MarketingLayout.astro';
 import StateSnapshot from '../components/marketing/widgets/StateSnapshot.astro';
+import ReleasesDashboard from '../components/marketing/widgets/ReleasesDashboard.astro';
 ---
 
 <MarketingLayout
@@ -32,13 +33,14 @@ import StateSnapshot from '../components/marketing/widgets/StateSnapshot.astro';
     <div class="transp-container">
       <p class="transp-eyebrow">Transparência</p>
       <h1 class="transp-h1">
-        Software aberto,<br class="hide-mobile" />
-        evolução pública e indicadores visíveis.
+        Tudo aberto:<br class="hide-mobile" />
+        código, roadmap, decisões, estado atual.
       </h1>
       <p class="transp-lead">
-        O canna-br não tem investidores. Não tem métricas de crescimento para esconder.
-        Tudo que existe — código, roadmap, decisões, releases, estado atual — está
-        documentado aqui e atualizável por qualquer pessoa.
+        Não pedimos confiança sem evidências. O canna-br não tem investidores,
+        não tem métricas de crescimento para esconder, e não tem código proprietário
+        trancado em servidor privado. Tudo que existe — código, roadmap, decisões,
+        releases, estado atual — está documentado aqui e atualizável por qualquer pessoa.
       </p>
       <div class="transp-hero-badges">
         <span class="transp-badge transp-badge--ok">
@@ -51,7 +53,7 @@ import StateSnapshot from '../components/marketing/widgets/StateSnapshot.astro';
         </span>
         <span class="transp-badge transp-badge--plan">
           <span aria-hidden="true">○</span>
-          v0.2.1.2 LIVE · 154/154 testes verdes
+          v0.1.0 · fundação usável · 154/154 testes verdes
         </span>
       </div>
     </div>
@@ -62,7 +64,7 @@ import StateSnapshot from '../components/marketing/widgets/StateSnapshot.astro';
   ============================================================ -->
   <section class="transp-section transp-section--alt">
     <div class="transp-container">
-      <h2 class="transp-h2">Por que transparência?</h2>
+      <h2 class="transp-h2">Por que transparência — e não apenas código aberto?</h2>
       <div class="transp-why-grid">
         <div class="transp-why-card">
           <div class="transp-why-icon" aria-hidden="true">
@@ -96,10 +98,11 @@ import StateSnapshot from '../components/marketing/widgets/StateSnapshot.astro';
               <polyline points="12 6 12 12 16 14"/>
             </svg>
           </div>
-          <h3 class="transp-why-title">Estado honesto</h3>
+          <h3 class="transp-why-title">Estado honesto — inclusive o que falta</h3>
           <p class="transp-why-text">
-            Não há números inflados. Pilotos ativos: 0. O carimbo de atualização
-            mostra quando os dados foram gerados. Confiar exige saber o que não existe ainda.
+            Pilotos ativos: 0. SNGPC: mock, aguardando XSD da ANVISA.
+            O carimbo de atualização mostra quando os dados foram gerados.
+            Dizer o que ainda não existe é parte do que construímos.
           </p>
         </div>
       </div>
@@ -114,9 +117,9 @@ import StateSnapshot from '../components/marketing/widgets/StateSnapshot.astro';
       <p class="transp-eyebrow-sm">Indicadores públicos</p>
       <h2 class="transp-h2" id="estado-heading">Estado da rede</h2>
       <p class="transp-section-lead">
-        Dados gerados a partir do repositório e do roadmap. Quando o sistema entrar
-        em operação, um adaptador substitui este snapshot por leitura de API em tempo real
-        — sem mudar a interface abaixo.
+        Indicadores gerados a partir do repositório e do roadmap — à vista,
+        com carimbo de quando foram atualizados. Quando o sistema entrar em operação,
+        este snapshot será substituído por leitura em tempo real, sem mudar a interface.
       </p>
       <StateSnapshot />
     </div>
@@ -134,69 +137,8 @@ import StateSnapshot from '../components/marketing/widgets/StateSnapshot.astro';
         de conclusão. Sem semanas; sem promessas vagas.
       </p>
 
-      <div class="transp-roadmap-grid">
-        <div class="transp-rm-card transp-rm-card--done">
-          <div class="transp-rm-header">
-            <span class="transp-rm-badge transp-rm-badge--done">concluído</span>
-            <span class="transp-rm-version">v0.1</span>
-          </div>
-          <h3 class="transp-rm-title">Domain Blueprint</h3>
-          <p class="transp-rm-date">2026-06-08</p>
-          <ul class="transp-rm-list">
-            <li>Docs site Astro 5 + Starlight 0.37</li>
-            <li>DDD completo — 8 bounded contexts + 38 domain events</li>
-            <li>Pesquisa: marco legal, SNGPC, mercado, modelos internacionais</li>
-            <li>Business model AGPL-3 + managed hosting</li>
-          </ul>
-        </div>
-
-        <div class="transp-rm-card transp-rm-card--done">
-          <div class="transp-rm-header">
-            <span class="transp-rm-badge transp-rm-badge--done">concluído</span>
-            <span class="transp-rm-version">v0.2.1.2</span>
-          </div>
-          <h3 class="transp-rm-title">Compliance Spine + MCP-First</h3>
-          <p class="transp-rm-date">2026-06-10</p>
-          <ul class="transp-rm-list">
-            <li>154 testes verdes — 11 workspaces</li>
-            <li>Domain Kernel + Emmett PG adapter</li>
-            <li>Criptografia por membro (LGPD Art. 18 IV)</li>
-            <li>Mock SNGPC — XML schema</li>
-            <li>MCP server + 3 apps inline no chat</li>
-            <li>Open WebUI smoke validado end-to-end</li>
-            <li>Deploy VPS live (canna-br.fonsecagabriel.com.br)</li>
-          </ul>
-        </div>
-
-        <div class="transp-rm-card transp-rm-card--next">
-          <div class="transp-rm-header">
-            <span class="transp-rm-badge transp-rm-badge--next">planejado</span>
-            <span class="transp-rm-version">v0.3</span>
-          </div>
-          <h3 class="transp-rm-title">Pilot Ready</h3>
-          <p class="transp-rm-date">set/2026 → dez/2026</p>
-          <ul class="transp-rm-list">
-            <li>RBAC — papéis e segregação de funções</li>
-            <li>TOTP para comandos críticos</li>
-            <li>LGPD consent versionado</li>
-            <li>Crypto-deletion garantida</li>
-            <li>CSV import — migração de planilhas</li>
-          </ul>
-        </div>
-
-        <div class="transp-rm-card transp-rm-card--future">
-          <div class="transp-rm-header">
-            <span class="transp-rm-badge transp-rm-badge--future">futuro</span>
-            <span class="transp-rm-version">v0.4 – v1.0</span>
-          </div>
-          <h3 class="transp-rm-title">Dossier ANVISA → ERP completo</h3>
-          <p class="transp-rm-date">jan/2027 → 2028</p>
-          <ul class="transp-rm-list">
-            <li>v0.4 — Dossier ANVISA, KPI dashboard, BSPO, RIPD</li>
-            <li>v0.5 — SNGPC produção (quando ANVISA publicar XSD)</li>
-            <li>v1.0 — multi-tenant, managed hosting, cultivo e financeiro</li>
-          </ul>
-        </div>
+      <div class="transp-widget-wrap">
+        <ReleasesDashboard view="roadmap" />
       </div>
 
       <div class="transp-roadmap-link">
@@ -219,74 +161,8 @@ import StateSnapshot from '../components/marketing/widgets/StateSnapshot.astro';
         Sem marketing retroativo — o que está escrito é o que foi entregue.
       </p>
 
-      <div class="transp-changelog">
-        <div class="transp-cl-item">
-          <div class="transp-cl-marker" aria-hidden="true"></div>
-          <div class="transp-cl-body">
-            <div class="transp-cl-header">
-              <span class="transp-cl-version">v0.2.1.2</span>
-              <span class="transp-cl-date">2026-06-10</span>
-              <span class="transp-cl-badge transp-cl-badge--current">atual</span>
-            </div>
-            <p class="transp-cl-headline">
-              154/154 testes verdes · Renomeação canna-oss → canna-br · Deploy VPS live
-            </p>
-            <a href="/releases/v021/" class="transp-cl-link">Ver release completa →</a>
-          </div>
-        </div>
-
-        <div class="transp-cl-item">
-          <div class="transp-cl-marker" aria-hidden="true"></div>
-          <div class="transp-cl-body">
-            <div class="transp-cl-header">
-              <span class="transp-cl-version">v0.2.1</span>
-              <span class="transp-cl-date">2026-06-08</span>
-            </div>
-            <p class="transp-cl-headline">
-              Compliance Spine + MCP-First Surface · 146 testes · smoke OWUI validado · ADR-002
-            </p>
-            <a href="/releases/v021/" class="transp-cl-link">Ver release completa →</a>
-          </div>
-        </div>
-
-        <div class="transp-cl-item">
-          <div class="transp-cl-marker transp-cl-marker--mute" aria-hidden="true"></div>
-          <div class="transp-cl-body">
-            <div class="transp-cl-header">
-              <span class="transp-cl-version">v0.2.0b</span>
-              <span class="transp-cl-date">2026-06-08</span>
-            </div>
-            <p class="transp-cl-headline">
-              Emmett Postgres adapter · spike gate PASSED · parallel writers verdes em PG real
-            </p>
-          </div>
-        </div>
-
-        <div class="transp-cl-item">
-          <div class="transp-cl-marker transp-cl-marker--mute" aria-hidden="true"></div>
-          <div class="transp-cl-body">
-            <div class="transp-cl-header">
-              <span class="transp-cl-version">v0.2.0a</span>
-              <span class="transp-cl-date">2026-06-08</span>
-            </div>
-            <p class="transp-cl-headline">
-              Domain Kernel in-memory · 50 specs GIVEN/WHEN/THEN · Membership + Inventory + Dispensation
-            </p>
-          </div>
-        </div>
-
-        <div class="transp-cl-item">
-          <div class="transp-cl-marker transp-cl-marker--mute" aria-hidden="true"></div>
-          <div class="transp-cl-body">
-            <div class="transp-cl-header">
-              <span class="transp-cl-version">v0.1.0</span>
-              <span class="transp-cl-date">2026-06-08</span>
-            </div>
-            <p class="transp-cl-headline">
-              Domain Blueprint · DDD 8 bounded contexts · ADR-001 · business model AGPL-3
-            </p>
-          </div>
-        </div>
+      <div class="transp-widget-wrap">
+        <ReleasesDashboard view="changelog" />
       </div>
     </div>
   </section>
@@ -558,6 +434,13 @@ import StateSnapshot from '../components/marketing/widgets/StateSnapshot.astro';
     line-height: 1.65;
     max-width: 640px;
     margin: 0 0 2rem;
+  }
+
+  /* ── widget host wrapper ── */
+  .transp-widget-wrap {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
   }
 
   /* ── sections ── */

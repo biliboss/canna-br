@@ -1,11 +1,11 @@
 ---
 title: Invariantes Críticos
-description: Todos os invariantes de domínio do canna-oss — cross-context, por bounded context e camadas de enforcement
+description: Todos os invariantes de domínio do canna-br — cross-context, por bounded context e camadas de enforcement
 ---
 
 # Invariantes Críticos
 
-Invariantes são regras de negócio que nunca podem ser violadas, independentemente do estado do sistema. No canna-oss, cada invariante é enforced em múltiplas camadas para garantia máxima.
+Invariantes são regras de negócio que nunca podem ser violadas, independentemente do estado do sistema. No canna-br, cada invariante é enforced em múltiplas camadas para garantia máxima.
 
 ---
 

@@ -1,11 +1,11 @@
 ---
 title: Bounded Contexts
-description: 8 bounded contexts do domínio canna-oss — agregados, entidades, value objects e invariantes
+description: 8 bounded contexts do domínio canna-br — agregados, entidades, value objects e invariantes
 ---
 
 # Bounded Contexts
 
-O domínio canna-oss é organizado em 8 bounded contexts com fronteiras explícitas. Comunicação entre contextos ocorre exclusivamente por domain events e referências por ULID — nunca por FK direta entre contextos.
+O domínio canna-br é organizado em 8 bounded contexts com fronteiras explícitas. Comunicação entre contextos ocorre exclusivamente por domain events e referências por ULID — nunca por FK direta entre contextos.
 
 ---
 

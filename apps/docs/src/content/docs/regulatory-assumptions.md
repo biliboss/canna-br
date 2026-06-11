@@ -52,7 +52,7 @@ Hipóteses comerciais e de adoção. **Devem ser flag de produto, não premissa 
 | Aposta | Risco se errada | Plano B |
 |---|---|---|
 | Associações pagam R$450–R$780/mês em managed hosting | ARR projection cai 60–80% | Pivotar para services-light (consultoria de implementação) ou foco em poucos enterprise (FACT, top-20 associações) |
-| 38% das ~315 associações endereçáveis (SAM) migram para canna-oss em 3 anos | SOM 2030 cai para R$5–10M | Reduzir time, otimizar para nicho high-touch |
+| 38% das ~315 associações endereçáveis (SAM) migram para canna-br em 3 anos | SOM 2030 cai para R$5–10M | Reduzir time, otimizar para nicho high-touch |
 | Mercado expande de ~315 endereçáveis → 800 associações até 2030 | Pool de adoção menor | Foco em retenção e upsell vs aquisição |
 | AGPL não afasta associações (advogado da associação aprova) | Bloqueio de venda em 30%+ dos casos | Dual licensing — oferecer licença comercial para casos restritos |
 | OSS audit é argumento de venda decisivo vs Cannanas/XURU | Trust moat fraco na prática | Compete em features (compliance engine, integração SNGPC) |

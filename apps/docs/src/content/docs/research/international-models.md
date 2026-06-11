@@ -65,7 +65,7 @@ A **KCanG** criou no mercado alemão exatamente a pressão que a **RDC 1.014/202
 3. Mercado de software de zero → dominação rápida por um player especializado (Cannanas)
 4. Retenção de dados de longo prazo como requisito hard
 
-O **Cannanas** cresceu de zero a 600+ clubes em ~18 meses pós-KCanG. O canna-oss tem a oportunidade análoga no Brasil — com a vantagem de ser OSS (auditável, self-hosted, LGPD-native).
+O **Cannanas** cresceu de zero a 600+ clubes em ~18 meses pós-KCanG. O canna-br tem a oportunidade análoga no Brasil — com a vantagem de ser OSS (auditável, self-hosted, LGPD-native).
 
 ---
 
@@ -77,4 +77,4 @@ Um padrão consistente em todas as jurisdições analisadas:
 
 O Metrc homologa integrações, mas certifica operadores. O KCanG exige retenção, mas certifica clubes. A RDC 1.014 segue o mesmo padrão: o dossier é da associação, o software é evidência no dossier.
 
-Implicação: o canna-oss não precisa — nem pode — obter "certificação ANVISA". Precisa ser o software que torna a associação **certificável**.
+Implicação: o canna-br não precisa — nem pode — obter "certificação ANVISA". Precisa ser o software que torna a associação **certificável**.

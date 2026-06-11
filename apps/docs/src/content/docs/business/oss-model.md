@@ -19,7 +19,7 @@ BUSL mata o argumento de auditabilidade:
 
 - Código fonte disponível mas **não é open source** — restrições comerciais por 4 anos
 - Advogado da associação não vai aprovar código com licença restritiva como base do sistema de saúde dos membros
-- A principal vantagem competitiva do canna-oss é precisamente ser auditável — BUSL destrói isso
+- A principal vantagem competitiva do canna-br é precisamente ser auditável — BUSL destrói isso
 
 ### Por Que Não Open-Core
 
@@ -136,7 +136,7 @@ OpenMRS e Bahmni são sistemas OSS de saúde bem-sucedidos tecnicamente que fora
 - Equipe core se tornou basicamente uma consultoria disfarçada de produto
 - Escalabilidade zero: crescimento de receita = crescimento linear de pessoas
 
-**Hard limit canna-oss: máximo 20% da receita de services.**
+**Hard limit canna-br: máximo 20% da receita de services.**
 
 Qualquer serviço contratado (migração, treinamento, customização) deve ter um teto claro e um cronograma de eliminação (documentação, automação, self-service).
 

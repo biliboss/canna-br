@@ -9,13 +9,13 @@ description: "Decisão arquitetural: TypeScript puro para domínio + Emmett como
 |---|---|
 | Status | **Accepted** (spike gate v0.2.0a + v0.2.0b PASSED, 99+ tests green em PG real) |
 | Data | 2026-06-08 |
-| Versão | v0.2 |
+| Versão | pré-0.1 (fundação) |
 | Substitui | — |
 | Camada interface substituída por | [ADR-002 — MCP-First Surface](/adr/0002-mcp-first-surface/) (camada domínio + event-sourcing **mantida** — esta ADR ainda canonical para Emmett + decide/evolve + sync vs async boundary) |
 
 ## Contexto
 
-canna-oss é um sistema de domínio regulado (RDC 1.014/2026 sandbox + LGPD dados sensíveis de saúde). Bug de domínio = risco jurídico direto para a diretoria da associação. A chain of custody (planta → colheita → lote → dispensação → SNGPC) é naturalmente event-sourced: cada transição é um evento imutável que vira evidência regulatória.
+canna-br é um sistema de domínio regulado (RDC 1.014/2026 sandbox + LGPD dados sensíveis de saúde). Bug de domínio = risco jurídico direto para a diretoria da associação. A chain of custody (planta → colheita → lote → dispensação → SNGPC) é naturalmente event-sourced: cada transição é um evento imutável que vira evidência regulatória.
 
 Três opções para event sourcing foram avaliadas:
 
@@ -159,4 +159,4 @@ Cf. [Premissas Regulatórias](/regulatory-assumptions/) para tracking sistemáti
 - [Emmett — event-driven-io/emmett](https://github.com/event-driven-io/emmett)
 - [Emmett Getting Started — decide/evolve pattern](https://event-driven-io.github.io/emmett/getting-started.html)
 - [Domain Kernel](/architecture/domain-kernel/) — implementação detalhada
-- [AGENTS.md](https://github.com/seu-org/canna-oss/blob/main/AGENTS.md) — workflow operacional
+- [AGENTS.md](https://github.com/seu-org/canna-br/blob/main/AGENTS.md) — workflow operacional

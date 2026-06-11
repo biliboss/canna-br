@@ -9,7 +9,7 @@ description: "Surface pivot: primary product UI = MCP server + MCP Apps inside O
 |---|---|
 | Status | **Accepted + Smoke Validated (2026-06-08)** (Gabriel pivot 2026-06-08) |
 | Data | 2026-06-08 |
-| Versão | v0.2.1+ |
+| Versão | pré-0.1 (fundação) |
 | Substitui | Parcialmente [ADR-001](/adr/0001-domain-kernel-emmett/) na **camada de interface**. Camada de domínio + event-sourcing inalterada. |
 | Substituído por | — |
 | Premissas | Manager premise #26 (hard_rule), #27 (stack), #28 (stack) |
@@ -32,7 +32,7 @@ Durante revisão de produto (2026-06-08), Gabriel re-priorizou:
 
 ## Decisão
 
-Para v0.2.1 até v1.0, **o canna-oss não terá admin Next.js standalone**. Toda interação humana com o sistema acontece através de:
+Para v0.1.0 até v1.0, **o canna-br não terá admin Next.js standalone**. Toda interação humana com o sistema acontece através de:
 
 1. **MCP server TypeScript** (`apps/mcp`) — expõe Tools (Nível 1 read, 2 draft, 3 write-with-approval), Resources, Prompts, e MCP Apps via [`@modelcontextprotocol/ext-apps`](https://github.com/modelcontextprotocol/ext-apps).
 
@@ -96,7 +96,7 @@ Essas **não são MCP tools**. São operações no `apps/api` que exigem TOTP + 
 
 - **Depende de host compatibility**: Open WebUI v0.9.6+ tem MCP nativo + parcial MCP Apps (UI custom). Outros hosts (Claude.ai, ChatGPT) suportam full MCP Apps. Hosts antigos ou agente fora do ecossistema = sem fallback se a associação não usa nenhum. Mitigação: REST/OpenAPI para integrações; Open WebUI é o sidecar default obrigatório no compose.
 - **Sem fallback "admin standard"**: se Open WebUI sair do ar, operação para. Mitigação: deploy redundante; emergency tool `apps/api` REST acessível via curl/Postman para Nível-4 critical commands.
-- **License consideration**: Open WebUI AGPL-3.0 + Commons Clause em enterprise. Não pode ser white-labeled como "canna-oss Admin"; usa como `ghcr.io/open-webui/open-webui` com branding visível. Aceito.
+- **License consideration**: Open WebUI AGPL-3.0 + Commons Clause em enterprise. Não pode ser white-labeled como "canna-br Admin"; usa como `ghcr.io/open-webui/open-webui` com branding visível. Aceito.
 - **MCP Apps spec é jovem (jan 2026)**: hosts ainda implementando. Mitigação: começar com Tools (Nível 1 read) que funcionam em 100% dos hosts; gradualmente adicionar Apps conforme amadurecer.
 - **Multi-tenant isolation**: Open WebUI v0.9.6 é single-tenant. Multi-tenant managed hosting v1.0+ exigirá schema isolation + 1 docker-compose per tenant ou Authentik front. Documentado em [Interfaces](/architecture/interfaces/) como decisão diferida.
 
@@ -143,9 +143,9 @@ Sub-agent G executou smoke end-to-end no commit `147009f` (tag `v0.2.1`, branch 
 
 Os 3 MCP Apps prontos buildam para single-file HTML com inlining estático (script + style inline) via `packages/ui-apps` Vite SSG step. Servidos por um HTTP server local na porta 8081 durante smoke, todos retornam 200 e renderizam:
 
-- `MemberQuotaCardApp` ([manifest](https://github.com/canna-oss/canna-oss/blob/main/packages/ui-apps/src/member-quota-card/index.ts)) — empty state + populated state OK
-- `TraceabilityTimelineApp` ([manifest](https://github.com/canna-oss/canna-oss/blob/main/packages/ui-apps/src/traceability-timeline/index.ts)) — timeline renderiza com phases ordenadas
-- `DispensationFormApp` ([manifest](https://github.com/canna-oss/canna-oss/blob/main/packages/ui-apps/src/dispensation-form/index.ts)) — form submit dispara postMessage `ui/tools/call`
+- `MemberQuotaCardApp` ([manifest](https://github.com/canna-br/canna-br/blob/main/packages/ui-apps/src/member-quota-card/index.ts)) — empty state + populated state OK
+- `TraceabilityTimelineApp` ([manifest](https://github.com/canna-br/canna-br/blob/main/packages/ui-apps/src/traceability-timeline/index.ts)) — timeline renderiza com phases ordenadas
+- `DispensationFormApp` ([manifest](https://github.com/canna-br/canna-br/blob/main/packages/ui-apps/src/dispensation-form/index.ts)) — form submit dispara postMessage `ui/tools/call`
 
 ### OWUI MCP registration reality
 
@@ -154,7 +154,7 @@ GOTCHA descoberto no smoke: `ops/openwebui/mcp_config.json` é **template/seed**
 - **Admin UI:** Settings → Integrações → Servidores de Ferramentas → + (manual, 1× por servidor)
 - **API:** `POST /api/v1/configs/tool_servers` com bearer token de admin (idempotente; seed script em `ops/openwebui/scripts/seed-tool-servers.ts` — Lane I)
 
-Docs operacionais atualizados: [`ops/openwebui/README.md`](https://github.com/canna-oss/canna-oss/blob/main/ops/openwebui/README.md) + [`ops/openwebui/Kamal.deploy.notes.md`](https://github.com/canna-oss/canna-oss/blob/main/ops/openwebui/Kamal.deploy.notes.md) seção "MCP server registration — RUNTIME".
+Docs operacionais atualizados: [`ops/openwebui/README.md`](https://github.com/canna-br/canna-br/blob/main/ops/openwebui/README.md) + [`ops/openwebui/Kamal.deploy.notes.md`](https://github.com/canna-br/canna-br/blob/main/ops/openwebui/Kamal.deploy.notes.md) seção "MCP server registration — RUNTIME".
 
 ### postMessage canonical contract
 
@@ -201,7 +201,7 @@ Cada App declara seu schema esperado no manifest `index.ts`. Resumo:
 
 ### Evidence
 
-9 screenshots em [`apps/docs/public/screenshots/owui/`](https://github.com/canna-oss/canna-oss/tree/main/apps/docs/public/screenshots/owui):
+9 screenshots em [`apps/docs/public/screenshots/owui/`](https://github.com/canna-br/canna-br/tree/main/apps/docs/public/screenshots/owui):
 
 | # | Frame | Estado |
 |---|---|---|

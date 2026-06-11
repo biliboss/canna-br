@@ -79,6 +79,6 @@ Self-hosted reduz:
 - **Lock-in de dados sensíveis**: migração de SaaS para qualquer outro provedor (ou crypto-deletion) depende de cooperação do fornecedor
 - **Superfície de vazamento**: um breach no fornecedor SaaS é breach de N associações simultaneamente — responsabilidade compartilhada com efeito sistêmico
 
-O modelo recomendado pelo canna-oss: **a associação hospeda o software em infraestrutura sob seu controle** (servidor próprio ou managed hosting com contrato explícito de operador BR-only).
+O modelo recomendado pelo canna-br: **a associação hospeda o software em infraestrutura sob seu controle** (servidor próprio ou managed hosting com contrato explícito de operador BR-only).
 
 Cf. [Premissas Regulatórias](/regulatory-assumptions/) — esta tese está em **Prováveis**: self-hosted reduz superfície de risco LGPD para a diretoria. Não é declaração de que SaaS viola LGPD per se.

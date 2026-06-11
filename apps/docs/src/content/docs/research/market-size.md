@@ -39,7 +39,7 @@ Federação das Associações de Cannabis Terapêutica:
 - Preço potencial: R$1.500/mês fixo federação + per-member por associação
 - ARR potencial FACT deal: R$648k–R$1.2M (dependendo tamanho das associações)
 
-## Projeções de Receita canna-oss
+## Projeções de Receita canna-br
 
 | Mês | ARR | Associações | Mix |
 |---|---|---|---|

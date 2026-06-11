@@ -1,0 +1,901 @@
+---
+/**
+ * CoordMetrics — v0.1.0 Coordination Metrics + AI Cost ledger widget
+ *
+ * Design references:
+ *   - Linear.app: near-black bg (#0b1a15), elevation via lightness, pill badges
+ *   - Stripe/Ramp: auditable ledger card, cost framing that answers questions
+ *   - heuristic #41: goal-line (SLA marker) on bar-track charts
+ *   - heuristic #12/#22: tabular-nums on all numeric columns
+ *   - heuristic #48: dashed markLine at timebox target on cycle-time bars
+ *   - heuristic #4: dark-mode elevation via background lightness, not shadow
+ *   - heuristic #52: styles live in .astro component, NOT in .mdx raw <style>
+ *
+ * Tokens:
+ *   --cm-bg:         #0b1a15   (brand deep-forest bg from EventStormingBoard)
+ *   --cm-emerald:    #10b981   (brand accent — work lanes)
+ *   --cm-blue:       #5B9BD5   (brand blue — verify lane)
+ *   --cm-amber:      #f59e0b   (brand amber — SLA marker, cost emphasis)
+ *   --cm-border:     rgba(16, 185, 129, 0.18)
+ *   --cm-muted:      rgba(255, 255, 255, 0.45)
+ */
+---
+
+<!-- ═══════════════════════════════════════════════════
+     SECTION 1 — Kanban Flow Metrics
+     ═══════════════════════════════════════════════════ -->
+
+<section class="cm-section" aria-label="Métricas de fluxo Kanban">
+
+  <!-- KPI strip -->
+  <div class="cm-kpi-strip" role="list" aria-label="KPIs da missão">
+    <div class="cm-kpi-card" role="listitem">
+      <span class="cm-kpi-value">9 min</span>
+      <span class="cm-kpi-label">Lead Time</span>
+      <span class="cm-kpi-sub">missão completa</span>
+    </div>
+    <div class="cm-kpi-card" role="listitem">
+      <span class="cm-kpi-value">4</span>
+      <span class="cm-kpi-label">Lanes</span>
+      <span class="cm-kpi-sub">3 work + 1 verify</span>
+    </div>
+    <div class="cm-kpi-card cm-kpi-card--accent" role="listitem">
+      <span class="cm-kpi-value">100%</span>
+      <span class="cm-kpi-label">SLA &lt;5 min</span>
+      <span class="cm-kpi-sub">4 / 4 lanes</span>
+    </div>
+    <div class="cm-kpi-card" role="listitem">
+      <span class="cm-kpi-value">1.53×</span>
+      <span class="cm-kpi-label">Speedup</span>
+      <span class="cm-kpi-sub">paralelismo</span>
+    </div>
+    <div class="cm-kpi-card" role="listitem">
+      <span class="cm-kpi-value">3 → 1</span>
+      <span class="cm-kpi-label">WIP</span>
+      <span class="cm-kpi-sub">work → verify</span>
+    </div>
+  </div>
+
+  <!-- Cycle-time bar chart (inline SVG, no external deps) -->
+  <!-- Max scale: 350s (safe margin over 329.6s wall clock). SLA line at 300s (5 min). -->
+  <!-- Bar widths are percentage of 350s container. SLA line at 300/350 = 85.7% -->
+  <div class="cm-chart-container" role="img" aria-label="Gráfico de tempo de ciclo por lane — barras horizontais, linha de SLA em 300s">
+    <div class="cm-chart-title">Cycle Time por Lane <span class="cm-sla-legend">— linha pontilhada = SLA 5 min (300 s)</span></div>
+    <div class="cm-bar-chart">
+
+      <!-- SLA marker line at 300/350 = 85.71% -->
+      <div class="cm-sla-line" style="left: 85.71%" aria-hidden="true"></div>
+
+      <!-- Lane: page-mdx — 89.7s / 350 = 25.63% — work (emerald) -->
+      <div class="cm-bar-row">
+        <div class="cm-bar-lane-label">page-mdx</div>
+        <div class="cm-bar-track" role="presentation">
+          <div class="cm-bar cm-bar--work" style="width: 25.63%" aria-label="89.7 segundos"></div>
+          <span class="cm-bar-value" style="left: calc(25.63% + 6px)">89.7 s</span>
+        </div>
+        <div class="cm-bar-badge cm-badge--pass" aria-label="Dentro do SLA">✓ SLA</div>
+      </div>
+
+      <!-- Lane: invite-comp — 87.1s / 350 = 24.89% — work (emerald) -->
+      <div class="cm-bar-row">
+        <div class="cm-bar-lane-label">invite-comp</div>
+        <div class="cm-bar-track" role="presentation">
+          <div class="cm-bar cm-bar--work" style="width: 24.89%" aria-label="87.1 segundos"></div>
+          <span class="cm-bar-value" style="left: calc(24.89% + 6px)">87.1 s</span>
+        </div>
+        <div class="cm-bar-badge cm-badge--pass" aria-label="Dentro do SLA">✓ SLA</div>
+      </div>
+
+      <!-- Lane: widget-html — 156.9s / 350 = 44.83% — work (emerald) -->
+      <div class="cm-bar-row">
+        <div class="cm-bar-lane-label">widget-html</div>
+        <div class="cm-bar-track" role="presentation">
+          <div class="cm-bar cm-bar--work" style="width: 44.83%" aria-label="156.9 segundos"></div>
+          <span class="cm-bar-value" style="left: calc(44.83% + 6px)">156.9 s</span>
+        </div>
+        <div class="cm-bar-badge cm-badge--pass" aria-label="Dentro do SLA">✓ SLA</div>
+      </div>
+
+      <!-- Lane: verify — 169.3s / 350 = 48.37% — verify (blue) -->
+      <div class="cm-bar-row">
+        <div class="cm-bar-lane-label">verify</div>
+        <div class="cm-bar-track" role="presentation">
+          <div class="cm-bar cm-bar--verify" style="width: 48.37%" aria-label="169.3 segundos"></div>
+          <span class="cm-bar-value" style="left: calc(48.37% + 6px)">169.3 s</span>
+        </div>
+        <div class="cm-bar-badge cm-badge--pass" aria-label="Dentro do SLA">✓ SLA</div>
+      </div>
+
+      <!-- X-axis scale labels -->
+      <div class="cm-axis-labels" aria-hidden="true">
+        <span style="left: 0%">0 s</span>
+        <span style="left: 28.57%">100 s</span>
+        <span style="left: 57.14%">200 s</span>
+        <span style="left: 85.71%">300 s</span>
+      </div>
+
+    </div>
+  </div>
+
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     SECTION 2 — AI Cost Ledger
+     ═══════════════════════════════════════════════════ -->
+
+<section class="cm-section" aria-label="Custo de IA — ledger entry #1">
+
+  <!-- Ledger card -->
+  <div class="cm-ledger-card" role="region" aria-label="Cost Ledger · Entrada #1">
+    <div class="cm-ledger-header">
+      <span class="cm-ledger-eyebrow">Cost Ledger</span>
+      <span class="cm-ledger-entry-id">Entrada #1</span>
+    </div>
+    <dl class="cm-ledger-fields">
+      <div class="cm-ledger-row">
+        <dt>Pago por</dt>
+        <dd><strong>Gabriel Fonseca</strong></dd>
+      </div>
+      <div class="cm-ledger-row">
+        <dt>Data</dt>
+        <dd>2026-06-11</dd>
+      </div>
+      <div class="cm-ledger-row">
+        <dt>Modelo</dt>
+        <dd><code>claude-sonnet-4-6</code></dd>
+      </div>
+      <div class="cm-ledger-row cm-ledger-row--total">
+        <dt>Total</dt>
+        <dd class="cm-ledger-total">US$ 2,29</dd>
+      </div>
+      <div class="cm-ledger-row">
+        <dt>Tokens</dt>
+        <dd class="cm-ledger-num">2.521.557</dd>
+      </div>
+      <div class="cm-ledger-row">
+        <dt>Missão</dt>
+        <dd><code>task#7hf358</code></dd>
+      </div>
+      <div class="cm-ledger-row">
+        <dt>Motivo do custo</dt>
+        <dd>Dominado por cache writes (context priming de 3 lanes paralelas)</dd>
+      </div>
+    </dl>
+    <div class="cm-ledger-note" role="note">
+      <strong>Próximas entradas pendentes (valores a confirmar com Gabriel):</strong>
+      Domínio <code>cannabr.org</code> (Hostinger) + plano e-mail Hostinger — serão registrados como Entradas #2 e #3 ao receber os valores.
+    </div>
+  </div>
+
+  <!-- Per-lane cost bar chart -->
+  <!-- Max scale: $0.80 for headroom. SLA line not applicable here. -->
+  <!-- Widths: page-mdx $0.49/0.80=61.25%, invite-comp $0.44/0.80=55%, widget-html $0.62/0.80=77.5%, verify $0.73/0.80=91.25% -->
+  <div class="cm-chart-container" role="img" aria-label="Gráfico de custo por lane em USD">
+    <div class="cm-chart-title">Custo por Lane (USD)</div>
+    <div class="cm-bar-chart">
+
+      <!-- page-mdx $0.49 — work -->
+      <div class="cm-bar-row">
+        <div class="cm-bar-lane-label">page-mdx</div>
+        <div class="cm-bar-track" role="presentation">
+          <div class="cm-bar cm-bar--work" style="width: 61.25%" aria-label="0.49 USD"></div>
+          <span class="cm-bar-value" style="left: calc(61.25% + 6px)">$0.49</span>
+        </div>
+        <div class="cm-bar-token-count">665 k tok</div>
+      </div>
+
+      <!-- invite-comp $0.44 — work -->
+      <div class="cm-bar-row">
+        <div class="cm-bar-lane-label">invite-comp</div>
+        <div class="cm-bar-track" role="presentation">
+          <div class="cm-bar cm-bar--work" style="width: 55%" aria-label="0.44 USD"></div>
+          <span class="cm-bar-value" style="left: calc(55% + 6px)">$0.44</span>
+        </div>
+        <div class="cm-bar-token-count">499 k tok</div>
+      </div>
+
+      <!-- widget-html $0.62 — work -->
+      <div class="cm-bar-row">
+        <div class="cm-bar-lane-label">widget-html</div>
+        <div class="cm-bar-track" role="presentation">
+          <div class="cm-bar cm-bar--work" style="width: 77.5%" aria-label="0.62 USD"></div>
+          <span class="cm-bar-value" style="left: calc(77.5% + 6px)">$0.62</span>
+        </div>
+        <div class="cm-bar-token-count">1.112 k tok</div>
+      </div>
+
+      <!-- verify $0.73 — verify (blue) -->
+      <div class="cm-bar-row">
+        <div class="cm-bar-lane-label">verify</div>
+        <div class="cm-bar-track" role="presentation">
+          <div class="cm-bar cm-bar--verify" style="width: 91.25%" aria-label="0.73 USD"></div>
+          <span class="cm-bar-value" style="left: calc(91.25% + 6px)">$0.73</span>
+        </div>
+        <div class="cm-bar-token-count">246 k tok</div>
+      </div>
+
+      <!-- X-axis scale labels -->
+      <div class="cm-axis-labels" aria-hidden="true">
+        <span style="left: 0%">$0</span>
+        <span style="left: 25%">$0.20</span>
+        <span style="left: 50%">$0.40</span>
+        <span style="left: 75%">$0.60</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Per-lane table -->
+  <div class="cm-table-wrapper" role="region" aria-label="Tabela detalhada por lane">
+    <table class="cm-table">
+      <caption class="cm-table-caption">Detalhamento por lane — missão canna v0.1.0 finalize · 2026-06-11</caption>
+      <thead>
+        <tr>
+          <th scope="col">Lane</th>
+          <th scope="col">Capacidade</th>
+          <th scope="col" class="cm-num-col">Ciclo (s)</th>
+          <th scope="col" class="cm-num-col">Tokens</th>
+          <th scope="col" class="cm-num-col">Custo USD</th>
+          <th scope="col">SLA &lt;5 min</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>page-mdx</code></td>
+          <td>Domínio canna.br → cannabr.org + 5 linhas v0.2 re-add</td>
+          <td class="cm-num-col">89.7</td>
+          <td class="cm-num-col">665.265</td>
+          <td class="cm-num-col">0.49</td>
+          <td><span class="cm-badge cm-badge--pass" aria-label="Dentro do SLA">✓</span></td>
+        </tr>
+        <tr>
+          <td><code>invite-comp</code></td>
+          <td>Domínio canna.br → cannabr.org (convite)</td>
+          <td class="cm-num-col">87.1</td>
+          <td class="cm-num-col">498.541</td>
+          <td class="cm-num-col">0.44</td>
+          <td><span class="cm-badge cm-badge--pass" aria-label="Dentro do SLA">✓</span></td>
+        </tr>
+        <tr>
+          <td><code>widget-html</code></td>
+          <td>Remover 3 campos v0.2 do DOM (member-registration)</td>
+          <td class="cm-num-col">156.9</td>
+          <td class="cm-num-col">1.112.243</td>
+          <td class="cm-num-col">0.62</td>
+          <td><span class="cm-badge cm-badge--pass" aria-label="Dentro do SLA">✓</span></td>
+        </tr>
+        <tr>
+          <td><code>verify</code></td>
+          <td>Build green (288 pgs) + grep + render check</td>
+          <td class="cm-num-col">169.3</td>
+          <td class="cm-num-col">245.508</td>
+          <td class="cm-num-col">0.73</td>
+          <td><span class="cm-badge cm-badge--pass" aria-label="Dentro do SLA">✓</span></td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr class="cm-table-total-row">
+          <td colspan="2"><strong>Total</strong></td>
+          <td class="cm-num-col"><strong>329.6</strong></td>
+          <td class="cm-num-col"><strong>2.521.557</strong></td>
+          <td class="cm-num-col"><strong>2.29</strong></td>
+          <td><span class="cm-badge cm-badge--pass" aria-label="Todas as lanes dentro do SLA">4/4</span></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     SECTION 3 — Como foi coordenado
+     ═══════════════════════════════════════════════════ -->
+
+<section class="cm-section" aria-label="Como foi coordenado">
+
+  <div class="cm-coord-card">
+    <div class="cm-coord-grid">
+
+      <div class="cm-coord-item cm-coord-item--tool">
+        <span class="cm-coord-label">Motor</span>
+        <span class="cm-coord-value">Claude Code Workflow tool</span>
+        <span class="cm-coord-sub">orquestração declarativa de lanes</span>
+      </div>
+
+      <div class="cm-coord-item cm-coord-item--model">
+        <span class="cm-coord-label">Modelo por lane</span>
+        <span class="cm-coord-value"><code>claude-sonnet-4-6</code></span>
+        <span class="cm-coord-sub">coord Opus · sub-agents Sonnet</span>
+      </div>
+
+      <div class="cm-coord-item cm-coord-item--pattern">
+        <span class="cm-coord-label">Padrão</span>
+        <span class="cm-coord-value">3 lanes paralelas → barrier → verify</span>
+        <span class="cm-coord-sub">file-isolated, sem race condition</span>
+      </div>
+
+      <div class="cm-coord-item cm-coord-item--timebox">
+        <span class="cm-coord-label">Timebox</span>
+        <span class="cm-coord-value">&lt; 5 min por lane</span>
+        <span class="cm-coord-sub">100 % das lanes respeitaram</span>
+      </div>
+
+    </div>
+
+    <div class="cm-coord-flow" aria-label="Diagrama de fluxo da missão" role="img">
+      <div class="cm-flow-col">
+        <div class="cm-flow-node cm-flow-node--work">page-mdx</div>
+        <div class="cm-flow-node cm-flow-node--work">invite-comp</div>
+        <div class="cm-flow-node cm-flow-node--work">widget-html</div>
+        <span class="cm-flow-label">Work (paralelo)</span>
+      </div>
+      <div class="cm-flow-arrow" aria-hidden="true">→</div>
+      <div class="cm-flow-col">
+        <div class="cm-flow-barrier" aria-label="Barrier — todas as lanes work concluídas">Barrier</div>
+        <span class="cm-flow-label">Sync</span>
+      </div>
+      <div class="cm-flow-arrow" aria-hidden="true">→</div>
+      <div class="cm-flow-col">
+        <div class="cm-flow-node cm-flow-node--verify">verify</div>
+        <span class="cm-flow-label">Verify (sequencial)</span>
+      </div>
+    </div>
+
+    <p class="cm-coord-note">
+      Cada lane opera em arquivo isolado — sem conflito de merge. O Workflow tool garante que a fase verify só inicia após todas as 3 lanes work completarem (barrier semântico). Métricas são registradas no ledger SurrealDB do manager via task <code>task#7hf358</code> (lead-time medido da abertura ao fechamento da missão). Premissa do projeto: <strong>everything is metrified</strong>.
+    </p>
+  </div>
+
+</section>
+
+<style>
+  /* ── Tokens ────────────────────────────────────────────── */
+  .cm-section {
+    --cm-bg:        #0b1a15;
+    --cm-bg-card:   #0f2019;
+    --cm-bg-row:    rgba(16, 185, 129, 0.04);
+    --cm-emerald:   #10b981;
+    --cm-blue:      #5B9BD5;
+    --cm-amber:     #f59e0b;
+    --cm-border:    rgba(16, 185, 129, 0.18);
+    --cm-muted:     rgba(255, 255, 255, 0.45);
+    --cm-text:      rgba(255, 255, 255, 0.88);
+    --cm-subtext:   rgba(255, 255, 255, 0.52);
+
+    margin: 0 0 2.5rem 0;
+    font-family: var(--sl-font, system-ui, sans-serif);
+  }
+
+  /* ── KPI strip ─────────────────────────────────────────── */
+  .cm-kpi-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .cm-kpi-card {
+    flex: 1 1 140px;
+    background: var(--cm-bg-card);
+    border: 1px solid var(--cm-border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    /* heuristic #4: elevation via lightness */
+    transition: background 150ms ease-out;
+  }
+
+  .cm-kpi-card--accent {
+    border-color: rgba(16, 185, 129, 0.55);
+    background: rgba(16, 185, 129, 0.08);
+  }
+
+  .cm-kpi-value {
+    font-size: 1.625rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: var(--cm-text);
+    /* heuristic #12: tabular nums for metrics */
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+
+  .cm-kpi-card--accent .cm-kpi-value {
+    color: var(--cm-emerald);
+  }
+
+  .cm-kpi-label {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--cm-text);
+    line-height: 1.2;
+  }
+
+  .cm-kpi-sub {
+    font-size: 0.6875rem;
+    color: var(--cm-subtext);
+    line-height: 1.2;
+  }
+
+  /* ── Chart container ───────────────────────────────────── */
+  .cm-chart-container {
+    background: var(--cm-bg);
+    border: 1px solid var(--cm-border);
+    border-radius: 12px;
+    padding: 20px 24px 32px;
+    margin-bottom: 20px;
+    /* gen-ui overflow contract heuristic #16 */
+    overflow-x: auto;
+    max-width: 100%;
+  }
+
+  .cm-chart-title {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--cm-text);
+    margin-bottom: 20px;
+    letter-spacing: -0.01em;
+  }
+
+  .cm-sla-legend {
+    font-weight: 400;
+    color: var(--cm-amber);
+    font-size: 0.75rem;
+  }
+
+  /* ── Bar chart ─────────────────────────────────────────── */
+  .cm-bar-chart {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    /* Enough padding-bottom for axis labels */
+    padding-bottom: 28px;
+    min-width: 360px;
+  }
+
+  /* heuristic #48: SLA markLine — dashed amber vertical line */
+  .cm-sla-line {
+    position: absolute;
+    top: 0;
+    bottom: 28px;
+    width: 0;
+    border-left: 2px dashed var(--cm-amber);
+    opacity: 0.75;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .cm-bar-row {
+    display: grid;
+    grid-template-columns: 88px 1fr 72px;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+  }
+
+  .cm-bar-lane-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--cm-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .cm-bar-track {
+    position: relative;
+    height: 24px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 4px;
+    overflow: visible;
+  }
+
+  .cm-bar {
+    height: 100%;
+    border-radius: 4px;
+    position: relative;
+    transition: width 400ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .cm-bar--work {
+    background: linear-gradient(90deg,
+      oklch(0.55 0.15 160) 0%,
+      oklch(0.60 0.17 160) 100%);
+  }
+
+  .cm-bar--verify {
+    background: linear-gradient(90deg,
+      oklch(0.52 0.10 230) 0%,
+      oklch(0.58 0.12 230) 100%);
+  }
+
+  .cm-bar-value {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--cm-text);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    pointer-events: none;
+  }
+
+  .cm-bar-badge {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    white-space: nowrap;
+    text-align: right;
+  }
+
+  .cm-bar-token-count {
+    font-size: 0.6875rem;
+    color: var(--cm-subtext);
+    white-space: nowrap;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .cm-badge--pass {
+    color: var(--cm-emerald);
+  }
+
+  /* ── Axis labels ───────────────────────────────────────── */
+  .cm-axis-labels {
+    position: absolute;
+    bottom: 0;
+    left: 98px; /* align with track start (88px label + 10px gap) */
+    right: 82px; /* align with track end (72px badge + 10px gap) */
+    height: 20px;
+    pointer-events: none;
+  }
+
+  .cm-axis-labels span {
+    position: absolute;
+    font-size: 0.625rem;
+    color: var(--cm-subtext);
+    transform: translateX(-50%);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── Ledger card ───────────────────────────────────────── */
+  .cm-ledger-card {
+    background: var(--cm-bg-card);
+    border: 1px solid var(--cm-border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+
+  .cm-ledger-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    background: rgba(16, 185, 129, 0.08);
+    border-bottom: 1px solid var(--cm-border);
+  }
+
+  .cm-ledger-eyebrow {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--cm-emerald);
+  }
+
+  .cm-ledger-entry-id {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--cm-subtext);
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
+    padding: 2px 10px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .cm-ledger-fields {
+    margin: 0;
+    padding: 4px 0;
+  }
+
+  .cm-ledger-row {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 12px;
+    align-items: baseline;
+    padding: 10px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .cm-ledger-row:last-child {
+    border-bottom: none;
+  }
+
+  .cm-ledger-row dt {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--cm-subtext);
+  }
+
+  .cm-ledger-row dd {
+    font-size: 0.8125rem;
+    color: var(--cm-text);
+    margin: 0;
+  }
+
+  .cm-ledger-row--total {
+    background: rgba(245, 158, 11, 0.06);
+    border-top: 1px solid rgba(245, 158, 11, 0.2);
+    border-bottom: 1px solid rgba(245, 158, 11, 0.2);
+  }
+
+  .cm-ledger-total {
+    font-size: 1.375rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--cm-amber);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .cm-ledger-num {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .cm-ledger-note {
+    padding: 12px 20px;
+    font-size: 0.75rem;
+    color: var(--cm-subtext);
+    background: rgba(255, 255, 255, 0.02);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    line-height: 1.5;
+  }
+
+  /* ── Table ─────────────────────────────────────────────── */
+  .cm-table-wrapper {
+    overflow-x: auto;
+    max-width: 100%;
+    border: 1px solid var(--cm-border);
+    border-radius: 12px;
+    margin-bottom: 4px;
+  }
+
+  .cm-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8125rem;
+    background: var(--cm-bg-card);
+  }
+
+  .cm-table-caption {
+    text-align: left;
+    font-size: 0.6875rem;
+    color: var(--cm-subtext);
+    padding: 10px 16px 6px;
+    letter-spacing: 0.02em;
+  }
+
+  .cm-table thead tr {
+    background: rgba(16, 185, 129, 0.07);
+    border-bottom: 1px solid var(--cm-border);
+  }
+
+  .cm-table th {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--cm-subtext);
+    padding: 10px 14px;
+    text-align: left;
+  }
+
+  /* heuristic #12: numbers right-aligned */
+  .cm-num-col {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .cm-table td {
+    padding: 9px 14px;
+    color: var(--cm-text);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .cm-table tbody tr:hover td {
+    background: var(--cm-bg-row);
+  }
+
+  .cm-table-total-row td {
+    background: rgba(16, 185, 129, 0.05);
+    border-top: 1px solid rgba(16, 185, 129, 0.2);
+    border-bottom: none;
+  }
+
+  .cm-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 999px;
+    border: 1px solid currentColor;
+  }
+
+  /* ── Coordination card ─────────────────────────────────── */
+  .cm-coord-card {
+    background: var(--cm-bg-card);
+    border: 1px solid var(--cm-border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+
+  .cm-coord-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .cm-coord-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    border-left: 3px solid transparent;
+  }
+
+  .cm-coord-item--tool    { border-left-color: var(--cm-emerald); background: rgba(16, 185, 129, 0.06); }
+  .cm-coord-item--model   { border-left-color: var(--cm-blue);    background: rgba(91, 155, 213, 0.06); }
+  .cm-coord-item--pattern { border-left-color: var(--cm-amber);   background: rgba(245, 158, 11, 0.06); }
+  .cm-coord-item--timebox { border-left-color: #C39BD3;           background: rgba(195, 155, 211, 0.06); }
+
+  .cm-coord-label {
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--cm-subtext);
+  }
+
+  .cm-coord-value {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--cm-text);
+    line-height: 1.3;
+  }
+
+  .cm-coord-sub {
+    font-size: 0.6875rem;
+    color: var(--cm-subtext);
+  }
+
+  /* ── Flow diagram ──────────────────────────────────────── */
+  .cm-coord-flow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    background: var(--cm-bg);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    overflow-x: auto;
+  }
+
+  .cm-flow-col {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .cm-flow-label {
+    font-size: 0.625rem;
+    color: var(--cm-subtext);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-align: center;
+    margin-top: 4px;
+    white-space: nowrap;
+  }
+
+  .cm-flow-node {
+    border-radius: 6px;
+    padding: 5px 14px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .cm-flow-node--work {
+    background: rgba(16, 185, 129, 0.14);
+    color: #6ee7b7;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+  }
+
+  .cm-flow-node--verify {
+    background: rgba(91, 155, 213, 0.14);
+    color: #93c4ef;
+    border: 1px solid rgba(91, 155, 213, 0.3);
+  }
+
+  .cm-flow-barrier {
+    border-radius: 6px;
+    padding: 5px 14px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    white-space: nowrap;
+    background: rgba(245, 158, 11, 0.12);
+    color: #fcd34d;
+    border: 1px dashed rgba(245, 158, 11, 0.5);
+    letter-spacing: 0.04em;
+  }
+
+  .cm-flow-arrow {
+    font-size: 1.25rem;
+    color: rgba(255, 255, 255, 0.25);
+    align-self: center;
+    padding: 0 4px;
+  }
+
+  /* ── Coord note ────────────────────────────────────────── */
+  .cm-coord-note {
+    font-size: 0.8125rem;
+    color: var(--cm-subtext);
+    line-height: 1.6;
+    margin: 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    padding-top: 14px;
+  }
+
+  .cm-coord-note strong {
+    color: var(--cm-text);
+  }
+
+  /* ── Responsive ────────────────────────────────────────── */
+  @media (max-width: 640px) {
+    .cm-kpi-strip {
+      gap: 8px;
+    }
+    .cm-kpi-card {
+      flex: 1 1 120px;
+      padding: 12px 14px;
+    }
+    .cm-kpi-value {
+      font-size: 1.25rem;
+    }
+    .cm-bar-row {
+      grid-template-columns: 72px 1fr 56px;
+    }
+    .cm-axis-labels {
+      left: 82px;
+      right: 66px;
+    }
+    .cm-ledger-row {
+      grid-template-columns: 110px 1fr;
+      padding: 9px 14px;
+    }
+    .cm-coord-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  /* ── Reduced motion ────────────────────────────────────── */
+  @media (prefers-reduced-motion: reduce) {
+    .cm-bar {
+      transition: none !important;
+    }
+  }
+</style>

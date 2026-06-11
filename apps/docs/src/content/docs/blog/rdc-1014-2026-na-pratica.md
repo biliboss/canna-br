@@ -88,7 +88,7 @@ Usar um sistema que pode ser auditado publicamente — onde o código que proces
 
 ## O que o canna-br está construindo agora
 
-O sistema está em v0.2.1 com 154 testes passando. Os módulos de dispensação, rastreabilidade de lotes e controle de cotas estão implementados. O SNGPC está em mock — o schema XSD específico para associações ainda não foi publicado pela ANVISA, mas a arquitetura está pronta para integração quando o documento sair.
+O sistema está em v0.1.0 com 154 testes passando. Os módulos de dispensação, rastreabilidade de lotes e controle de cotas estão implementados. O SNGPC está em mock — o schema XSD específico para associações ainda não foi publicado pela ANVISA, mas a arquitetura está pronta para integração quando o documento sair.
 
 O piloto está sendo estruturado com associações que queiram construir esse padrão desde o início — não adaptar um sistema genérico depois que a fiscalização chegar.
 

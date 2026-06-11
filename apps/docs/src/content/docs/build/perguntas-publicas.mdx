@@ -96,9 +96,9 @@ Vídeo substitui form longo. Presença e clareza de propósito — dimensões qu
 
 | Componente | Provider | Justificativa |
 |---|---|---|
-| Storage | MinIO (Langfuse VPS, `62.171.145.76`) ou Cloudflare R2 free tier (10 GB) | MinIO já instalado. R2 free tier suficiente para fase seed. **Decisao pendente Gabriel** (ver Open Questions) |
+| Storage | MinIO (VPS interna) ou Cloudflare R2 free tier (10 GB) | MinIO já instalado. R2 free tier suficiente para fase seed. **Decisao pendente Gabriel** (ver Open Questions) |
 | Transcrição | Groq Whisper API, free tier (10h/dia) | Zero custo fase seed. Accuracy pt-BR ≥ 90% em condições normais. Alternativa: whisper.cpp local na VPS. **Decisao pendente Gabriel** |
-| DB | SurrealDB `62.171.145.76`, tabela `video_submission` | Instância já operacional (cf. ADR-004). Padrão de acesso via SSH tunnel ou network interna |
+| DB | SurrealDB (VPS interna), tabela `video_submission` | Instância já operacional (cf. ADR-004). Padrão de acesso via SSH tunnel ou network interna |
 | Email notify | Resend | Já referenciado no ops-stack. Zero config pra volume seed (menos de 100 emails/mês) |
 | CLI runner | `bun scripts/` | Padrão estabelecido no monorepo |
 | Publish pipeline | git commit + push (via CLI) | Sem webhook server extra. Astro rebuild manual ou CI/CD existente |

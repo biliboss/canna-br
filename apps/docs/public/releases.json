@@ -1,0 +1,61 @@
+{
+  "currentVersion": "v0.1.0",
+  "updatedAt": "2026-06-11",
+  "releases": [
+    {
+      "version": "v0.1.0",
+      "status": "current",
+      "date": "2026-06-11",
+      "headline": "Sistema usável live — membros, dispensação c/ aprovação, rastreabilidade, trilha, cotas, MCP inline",
+      "testCount": 154,
+      "docsSlug": "/releases/v0-1-0-coordenacao-metricas/",
+      "modules": [
+        "Cadastro de membros",
+        "Dispensação c/ aprovação",
+        "Rastreabilidade de lote",
+        "Trilha de auditoria",
+        "Cotas por prescrição",
+        "Criptografia por membro (LGPD)",
+        "MCP server inline"
+      ]
+    }
+  ],
+  "roadmap": [
+    {
+      "version": "v0.2",
+      "label": "Multi-tenant + onboarding self-serve",
+      "window": "set/2026 → dez/2026",
+      "status": "planned"
+    },
+    {
+      "version": "v0.3",
+      "label": "Pilot hardening (RBAC/TOTP/consent/crypto-deletion/CSV)",
+      "window": "2027",
+      "status": "future"
+    },
+    {
+      "version": "SNGPC produção",
+      "label": "Quando a ANVISA publicar o schema XSD",
+      "window": null,
+      "status": "future-conditional"
+    },
+    {
+      "version": "v1.0",
+      "label": "Cultivo, financeiro, marketplace",
+      "window": "2028",
+      "status": "future"
+    }
+  ],
+  "preMilestones": [
+    {
+      "label": "Domain Blueprint (pré-0.1)",
+      "date": "2026-06-08",
+      "note": "DDD, 8 bounded contexts, research — fundação, não release"
+    },
+    {
+      "label": "Fundação kernel (pré-0.1)",
+      "date": "2026-06-08",
+      "note": "Domain kernel + Emmett PG spike gate PASSED"
+    }
+  ]
+}

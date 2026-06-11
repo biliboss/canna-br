@@ -40,10 +40,10 @@ Referência oficial: [RNDS — Rede Nacional de Dados em Saúde](https://www.gov
 
 | Módulo | O que entrega | Fase |
 |---|---|---|
-| **Rastreabilidade ponta-a-ponta** | Trilha imutável de cada dispensação: lote → membro → RT aprovador → timestamp. Audit log com RULE PostgreSQL bloqueando UPDATE/DELETE. | v0.2.1 |
+| **Rastreabilidade ponta-a-ponta** | Trilha imutável de cada dispensação: lote → membro → RT aprovador → timestamp. Audit log com RULE PostgreSQL bloqueando UPDATE/DELETE. | v0.1.0 |
 | **Evidência regulatória** | Desfechos clínicos opcionais, eventos adversos, protocolos de uso, coorte anonimizada exportável. Base para dossier sandbox e farmacovigilância. | v0.3 – v0.4 |
 | **Interoperabilidade RNDS** | Export padronizado (CSV/JSON LGPD Art. 18 V), APIs abertas, trilhas compatíveis com padrões RNDS. Adaptador plugável (mock → produção). | v0.4 – v0.5 |
-| **Governança associativa** | Prestação de contas auditável, assembleias registradas como eventos de domínio, papéis com escopo RBAC, consentimento versionado. | v0.2.1 – v0.3 |
+| **Governança associativa** | Prestação de contas auditável, assembleias registradas como eventos de domínio, papéis com escopo RBAC, consentimento versionado. | v0.1.0 – v0.3 |
 | **Observabilidade pública** | KPI dashboard com indicadores agregados (dispensações, conformidade de quotas, churn, pendências compliance). Leitura pública sem credenciais. | v0.3 |
 | **Sandbox-ready compliance** | Templates BSPO + RIPD + Dossier gerados via agente; revisão humana obrigatória antes de submissão; protocolo experimental documentado; limites e monitoramento configuráveis. | v0.4 |
 

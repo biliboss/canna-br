@@ -25,12 +25,12 @@ O sandbox ANVISA (RDC 1.014/2026) cria uma janela de timing única:
 
 ### 3 — Dossier Template (reduz barreira candidatura ANVISA)
 
-A candidatura ao sandbox ANVISA exige documentação técnica complexa. canna-oss pode reduzir esse atrito:
+A candidatura ao sandbox ANVISA exige documentação técnica complexa. canna-br pode reduzir esse atrito:
 
 - Template de dossier pré-preenchido com campos que o sistema gera automaticamente
 - Seção "Controle de Qualidade e Rastreabilidade" auto-documentada via chain of custody
 - Seção "Proteção de Dados" auto-documentada via LGPD crypto model
-- **Associações que usam canna-oss têm vantagem comprovável na candidatura**
+- **Associações que usam canna-br têm vantagem comprovável na candidatura**
 
 ### 4 — Base HC Judicial (279 associações fora da FACT)
 
@@ -66,13 +66,13 @@ Jul/26  Publicação dos selecionados para sandbox
 AGO/26   Vigência sandbox
 ──────────────────────────────────────────────
 Ago/26  Primeiras associações sandbox iniciam operação regulada
-Ago/26  canna-oss em produção para associações sandbox — SNGPC obrigatório
+Ago/26  canna-br em produção para associações sandbox — SNGPC obrigatório
 
 
 SET → OUT/26   Suporte dossier
 ──────────────────────────────────────────────
 Set/26  Dossier template disponível para associações candidatas edital 2027
-Out/26  Workshop com FACT: "Como usar canna-oss no dossier ANVISA"
+Out/26  Workshop com FACT: "Como usar canna-br no dossier ANVISA"
 Nov/26  Negociação contrato FACT para 2027
 
 
@@ -135,4 +135,4 @@ Mar/27  Expansão acelerada — demand pull do mercado
 - STJ Tema 16 (2024) consolidou direito à cannabis medicinal via HC judicial — não depende de regulamentação executiva
 - Base HC judicial é mercado primário; sandbox é secundário
 - Sistema é útil para qualquer associação que precisa de controle interno, mesmo sem regulamentação formal
-- Código AGPL — mesmo se canna-oss fechar, código existe e pode ser mantido por terceiros
+- Código AGPL — mesmo se canna-br fechar, código existe e pode ser mantido por terceiros

@@ -1,6 +1,6 @@
 ---
 title: "ADR-004 — Simulacao em VPS Dedicada"
-description: "Nova VPS para simular canna-br stack pivot sem tocar fleet 62.171.145.76 (Langfuse + Surreal + NATS production)"
+description: "Nova VPS para simular canna-br stack pivot sem tocar fleet interna (Langfuse + Surreal + NATS production)"
 ---
 
 # ADR-004 — Simulacao em VPS Dedicada
@@ -9,7 +9,7 @@ description: "Nova VPS para simular canna-br stack pivot sem tocar fleet 62.171.
 |---|---|
 | Status | **Proposed** (2026-06-09) |
 | Data | 2026-06-09 |
-| Versao | v0.1 |
+| Versao | v0.1.0 |
 | Substitui | — |
 | Relacionado | [ADR-003 — Stack Pivot NATS + SurrealDB + DBOS](/adr/0003-stack-pivot-nats-surreal-dbos/) |
 
@@ -17,7 +17,7 @@ description: "Nova VPS para simular canna-br stack pivot sem tocar fleet 62.171.
 
 ### Fleet atual saturada
 
-A VPS `62.171.145.76` (Contabo) ja executa:
+A VPS interna (Contabo) ja executa:
 
 | Servico | RAM estimada |
 |---|---|
@@ -50,7 +50,7 @@ SurrealDB 3.x usa Business Source License (BSL 1.1). A restricao central e: nao 
 
 ## Decisao
 
-Provisionar **VPS dedicada nova** exclusivamente para canna-br simulacao e desenvolvimento do stack pivot (ADR-003). A fleet `62.171.145.76` permanece intocada.
+Provisionar **VPS dedicada nova** exclusivamente para canna-br simulacao e desenvolvimento do stack pivot (ADR-003). A fleet interna permanece intocada.
 
 ### O que roda na VPS dedicada
 
@@ -64,7 +64,7 @@ Provisionar **VPS dedicada nova** exclusivamente para canna-br simulacao e desen
 
 ### O que NAO muda
 
-- Fleet `62.171.145.76` — Langfuse, SurrealDB prod, NATS prod: **intocados**
+- Fleet interna — Langfuse, SurrealDB prod, NATS prod: **intocados**
 - canna-br.fonsecagabriel.com.br — pode apontar para VPS nova ou redirecionar (decidir antes de provisionar)
 - Branch `feature/mcp-first-pivot` — continua como base de desenvolvimento
 
@@ -176,7 +176,7 @@ SSH access via IP (nao hostname) — padrao Kamal v2 conforme `feedback-kamal-v2
 - feedback-kamal-v2-gotchas — SSH via IP, deploy_timeout 240, image sem tag
 - project-surrealdb-fonsecagabriel — instancia SurrealDB em producao (nao tocar)
 - project-nats-fonsecagabriel — instancia NATS em producao (nao tocar)
-- project-langfuse — Langfuse em 62.171.145.76 (nao tocar)
+- project-langfuse — Langfuse na VPS interna (nao tocar)
 - feedback-posthog-vps-undersized — lição aprendida: pre-flight `free -h` antes de adicionar servicos em VPS compartilhada
 - Contabo Cloud VPS pricing — https://www.contabo.com/en/vps/cloud-vps/
 - DBOS docs — https://docs.dbos.dev

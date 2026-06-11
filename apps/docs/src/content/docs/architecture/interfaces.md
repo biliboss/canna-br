@@ -13,7 +13,7 @@ description: "Primary surface = MCP server + MCP Apps em Open WebUI. REST/OpenAP
 > - **All interfaces call `packages/app-services`. No interface bypasses the domain kernel.**
 > - Critical commands (crypto-deletion, role change, SNGPC prod, recall, key rotation) **não são MCP tools** — vivem em `apps/api` REST com TOTP.
 
-Conversation-first, **não** ChatGPT-first. canna-oss aceita comandos vindos de Claude, ChatGPT, Cursor, Open WebUI ou qualquer cliente MCP. Open WebUI é o sidecar default (deployed por padrão); REST permanece acessível para emergência e integrações tradicionais.
+Conversation-first, **não** ChatGPT-first. canna-br aceita comandos vindos de Claude, ChatGPT, Cursor, Open WebUI ou qualquer cliente MCP. Open WebUI é o sidecar default (deployed por padrão); REST permanece acessível para emergência e integrações tradicionais.
 
 ## Arquitetura de Camadas
 
@@ -51,7 +51,7 @@ Conversation-first, **não** ChatGPT-first. canna-oss aceita comandos vindos de 
 | Falha do ChatGPT = associação parada | Falha de qualquer agente externo = associação opera pela UI |
 | Customização presa ao OpenAI | Cliente pode trocar de agente (Claude, ChatGPT, Cursor, agente próprio) sem reescrever produto |
 
-canna-oss é **conversation-first**. ChatGPT (ou Claude, ou Cursor) é **um dos clientes**, não a porta.
+canna-br é **conversation-first**. ChatGPT (ou Claude, ou Cursor) é **um dos clientes**, não a porta.
 
 ## Sem Admin Next.js (ADR-002)
 
@@ -96,13 +96,13 @@ MCP App pode **iniciar** o fluxo (criar PendingAction tipo `Nível4Request`), ma
 
 A tese comercial:
 
-> Uma associação pode operar o canna-oss pelo agente de IA que já usa — respeitando RBAC, OAuth, auditoria e aprovação humana nas ações críticas.
+> Uma associação pode operar o canna-br pelo agente de IA que já usa — respeitando RBAC, OAuth, auditoria e aprovação humana nas ações críticas.
 
 ### Primitivas MCP
 
-O MCP tem três primitivas; cada uma mapeia para um conceito do canna-oss:
+O MCP tem três primitivas; cada uma mapeia para um conceito do canna-br:
 
-| Primitiva MCP | No canna-oss |
+| Primitiva MCP | No canna-br |
 |---|---|
 | **Resources** (contexto/dados read-only) | Read models projetados — KPIs, quota, lotes, traces |
 | **Tools** (funções executáveis) | Commands do app-service, com níveis de risco |
@@ -142,7 +142,7 @@ Prompts:
 
 [MCP Apps](https://github.com/modelcontextprotocol/ext-apps) é a extensão do MCP que permite o servidor entregar **componentes UI interativos renderizados dentro da conversa do host** (Claude, Open WebUI, ChatGPT). Forms, dashboards, tabelas, gráficos, fluxo de aprovação — inline no chat.
 
-Para canna-oss isso muda o cálculo: várias telas operacionais que seriam construídas no admin tradicional nascem dentro do próprio agente.
+Para canna-br isso muda o cálculo: várias telas operacionais que seriam construídas no admin tradicional nascem dentro do próprio agente.
 
 ### Telas operacionais que migram para MCP Apps
 
@@ -251,28 +251,28 @@ Mesma regra: REST handler chama `app-services`, nunca toca event store ou Drizzl
 
 ## Open WebUI — Cockpit Agentic Opcional
 
-"canna-oss AI Workbench — powered by Open WebUI". [Open WebUI](https://github.com/open-webui/open-webui) já resolve coisas que **não devemos construir agora**: chat UI, gestão de usuários/grupos por papel, modelos locais (Ollama) + cloud, RAG sobre docs da associação, tools (MCP/OpenAPI/Python), pipelines.
+"canna-br AI Workbench — powered by Open WebUI". [Open WebUI](https://github.com/open-webui/open-webui) já resolve coisas que **não devemos construir agora**: chat UI, gestão de usuários/grupos por papel, modelos locais (Ollama) + cloud, RAG sobre docs da associação, tools (MCP/OpenAPI/Python), pipelines.
 
 ### Como integra
 
 ```text
 Open WebUI
   ↓ MCP / OpenAPI (mcpo bridge se necessário)
-canna-oss interface layer (MCP server + REST/OpenAPI)
+canna-br interface layer (MCP server + REST/OpenAPI)
   ↓ app-services
 Domain Kernel / Emmett
   ↓
 Event Store / Read Models
 ```
 
-- canna-oss expõe MCP Server + OpenAPI Server
+- canna-br expõe MCP Server + OpenAPI Server
 - Open WebUI consome esses servers como tools
-- Grupos/permissões do Open WebUI mapeiam para roles do canna-oss (via OAuth scopes)
+- Grupos/permissões do Open WebUI mapeiam para roles do canna-br (via OAuth scopes)
 - Modelo (Claude/Sonnet/Llama local) escolhido por tenant ou usuário
 
 ### Boundary estrito
 
-| Open WebUI controla | canna-oss controla |
+| Open WebUI controla | canna-br controla |
 |---|---|
 | Chat UI + histórico de conversa | Source of truth regulatório |
 | Modelo + temperatura + system prompt | Auth canônica (TOTP no Admin) |
@@ -282,7 +282,7 @@ Event Store / Read Models
 ### Riscos a evitar
 
 - **Não usar Workspace Tools (Python arbitrário)** — execução de código no servidor; doc oficial alerta que operadores comuns não devem ter essa permissão
-- **Não tratar Open WebUI como fonte de verdade de usuário/RBAC** — RBAC vive no canna-oss app-services, OAuth é apenas tradutor
+- **Não tratar Open WebUI como fonte de verdade de usuário/RBAC** — RBAC vive no canna-br app-services, OAuth é apenas tradutor
 - **Não embedar/forkar dentro do produto** — licença Open WebUI exige preservar branding (cf. [README oficial](https://github.com/open-webui/open-webui))
 - **Não rodar regra de negócio no Open WebUI** — apenas consumir tools
 
@@ -318,15 +318,15 @@ Cada interface tem seu próprio mecanismo. Domínio é único.
 
 ### Identity Provider — decisão postponed
 
-A pergunta "quem é o IdP?" (canna-oss próprio, Open WebUI, ou IdP externo como Keycloak/Zitadel/Authentik) **fica em aberto** até v0.5+. Postura faseada:
+A pergunta "quem é o IdP?" (canna-br próprio, Open WebUI, ou IdP externo como Keycloak/Zitadel/Authentik) **fica em aberto** até v0.5+. Postura faseada:
 
 | Fase | Auth |
 |---|---|
 | **v0.2** | Admin auth próprio simples — JWT + TOTP. Sem OAuth ainda. |
-| **v0.3** | canna-oss emite tokens com escopo para MCP/OpenAPI (próprio IdP simples). Open WebUI usa esses tokens. |
+| **v0.3** | canna-br emite tokens com escopo para MCP/OpenAPI (próprio IdP simples). Open WebUI usa esses tokens. |
 | **v0.5+** | **ADR-002** (futuro) avalia OIDC provider self-hosted se federação/agentes externos crescerem. Não introduzir Keycloak cedo — é um rinoceronte na sala. |
 
-Premissa: identidade vive no canna-oss até existir necessidade real de delegação multi-sistema.
+Premissa: identidade vive no canna-br até existir necessidade real de delegação multi-sistema.
 
 ## Roadmap de Interfaces (pós-ADR-002)
 
@@ -343,7 +343,7 @@ Tools Nível 4 (crypto-deletion, role change, recall, SNGPC prod submit, quota c
 
 ## Mensagem Comercial
 
-> "Você opera o canna-oss pelo agente de IA que sua associação já usa — Claude, ChatGPT, Open WebUI, Cursor. Telas operacionais nascem dentro do chat via MCP Apps inline; busca de membro, dispensação, traceability, KPIs, aprovação — tudo no fluxo conversacional. Ações críticas (crypto-deletion, recall de lote, submissão SNGPC produção) exigem TOTP via REST direta, com auditoria event-sourced."
+> "Você opera o canna-br pelo agente de IA que sua associação já usa — Claude, ChatGPT, Open WebUI, Cursor. Telas operacionais nascem dentro do chat via MCP Apps inline; busca de membro, dispensação, traceability, KPIs, aprovação — tudo no fluxo conversacional. Ações críticas (crypto-deletion, recall de lote, submissão SNGPC produção) exigem TOTP via REST direta, com auditoria event-sourced."
 
 Isso só é verdade se a regra invariante for cumprida em código: **toda interface chama `packages/app-services`; nenhuma interface bypassa o domain kernel; admin Next.js não existe.**
 
@@ -356,4 +356,4 @@ Isso só é verdade se a regra invariante for cumprida em código: **toda interf
 - [Open WebUI](https://github.com/open-webui/open-webui) — cockpit agentic opcional
 - [mcpo](https://github.com/open-webui/mcpo) — MCP-to-OpenAPI proxy
 - [ADR-001 — Domain Kernel com Emmett](/adr/0001-domain-kernel-emmett/) — sync vs async boundary
-- [AGENTS.md](https://github.com/seu-org/canna-oss/blob/main/AGENTS.md) — regras operacionais
+- [AGENTS.md](https://github.com/seu-org/canna-br/blob/main/AGENTS.md) — regras operacionais

@@ -54,7 +54,7 @@ Implementar dois modos de vídeo independentes com privacidade, moderação e pu
 
 **Moderação flow:** Gabriel é o único receptor. Não há fila de moderação — o vídeo chega, Gabriel ouve, responde diretamente via email ou WhatsApp com próximos passos. Fluxo de aprovação ou rejeição é pessoal e assíncrono.
 
-**Storage:** Bucket privado (MinIO já existente na VPS `62.171.145.76` via Langfuse stack, ou Cloudflare R2 free tier). Upload via signed POST gerado server-side — credenciais nunca expostas ao cliente. Filename: UUID v4 opaco, sem metadados no nome.
+**Storage:** Bucket privado (MinIO já existente na VPS interna via Langfuse stack, ou Cloudflare R2 free tier). Upload via signed POST gerado server-side — credenciais nunca expostas ao cliente. Filename: UUID v4 opaco, sem metadados no nome.
 
 **Publicação:** Nenhuma. Este modo nunca produz página pública.
 
@@ -319,7 +319,7 @@ Alguém pode gravar conteúdo ilegal (ameaça, promessa terapêutica enganosa, e
 Vídeo de 5 minutos 720p webm ≈ 50-80 MB. 100 candidaturas = 5-8 GB. 500 perguntas públicas (respostas incluídas) = 25-40 GB.
 
 **Mitigação:**
-- MinIO já existe na VPS `62.171.145.76` (Langfuse stack inclui MinIO). Headroom disponível depende de disco provisionado (ADR-004 define nova VPS com disco configurável).
+- MinIO já existe na VPS interna (Langfuse stack inclui MinIO). Headroom disponível depende de disco provisionado (ADR-004 define nova VPS com disco configurável).
 - Cloudflare R2 free tier: 10 GB storage, 1 milhão de operações classe A — suficiente para fase seed.
 - Vídeos Modo 1 com TTL 18 meses + auto-delete após resposta final liberam espaço continuamente.
 - Limite explícito de submissions por IP/dia no server (rate limiting): previne abuso de armazenamento.

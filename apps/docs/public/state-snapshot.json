@@ -1,61 +1,49 @@
 {
-  "updatedAt": "2026-06-10",
-  "version": "v0.2.1.2",
-  "note": "Snapshot estático commitado. Quando o sistema entra em operação, um adaptador troca este arquivo por leitura de API — sem mudar a interface.",
+  "updatedAt": "2026-06-11",
+  "version": "v0.1.0",
+  "note": "Snapshot estático commitado. Quando o sistema entra em operação real, um adaptador troca este arquivo por leitura de API — sem mudar a interface.",
   "pilots": {
     "active": 0,
     "note": "vagas abertas — 5 slots seed disponíveis até 30 set 2026"
   },
   "openCollectivePurchases": 0,
   "modulesDelivered": [
-    { "name": "Cadastro e gestão de membros", "since": "v0.2.0a" },
-    { "name": "Registro de dispensação com gate de aprovação", "since": "v0.2.0a" },
-    { "name": "Rastreabilidade de lote — cadeia de custódia", "since": "v0.2.0a" },
-    { "name": "Trilha de auditoria imutável (event sourcing)", "since": "v0.2.0a" },
-    { "name": "Controle de cotas por prescrição", "since": "v0.2.0a" },
-    { "name": "Criptografia por membro — LGPD Art. 18 IV", "since": "v0.2.1" },
-    { "name": "Mock SNGPC — XML schema (schema XSD ANVISA pendente)", "since": "v0.2.1" },
-    { "name": "MCP server — 3 apps inline no chat operacional", "since": "v0.2.1" }
+    { "name": "Cadastro e gestão de membros" },
+    { "name": "Registro de dispensação com gate de aprovação" },
+    { "name": "Rastreabilidade de lote — cadeia de custódia" },
+    { "name": "Trilha de auditoria imutável (event sourcing)" },
+    { "name": "Controle de cotas por prescrição" },
+    { "name": "Criptografia por membro — LGPD Art. 11 + Art. 18 IV" },
+    { "name": "MCP server — apps inline no chat operacional" }
   ],
   "recentReleases": [
     {
-      "version": "v0.2.1.2",
-      "date": "2026-06-10",
-      "headline": "154/154 testes verdes — renomeação canna-oss → canna-br + deploy VPS live",
-      "href": "/releases/v021/"
-    },
-    {
-      "version": "v0.2.1",
-      "date": "2026-06-08",
-      "headline": "Compliance Spine + MCP-First — 146 testes, smoke OWUI validado end-to-end",
-      "href": "/releases/v021/"
-    },
-    {
-      "version": "v0.2.0b",
-      "date": "2026-06-08",
-      "headline": "Emmett Postgres adapter — spike gate PASSED, parallel writers verdes em PG real"
-    },
-    {
       "version": "v0.1.0",
+      "date": "2026-06-11",
+      "headline": "Sistema usável, live em cannabr.org — membros, dispensação com aprovação, rastreabilidade, trilha auditável, cotas e MCP inline",
+      "href": "/roadmap/v0-1-0/"
+    },
+    {
+      "version": "Fundação (pré-0.1)",
       "date": "2026-06-08",
-      "headline": "Domain Blueprint — DDD 8 bounded contexts + event storming + ADR-001 + business model"
+      "headline": "Domain kernel (DDD, 8 bounded contexts) + event sourcing + spike gate Emmett PASSED em Postgres real"
     }
   ],
   "nextMilestones": [
     {
-      "label": "v0.3 — Pilot Ready",
+      "label": "v0.2 — Multi-tenant + onboarding self-serve",
       "window": "set/2026 → dez/2026",
-      "description": "RBAC, TOTP, LGPD consent versionado, crypto-deletion, CSV import — pronto para associação real"
+      "description": "Associação provisionada e isolada por tenant; primeiro acesso guiado via MCP Operacional; login Zitadel OIDC/PKCE"
     },
     {
       "label": "Integração SNGPC produção",
-      "window": "quando ANVISA publicar o schema XSD",
-      "description": "Mock já existe; adapter troca para produção quando regulação exigir"
+      "window": "quando a ANVISA publicar o schema XSD",
+      "description": "Mock já existe; o adapter troca para produção quando a regulação exigir"
     },
     {
-      "label": "v0.4 — Sandbox Dossier Ready",
-      "window": "jan/2027 → mai/2027",
-      "description": "Dossier ANVISA, KPI dashboard, BSPO trimestral assinado, RIPD"
+      "label": "v0.3 — Pilot hardening",
+      "window": "2027",
+      "description": "RBAC, TOTP, consentimento LGPD versionado, crypto-deletion, import CSV — pronto para associação real"
     }
   ]
 }

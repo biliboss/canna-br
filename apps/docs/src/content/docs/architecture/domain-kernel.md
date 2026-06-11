@@ -7,7 +7,7 @@ description: "Domínio executável primeiro. Emmett (event-driven-io) como event
 
 > **Tese:** domínio puro primeiro, Emmett como kernel de Event Sourcing, **raw para todo o resto**.
 
-O canna-oss é um sistema de domínio regulado. Bug de domínio = risco jurídico para a associação. A arquitetura espelha esse fato: o **kernel de domínio** é a primeira coisa a ser escrita, em TypeScript puro, com testes GIVEN/WHEN/THEN cobrindo cada cenário de cada comando — antes de qualquer banco, antes de qualquer HTTP route, antes de qualquer UI.
+O canna-br é um sistema de domínio regulado. Bug de domínio = risco jurídico para a associação. A arquitetura espelha esse fato: o **kernel de domínio** é a primeira coisa a ser escrita, em TypeScript puro, com testes GIVEN/WHEN/THEN cobrindo cada cenário de cada comando — antes de qualquer banco, antes de qualquer HTTP route, antes de qualquer UI.
 
 [Emmett (event-driven-io/emmett)](https://github.com/event-driven-io/emmett) entra como biblioteca de Event Sourcing — não como framework da aplicação. Ele fornece event store (Postgres, in-memory), command handler, optimistic concurrency e test harness. O resto — Fastify, Drizzle (para read models), BullMQ, MinIO — fica raw.
 
@@ -55,7 +55,7 @@ Esses são os testes. Eles são o domínio.
 ## Layout de Pacotes
 
 ```text
-canna-oss/
+canna-br/
 ├── packages/
 │   ├── domain/                          ← TypeScript puro, zero dependências externas
 │   │   ├── src/

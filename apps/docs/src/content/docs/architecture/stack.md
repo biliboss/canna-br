@@ -27,9 +27,9 @@ description: "Domain kernel (Emmett) + MCP Server + MCP Apps + Open WebUI sideca
 | Tecnologia | Papel |
 |---|---|
 | MCP Server (`@modelcontextprotocol/sdk`) | Exposição de Tools (commands) + Resources (read models) + Apps (UI inline) — consumido por Claude / ChatGPT / Open WebUI |
-| [MCP Apps (`ext-apps`)](https://github.com/modelcontextprotocol/ext-apps) | Componentes UI interativos renderizados dentro do chat — substituem 80+ telas CRUD de ERP tradicional. v0.2.1: `MemberQuotaCardApp`, `TraceabilityTimelineApp`, `DispensationFormApp`. v0.3+: `InventoryLotPickerApp`, `MemberSearchApp`, `SngpcPendingApp`, `KpiDashboardApp`, `BspoReviewApp`, `RipdReviewApp`, `LgpdRequestsApp`, `AuditTimelineApp` |
+| [MCP Apps (`ext-apps`)](https://github.com/modelcontextprotocol/ext-apps) | Componentes UI interativos renderizados dentro do chat — substituem 80+ telas CRUD de ERP tradicional. v0.1.0: `MemberQuotaCardApp`, `TraceabilityTimelineApp`, `DispensationFormApp`. v0.3+: `InventoryLotPickerApp`, `MemberSearchApp`, `SngpcPendingApp`, `KpiDashboardApp`, `BspoReviewApp`, `RipdReviewApp`, `LgpdRequestsApp`, `AuditTimelineApp` |
 | `packages/ui-apps/` | Pacote canônico — manifests + HTML bundles (single-file via vite-plugin-singlefile). Registry em `src/registry.ts`. |
-| OAuth 2.1 (per MCP spec) | Autorização agente↔canna-oss; agente age em nome de usuário humano com escopo limitado |
+| OAuth 2.1 (per MCP spec) | Autorização agente↔canna-br; agente age em nome de usuário humano com escopo limitado |
 | OpenAPI auto-gerado | Para hosts OpenAPI-only (Open WebUI Tools, integradores tradicionais) |
 | [mcpo bridge](https://github.com/open-webui/mcpo) | MCP-to-OpenAPI proxy quando host não fala MCP nativo |
 | [Open WebUI](https://github.com/open-webui/open-webui) v0.9.6+ (sidecar OBRIGATÓRIO) | Chat host primário — `ghcr.io/open-webui/open-webui:v0.9.6` em docker-compose. MCP server registrado via config file. OAuth 2.1 mapeando scopes para canna roles. **Workspace Tools desabilitado** (`ENABLE_KB_EXEC=false`). |
@@ -135,10 +135,10 @@ Intel NUC ou Raspberry Pi 5 + Docker + Tailscale funnel
 ### Opção C — Multi-Tenant Managed Hosting
 
 ```
-Schema isolation por associação + plano managed (canna-oss cloud)
+Schema isolation por associação + plano managed (canna-br cloud)
 ```
 
-- Modelo de negócio SaaS gerenciado pelo canna-oss
+- Modelo de negócio SaaS gerenciado pelo canna-br
 - Infraestrutura compartilhada com isolamento por schema PostgreSQL
 - Contratos de processamento pré-negociados (DPA padrão LGPD)
 - Ver: [Revenue Model](/business/revenue-model)

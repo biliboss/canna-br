@@ -1,6 +1,6 @@
 ---
 title: Catálogo de Domain Events
-description: Todos os domain events do canna-oss organizados por bounded context — payload e políticas disparadas
+description: Todos os domain events do canna-br organizados por bounded context — payload e políticas disparadas
 ---
 
 # Catálogo de Domain Events

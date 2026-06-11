@@ -15,7 +15,7 @@ O canna-br esta em **modo simulacao**: o stack completo roda localmente (Docker 
 - DispensationFormApp + MemberQuotaCardApp inline no chat
 - Simulacao de dispensacao real com membro, lote e SNGPC draft
 
-**Status atual:** v0.2.1.2 LIVE em VPS compartilhada (62.171.145.76 com Langfuse). Limitacao: VPS compartilhada nao e ambiente de producao para dados de saude.
+**Status atual:** v0.1.0 LIVE em VPS compartilhada (com Langfuse). Limitacao: VPS compartilhada nao e ambiente de producao para dados de saude.
 
 ## Fases de Infraestrutura
 
@@ -76,8 +76,9 @@ Blocker: **decisao VPS dedicada** (Gabriel — ver [Abertas](/build/abertas/#inf
 
 | Versao | Fase | Capability principal |
 |---|---|---|
-| v0.2.1.2 (atual) | Simulacao | MCP Tools 1-3, simulacao local |
-| v0.3 | Fase 1 + 2 | VPS dedicada + LGPD hardening |
+| v0.1.0 (atual) | Simulacao | MCP Tools 1-3, simulacao local, cadastro/gestao de membros, dispensacao com aprovacao, rastreabilidade de lote, trilha de auditoria imutavel |
+| v0.2 | Fase 1 | Multi-tenant + onboarding self-serve |
+| v0.3 | Fase 1 + 2 | VPS dedicada + LGPD hardening (RBAC/TOTP/consent/crypto-deletion) |
 | v0.4 | Fase 2 | BSPO + RIPD + DPO view |
 | v0.5 | Fase 3 | SNGPC real + REST v1 |
 | v1.0 | Fase 4 | Multi-tenant + billing |
