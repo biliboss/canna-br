@@ -1,0 +1,581 @@
+---
+// TEMP showcase — safe to delete; not in nav
+import EventStormingBoard from '../components/EventStormingBoard.astro';
+import UseCaseMatrix from '../components/UseCaseMatrix.astro';
+import InviteReturnContract from '../components/InviteReturnContract.astro';
+import CoordMetrics from '../components/CoordMetrics.astro';
+import ReleasesDashboard from '../components/marketing/widgets/ReleasesDashboard.astro';
+import StateSnapshot from '../components/marketing/widgets/StateSnapshot.astro';
+
+// ── Fixed data: EventStormingBoard (full, 5-column) ───────────────
+const esBoardFull = [
+  {
+    cards: [
+      { type: 'actor' as const, label: 'Diretor' },
+      { type: 'actor' as const, label: 'Membro' },
+    ],
+  },
+  {
+    cards: [
+      { type: 'command' as const, label: 'RegisterMember', pivotal: true },
+      { type: 'command' as const, label: 'RecordDispensation' },
+    ],
+  },
+  {
+    cards: [
+      { type: 'aggregate' as const, label: 'Membership' },
+      { type: 'aggregate' as const, label: 'Dispensation' },
+    ],
+  },
+  {
+    cards: [
+      { type: 'event' as const, label: 'MemberRegistered', pivotal: true },
+      { type: 'event' as const, label: 'DispensationRecorded' },
+      { type: 'policy' as const, label: 'Quota Reset Policy' },
+    ],
+  },
+  {
+    cards: [
+      { type: 'read-model' as const, label: 'MemberQuotaView' },
+      { type: 'read-model' as const, label: 'DispensationLog' },
+      { type: 'external' as const, label: 'SNGPC Gateway' },
+    ],
+  },
+];
+
+// ── Fixed data: EventStormingBoard (mini, 2-column) ───────────────
+const esBoardMini = [
+  {
+    cards: [
+      { type: 'command' as const, label: 'ProvisionAssociation' },
+      { type: 'actor' as const, label: 'Admin' },
+    ],
+  },
+  {
+    cards: [
+      { type: 'aggregate' as const, label: 'Association' },
+      { type: 'event' as const, label: 'AssociationProvisioned', pivotal: true },
+    ],
+  },
+];
+
+// ── Fixed data: UseCaseMatrix ─────────────────────────────────────
+const ucmGroups = [
+  {
+    context: 'Gestão de Associação',
+    useCases: [
+      {
+        name: 'ProvisionAssociation',
+        type: 'command' as const,
+        desc: 'Cria tenant + configura infra para nova associação',
+        surfaces: { mcp: 'provision_association', web: true, app: true },
+      },
+      {
+        name: 'UpdateAssociationProfile',
+        type: 'command' as const,
+        desc: 'Atualiza nome, CNPJ, endereço, logo',
+        surfaces: { mcp: 'update_association_profile', web: true },
+      },
+      {
+        name: 'GetAssociationStatus',
+        type: 'query' as const,
+        desc: 'Retorna estado atual, limites e compliance flags',
+        surfaces: { mcp: 'get_association_status', web: true, app: true },
+      },
+    ],
+  },
+  {
+    context: 'Membros e Dispensações',
+    useCases: [
+      {
+        name: 'RegisterMember',
+        type: 'command' as const,
+        desc: 'Admite sócio + provisiona acesso + emite convite',
+        surfaces: { mcp: 'register_member', web: true, app: 'MemberRegistrationForm' },
+      },
+      {
+        name: 'RecordDispensation',
+        type: 'command' as const,
+        desc: 'Registra retirada respeitando quota ativa do membro',
+        surfaces: { mcp: 'record_dispensation', app: 'DispensationForm' },
+      },
+      {
+        name: 'ViewMemberQuota',
+        type: 'query' as const,
+        desc: 'Consulta consumo atual vs. limite mensal',
+        surfaces: { mcp: 'view_member_quota', web: true },
+      },
+    ],
+  },
+  {
+    context: 'Compliance e Relatórios',
+    useCases: [
+      {
+        name: 'GenerateTraceabilityReport',
+        type: 'query' as const,
+        desc: 'Relatório rastreabilidade pronto p/ diretoria',
+        surfaces: { mcp: 'generate_traceability_report' },
+      },
+      {
+        name: 'SubmitSNGPC',
+        type: 'command' as const,
+        desc: 'Envia dados ao sistema SNGPC da Anvisa',
+        surfaces: { mcp: 'submit_sngpc' },
+      },
+    ],
+  },
+];
+---
+
+<!doctype html>
+<html lang="pt-BR" color-scheme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>canna-br · Componentes (showcase temp)</title>
+  <style>
+    /* ── Reset + base ──────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:         #020617;
+      --bg-card:    #070f1c;
+      --bg-section: #0b1620;
+      --emerald:    #10b981;
+      --emerald-300: #6ee7b7;
+      --forest:     #064e3b;
+      --amber:      #f59e0b;
+      --border:     rgba(16, 185, 129, 0.18);
+      --border-card: rgba(16, 185, 129, 0.12);
+      --text:       rgba(255, 255, 255, 0.88);
+      --muted:      rgba(255, 255, 255, 0.45);
+      --micro:      rgba(255, 255, 255, 0.28);
+      --font-ui:    system-ui, -apple-system, "Segoe UI", sans-serif;
+      --font-mono:  "JetBrains Mono", ui-monospace, monospace;
+      color-scheme: dark;
+    }
+
+    html, body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-ui);
+      font-size: 15px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ── Page chrome ───────────────────────────────────────────── */
+    .sc-header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(2, 6, 23, 0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 max(24px, env(safe-area-inset-right));
+    }
+
+    .sc-header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      gap: 16px;
+    }
+
+    .sc-header-title {
+      font-size: 0.875rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--emerald-300);
+    }
+
+    .sc-header-title span {
+      color: var(--muted);
+      font-weight: 400;
+    }
+
+    .sc-temp-badge {
+      font-size: 0.625rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--amber);
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      border-radius: 999px;
+      padding: 3px 10px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    /* ── Layout ────────────────────────────────────────────────── */
+    .sc-body {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 48px max(24px, env(safe-area-inset-right)) 96px;
+    }
+
+    /* ── Nav (component index) ─────────────────────────────────── */
+    .sc-toc {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 48px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border-card);
+    }
+
+    .sc-toc-link {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-decoration: none;
+      padding: 4px 12px;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 6px;
+      transition: color 0.15s ease-out, border-color 0.15s ease-out, background 0.15s ease-out;
+    }
+
+    .sc-toc-link:hover {
+      color: var(--emerald-300);
+      border-color: var(--border);
+      background: rgba(16, 185, 129, 0.06);
+    }
+
+    .sc-toc-link:focus-visible {
+      outline: 2px solid var(--emerald);
+      outline-offset: 2px;
+    }
+
+    /* ── Section block ─────────────────────────────────────────── */
+    .sc-section {
+      margin-bottom: 80px;
+    }
+
+    .sc-section-header {
+      margin-bottom: 24px;
+    }
+
+    .sc-component-name {
+      font-size: 1.125rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: rgba(255, 255, 255, 0.96);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sc-component-name code {
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--emerald-300);
+      background: rgba(16, 185, 129, 0.10);
+      border: 1px solid rgba(16, 185, 129, 0.20);
+      border-radius: 5px;
+      padding: 1px 8px;
+    }
+
+    .sc-what {
+      font-size: 0.8125rem;
+      color: var(--muted);
+      line-height: 1.5;
+      margin-bottom: 0;
+    }
+
+    .sc-path {
+      font-size: 0.6875rem;
+      font-family: var(--font-mono);
+      color: var(--micro);
+      margin-top: 4px;
+    }
+
+    /* ── Flavor label ──────────────────────────────────────────── */
+    .sc-flavor-block {
+      margin-bottom: 32px;
+    }
+
+    .sc-flavor-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.6875rem;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--amber);
+      background: rgba(245, 158, 11, 0.08);
+      border: 1px solid rgba(245, 158, 11, 0.22);
+      border-radius: 6px;
+      padding: 4px 12px;
+      margin-bottom: 16px;
+    }
+
+    /* ── Component wrapper ─────────────────────────────────────── */
+    .sc-component-wrap {
+      background: var(--bg-section);
+      border: 1px solid var(--border-card);
+      border-radius: 12px;
+      padding: 24px;
+      /* heuristic #16: gen-ui overflow contract */
+      overflow-x: auto;
+      max-width: 100%;
+    }
+
+    /* StateSnapshot + ReleasesDashboard get more breathing room */
+    .sc-component-wrap--wide {
+      padding: 32px;
+    }
+
+    /* ── Divider between flavors ───────────────────────────────── */
+    .sc-divider {
+      border: 0;
+      border-top: 1px dashed rgba(16, 185, 129, 0.12);
+      margin: 32px 0;
+    }
+
+    /* ── Section separator ─────────────────────────────────────── */
+    .sc-section-sep {
+      border: 0;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      margin: 0 0 80px;
+    }
+
+    /* ── Responsive ────────────────────────────────────────────── */
+    @media (max-width: 640px) {
+      .sc-body {
+        padding: 32px 16px 64px;
+      }
+      .sc-component-wrap {
+        padding: 16px;
+      }
+      .sc-component-wrap--wide {
+        padding: 16px;
+      }
+    }
+
+    /* ── Reduced motion ────────────────────────────────────────── */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sticky header -->
+  <header class="sc-header">
+    <div class="sc-header-inner">
+      <h1 class="sc-header-title">
+        canna-br <span>· Componentes</span>
+      </h1>
+      <span class="sc-temp-badge" aria-label="Página temporária — segura para deletar">TEMP showcase</span>
+    </div>
+  </header>
+
+  <main class="sc-body">
+
+    <!-- Component index / nav -->
+    <nav class="sc-toc" aria-label="Índice de componentes">
+      <a href="#event-storming" class="sc-toc-link">EventStormingBoard</a>
+      <a href="#use-case-matrix" class="sc-toc-link">UseCaseMatrix</a>
+      <a href="#invite-return" class="sc-toc-link">InviteReturnContract</a>
+      <a href="#coord-metrics" class="sc-toc-link">CoordMetrics</a>
+      <a href="#releases-dashboard" class="sc-toc-link">ReleasesDashboard ×4</a>
+      <a href="#state-snapshot" class="sc-toc-link">StateSnapshot</a>
+    </nav>
+
+    <!-- ─────────────────────────────────────────────────────────── -->
+    <!-- 1. EventStormingBoard                                       -->
+    <!-- ─────────────────────────────────────────────────────────── -->
+    <section class="sc-section" id="event-storming">
+      <div class="sc-section-header">
+        <h2 class="sc-component-name">
+          <code>EventStormingBoard</code>
+        </h2>
+        <p class="sc-what">Quadro de EventStorming (Brandolini grammar) com suporte a todos os 8 tipos de cards, hotspots, legenda e cards pivotais. Scroll horizontal, zero JS.</p>
+        <p class="sc-path">src/components/EventStormingBoard.astro</p>
+      </div>
+
+      <!-- Flavor A: full 5-column board -->
+      <div class="sc-flavor-block">
+        <span class="sc-flavor-label" aria-label="Flavor: full">Flavor A — Board completo (5 colunas, pivotal, all types)</span>
+        <div class="sc-component-wrap">
+          <EventStormingBoard
+            title="Fluxo Membro→Dispensação — canna-br v0.1"
+            columns={esBoardFull}
+            hotspots={[
+              { label: 'Quota reset automático ou manual?' },
+              { label: 'SNGPC envio: síncrono ou batch noturno?' },
+            ]}
+          />
+        </div>
+      </div>
+
+      <hr class="sc-divider" />
+
+      <!-- Flavor B: 2-column minimal -->
+      <div class="sc-flavor-block">
+        <span class="sc-flavor-label">Flavor B — Mini board (2 colunas, sem hotspots)</span>
+        <div class="sc-component-wrap">
+          <EventStormingBoard
+            title="Provisionamento de Associação"
+            columns={esBoardMini}
+          />
+        </div>
+      </div>
+    </section>
+
+    <hr class="sc-section-sep" />
+
+    <!-- ─────────────────────────────────────────────────────────── -->
+    <!-- 2. UseCaseMatrix                                            -->
+    <!-- ─────────────────────────────────────────────────────────── -->
+    <section class="sc-section" id="use-case-matrix">
+      <div class="sc-section-header">
+        <h2 class="sc-component-name">
+          <code>UseCaseMatrix</code>
+        </h2>
+        <p class="sc-what">Catálogo de use cases da camada de aplicação com tipo (Command/Query), superfícies expostas (MCP/Web/App) e chips de presença. Golden Circle intro integrado. Zero JS, SSR puro.</p>
+        <p class="sc-path">src/components/UseCaseMatrix.astro</p>
+      </div>
+
+      <div class="sc-flavor-block">
+        <span class="sc-flavor-label">Flavor único — 3 grupos, 8 use cases, mix command/query, surfaces variadas</span>
+        <div class="sc-component-wrap">
+          <UseCaseMatrix groups={ucmGroups} />
+        </div>
+      </div>
+    </section>
+
+    <hr class="sc-section-sep" />
+
+    <!-- ─────────────────────────────────────────────────────────── -->
+    <!-- 3. InviteReturnContract                                     -->
+    <!-- ─────────────────────────────────────────────────────────── -->
+    <section class="sc-section" id="invite-return">
+      <div class="sc-section-header">
+        <h2 class="sc-component-name">
+          <code>InviteReturnContract</code>
+        </h2>
+        <p class="sc-what">Demonstra o padrão "retorno é o artefato acionável": (1) card de convite MCP App com botão copiar, (2) contrato de retorno JSON, (3) tabela de oportunidades use-case × artefato com badges de versão. Dados baked-in (sem props). Copy button com toast feedback.</p>
+        <p class="sc-path">src/components/InviteReturnContract.astro</p>
+      </div>
+
+      <div class="sc-flavor-block">
+        <span class="sc-flavor-label">Flavor único — invite card Casa da Mata + JSON contract + opportunity table</span>
+        <div class="sc-component-wrap">
+          <InviteReturnContract />
+        </div>
+      </div>
+    </section>
+
+    <hr class="sc-section-sep" />
+
+    <!-- ─────────────────────────────────────────────────────────── -->
+    <!-- 4. CoordMetrics                                             -->
+    <!-- ─────────────────────────────────────────────────────────── -->
+    <section class="sc-section" id="coord-metrics">
+      <div class="sc-section-header">
+        <h2 class="sc-component-name">
+          <code>CoordMetrics</code>
+        </h2>
+        <p class="sc-what">Dashboard de métricas de coordenação Kanban: KPI strip, gráfico de cycle time (inline SVG + linha SLA dashed amber), cost ledger entry auditável, tabela detalhada por lane e diagrama de fluxo work→barrier→verify. Dados baked-in, zero JS.</p>
+        <p class="sc-path">src/components/CoordMetrics.astro</p>
+      </div>
+
+      <div class="sc-flavor-block">
+        <span class="sc-flavor-label">Flavor único — missão canna v0.1.0 finalize · 4 lanes · US$2.29</span>
+        <div class="sc-component-wrap sc-component-wrap--wide">
+          <CoordMetrics />
+        </div>
+      </div>
+    </section>
+
+    <hr class="sc-section-sep" />
+
+    <!-- ─────────────────────────────────────────────────────────── -->
+    <!-- 5. ReleasesDashboard — 4 views                             -->
+    <!-- ─────────────────────────────────────────────────────────── -->
+    <section class="sc-section" id="releases-dashboard">
+      <div class="sc-section-header">
+        <h2 class="sc-component-name">
+          <code>ReleasesDashboard</code>
+        </h2>
+        <p class="sc-what">Fonte única de verdade para versões, roadmap e changelog. Fetch client-side de /releases.json (dado fixo em disco). Skeleton shimmer durante carregamento. Suporta 4 views: badge, roadmap, changelog, full.</p>
+        <p class="sc-path">src/components/marketing/widgets/ReleasesDashboard.astro</p>
+      </div>
+
+      <!-- view="badge" -->
+      <div class="sc-flavor-block">
+        <span class="sc-flavor-label">view="badge" — inline compact, versão + status + test count</span>
+        <div class="sc-component-wrap">
+          <ReleasesDashboard view="badge" id="rd-badge" />
+        </div>
+      </div>
+
+      <hr class="sc-divider" />
+
+      <!-- view="roadmap" -->
+      <div class="sc-flavor-block">
+        <span class="sc-flavor-label">view="roadmap" — current release card + roadmap grid</span>
+        <div class="sc-component-wrap sc-component-wrap--wide">
+          <ReleasesDashboard view="roadmap" id="rd-roadmap" />
+        </div>
+      </div>
+
+      <hr class="sc-divider" />
+
+      <!-- view="changelog" -->
+      <div class="sc-flavor-block">
+        <span class="sc-flavor-label">view="changelog" — releases newest-first + pre-milestones</span>
+        <div class="sc-component-wrap sc-component-wrap--wide">
+          <ReleasesDashboard view="changelog" id="rd-changelog" />
+        </div>
+      </div>
+
+      <hr class="sc-divider" />
+
+      <!-- view="full" -->
+      <div class="sc-flavor-block">
+        <span class="sc-flavor-label">view="full" — badge + roadmap + changelog combinados</span>
+        <div class="sc-component-wrap sc-component-wrap--wide">
+          <ReleasesDashboard view="full" id="rd-full" />
+        </div>
+      </div>
+    </section>
+
+    <hr class="sc-section-sep" />
+
+    <!-- ─────────────────────────────────────────────────────────── -->
+    <!-- 6. StateSnapshot                                            -->
+    <!-- ─────────────────────────────────────────────────────────── -->
+    <section class="sc-section" id="state-snapshot">
+      <div class="sc-section-header">
+        <h2 class="sc-component-name">
+          <code>StateSnapshot</code>
+        </h2>
+        <p class="sc-what">Ilha "estado da rede" — lê /state-snapshot.json client-side e renderiza 4 cards: pilotos ativos, módulos entregues, releases recentes, próximos marcos. Skeleton shimmer → hydrate. Carimbo "atualizado em" com pulse dot.</p>
+        <p class="sc-path">src/components/marketing/widgets/StateSnapshot.astro</p>
+      </div>
+
+      <div class="sc-flavor-block">
+        <span class="sc-flavor-label">Flavor único — lê /state-snapshot.json (fixo em disco)</span>
+        <div class="sc-component-wrap sc-component-wrap--wide">
+          <StateSnapshot />
+        </div>
+      </div>
+    </section>
+
+  </main>
+</body>
+</html>

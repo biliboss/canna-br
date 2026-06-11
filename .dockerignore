@@ -1,10 +1,12 @@
 **/node_modules
 **/dist
+**/.next
 **/.astro
 **/.turbo
 **/*.tsbuildinfo
 **/.vitest-cache
 **/.pnpm-store
+**/.wrangler
 **/coverage
 .git
 .github
@@ -26,3 +28,14 @@ ROADMAP.md
 CHANGELOG.md
 ADR-*.md
 docs
+# apps/docs (Astro docsite) is not part of the runtime image — owned separately.
+apps/docs
+# Cloudflare Worker — deployed via wrangler, not Docker.
+apps/apply-worker
+# Local-only / non-runtime trees.
+marketing
+mcp-prototype
+releases
+*.png
+*.mp4
+*.mov

@@ -1,0 +1,206 @@
+# canna-br — v0.1.0 self-host stack.
+#
+#   cp .env.example .env      # fill in OPENROUTER_API_KEY + a masterkey
+#   docker compose up         # builds the single image once, runs every role
+#
+# Managed-vs-self-host: the owner runs the managed flavour on Zitadel Cloud +
+# Neon Postgres. THIS compose is the OSS self-host path — an association can run
+# its own instance with the services below and zero external SaaS. See
+# ops/docker/README.md.
+#
+# Service -> port map (host:container):
+#   postgres   5432   event store + read models (Emmett + Drizzle)
+#   redis      6379   BullMQ queues for the worker
+#   zitadel    8080   auth / multi-tenant (single-instance self-host)
+#   api        3000   Fastify REST (POST /v1/commands/*, GET /health)
+#   mcp        3001   MCP server (StreamableHTTP, x-canna-* headers)
+#   agent      3002   Next.js / assistant-ui chat  (see TODO on the service)
+#   worker      --    BullMQ background worker (internal health on 3002)
+
+x-canna-image: &canna-image
+  build:
+    context: .
+    dockerfile: Dockerfile
+  image: canna-br:0.1.0
+
+services:
+  # --- Datastore: event store + read models -------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: canna-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-canna}
+      POSTGRES_USER: ${POSTGRES_USER:-canna}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-canna} -d ${POSTGRES_DB:-canna}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    networks: [canna]
+
+  # --- Queue backend for the worker ---------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: canna-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks: [canna]
+
+  # --- Auth / multi-tenant -------------------------------------------------
+  # Single-instance Zitadel for self-host. It owns its OWN Postgres database on
+  # the shared postgres service (db: zitadel) so it never collides with the
+  # canna event store. Reverse proxy terminates TLS in real deploys; here it
+  # binds host 8080 directly for first-run setup.
+  #
+  # First boot prints the initial admin (zitadel-admin@<org>) — grab it from
+  # `docker compose logs zitadel`. ZITADEL_EXTERNALSECURE=false is dev-only:
+  # set it true + put Zitadel behind TLS before exposing publicly.
+  #
+  # TODO(v0.1.x): wire the canna apps to Zitadel as an OIDC IdP (api/mcp today
+  # still read x-canna-* stub headers — real OAuth 2.1 lands once the IdP is
+  # provisioned). Until then Zitadel runs but the apps do not yet validate its
+  # tokens. See ops/docker/README.md "Zitadel wiring depth".
+  zitadel:
+    image: ghcr.io/zitadel/zitadel:latest
+    container_name: canna-zitadel
+    restart: unless-stopped
+    command: 'start-from-init --masterkey "${ZITADEL_MASTERKEY:?ZITADEL_MASTERKEY is required (exactly 32 bytes)}" --tlsMode disabled'
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ZITADEL_EXTERNALDOMAIN: ${ZITADEL_EXTERNALDOMAIN:-localhost}
+      ZITADEL_EXTERNALPORT: ${ZITADEL_EXTERNALPORT:-8080}
+      ZITADEL_EXTERNALSECURE: ${ZITADEL_EXTERNALSECURE:-false}
+      ZITADEL_TLS_ENABLED: "false"
+      # Zitadel stores its own state in a dedicated DB on the shared postgres.
+      ZITADEL_DATABASE_POSTGRES_HOST: postgres
+      ZITADEL_DATABASE_POSTGRES_PORT: "5432"
+      ZITADEL_DATABASE_POSTGRES_DATABASE: ${ZITADEL_DB:-zitadel}
+      ZITADEL_DATABASE_POSTGRES_USER_USERNAME: ${POSTGRES_USER:-canna}
+      ZITADEL_DATABASE_POSTGRES_USER_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      ZITADEL_DATABASE_POSTGRES_USER_SSL_MODE: disable
+      ZITADEL_DATABASE_POSTGRES_ADMIN_USERNAME: ${POSTGRES_USER:-canna}
+      ZITADEL_DATABASE_POSTGRES_ADMIN_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      ZITADEL_DATABASE_POSTGRES_ADMIN_SSL_MODE: disable
+    ports:
+      - "${ZITADEL_EXTERNALPORT:-8080}:8080"
+    networks: [canna]
+
+  # --- canna-api: Fastify REST (role = api) -------------------------------
+  api:
+    <<: *canna-image
+    container_name: canna-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-canna}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-canna}
+      PORT: "3000"
+      HOST: 0.0.0.0
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      CORS_ORIGIN: ${CORS_ORIGIN:-}
+    command: ["tsx", "apps/api/src/server.ts"]
+    ports:
+      - "3000:3000"
+    networks: [canna]
+
+  # --- canna-mcp: MCP server, StreamableHTTP (role = mcp) -----------------
+  mcp:
+    <<: *canna-image
+    container_name: canna-mcp
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-canna}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-canna}
+      PORT: "3001"
+      HOST: 0.0.0.0
+      # v0.2.1 stub identity headers (real OAuth 2.1 via Zitadel is a TODO).
+      CANNA_USER: ${CANNA_USER:-admin}
+      CANNA_ROLE: ${CANNA_ROLE:-admin}
+      CANNA_ASSOCIATION: ${CANNA_ASSOCIATION:-default}
+    # tsx (not plain node --experimental-strip-types): the mcp source imports
+    # siblings with `.js` specifiers that resolve to `.ts` on disk — only tsx
+    # rewrites them at runtime.
+    command: ["tsx", "apps/mcp/src/main.ts"]
+    ports:
+      - "3001:3001"
+    networks: [canna]
+
+  # --- canna-worker: BullMQ background worker (role = worker) -------------
+  worker:
+    <<: *canna-image
+    container_name: canna-worker
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-canna}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-canna}
+      REDIS_URL: redis://redis:6379/0
+      PORT: "3002"
+      HOST: 0.0.0.0
+    # tsx for the same `.js`->`.ts` specifier-resolution reason as mcp.
+    command: ["tsx", "apps/worker/src/server.ts"]
+    networks: [canna]
+
+  # --- canna-agent: Next.js / assistant-ui chat ---------------------------
+  # NOT built by the root Dockerfile: apps/agent is excluded from the pnpm
+  # workspace and depends on unpublished `link:` packages OUTSIDE this repo
+  # (~/.obsidian/.../mcp-app-base/packages/*). A clean `docker build` cannot
+  # resolve them.
+  #
+  # TODO(v0.1.x): publish the assistant-ui packages (or vendor them in) and add
+  # an agent build stage to the Dockerfile, then point `image:` at it and drop
+  # `profiles`. Until then this service is opt-in only:
+  #   docker compose --profile agent up
+  # and you must build the image yourself from apps/agent (see its README).
+  agent:
+    image: canna-br-agent:0.1.0
+    container_name: canna-agent
+    restart: unless-stopped
+    profiles: ["agent"]
+    depends_on:
+      - mcp
+    environment:
+      MCP_ENABLED: ${MCP_ENABLED:-true}
+      MCP_SERVER_URL: ${MCP_SERVER_URL:-http://mcp:3001}
+      MODEL_ID: ${MODEL_ID:-google/gemini-2.5-flash-lite}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:?OPENROUTER_API_KEY is required to run the agent}
+      NEXT_PUBLIC_DOCS_URL: ${NEXT_PUBLIC_DOCS_URL:-http://localhost:4337}
+      NODE_ENV: production
+      PORT: "3002"
+    ports:
+      - "3002:3002"
+    networks: [canna]
+
+volumes:
+  postgres_data:
+    name: canna-postgres-data
+  redis_data:
+    name: canna-redis-data
+
+networks:
+  canna:
+    name: canna
+    driver: bridge

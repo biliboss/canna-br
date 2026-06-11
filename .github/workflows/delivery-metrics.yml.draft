@@ -1,0 +1,247 @@
+# delivery-metrics.yml.draft
+#
+# DRAFT — do NOT rename to .yml or enable in GH Actions until the COORD wires
+# the required secrets and validates each step against the live prod setup.
+#
+# Purpose: After a successful build+deploy to cannabr.org, emit structured
+# metrics (build time, page count, Lighthouse scores, screenshots) into the
+# manager skill's ci_run time-series via ci-ingest.ts.
+#
+# Required GH Secrets (set via `gh secret set` — see COORD wiring steps):
+#   SURREALDB_URL       — ws(s):// URL of the SurrealDB instance
+#   SURREALDB_USER      — SurrealDB username
+#   SURREALDB_PASSWORD  — SurrealDB password
+#   MANAGER_INGEST_SSH_KEY   — ed25519 private key with access to the VPS
+#                              (only needed for SSH ingestion path — see option B)
+#
+# Ingestion options (choose ONE, comment out the other):
+#   A. Direct from GH Actions runner (SurrealDB reachable from internet, or via CF Tunnel)
+#   B. SSH into VPS, run ci-ingest there (SurrealDB only reachable on VPS-local network)
+#
+# This draft uses option A (direct).  See "Option B" comment block for SSH variant.
+
+name: delivery-metrics
+
+on:
+  workflow_run:
+    # Trigger AFTER the main CD workflow completes successfully.
+    # Replace "Deploy" with the actual workflow name in canna-br.
+    workflows: ["Deploy"]
+    types: [completed]
+    branches: [main]
+
+  # Allow manual trigger with a custom live_url override (useful for testing)
+  workflow_dispatch:
+    inputs:
+      live_url:
+        description: "Live URL to run Lighthouse against"
+        required: false
+        default: "https://cannabr.org"
+
+jobs:
+  collect-and-ingest:
+    name: Collect metrics + ingest ci_run
+    # Only run on success of the triggering workflow (or on manual dispatch)
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      # ── 0. Checkout (needed to count pages + run ci-ingest) ─────────────────
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Use the commit that was deployed, not HEAD of main
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      # ── 1. Set up Bun ───────────────────────────────────────────────────────
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      # ── 2. Record build start (approx — the actual build ran in the CD job) ─
+      # We use the CD workflow's created_at → updated_at window as build_time_s.
+      # GH API provides this; here we approximate from workflow timing env vars.
+      - name: Capture timing
+        id: timing
+        run: |
+          # GH sets GITHUB_RUN_ATTEMPT; we approximate build time from event payload.
+          # Real build_time_s should come from CD job's output artifact (metrics-partial.json).
+          # For now default to 0 and let the CD job write build_time_s itself.
+          echo "build_time_s=0" >> "$GITHUB_OUTPUT"
+          echo "ts=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+
+      # ── 3. Count pages ───────────────────────────────────────────────────────
+      - name: Count built pages
+        id: pages
+        run: |
+          # Adjust path to wherever the CD job writes the built site.
+          # If the build output is not present here (artifact from CD job), default to 0.
+          COUNT=0
+          if [ -d "apps/docs/dist" ]; then
+            COUNT=$(find apps/docs/dist -name "*.html" | wc -l | tr -d ' ')
+          fi
+          echo "page_count=$COUNT" >> "$GITHUB_OUTPUT"
+
+      # ── 4. Install chrome-devtools-mcp for Lighthouse ────────────────────────
+      - name: Install chrome-devtools-mcp
+        run: bun add -g chrome-devtools-mcp
+
+      # ── 5. Capture Lighthouse scores ─────────────────────────────────────────
+      - name: Lighthouse audit
+        id: lighthouse
+        env:
+          LIVE_URL: ${{ github.event.inputs.live_url || 'https://cannabr.org' }}
+        run: |
+          # chrome-devtools-mcp ships a lighthouse_audit CLI command.
+          # Timeout 3min; fail softly (||true) — missing LH does not abort ingest.
+          REPORT_FILE="/tmp/lh-report.json"
+          bunx chrome-devtools-mcp lighthouse_audit \
+            --url "$LIVE_URL" \
+            --output-format json \
+            --output-path "$REPORT_FILE" \
+            --timeout 120 || true
+
+          # Parse scores (0–100) from the report; default to null on missing fields.
+          python3 - <<'PYEOF'
+          import json, os, sys
+          path = "/tmp/lh-report.json"
+          scores = {"perf": None, "a11y": None, "best": None, "seo": None}
+          try:
+              with open(path) as f:
+                  r = json.load(f)
+              cats = r.get("categories", {})
+              def s(k): return round((cats.get(k, {}).get("score") or 0) * 100)
+              scores = {
+                  "perf":  s("performance"),
+                  "a11y":  s("accessibility"),
+                  "best":  s("best-practices"),
+                  "seo":   s("seo"),
+              }
+          except Exception as e:
+              print(f"[delivery-metrics] LH parse warning: {e}", file=sys.stderr)
+          env_file = os.environ["GITHUB_OUTPUT"]
+          with open(env_file, "a") as f:
+              f.write(f"lh_json={json.dumps(scores)}\n")
+          PYEOF
+
+      # ── 6. Capture screenshot ────────────────────────────────────────────────
+      - name: Screenshot
+        id: screenshot
+        env:
+          LIVE_URL: ${{ github.event.inputs.live_url || 'https://cannabr.org' }}
+        run: |
+          # Screenshot via chrome-devtools-mcp.
+          # Upload to R2 or a public bucket; here we store the local path for now.
+          # TODO(coord): wire R2 upload + replace with CDN URL.
+          bunx chrome-devtools-mcp navigate_page --url "$LIVE_URL" --timeout 30 || true
+          bunx chrome-devtools-mcp take_screenshot \
+            --file-path "/tmp/screen-${{ github.run_id }}.png" || true
+          echo "screenshot_path=/tmp/screen-${{ github.run_id }}.png" >> "$GITHUB_OUTPUT"
+          # Placeholder URL until R2 upload is wired:
+          echo "screenshot_url=" >> "$GITHUB_OUTPUT"
+
+      # ── 7. Assemble metrics.json ──────────────────────────────────────────────
+      - name: Build metrics.json
+        id: metrics
+        env:
+          BUILD_TIME_S: ${{ steps.timing.outputs.build_time_s }}
+          PAGE_COUNT:   ${{ steps.pages.outputs.page_count }}
+          LH_JSON:      ${{ steps.lighthouse.outputs.lh_json }}
+          SCREENSHOT_URL: ${{ steps.screenshot.outputs.screenshot_url }}
+          TS:           ${{ steps.timing.outputs.ts }}
+        run: |
+          python3 - <<'PYEOF'
+          import json, os
+          lh = json.loads(os.environ.get("LH_JSON", "{}"))
+          sc_url = os.environ.get("SCREENSHOT_URL", "")
+          metrics = {
+              "project":       "canna-br",
+              "run_id":        f"gh-run-{os.environ['GITHUB_RUN_ID']}",
+              "ts":            os.environ["TS"],
+              "kind":          "cd",
+              "commit_sha":    os.environ.get("GITHUB_SHA", "")[:12],
+              "build_time_s":  float(os.environ.get("BUILD_TIME_S") or 0),
+              "page_count":    int(os.environ.get("PAGE_COUNT") or 0),
+              "deploy_status": "success",
+              "live_url":      os.environ.get("LIVE_URL", "https://cannabr.org"),
+              "lighthouse":    lh,
+              "screenshots":   [sc_url] if sc_url else [],
+              "meta": {
+                  "branch": os.environ.get("GITHUB_REF_NAME", ""),
+                  "actor":  os.environ.get("GITHUB_ACTOR", ""),
+                  "trigger": os.environ.get("GITHUB_EVENT_NAME", ""),
+              },
+          }
+          with open("metrics.json", "w") as f:
+              json.dump(metrics, f, indent=2)
+          print(json.dumps(metrics, indent=2))
+          PYEOF
+
+      # ── 8a. Ingest — Option A: direct from runner ────────────────────────────
+      # The manager skill's ci-ingest.ts must be accessible from this runner.
+      # Simplest: copy ci-ingest.ts + _lib deps into a thin wrapper package,
+      # or publish as a standalone npm package. Until then, use the inline approach.
+      #
+      # For now: call the SurrealDB HTTP API directly (no bun script needed).
+      - name: Ingest into SurrealDB (direct HTTP)
+        env:
+          SURREALDB_URL:      ${{ secrets.SURREALDB_URL }}
+          SURREALDB_USER:     ${{ secrets.SURREALDB_USER }}
+          SURREALDB_PASSWORD: ${{ secrets.SURREALDB_PASSWORD }}
+        run: |
+          # Convert ws(s):// to http(s):// for the REST endpoint
+          HTTP_URL="${SURREALDB_URL/ws:\/\//http://}"
+          HTTP_URL="${HTTP_URL/wss:\/\//https://}"
+          HTTP_URL="${HTTP_URL%/rpc}"
+
+          METRICS=$(cat metrics.json)
+          PROJECT=$(echo "$METRICS" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['project'])")
+          RUN_ID=$(echo "$METRICS" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['run_id'])")
+
+          # Upsert via SurrealDB SQL endpoint (idempotent)
+          curl --fail-with-body -s \
+            -H "Accept: application/json" \
+            -H "Content-Type: application/json" \
+            -H "NS: manager" \
+            -H "DB: fleet" \
+            -u "${SURREALDB_USER}:${SURREALDB_PASSWORD}" \
+            -X POST "${HTTP_URL}/sql" \
+            -d "$(python3 -c "
+          import sys, json
+          data = json.loads(open('metrics.json').read())
+          # UPSERT via SELECT+UPDATE or INSERT (idempotent on UNIQUE index)
+          stmt = 'INSERT INTO ci_run ' + json.dumps(data) + ' ON DUPLICATE KEY UPDATE *;'
+          print(json.dumps(stmt))
+          " | python3 -c "import sys; print(sys.stdin.read()[1:-2])")" \
+            || echo "[delivery-metrics] SurrealDB ingest warning — check secrets"
+
+      # ── 8b. Option B: SSH ingest (comment out 8a, uncomment this) ────────────
+      # Use when SurrealDB is NOT reachable from the public internet.
+      #
+      # - name: Ingest via SSH
+      #   env:
+      #     MANAGER_INGEST_SSH_KEY: ${{ secrets.MANAGER_INGEST_SSH_KEY }}
+      #     VPS_HOST: ${{ secrets.VPS_HOST }}
+      #   run: |
+      #     # Write private key
+      #     install -m 600 /dev/null ~/.ssh/deploy_key
+      #     echo "$MANAGER_INGEST_SSH_KEY" > ~/.ssh/deploy_key
+      #     # Copy metrics.json + ci-ingest.ts to VPS, run there
+      #     scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+      #       metrics.json deploy@${VPS_HOST}:/tmp/ci-metrics-${{ github.run_id }}.json
+      #     ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no deploy@${VPS_HOST} \
+      #       "cd /srv/manager-skill && bun scripts/ci-ingest.ts \
+      #         --file=/tmp/ci-metrics-${{ github.run_id }}.json"
+
+      # ── 9. Upload metrics.json as GH artifact (debugging + audit trail) ──────
+      - name: Upload metrics artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: delivery-metrics-${{ github.run_id }}
+          path: metrics.json
+          retention-days: 90
