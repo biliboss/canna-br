@@ -37,3 +37,6 @@ ops/openwebui/smoke/
 marketing/
 *.mp4
 *.mov
+
+# Private working drafts — invitation plans, thesis iterations (never publish)
+apps/docs/_drafts/

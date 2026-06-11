@@ -4,7 +4,7 @@ OSS para gestão de associações de cannabis medicinal no Brasil.
 
 **Site**: https://canna-br.fonsecagabriel.com.br
 **Status**: alpha (v0.2.1.2) · pre-MVP · co-design com associações seed
-**Licença**: AGPL-3.0
+**Licença**: [AGPL-3.0](LICENSE) + [Licença Comercial disponível](COMMERCIAL-LICENSE.md) (dual licensing via CLA)
 
 ## O que é
 
