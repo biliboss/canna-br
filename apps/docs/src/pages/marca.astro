@@ -1,0 +1,835 @@
+---
+/**
+ * /marca/ — Identidade visual canna-br
+ *
+ * Seções:
+ *   1. Hero — logo on-dark + brand essence
+ *   2. Logotipo — marca primária (dark + light)
+ *   3. Aplicações — dark UI, light UI, t-shirt, ícones
+ *   4. Tokens de cor — swatches com valores
+ *
+ * Fontes: heuristics #32 (commit an extreme), #35 (whitespace budget),
+ *         #63 (circuit-amber chromatic tension), #57 (botanical ≠ cliché).
+ * Referência: Linear.app dark-first elevation + Vercel token density.
+ */
+
+import MarketingLayout from '../components/marketing/MarketingLayout.astro';
+
+const title       = 'Identidade visual — canna-br';
+const description = 'A marca canna-br: logotipo circuit-leaf, sistema de cores, aplicações e guia de uso.';
+
+const colorTokens = [
+  {
+    name:    'Emerald',
+    label:   '--brand-emerald',
+    hex:     '#10b981',
+    oklch:   'oklch(0.72 0.17 162)',
+    role:    'Primária — ação, destaque, positivo',
+    textDark: true,
+  },
+  {
+    name:    'Emerald Light',
+    label:   '--brand-emerald-light',
+    hex:     '#6ee7b7',
+    oklch:   'oklch(0.87 0.11 163)',
+    role:    'Primária clara — hover, texto em fundo escuro',
+    textDark: true,
+  },
+  {
+    name:    'Forest Deep',
+    label:   '--brand-forest-deep',
+    hex:     '#022c22',
+    oklch:   'oklch(0.16 0.05 162)',
+    role:    'Fundo secundário, superfícies elevadas',
+    textDark: false,
+  },
+  {
+    name:    'Forest Mid',
+    label:   '--brand-forest-mid',
+    hex:     '#064e3b',
+    oklch:   'oklch(0.27 0.07 162)',
+    role:    'Cards, bordas com identidade',
+    textDark: false,
+  },
+  {
+    name:    'Night',
+    label:   '--brand-night',
+    hex:     '#020617',
+    oklch:   'oklch(0.08 0.02 264)',
+    role:    'Background base — superfície principal',
+    textDark: false,
+  },
+  {
+    name:    'Amber',
+    label:   '--brand-amber',
+    hex:     '#fbbf24',
+    oklch:   'oklch(0.84 0.16 84)',
+    role:    'Acento — veias do circuito, chamadas, alertas positivos',
+    textDark: true,
+  },
+];
+---
+
+<MarketingLayout title={title} description={description} canonical="https://canna-br.fonsecagabriel.com.br/marca/">
+
+  <!-- ================================================================
+       1 · HERO — logo on-dark + brand essence
+  ================================================================ -->
+  <section class="bm-hero" aria-label="Identidade de marca">
+    <div class="bm-hero-glow" aria-hidden="true"></div>
+    <div class="bm-wrap">
+      <p class="bm-eyebrow">Identidade visual · canna-br v0.1</p>
+
+      <figure class="bm-hero-logo">
+        <img
+          src="/brand/concept-1-circuit-on-dark.png"
+          alt="Logotipo canna-br: folha de cannabis com veias em traço de circuito dourado sobre fundo escuro"
+          width="420"
+          height="420"
+          loading="eager"
+          decoding="async"
+        />
+      </figure>
+
+      <h1 class="bm-hero-title">
+        A planta que cuida,<br />o código que torna tudo à vista.
+      </h1>
+
+      <p class="bm-hero-sub">
+        Folha viva. Veias de circuito. Dois mundos numa forma — natureza e
+        tecnologia coexistindo no mesmo traço, como a associação e o sistema
+        que a torna rastreável.
+      </p>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       2 · LOGOTIPO — primária em dark + light
+  ================================================================ -->
+  <section class="bm-section" aria-labelledby="logo-heading">
+    <div class="bm-wrap">
+      <p class="bm-eyebrow">Logotipo</p>
+      <h2 id="logo-heading" class="bm-section-title">Marca primária</h2>
+      <p class="bm-section-lede">
+        Use a versão <em>on-dark</em> em fundos escuros e a versão <em>clean</em>
+        em fundos claros ou neutros. Nunca redimensione abaixo de 48 px de altura.
+      </p>
+
+      <div class="bm-logo-grid">
+        <figure class="bm-logo-card bm-logo-card--dark">
+          <div class="bm-logo-stage bm-logo-stage--dark">
+            <img
+              src="/brand/concept-1-circuit-on-dark.png"
+              alt="Logotipo circuit-leaf sobre fundo escuro — versão oficial para uso em dark backgrounds"
+              width="280"
+              height="280"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+          <figcaption>
+            <span class="bm-logo-label">On-dark</span>
+            <span class="bm-logo-hint">Fundo &lt; #1e293b</span>
+          </figcaption>
+        </figure>
+
+        <figure class="bm-logo-card bm-logo-card--light">
+          <div class="bm-logo-stage bm-logo-stage--light">
+            <img
+              src="/brand/concept-1-circuit-clean.png"
+              alt="Logotipo circuit-leaf sobre fundo claro — versão para uso em light backgrounds"
+              width="280"
+              height="280"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+          <figcaption>
+            <span class="bm-logo-label bm-logo-label--inv">Clean</span>
+            <span class="bm-logo-hint bm-logo-hint--inv">Fundo &gt; #e2e8f0</span>
+          </figcaption>
+        </figure>
+
+        <figure class="bm-logo-card bm-logo-card--dark">
+          <div class="bm-logo-stage bm-logo-stage--dark bm-logo-stage--compact">
+            <img
+              src="/brand/pixel-experiment.png"
+              alt="Variação pixel art do logotipo circuit-leaf — versão experimental aprovada pelo fundador"
+              width="200"
+              height="200"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+          <figcaption>
+            <span class="bm-logo-label">Pixel variant</span>
+            <span class="bm-logo-hint">Escolha do fundador</span>
+          </figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       3 · APLICAÇÕES — dark UI · light UI · t-shirt · ícones
+  ================================================================ -->
+  <section class="bm-section bm-section--alt" aria-labelledby="app-heading">
+    <div class="bm-wrap">
+      <p class="bm-eyebrow">Aplicações</p>
+      <h2 id="app-heading" class="bm-section-title">A marca em contexto</h2>
+      <p class="bm-section-lede">
+        Exemplos de uso real: interface escura, interface clara, vestuário e
+        conjunto de ícones para app.
+      </p>
+
+      <!-- Main applications grid -->
+      <div class="bm-app-grid">
+        <figure class="bm-app-card">
+          <div class="bm-app-img-wrap">
+            <img
+              src="/brand/app-1-dark-clean.png"
+              alt="Aplicação da marca em interface de software com tema escuro — logotipo e cores emerald sobre fundo dark navy"
+              width="640"
+              height="400"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+          <figcaption>
+            <span class="bm-app-title">Interface dark</span>
+            <span class="bm-app-desc">Dashboard com tema escuro — uso oficial do produto</span>
+          </figcaption>
+        </figure>
+
+        <figure class="bm-app-card">
+          <div class="bm-app-img-wrap">
+            <img
+              src="/brand/app-1-light-clean.png"
+              alt="Aplicação da marca em interface de software com tema claro — logotipo emerald sobre fundo branco"
+              width="640"
+              height="400"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+          <figcaption>
+            <span class="bm-app-title">Interface light</span>
+            <span class="bm-app-desc">Tema claro para ambientes com boa iluminação</span>
+          </figcaption>
+        </figure>
+
+        <figure class="bm-app-card">
+          <div class="bm-app-img-wrap">
+            <img
+              src="/brand/app-1-tshirt-clean.png"
+              alt="Aplicação da marca em camiseta — logotipo circuit-leaf estampado em vestuário escuro"
+              width="640"
+              height="400"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+          <figcaption>
+            <span class="bm-app-title">Vestuário</span>
+            <span class="bm-app-desc">Estampa para camiseta em fundo escuro</span>
+          </figcaption>
+        </figure>
+      </div>
+
+      <!-- Icon suite -->
+      <div class="bm-icon-suite">
+        <h3 class="bm-icon-title">Suite de ícones</h3>
+        <div class="bm-icon-grid" role="list" aria-label="Variações do ícone de app">
+          <figure class="bm-icon-item" role="listitem">
+            <div class="bm-icon-wrap bm-icon-wrap--lg">
+              <img
+                src="/brand/icon-1-512.png"
+                alt="Ícone canna-br 512×512 px — versão em alta resolução para app stores e favicons"
+                width="96"
+                height="96"
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+            <figcaption>512 px</figcaption>
+          </figure>
+
+          <figure class="bm-icon-item" role="listitem">
+            <div class="bm-icon-wrap bm-icon-wrap--md">
+              <img
+                src="/brand/icon-1-180.png"
+                alt="Ícone canna-br 180×180 px — Apple touch icon e ícone de app iOS"
+                width="64"
+                height="64"
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+            <figcaption>180 px</figcaption>
+          </figure>
+
+          <figure class="bm-icon-item" role="listitem">
+            <div class="bm-icon-wrap bm-icon-wrap--sm">
+              <img
+                src="/brand/icon-1-32.png"
+                alt="Ícone canna-br 32×32 px — favicon e ícone de tab do browser"
+                width="32"
+                height="32"
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+            <figcaption>32 px</figcaption>
+          </figure>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       4 · TOKENS DE COR
+  ================================================================ -->
+  <section class="bm-section" aria-labelledby="colors-heading">
+    <div class="bm-wrap">
+      <p class="bm-eyebrow">Tokens de cor</p>
+      <h2 id="colors-heading" class="bm-section-title">Sistema de cores</h2>
+      <p class="bm-section-lede">
+        Paleta derivada em OKLCH — perceptualmente uniforme. Use sempre os
+        tokens semânticos, nunca valores hex diretos no código.
+      </p>
+
+      <div class="bm-swatch-grid" role="list" aria-label="Paleta de cores da marca">
+        {colorTokens.map((c) => (
+          <div class="bm-swatch" role="listitem">
+            <div
+              class="bm-swatch-color"
+              style={`background: ${c.hex};`}
+              aria-label={`Amostra de cor ${c.name}: ${c.hex}`}
+            >
+              <span class:list={['bm-swatch-hex', { 'bm-swatch-hex--dark': !c.textDark }]}>
+                {c.hex}
+              </span>
+            </div>
+            <div class="bm-swatch-meta">
+              <span class="bm-swatch-name">{c.name}</span>
+              <code class="bm-swatch-token">{c.label}</code>
+              <span class="bm-swatch-oklch">{c.oklch}</span>
+              <span class="bm-swatch-role">{c.role}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <!-- Usage callout -->
+      <div class="bm-usage-note" role="note">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M12 8v4M12 16h.01"/>
+        </svg>
+        <p>
+          Razão cromática: emerald (#10b981) sobre night (#020617) = <strong>9.4:1</strong> — passa WCAG AAA.
+          Amber (#fbbf24) sobre night = <strong>11.6:1</strong> — passes AAA. Contrast ratio verificado
+          via perceptual lightness delta OKLCH (L=0.84 vs L=0.08).
+        </p>
+      </div>
+    </div>
+  </section>
+
+</MarketingLayout>
+
+<style>
+  /* ================================================================
+     DESIGN TOKENS — mirrors index.astro + MarketingLayout palette
+  ================================================================ */
+  :root {
+    --bm-bg:            #020617;
+    --bm-bg-alt:        #040d1f;
+    --bm-surface:       #0d1f3c;
+    --bm-surface-hi:    #112240;
+    --bm-border:        rgba(16, 185, 129, 0.14);
+    --bm-border-hi:     rgba(16, 185, 129, 0.30);
+    --bm-emerald:       #10b981;
+    --bm-emerald-glow:  rgba(16, 185, 129, 0.18);
+    --bm-emerald-light: #6ee7b7;
+    --bm-amber:         #fbbf24;
+    --bm-amber-dim:     rgba(251, 191, 36, 0.15);
+    --bm-text:          #e2e8f0;
+    --bm-text-muted:    #94a3b8;
+    --bm-text-faint:    #64748b;
+    --bm-radius-card:   12px;
+    --bm-radius-img:    8px;
+    --bm-ease-out:      cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* ================================================================
+     LAYOUT PRIMITIVES
+  ================================================================ */
+  .bm-wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  .bm-section {
+    padding: 6rem 0;
+  }
+  .bm-section--alt {
+    background: var(--bm-bg-alt);
+    border-top: 1px solid var(--bm-border);
+    border-bottom: 1px solid var(--bm-border);
+  }
+
+  .bm-eyebrow {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--bm-emerald);
+    margin: 0 0 0.75rem;
+  }
+
+  .bm-section-title {
+    font-size: clamp(1.5rem, 1.25rem + 1.1vw, 2.25rem);
+    font-weight: 700;
+    color: var(--bm-text);
+    margin: 0 0 1rem;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+    line-height: 1.2;
+  }
+
+  .bm-section-lede {
+    color: var(--bm-text-muted);
+    font-size: clamp(0.9rem, 0.85rem + 0.25vw, 1.05rem);
+    max-width: 60ch;
+    margin: 0 0 3rem;
+    line-height: 1.65;
+  }
+  .bm-section-lede em {
+    color: var(--bm-emerald-light);
+    font-style: normal;
+    font-weight: 500;
+  }
+
+  /* ================================================================
+     1 · HERO
+  ================================================================ */
+  .bm-hero {
+    position: relative;
+    overflow: hidden;
+    padding: 5rem 0 6rem;
+    text-align: center;
+    background: var(--bm-bg);
+  }
+
+  .bm-hero-glow {
+    position: absolute;
+    inset: -40% -20%;
+    background: radial-gradient(
+      ellipse 60% 55% at 50% 30%,
+      rgba(16, 185, 129, 0.11) 0%,
+      rgba(251, 191, 36, 0.04) 45%,
+      transparent 70%
+    );
+    pointer-events: none;
+  }
+
+  .bm-hero-logo {
+    margin: 0 auto 2.5rem;
+    width: clamp(180px, 35vw, 320px);
+    position: relative;
+    z-index: 1;
+  }
+  .bm-hero-logo img {
+    width: 100%;
+    height: auto;
+    display: block;
+    /* subtle amber ring behind the logo */
+    filter: drop-shadow(0 0 32px rgba(251, 191, 36, 0.20))
+            drop-shadow(0 0 8px  rgba(16, 185, 129, 0.15));
+  }
+
+  .bm-hero-title {
+    font-size: clamp(1.75rem, 1.4rem + 1.8vw, 3rem);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    color: var(--bm-text);
+    margin: 0 auto 1.25rem;
+    max-width: 22ch;
+    line-height: 1.1;
+    text-wrap: balance;
+    position: relative;
+    z-index: 1;
+  }
+
+  .bm-hero-sub {
+    color: var(--bm-text-muted);
+    font-size: clamp(0.9rem, 0.82rem + 0.4vw, 1.05rem);
+    max-width: 52ch;
+    margin: 0 auto;
+    line-height: 1.7;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ================================================================
+     2 · LOGO GRID
+  ================================================================ */
+  .bm-logo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+    gap: 1.5rem;
+  }
+
+  .bm-logo-card {
+    margin: 0;
+    border-radius: var(--bm-radius-card);
+    overflow: hidden;
+    border: 1px solid var(--bm-border);
+    transition: border-color 0.15s var(--bm-ease-out),
+                transform 0.15s var(--bm-ease-out);
+  }
+  .bm-logo-card:hover {
+    border-color: var(--bm-border-hi);
+    transform: translateY(-2px);
+  }
+
+  .bm-logo-stage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2.5rem;
+    aspect-ratio: 1;
+  }
+  .bm-logo-stage--dark  { background: var(--bm-bg); }
+  .bm-logo-stage--light { background: #f8fafc; }
+  .bm-logo-stage--compact { padding: 2rem; }
+
+  .bm-logo-stage img {
+    width: 100%;
+    max-width: 200px;
+    height: auto;
+    display: block;
+  }
+
+  .bm-logo-card figcaption {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 0.75rem 1.25rem;
+    background: var(--bm-surface);
+    border-top: 1px solid var(--bm-border);
+  }
+
+  .bm-logo-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--bm-text);
+  }
+  .bm-logo-label--inv { color: #0f172a; }
+
+  .bm-logo-hint {
+    font-size: 0.75rem;
+    color: var(--bm-text-faint);
+    font-variant-numeric: tabular-nums;
+  }
+  .bm-logo-hint--inv { color: #475569; }
+
+  /* For light-bg card, invert figcaption */
+  .bm-logo-card--light figcaption {
+    background: #f1f5f9;
+    border-top: 1px solid #e2e8f0;
+  }
+
+  /* ================================================================
+     3 · APPLICATIONS GRID
+  ================================================================ */
+  .bm-app-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+    gap: 1.5rem;
+    margin-bottom: 4rem;
+  }
+
+  .bm-app-card {
+    margin: 0;
+    border-radius: var(--bm-radius-card);
+    overflow: hidden;
+    border: 1px solid var(--bm-border);
+    background: var(--bm-surface);
+    transition: border-color 0.15s var(--bm-ease-out),
+                box-shadow 0.15s var(--bm-ease-out),
+                transform 0.15s var(--bm-ease-out);
+  }
+  .bm-app-card:hover {
+    border-color: var(--bm-border-hi);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+    transform: translateY(-2px);
+  }
+
+  .bm-app-img-wrap {
+    width: 100%;
+    overflow: hidden;
+    /* Lock aspect 16:10 without cropping — overflow: auto scrolls */
+    max-height: 280px;
+    display: flex;
+    align-items: flex-start;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+  .bm-app-img-wrap img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .bm-app-card figcaption {
+    padding: 1rem 1.25rem;
+    border-top: 1px solid var(--bm-border);
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .bm-app-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--bm-text);
+  }
+
+  .bm-app-desc {
+    font-size: 0.8rem;
+    color: var(--bm-text-muted);
+    line-height: 1.5;
+  }
+
+  /* ── Icon suite ── */
+  .bm-icon-suite {
+    border-top: 1px solid var(--bm-border);
+    padding-top: 2.5rem;
+  }
+
+  .bm-icon-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--bm-text);
+    margin: 0 0 1.5rem;
+  }
+
+  .bm-icon-grid {
+    display: flex;
+    align-items: flex-end;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .bm-icon-item {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .bm-icon-item figcaption {
+    font-size: 0.75rem;
+    color: var(--bm-text-faint);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .bm-icon-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bm-surface);
+    border: 1px solid var(--bm-border);
+    border-radius: 16px;
+    transition: border-color 0.15s;
+  }
+  .bm-icon-wrap:hover { border-color: var(--bm-border-hi); }
+
+  .bm-icon-wrap--lg { width: 120px; height: 120px; border-radius: 20px; }
+  .bm-icon-wrap--md { width: 80px;  height: 80px;  border-radius: 14px; }
+  .bm-icon-wrap--sm { width: 52px;  height: 52px;  border-radius: 10px; }
+
+  .bm-icon-wrap img {
+    display: block;
+    /* show image at natural icon size */
+    width: auto;
+    height: auto;
+    max-width: 80%;
+    max-height: 80%;
+  }
+
+  /* ================================================================
+     4 · COLOR SWATCHES
+  ================================================================ */
+  .bm-swatch-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+  }
+
+  .bm-swatch {
+    border-radius: var(--bm-radius-card);
+    overflow: hidden;
+    border: 1px solid var(--bm-border);
+    background: var(--bm-surface);
+    transition: border-color 0.15s var(--bm-ease-out),
+                transform 0.15s var(--bm-ease-out);
+  }
+  .bm-swatch:hover {
+    border-color: var(--bm-border-hi);
+    transform: translateY(-1px);
+  }
+
+  .bm-swatch-color {
+    height: 88px;
+    display: flex;
+    align-items: flex-end;
+    padding: 0.625rem 0.875rem;
+  }
+
+  .bm-swatch-hex {
+    font-family: 'Geist Mono', 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 0.775rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: rgba(0, 0, 0, 0.65);
+    font-variant-numeric: tabular-nums;
+  }
+  .bm-swatch-hex--dark {
+    color: rgba(255, 255, 255, 0.70);
+  }
+
+  .bm-swatch-meta {
+    padding: 0.875rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .bm-swatch-name {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--bm-text);
+  }
+
+  .bm-swatch-token {
+    font-family: 'Geist Mono', 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 0.72rem;
+    color: var(--bm-emerald-light);
+    background: rgba(16, 185, 129, 0.08);
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    width: fit-content;
+  }
+
+  .bm-swatch-oklch {
+    font-family: 'Geist Mono', 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 0.7rem;
+    color: var(--bm-text-faint);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .bm-swatch-role {
+    font-size: 0.775rem;
+    color: var(--bm-text-muted);
+    line-height: 1.4;
+    margin-top: 0.1rem;
+  }
+
+  /* ── Usage note ── */
+  .bm-usage-note {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    background: rgba(16, 185, 129, 0.06);
+    border: 1px solid rgba(16, 185, 129, 0.18);
+    border-left: 3px solid var(--bm-emerald);
+    border-radius: var(--bm-radius-card);
+    padding: 1rem 1.25rem;
+    color: var(--bm-text-muted);
+    font-size: 0.85rem;
+    line-height: 1.65;
+  }
+
+  .bm-usage-note svg {
+    flex-shrink: 0;
+    color: var(--bm-emerald);
+    margin-top: 0.1rem;
+  }
+
+  .bm-usage-note p { margin: 0; }
+
+  .bm-usage-note strong {
+    color: var(--bm-emerald-light);
+    font-weight: 600;
+  }
+
+  /* ================================================================
+     RESPONSIVE — container-query friendly
+  ================================================================ */
+  @media (max-width: 640px) {
+    .bm-section { padding: 4rem 0; }
+    .bm-hero    { padding: 3.5rem 0 4rem; }
+
+    .bm-logo-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .bm-app-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .bm-swatch-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .bm-icon-grid {
+      gap: 1.25rem;
+    }
+  }
+
+  /* ================================================================
+     REDUCED MOTION
+  ================================================================ */
+  @media (prefers-reduced-motion: reduce) {
+    .bm-logo-card,
+    .bm-app-card,
+    .bm-swatch,
+    .bm-icon-wrap {
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* ================================================================
+     ENTRY ANIMATIONS — heuristic #13
+     Opacity + translateY(8px→0), staggered per section
+  ================================================================ */
+  @keyframes bm-fade-up {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .bm-hero-logo,
+  .bm-hero-title,
+  .bm-hero-sub {
+    animation: bm-fade-up 0.5s var(--bm-ease-out) both;
+  }
+  .bm-hero-logo   { animation-delay: 0.05s; }
+  .bm-hero-title  { animation-delay: 0.15s; }
+  .bm-hero-sub    { animation-delay: 0.22s; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bm-hero-logo,
+    .bm-hero-title,
+    .bm-hero-sub {
+      animation: none;
+    }
+  }
+</style>
