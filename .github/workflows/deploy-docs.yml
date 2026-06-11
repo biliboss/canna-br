@@ -72,7 +72,10 @@ jobs:
           install -m 600 /dev/null /tmp/deploy_key
           echo "$DEPLOY_SSH_KEY" > /tmp/deploy_key
 
+          # exclude ci-metrics.json so the live time-series (managed by the
+          # metrics step) is never clobbered by the build's seed file.
           rsync -az --delete \
+            --exclude='ci-metrics.json' \
             -e "ssh -i /tmp/deploy_key -o StrictHostKeyChecking=accept-new -o BatchMode=yes" \
             apps/docs/dist/ \
             "${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}/"
@@ -137,31 +140,25 @@ jobs:
 
           SSH_CMD="ssh -i /tmp/deploy_key_metrics -o StrictHostKeyChecking=accept-new -o BatchMode=yes"
 
-          # Read existing file from box (or use empty baseline), prepend new run,
-          # cap at 50 entries, write back. All inline node over SSH.
-          $SSH_CMD "${DEPLOY_USER}@${DEPLOY_HOST}" "
-            METRICS_FILE=\"${DEPLOY_PATH}/ci-metrics.json\"
-            # Read existing or use empty baseline
-            if [ -f \"\$METRICS_FILE\" ]; then
-              EXISTING=\$(cat \"\$METRICS_FILE\")
-            else
-              EXISTING='{\"updatedAt\":\"\",\"runs\":[]}'
-            fi
-            # Prepend new run, cap at 50 — inline node (available on ubuntu:latest-based VPS)
-            echo \"\$EXISTING\" | node -e \"
-              const fs = require('fs');
-              let existing = '';
-              process.stdin.on('data', d => existing += d);
-              process.stdin.on('end', () => {
-                let store;
-                try { store = JSON.parse(existing); } catch(e) { store = { runs: [] }; }
-                if (!Array.isArray(store.runs)) store.runs = [];
-                const newRun = JSON.parse(process.argv[1]);
-                store.runs = [newRun, ...store.runs].slice(0, 50);
-                store.updatedAt = new Date().toISOString();
-                process.stdout.write(JSON.stringify(store, null, 2));
-              });
-            \" '${NEW_RUN}' > /tmp/ci-metrics-new.json && mv /tmp/ci-metrics-new.json \"\$METRICS_FILE\"
-          " || echo "[deploy-docs] metrics update warning — non-fatal"
+          # Pull existing metrics from the box, MERGE IN THE RUNNER (node is
+          # available here; the deploy box may not have node), push the single
+          # file back via `ssh cat >`. ci-metrics.json is rsync-excluded so the
+          # time-series accumulates across deploys.
+          EXISTING=$($SSH_CMD "${DEPLOY_USER}@${DEPLOY_HOST}" "cat ${DEPLOY_PATH}/ci-metrics.json 2>/dev/null" || echo '{"updatedAt":"","runs":[]}')
+          printf '%s' "$EXISTING" | node -e "
+            let existing = '';
+            process.stdin.on('data', d => existing += d);
+            process.stdin.on('end', () => {
+              let store;
+              try { store = JSON.parse(existing); } catch (e) { store = { runs: [] }; }
+              if (!Array.isArray(store.runs)) store.runs = [];
+              const newRun = JSON.parse(process.argv[1]);
+              store.runs = [newRun, ...store.runs].slice(0, 50);
+              store.updatedAt = new Date().toISOString();
+              process.stdout.write(JSON.stringify(store, null, 2));
+            });
+          " "${NEW_RUN}" > /tmp/ci-metrics-new.json
+          cat /tmp/ci-metrics-new.json | $SSH_CMD "${DEPLOY_USER}@${DEPLOY_HOST}" "cat > ${DEPLOY_PATH}/ci-metrics.json" \
+            || echo "[deploy-docs] metrics push warning — non-fatal"
 
-          rm -f /tmp/deploy_key_metrics
+          rm -f /tmp/deploy_key_metrics /tmp/ci-metrics-new.json
