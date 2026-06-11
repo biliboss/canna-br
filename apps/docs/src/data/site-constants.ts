@@ -50,6 +50,17 @@ export function fmtPctRange(lo: number, hi: number): string {
 }
 
 // ---------------------------------------------------------------------------
+// URL do app (env-aware) — em dev aponta pro app local, em prod pro domínio.
+// `import.meta.env.DEV` é true no servidor de desenvolvimento Astro.
+// Local: apps/agent roda em :3002 (next dev). Prod: app.cannabr.org.
+// Override opcional via PUBLIC_APP_URL.
+// ---------------------------------------------------------------------------
+
+export const APP_URL: string =
+  import.meta.env.PUBLIC_APP_URL ??
+  (import.meta.env.DEV ? "http://localhost:3002" : "https://app.cannabr.org");
+
+// ---------------------------------------------------------------------------
 // Constante principal
 // ---------------------------------------------------------------------------
 

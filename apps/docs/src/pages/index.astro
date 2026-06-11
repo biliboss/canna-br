@@ -3,6 +3,7 @@ import MarketingLayout from '../components/marketing/MarketingLayout.astro';
 import StateSnapshot from '../components/marketing/widgets/StateSnapshot.astro';
 import IntroVideoModal from '../components/IntroVideoModal.astro';
 import InvitationCard from '../components/InvitationCard.astro';
+import { APP_URL } from '../data/site-constants';
 
 const title = 'canna-br — OSS para associações de cannabis medicinal';
 const description =
@@ -20,23 +21,24 @@ const description =
       <p class="hero-eyebrow">Software livre · AGPL-3.0 · evolução pública</p>
 
       <h1 class="hero-title">
-        Sistema OSS para associações de cannabis medicinal.
+        O sistema que torna visível o cuidado que a associação já presta.
       </h1>
 
       <p class="hero-sub">
-        Gestão, transparência e trilha auditável em uma base aberta, com
-        LGPD-by-design, SNGPC em desenvolvimento e arquitetura preparada para
-        RDC 1.014/2026.
+        Do lote ao membro, cada passo registrado e rastreável — em código
+        aberto, com privacidade desde o desenho e arquitetura preparada
+        para RDC 1.014/2026. A foto completa existe, e qualquer pessoa
+        autorizada pode consultá-la.
       </p>
 
       <div class="hero-ctas">
         <a href="/piloto/" class="btn btn-primary">Entrar como piloto</a>
-        <a href="/produto/" class="btn btn-secondary">Ver demonstração</a>
+        <a href={APP_URL} class="btn btn-secondary">Ver demonstração</a>
         <a href="/about/" class="btn btn-ghost">Ler documentação</a>
       </div>
 
       <div class="hero-trust">
-        <span>v0.2.1.2 em operação</span>
+        <span>v0.1.0 · fundação usável</span>
         <span aria-hidden="true">·</span>
         <span>154/154 testes</span>
         <span aria-hidden="true">·</span>
@@ -56,12 +58,13 @@ const description =
     <div class="wrap wrap--narrow">
       <p class="eyebrow">A realidade de hoje</p>
       <h2 class="section-title">
-        Quando a operação cresce, planilhas e fluxos manuais deixam de dar conta.
+        A operação cresce. A planilha, não.
       </h2>
       <p class="lede">
-        O dia a dia da associação fica espalhado entre cadernos, grupos de
-        mensagem e planilhas paralelas. Cada uma com sua versão da verdade — e
-        ninguém com a foto completa quando ela mais importa.
+        O dia a dia da associação vive espalhado entre cadernos, grupos de
+        mensagem e abas paralelas — cada uma com sua versão da verdade.
+        Quando alguém precisa da foto completa para tomar uma decisão,
+        ou para uma fiscalização, ela não existe.
       </p>
 
       <div class="pains">
@@ -94,15 +97,15 @@ const description =
        ============================================================ -->
   <section class="band">
     <div class="wrap wrap--narrow">
-      <p class="eyebrow">A proposta</p>
+      <p class="eyebrow">Como funciona</p>
       <h2 class="section-title">
-        O canna-br organiza a operação da associação com mais rastreabilidade,
-        governança e clareza para equipe, diretoria e associados.
+        Da cultura ao lote, do lote à dispensação, do dispensador ao membro.
       </h2>
       <p class="lede">
-        Uma base única e aberta onde cada registro fica gravado de forma
-        verificável. A operação acontece no fluxo natural da equipe — sem
-        planilhas paralelas, sem perder a foto do todo.
+        Uma base única e aberta onde o registro é imutável e a operação
+        acontece no fluxo natural da equipe. A cadeia de custódia completa
+        — consultável a qualquer hora, por quem tiver autorização,
+        sem reconstruir nada na memória.
       </p>
 
       <ol class="steps">
@@ -136,8 +139,8 @@ const description =
       <p class="eyebrow">O que o sistema cobre</p>
       <h2 class="section-title">Módulos principais</h2>
       <p class="lede lede--center">
-        Pensado para a operação real de uma associação — começando pelo que mais
-        dói e expandindo conforme o piloto amadurece.
+        Cada módulo cobre um fluxo que a associação já precisa fazer —
+        começando pelo que mais pesa na operação diária.
       </p>
 
       <div class="modules">
@@ -186,10 +189,10 @@ const description =
   <section class="band">
     <div class="wrap">
       <p class="eyebrow">Transparência viva</p>
-      <h2 class="section-title">Software aberto, evolução pública e indicadores visíveis.</h2>
+      <h2 class="section-title">Código aberto, decisões documentadas, estado atual à vista.</h2>
       <p class="lede lede--center">
-        Não pedimos confiança no escuro. O que já entregamos, o que vem a seguir
-        e o estado das vagas piloto ficam à vista — atualizados a cada marco.
+        Não pedimos confiança no escuro. O que já existe, o que ainda não existe
+        e o que vem a seguir ficam públicos — atualizados a cada marco.
       </p>
 
       <StateSnapshot />
@@ -197,7 +200,7 @@ const description =
       <p class="band-foot">
         Roadmap, changelog e marcos detalhados em
         <a href="/transparencia/">/transparência</a> · releases em
-        <a href="/releases/v021/">/releases</a>.
+        <a href="/releases/v0-2-1/">/releases</a>.
       </p>
     </div>
   </section>
@@ -208,11 +211,11 @@ const description =
   <section class="band band--alt">
     <div class="wrap">
       <p class="eyebrow">Compliance & arquitetura aberta</p>
-      <h2 class="section-title">Feito para passar por auditoria — e para ser auditado.</h2>
+      <h2 class="section-title">Feito para ser auditado — por qualquer pessoa da associação.</h2>
       <p class="lede lede--center">
-        Privacidade desde o desenho, trilha que ninguém reescreve e código que
-        qualquer advogado ou técnico da associação pode revisar. Sem caixa-preta,
-        sem aprisionamento.
+        Privacidade desde o desenho, trilha que ninguém reescreve, código que o
+        advogado da associação pode revisar linha a linha. Sem caixa-preta,
+        sem dependência de fornecedor.
       </p>
 
       <div class="trust-grid">
@@ -281,10 +284,10 @@ const description =
   <section id="circulo-convites" class="band" aria-labelledby="circulo-convites-heading">
     <div class="wrap">
       <p class="eyebrow">Círculo principal · convites em aberto</p>
-      <h2 id="circulo-convites-heading" class="section-title">O time que está sendo construído.</h2>
+      <h2 id="circulo-convites-heading" class="section-title">As pessoas que estão sendo convidadas a construir isso.</h2>
       <p class="lede lede--center">
-        Não é uma página institucional de equipe. São pessoas sendo convidadas —
-        uma a uma, com nome real, papel proposto e o porquê. Se você está aqui e
+        Não é uma página de equipe montada para impressionar. São convites reais —
+        um a um, com nome, papel proposto e o porquê. Se você chegou aqui e
         quer propor outro recorte,
         <a href="mailto:gabriel@devmagic.com.br">escreve pro Gabriel</a>.
       </p>
@@ -557,13 +560,12 @@ const description =
     <div class="pilot-inner">
       <span class="pilot-badge">Vagas seed abertas · candidaturas até 30 set 2026</span>
       <h2 class="pilot-title">
-        Estamos estruturando pilotos com associações que queiram construir esse
-        padrão desde o início.
+        As primeiras associações ajudam a moldar o que o sistema vai ser.
       </h2>
       <p class="pilot-sub">
-        As primeiras associações ajudam a moldar o roadmap, validam a operação no
-        mundo real e recebem acompanhamento direto durante todo o piloto. Sem
-        custo para participar.
+        O piloto não é um período de testes silencioso. É uma construção conjunta:
+        a associação valida a operação no mundo real, contribui com o roadmap e
+        recebe acompanhamento direto ao longo de tudo. Sem custo.
       </p>
       <a href="/piloto/" class="btn btn-pilot">Entrar como piloto</a>
       <p class="pilot-foot">
