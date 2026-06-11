@@ -1,0 +1,410 @@
+---
+/**
+ * EventStormingBoard — reusable process-modeling widget
+ *
+ * Renders a horizontal-scroll EventStorming timeline (Brandolini grammar) as
+ * pure server-side HTML+CSS. Zero JavaScript required. Dark-first, themable.
+ *
+ * Design references:
+ *   - Card accent via border-left color (Linear elevation pattern for dark mode)
+ *   - Tinted card backgrounds at ~15% opacity (avoids full neon fills on dark)
+ *   - Type label as non-color a11y signal (WCAG 2.2 heuristic #14)
+ *   - Subtle 1-2deg rotation on Event/Hotspot only (sticky-note metaphor hint)
+ *
+ * Props:
+ *   title?    — section heading shown above the board
+ *   columns   — Array<{ cards: Card[] }>
+ *   hotspots? — Array<{ label: string }> — floating annotation bar
+ *
+ * Card shape:
+ *   { type, label, pivotal? }
+ *   type: 'actor' | 'command' | 'aggregate' | 'event' | 'policy'
+ *        | 'read-model' | 'external' | 'hotspot'
+ */
+
+export interface Card {
+  type: 'actor' | 'command' | 'aggregate' | 'event' | 'policy' | 'read-model' | 'external' | 'hotspot';
+  label: string;
+  pivotal?: boolean;
+}
+
+export interface Column {
+  cards: Card[];
+}
+
+export interface Props {
+  title?: string;
+  columns: Column[];
+  hotspots?: Array<{ label: string }>;
+}
+
+const { title, columns, hotspots = [] } = Astro.props;
+
+// Brandolini canonical colors — border-left accent + tinted background
+const TYPE_META: Record<Card['type'], {
+  accent: string;   // strong border-left / swatch color
+  bg: string;       // ~15% tinted background (oklch-derived)
+  text: string;     // readable text on dark tinted bg
+  label: string;    // display name for TYPE badge + legend
+  rotate?: string;  // subtle skew for sticky metaphor
+  wide?: boolean;   // wider card (policy, external)
+  large?: boolean;  // taller/larger card (aggregate)
+  small?: boolean;  // smaller card (actor)
+}> = {
+  event:       { accent: '#F4831F', bg: 'rgba(244, 131, 31, 0.13)',  text: '#fcd9b4', label: 'Domain Event',    rotate: 'rotate(-1deg)' },
+  command:     { accent: '#5B9BD5', bg: 'rgba(91, 155, 213, 0.13)',  text: '#bdd9f7', label: 'Command'         },
+  actor:       { accent: '#FFD966', bg: 'rgba(255, 217, 102, 0.12)', text: '#ffe8a3', label: 'Actor',            small: true },
+  policy:      { accent: '#C39BD3', bg: 'rgba(195, 155, 211, 0.13)', text: '#e2ccf0', label: 'Policy',           wide: true },
+  'read-model':{ accent: '#82E0AA', bg: 'rgba(130, 224, 170, 0.12)', text: '#b3f0cb', label: 'Read Model',       wide: true },
+  aggregate:   { accent: '#F9E79F', bg: 'rgba(249, 231, 159, 0.12)', text: '#fdf0c0', label: 'Aggregate',        large: true },
+  external:    { accent: '#F1948A', bg: 'rgba(241, 148, 138, 0.13)', text: '#faccca', label: 'External System',  wide: true },
+  hotspot:     { accent: '#FF355E', bg: 'rgba(255, 53, 94, 0.14)',   text: '#ffaabb', label: 'Hotspot',           rotate: 'rotate(2deg)' },
+};
+---
+
+<section
+  class="es-board-section"
+  role="region"
+  aria-label={title ?? 'EventStorming Process Board'}
+>
+  {title && <h3 class="es-board-title">{title}</h3>}
+
+  {hotspots.length > 0 && (
+    <div class="es-hotspot-bar" aria-label="Hotspots e questões abertas">
+      {hotspots.map(h => (
+        <span class="es-hotspot-pill">
+          <span class="es-hotspot-icon" aria-hidden="true">⚡</span>
+          {h.label}
+        </span>
+      ))}
+    </div>
+  )}
+
+  <div class="es-scroll-container" tabindex="0" role="group" aria-label="Timeline de EventStorming — scroll horizontal">
+    <div class="es-board">
+      {columns.map((col, ci) => (
+        <div class="es-column">
+          <div class="es-cards">
+            {col.cards.map(card => {
+              const meta = TYPE_META[card.type];
+              const classes = [
+                'es-card',
+                `es-card--${card.type}`,
+                card.pivotal ? 'es-card--pivotal' : '',
+                meta.wide  ? 'es-card--wide'  : '',
+                meta.large ? 'es-card--large' : '',
+                meta.small ? 'es-card--small' : '',
+              ].filter(Boolean).join(' ');
+              return (
+                <div
+                  class={classes}
+                  style={`
+                    --es-accent: ${meta.accent};
+                    --es-bg: ${meta.bg};
+                    --es-text: ${meta.text};
+                    ${meta.rotate ? `--es-rotate: ${meta.rotate};` : ''}
+                  `}
+                >
+                  <span class="es-type-label">{meta.label}</span>
+                  <span class="es-card-label">{card.label}</span>
+                  {card.pivotal && (
+                    <span class="es-pivotal-badge" aria-label="Evento pivotal — marco de processo">
+                      ★
+                    </span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+
+  {/* Legend — always visible, swatch + type name */}
+  <div class="es-legend" aria-label="Legenda do EventStorming">
+    <span class="es-legend-title">Legenda</span>
+    {(Object.entries(TYPE_META) as [Card['type'], typeof TYPE_META[Card['type']]][]).map(([type, meta]) => (
+      <span class="es-legend-item">
+        <span
+          class="es-legend-swatch"
+          style={`background: ${meta.accent};`}
+          aria-hidden="true"
+        />
+        <span class="es-legend-name">{meta.label}</span>
+      </span>
+    ))}
+    <span class="es-legend-item">
+      <span class="es-legend-pivotal-swatch" aria-hidden="true">★</span>
+      <span class="es-legend-name">Pivotal (marco)</span>
+    </span>
+  </div>
+</section>
+
+<style>
+  /* ── Board container ─────────────────────────────────────────── */
+  .es-board-section {
+    --es-board-bg: #0b1a15;
+    --es-border-color: rgba(16, 185, 129, 0.18);
+    --es-muted: rgba(255, 255, 255, 0.38);
+    --es-arrow-color: rgba(255, 255, 255, 0.22);
+    margin: 0 0 2rem 0;
+    font-family: var(--sl-font, system-ui, sans-serif);
+  }
+
+  .es-board-title {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--sl-color-text, #e2e8f0);
+    margin: 0 0 0.75rem 0;
+  }
+
+  /* ── Hotspot bar ─────────────────────────────────────────────── */
+  .es-hotspot-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .es-hotspot-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(255, 53, 94, 0.12);
+    border: 1px solid rgba(255, 53, 94, 0.35);
+    border-radius: 999px;
+    padding: 4px 12px 4px 8px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #ffaabb;
+    line-height: 1.3;
+  }
+
+  .es-hotspot-icon {
+    font-size: 0.8rem;
+  }
+
+  /* ── Scroll container ────────────────────────────────────────── */
+  .es-scroll-container {
+    background: var(--es-board-bg);
+    border: 1px solid var(--es-border-color);
+    border-radius: 12px;
+    overflow-x: auto;
+    overflow-y: visible;
+    padding: 24px 20px;
+    /* Keyboard scroll */
+    outline-offset: 3px;
+    /* Gen-UI overflow contract heuristic #16 */
+    max-width: 100%;
+  }
+
+  .es-scroll-container:focus-visible {
+    outline: 2px solid var(--sl-color-accent, #10b981);
+  }
+
+  /* ── Board row ───────────────────────────────────────────────── */
+  .es-board {
+    display: flex;
+    flex-direction: row;
+    gap: 0;
+    align-items: stretch;
+    min-width: max-content;
+  }
+
+  /* ── Column ──────────────────────────────────────────────────── */
+  .es-column {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0;
+  }
+
+  /* Arrow connector between columns */
+  .es-column:not(:last-child)::after {
+    content: '→';
+    font-size: 1.25rem;
+    color: var(--es-arrow-color);
+    padding: 0 12px;
+    flex-shrink: 0;
+    align-self: center;
+  }
+
+  .es-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+  }
+
+  /* ── Card base ───────────────────────────────────────────────── */
+  .es-card {
+    --es-accent: #888;
+    --es-bg: rgba(136, 136, 136, 0.12);
+    --es-text: #ccc;
+    --es-rotate: rotate(0deg);
+
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 140px;
+    padding: 10px 12px 10px 14px;
+    background: var(--es-bg);
+    border-radius: 6px;
+    border-left: 3px solid var(--es-accent);
+    border-top: 1px solid color-mix(in srgb, var(--es-accent) 25%, transparent);
+    border-right: 1px solid color-mix(in srgb, var(--es-accent) 10%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--es-accent) 10%, transparent);
+    transform: var(--es-rotate);
+    transition: transform 150ms ease-out, box-shadow 150ms ease-out;
+  }
+
+  /* ── Card size modifiers ─────────────────────────────────────── */
+  .es-card--small  { width: 120px; padding: 7px 10px 7px 12px; }
+  .es-card--wide   { width: 168px; }
+  .es-card--large  {
+    width: 152px;
+    padding: 12px 14px 12px 16px;
+    border-left-width: 4px;
+    font-weight: 500;
+  }
+
+  /* ── Pivotal accent line ─────────────────────────────────────── */
+  .es-card--pivotal {
+    border-left-width: 4px;
+    box-shadow:
+      inset 4px 0 0 color-mix(in srgb, var(--es-accent) 40%, transparent),
+      0 0 0 1px color-mix(in srgb, var(--es-accent) 20%, transparent);
+  }
+
+  /* ── Type label ──────────────────────────────────────────────── */
+  .es-type-label {
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--es-accent) 70%, transparent);
+    line-height: 1;
+    display: block;
+  }
+
+  /* ── Card text ───────────────────────────────────────────────── */
+  .es-card-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--es-text);
+    line-height: 1.35;
+    display: block;
+  }
+
+  /* ── Pivotal badge ───────────────────────────────────────────── */
+  .es-pivotal-badge {
+    position: absolute;
+    top: 6px;
+    right: 7px;
+    font-size: 0.625rem;
+    color: var(--es-accent);
+    line-height: 1;
+  }
+
+  /* ── Legend ──────────────────────────────────────────────────── */
+  .es-legend {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 16px;
+    margin-top: 12px;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--es-border-color);
+    border-radius: 8px;
+  }
+
+  .es-legend-title {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--es-muted);
+    margin-right: 8px;
+  }
+
+  .es-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .es-legend-swatch {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .es-legend-pivotal-swatch {
+    font-size: 0.7rem;
+    color: #F4831F;
+    line-height: 1;
+  }
+
+  .es-legend-name {
+    font-size: 0.6875rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.6);
+    white-space: nowrap;
+  }
+
+  /* ── Mobile: stack columns vertically, hide arrows ──────────── */
+  @media (max-width: 640px) {
+    .es-scroll-container {
+      overflow-x: visible;
+      padding: 16px 12px;
+    }
+
+    .es-board {
+      flex-direction: column;
+      align-items: stretch;
+      min-width: unset;
+      gap: 16px;
+    }
+
+    .es-column {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+    }
+
+    /* Hide the horizontal arrow connector on mobile */
+    .es-column:not(:last-child)::after {
+      display: none;
+    }
+
+    .es-cards {
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+      align-items: flex-start;
+    }
+
+    .es-card,
+    .es-card--small,
+    .es-card--wide,
+    .es-card--large {
+      width: auto;
+      min-width: 120px;
+      flex: 0 0 auto;
+    }
+  }
+
+  /* ── Reduced motion override ─────────────────────────────────── */
+  @media (prefers-reduced-motion: reduce) {
+    .es-card {
+      transition: none;
+      transform: none !important;
+    }
+  }
+</style>

@@ -1,0 +1,830 @@
+---
+/**
+ * InviteReturnContract — "O retorno é o artefato acionável" pattern explainer
+ *
+ * Renders three sub-sections for the v0.1.0 docsite roadmap page:
+ *   1. Invite card — MCP App tool-result widget mockup with copy button
+ *   2. Application-layer return contract — JSON code block + annotation
+ *   3. Pattern opportunity table — use-case × return mapping, versioned badges
+ *
+ * Design references:
+ *   - Linear.app: elevation via lightness delta, dense without crowding
+ *   - Vercel docs: code block with dark tinted bg, tabular data layout
+ *   - EventStormingBoard / UseCaseMatrix color tokens (same page): consistency
+ *
+ * Color tokens (OKLCH — perceptually uniform):
+ *   Emerald accent  oklch(0.72 0.17 162)  → #10b981 sRGB fallback
+ *   Blue accent     oklch(0.70 0.14 240)  → #5B9BD5 sRGB fallback
+ *   Amber accent    oklch(0.82 0.16 80)   → #f59e0b sRGB fallback
+ *   Page base bg    #0b1a15               (consistent with board components)
+ *
+ * Constraints:
+ *   - This file is an .astro component, NOT MDX → <style> is valid here (scoped)
+ *   - Copy button uses <script> in this .astro file — safe from MDX acorn parser
+ *   - All client JS in a single <script> block, no external deps
+ *   - prefers-reduced-motion respected
+ *   - WCAG 2.2: contrast ≥ 4.5:1 on all text, focus-visible ring on interactive elements
+ */
+---
+
+<!-- Invite Card -->
+<div class="irc-invite-wrap">
+  <p class="irc-tool-eyebrow">
+    <span class="irc-dot" aria-hidden="true"></span>
+    MCP Operacional &nbsp;·&nbsp; Resultado da ferramenta
+  </p>
+
+  <div class="irc-invite-card" role="region" aria-label="Card de convite — Casa da Mata São Vicente">
+    <div class="irc-card-header">
+      <span class="irc-card-icon" aria-hidden="true">🌿</span>
+      <div class="irc-card-title-block">
+        <span class="irc-card-type-label">Convite</span>
+        <strong class="irc-card-title">Casa da Mata São Vicente</strong>
+      </div>
+    </div>
+
+    <div class="irc-card-body">
+      <p class="irc-salutation">Olá <strong>Thiago</strong>, sua associação está provisionada no <span class="irc-brand">canna-br</span>. Você é o administrador inicial (<span class="irc-role">Diretor</span>).</p>
+
+      <div class="irc-credential-block" aria-label="Credencial temporária de primeiro acesso">
+        <p class="irc-cred-label">
+          <span aria-hidden="true">🔑</span> Primeiro acesso (credencial temporária):
+        </p>
+        <dl class="irc-cred-dl">
+          <div class="irc-cred-row">
+            <dt>Login</dt>
+            <dd><code>thiago@casa-da-mata-sv.cannabr.org</code></dd>
+          </div>
+          <div class="irc-cred-row">
+            <dt>Senha</dt>
+            <dd><code>thiago@casa-da-mata-sv.cannabr.org</code> <span class="irc-cred-note">(igual ao login)</span></dd>
+          </div>
+        </dl>
+      </div>
+
+      <p class="irc-link-row">
+        <span aria-hidden="true">🔗</span> Entrar:&nbsp;
+        <span class="irc-link-pill">https://casa-da-mata-sv.cannabr.org</span>
+      </p>
+
+      <p class="irc-expire-note">No 1º login você define a senha real + ativa 2FA. A credencial temporária expira em <strong>7 dias</strong>.</p>
+    </div>
+
+    <div class="irc-card-actions">
+      <button
+        type="button"
+        class="irc-copy-btn"
+        aria-label="Copiar convite para a área de transferência"
+        data-copy-text={"🌿 Convite — Casa da Mata São Vicente\n\nOlá Thiago, sua associação está provisionada no canna-br. Você é o administrador inicial (Diretor).\n\n🔑 Primeiro acesso (credencial temporária):\n   Login:  thiago@casa-da-mata-sv.cannabr.org\n   Senha:  thiago@casa-da-mata-sv.cannabr.org   (igual ao login)\n\n🔗 Entrar:  https://casa-da-mata-sv.cannabr.org\n\nNo 1º login você define a senha real + ativa 2FA. A credencial temporária expira em 7 dias."}
+      >
+        <svg class="irc-copy-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+        </svg>
+        <span class="irc-copy-label">Copiar convite</span>
+      </button>
+      <div class="irc-copy-toast" role="status" aria-live="polite" aria-atomic="true"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Return Contract -->
+<div class="irc-contract-wrap">
+  <div class="irc-code-block" role="region" aria-label="Contrato de retorno da camada de aplicação — JSON">
+    <div class="irc-code-header">
+      <span class="irc-code-lang">json</span>
+      <span class="irc-code-filename">provision_association + seed_admin_user → output</span>
+    </div>
+    <pre class="irc-pre"><code class="irc-code">{`{
+  "association": {
+    "id": "assoc_…",
+    "slug": "casa-da-mata-sv",
+    "name": "Casa da Mata São Vicente",
+    "tenant": "casa-da-mata-sv"
+  },
+  "admin": {
+    "name": "Thiago",
+    "role": "Diretor",
+    "login": "thiago@casa-da-mata-sv.cannabr.org",
+    "must_change_credentials": true,
+    "expires_at": "2026-06-18T00:00:00Z"
+  },
+  "invite": {
+    "subject": "Convite — Casa da Mata São Vicente no cannabr.org",
+    "body_markdown": "…",
+    "body_plain": "…",
+    "copy_paste": "🌿 Convite — Casa da Mata São Vicente …"
+  }
+}`}</code></pre>
+  </div>
+  <p class="irc-contract-note">
+    A chamada foi <code>provision_association</code> + <code>seed_admin_user</code> via o MCP Operacional; o campo que importa para a UX é <code>invite.copy_paste</code>.
+  </p>
+</div>
+
+<!-- Pattern Opportunity Table -->
+<div class="irc-table-wrap" role="region" aria-label="Tabela: o retorno é o artefato acionável — oportunidades por use case">
+  <table class="irc-table" aria-label="Pattern: o retorno é o artefato acionável">
+    <caption class="irc-table-caption">
+      Cada use case devolve hoje apenas o registro. A coluna "Devia devolver" mostra o artefato agent-first que fecha o loop para o operador ou membro.
+    </caption>
+    <thead>
+      <tr>
+        <th scope="col" class="irc-th irc-th--usecase">Use Case</th>
+        <th scope="col" class="irc-th irc-th--today">Devolve hoje</th>
+        <th scope="col" class="irc-th irc-th--artifact">Devia devolver (artefato)</th>
+        <th scope="col" class="irc-th irc-th--version">Versão</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="irc-tr">
+        <td class="irc-td irc-td--usecase"><code class="irc-uc">provision / seed_admin</code></td>
+        <td class="irc-td irc-td--today"><span class="irc-muted">ids</span></td>
+        <td class="irc-td irc-td--artifact">convite admin <em>copy-paste</em></td>
+        <td class="irc-td irc-td--version"><span class="irc-badge irc-badge--v01">v0.1.0</span></td>
+      </tr>
+      <tr class="irc-tr">
+        <td class="irc-td irc-td--usecase"><code class="irc-uc">reset_credential</code></td>
+        <td class="irc-td irc-td--today"><span class="irc-muted">ok</span></td>
+        <td class="irc-td irc-td--artifact">mensagem "nova senha temporária" pronta</td>
+        <td class="irc-td irc-td--version"><span class="irc-badge irc-badge--v01">v0.1.0</span></td>
+      </tr>
+      <tr class="irc-tr">
+        <td class="irc-td irc-td--usecase"><code class="irc-uc">registerMember</code></td>
+        <td class="irc-td irc-td--today"><span class="irc-muted">member id</span></td>
+        <td class="irc-td irc-td--artifact">boas-vindas + link de 1º acesso do membro (WhatsApp-ready) + carteirinha digital</td>
+        <td class="irc-td irc-td--version"><span class="irc-badge irc-badge--v01">v0.1.0</span></td>
+      </tr>
+      <tr class="irc-tr">
+        <td class="irc-td irc-td--usecase"><code class="irc-uc">viewMemberQuota</code> <span class="irc-context">(perto do limite)</span></td>
+        <td class="irc-td irc-td--today"><span class="irc-muted">número</span></td>
+        <td class="irc-td irc-td--artifact">nudge "40/45g este mês" pro membro</td>
+        <td class="irc-td irc-td--version"><span class="irc-badge irc-badge--v01">v0.1.0</span></td>
+      </tr>
+      <tr class="irc-tr">
+        <td class="irc-td irc-td--usecase"><span class="irc-uc irc-uc--prose">1º login concluído</span></td>
+        <td class="irc-td irc-td--today"><span class="irc-muted">—</span></td>
+        <td class="irc-td irc-td--artifact">coach "bem-vindo · próximos 3 passos"</td>
+        <td class="irc-td irc-td--version"><span class="irc-badge irc-badge--v01">v0.1.0</span></td>
+      </tr>
+      <tr class="irc-tr irc-tr--v2">
+        <td class="irc-td irc-td--usecase"><code class="irc-uc">recordDispensation</code></td>
+        <td class="irc-td irc-td--today"><span class="irc-muted">event</span></td>
+        <td class="irc-td irc-td--artifact">recibo de dispensação pro paciente (PDF / texto)</td>
+        <td class="irc-td irc-td--version"><span class="irc-badge irc-badge--v02">v0.2</span></td>
+      </tr>
+      <tr class="irc-tr irc-tr--v2">
+        <td class="irc-td irc-td--usecase"><code class="irc-uc">generate_traceability_report</code></td>
+        <td class="irc-td irc-td--today"><span class="irc-muted">data</span></td>
+        <td class="irc-td irc-td--artifact">relatório pronto pro grupo da diretoria</td>
+        <td class="irc-td irc-td--version"><span class="irc-badge irc-badge--v02">v0.2</span></td>
+      </tr>
+      <tr class="irc-tr irc-tr--v2">
+        <td class="irc-td irc-td--usecase"><code class="irc-uc">submit_sngpc</code></td>
+        <td class="irc-td irc-td--today"><span class="irc-muted">protocolo</span></td>
+        <td class="irc-td irc-td--artifact">confirmação de protocolo copy-paste</td>
+        <td class="irc-td irc-td--version"><span class="irc-badge irc-badge--v02">v0.2</span></td>
+      </tr>
+      <tr class="irc-tr irc-tr--v2">
+        <td class="irc-td irc-td--usecase"><code class="irc-uc">explain_compliance_gap</code></td>
+        <td class="irc-td irc-td--today"><span class="irc-muted">gaps</span></td>
+        <td class="irc-td irc-td--artifact">checklist de remediação acionável</td>
+        <td class="irc-td irc-td--version"><span class="irc-badge irc-badge--v02">v0.2</span></td>
+      </tr>
+      <tr class="irc-tr irc-tr--v2">
+        <td class="irc-td irc-td--usecase"><span class="irc-uc irc-uc--prose">membership / prescrição expirando</span></td>
+        <td class="irc-td irc-td--today"><span class="irc-muted">—</span></td>
+        <td class="irc-td irc-td--artifact">lembrete de renovação pronto</td>
+        <td class="irc-td irc-td--version"><span class="irc-badge irc-badge--v02">v0.2</span></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<style>
+  /* ================================================================
+     SHARED TOKENS — consistent with EventStormingBoard + UseCaseMatrix
+  ================================================================ */
+  .irc-invite-wrap,
+  .irc-contract-wrap,
+  .irc-table-wrap {
+    --irc-bg:            #0b1a15;
+    --irc-border:        rgba(16, 185, 129, 0.22);
+    --irc-border-row:    rgba(16, 185, 129, 0.09);
+    --irc-emerald:       #10b981;
+    --irc-emerald-300:   #6ee7b7;
+    --irc-emerald-dim:   rgba(16, 185, 129, 0.14);
+    --irc-blue:          #5B9BD5;
+    --irc-blue-300:      #bdd9f7;
+    --irc-amber:         #f59e0b;
+    --irc-amber-300:     #fde68a;
+    --irc-text:          rgba(255, 255, 255, 0.82);
+    --irc-muted:         rgba(255, 255, 255, 0.45);
+    --irc-micro:         rgba(255, 255, 255, 0.32);
+    --irc-font-mono:     var(--sl-font-mono, 'JetBrains Mono', ui-monospace, monospace);
+    --irc-font-ui:       var(--sl-font, system-ui, sans-serif);
+    --irc-motion-enter:  cubic-bezier(0.16, 1, 0.3, 1);
+    --irc-motion-state:  cubic-bezier(0.4, 0, 0.2, 1);
+    font-family: var(--irc-font-ui);
+  }
+
+  /* ================================================================
+     1. INVITE CARD WIDGET
+  ================================================================ */
+  .irc-invite-wrap {
+    margin: 0 0 1.5rem 0;
+  }
+
+  /* Tool-result eyebrow — looks like a terminal output label */
+  .irc-tool-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-family: var(--irc-font-mono);
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--irc-emerald-300);
+    opacity: 0.75;
+    margin: 0 0 8px 2px;
+  }
+
+  .irc-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--irc-emerald);
+    flex-shrink: 0;
+    animation: irc-dot-pulse 2.4s ease-in-out infinite;
+  }
+
+  @keyframes irc-dot-pulse {
+    0%, 100% { opacity: 0.6; }
+    50%       { opacity: 1; }
+  }
+
+  .irc-invite-card {
+    background: var(--irc-bg);
+    border: 1px solid var(--irc-border);
+    border-radius: 12px;
+    overflow: hidden;
+    /* Linear card elevation: lightness delta rather than shadow */
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+  }
+
+  /* Card header — icon + title */
+  .irc-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 16px 12px;
+    border-bottom: 1px solid var(--irc-border);
+    background: rgba(16, 185, 129, 0.05);
+  }
+
+  .irc-card-icon {
+    font-size: 1.25rem;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .irc-card-title-block {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .irc-card-type-label {
+    font-size: 0.5625rem;
+    font-weight: 800;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: rgba(16, 185, 129, 0.6);
+    line-height: 1;
+  }
+
+  .irc-card-title {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.92);
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+
+  /* Card body */
+  .irc-card-body {
+    padding: 16px 16px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .irc-salutation {
+    font-size: 0.8125rem;
+    line-height: 1.55;
+    color: var(--irc-text);
+    margin: 0;
+  }
+
+  .irc-salutation strong {
+    color: rgba(255,255,255,0.95);
+  }
+
+  .irc-brand {
+    color: var(--irc-emerald-300);
+    font-weight: 500;
+  }
+
+  .irc-role {
+    background: rgba(16, 185, 129, 0.14);
+    border: 1px solid rgba(16, 185, 129, 0.28);
+    border-radius: 4px;
+    padding: 0 5px;
+    color: var(--irc-emerald-300);
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  /* Credential block */
+  .irc-credential-block {
+    background: rgba(0, 0, 0, 0.22);
+    border: 1px solid rgba(16, 185, 129, 0.14);
+    border-radius: 8px;
+    padding: 10px 14px;
+  }
+
+  .irc-cred-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--irc-emerald-300);
+    margin: 0 0 8px 0;
+  }
+
+  .irc-cred-dl {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .irc-cred-row {
+    display: grid;
+    grid-template-columns: 44px 1fr;
+    gap: 8px;
+    align-items: baseline;
+  }
+
+  .irc-cred-row dt {
+    font-family: var(--irc-font-mono);
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--irc-muted);
+    line-height: 1.6;
+  }
+
+  .irc-cred-row dd {
+    margin: 0;
+    font-size: 0.75rem;
+    line-height: 1.6;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .irc-cred-row dd code {
+    font-family: var(--irc-font-mono);
+    font-size: 0.6875rem;
+    background: rgba(16, 185, 129, 0.10);
+    color: #6ee7b7;
+    border: 1px solid rgba(16, 185, 129, 0.20);
+    border-radius: 4px;
+    padding: 1px 6px;
+    white-space: nowrap;
+  }
+
+  .irc-cred-note {
+    font-size: 0.6875rem;
+    color: var(--irc-muted);
+    font-style: italic;
+  }
+
+  /* Link row */
+  .irc-link-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    font-size: 0.8125rem;
+    color: var(--irc-text);
+    margin: 0;
+  }
+
+  .irc-link-pill {
+    font-family: var(--irc-font-mono);
+    font-size: 0.6875rem;
+    color: var(--irc-blue-300);
+    background: rgba(91, 155, 213, 0.10);
+    border: 1px solid rgba(91, 155, 213, 0.22);
+    border-radius: 6px;
+    padding: 2px 8px;
+    word-break: break-all;
+  }
+
+  /* Expiry note */
+  .irc-expire-note {
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.52);
+    margin: 0;
+    line-height: 1.5;
+    font-style: italic;
+  }
+
+  .irc-expire-note strong {
+    color: rgba(255,255,255,0.72);
+    font-style: normal;
+  }
+
+  /* Card actions */
+  .irc-card-actions {
+    padding: 10px 16px 14px;
+    border-top: 1px solid rgba(16, 185, 129, 0.09);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+  }
+
+  .irc-copy-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    min-height: 36px;
+    border-radius: 6px;
+    border: 1px solid rgba(16, 185, 129, 0.38);
+    background: rgba(16, 185, 129, 0.10);
+    color: var(--irc-emerald-300);
+    font-family: var(--irc-font-ui);
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+      background 0.15s var(--irc-motion-state),
+      border-color 0.15s var(--irc-motion-state),
+      transform 0.15s var(--irc-motion-state);
+  }
+
+  .irc-copy-btn:hover {
+    background: rgba(16, 185, 129, 0.18);
+    border-color: rgba(16, 185, 129, 0.65);
+    transform: translateY(-1px);
+  }
+
+  .irc-copy-btn:active {
+    transform: translateY(0);
+  }
+
+  .irc-copy-btn:focus-visible {
+    outline: 2px solid var(--irc-emerald);
+    outline-offset: 2px;
+  }
+
+  .irc-copy-icon {
+    flex-shrink: 0;
+  }
+
+  .irc-copy-label {
+    white-space: nowrap;
+  }
+
+  /* Toast */
+  .irc-copy-toast {
+    font-family: var(--irc-font-mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    color: var(--irc-emerald-300);
+    opacity: 0;
+    transition: opacity 0.2s var(--irc-motion-enter);
+    pointer-events: none;
+    padding: 2px 8px;
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.28);
+    border-radius: 999px;
+  }
+
+  .irc-copy-toast.irc-toast-visible {
+    opacity: 1;
+  }
+
+  /* ================================================================
+     2. RETURN CONTRACT CODE BLOCK
+  ================================================================ */
+  .irc-contract-wrap {
+    margin: 0 0 1.5rem 0;
+    /* Gen-UI overflow contract #16 */
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .irc-code-block {
+    background: var(--irc-bg);
+    border: 1px solid var(--irc-border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .irc-code-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 14px;
+    background: rgba(16, 185, 129, 0.05);
+    border-bottom: 1px solid var(--irc-border);
+  }
+
+  .irc-code-lang {
+    font-family: var(--irc-font-mono);
+    font-size: 0.5625rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(16, 185, 129, 0.55);
+    background: rgba(16, 185, 129, 0.10);
+    border: 1px solid rgba(16, 185, 129, 0.20);
+    border-radius: 3px;
+    padding: 1px 5px;
+  }
+
+  .irc-code-filename {
+    font-family: var(--irc-font-mono);
+    font-size: 0.625rem;
+    color: var(--irc-muted);
+    letter-spacing: 0.02em;
+  }
+
+  .irc-pre {
+    margin: 0;
+    padding: 16px 18px;
+    overflow-x: auto;
+    background: transparent;
+    border: none;
+  }
+
+  /* Override Starlight's default <pre> styling within our component */
+  .irc-code-block .irc-pre {
+    background: transparent !important;
+    padding: 14px 18px !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .irc-code {
+    font-family: var(--irc-font-mono);
+    font-size: 0.75rem;
+    line-height: 1.65;
+    color: rgba(255, 255, 255, 0.82);
+    display: block;
+    white-space: pre;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+
+  .irc-contract-note {
+    font-size: 0.75rem;
+    color: var(--irc-muted);
+    margin: 10px 0 0 0;
+    line-height: 1.5;
+    padding-left: 2px;
+  }
+
+  .irc-contract-note code {
+    font-family: var(--irc-font-mono);
+    font-size: 0.6875rem;
+    background: rgba(16, 185, 129, 0.10);
+    color: #6ee7b7;
+    border: 1px solid rgba(16, 185, 129, 0.20);
+    border-radius: 4px;
+    padding: 1px 5px;
+  }
+
+  /* ================================================================
+     3. PATTERN OPPORTUNITY TABLE
+  ================================================================ */
+  .irc-table-wrap {
+    /* Gen-UI overflow contract #16 */
+    max-width: 100%;
+    overflow-x: auto;
+    background: var(--irc-bg);
+    border: 1px solid var(--irc-border);
+    border-radius: 12px;
+    margin: 0 0 1.5rem 0;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .irc-table {
+    width: 100%;
+    min-width: 620px;
+    border-collapse: collapse;
+    /* tabular-nums for scannable columns — heuristic #12 */
+    font-variant-numeric: tabular-nums;
+  }
+
+  .irc-table-caption {
+    caption-side: bottom;
+    font-size: 0.6875rem;
+    color: var(--irc-micro);
+    padding: 8px 14px 10px;
+    text-align: left;
+    line-height: 1.5;
+    border-top: 1px solid var(--irc-border-row);
+  }
+
+  /* Column headers */
+  .irc-th {
+    padding: 8px 12px;
+    font-size: 0.5625rem;
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--irc-muted);
+    background: rgba(16, 185, 129, 0.05);
+    border-bottom: 1px solid var(--irc-border);
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  .irc-th--version { text-align: center; }
+
+  /* Body rows */
+  .irc-tr {
+    border-bottom: 1px solid var(--irc-border-row);
+    transition: background 120ms var(--irc-motion-state);
+  }
+
+  .irc-tr:last-child {
+    border-bottom: none;
+  }
+
+  .irc-tr:hover {
+    background: rgba(16, 185, 129, 0.04);
+  }
+
+  /* v0.2 rows — slightly dimmer to visually de-prioritize vs v0.1.0 */
+  .irc-tr--v2 {
+    opacity: 0.72;
+  }
+
+  .irc-tr--v2:hover {
+    opacity: 1;
+  }
+
+  .irc-td {
+    padding: 7px 12px;
+    font-size: 0.75rem;
+    color: var(--irc-text);
+    vertical-align: middle;
+    line-height: 1.4;
+  }
+
+  .irc-td--version {
+    text-align: center;
+  }
+
+  .irc-td--today {
+    min-width: 72px;
+  }
+
+  .irc-td--artifact {
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  /* Use-case code name */
+  .irc-uc {
+    font-family: var(--irc-font-mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.88);
+    background: transparent;
+    border: none;
+    padding: 0;
+  }
+
+  /* prose variant for non-code use-case names */
+  .irc-uc--prose {
+    font-family: var(--irc-font-ui);
+    font-size: 0.75rem;
+    font-style: italic;
+    color: rgba(255, 255, 255, 0.72);
+  }
+
+  .irc-context {
+    font-size: 0.625rem;
+    color: var(--irc-micro);
+    font-style: italic;
+    margin-left: 4px;
+    white-space: nowrap;
+  }
+
+  .irc-muted {
+    font-family: var(--irc-font-mono);
+    font-size: 0.6875rem;
+    color: rgba(255, 255, 255, 0.30);
+  }
+
+  /* Version badges */
+  .irc-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 0.5625rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .irc-badge--v01 {
+    /* Emerald — active / in-scope */
+    background: rgba(16, 185, 129, 0.16);
+    border: 1px solid rgba(16, 185, 129, 0.38);
+    color: #6ee7b7;
+  }
+
+  .irc-badge--v02 {
+    /* Amber — planned / future */
+    background: rgba(245, 158, 11, 0.12);
+    border: 1px solid rgba(245, 158, 11, 0.28);
+    color: #fde68a;
+  }
+
+  /* ================================================================
+     RESPONSIVE
+  ================================================================ */
+  @media (max-width: 540px) {
+    .irc-cred-row {
+      grid-template-columns: 1fr;
+      gap: 2px;
+    }
+
+    .irc-cred-row dt {
+      font-size: 0.5rem;
+    }
+
+    .irc-card-title {
+      font-size: 0.875rem;
+    }
+  }
+
+  /* ================================================================
+     REDUCED MOTION
+  ================================================================ */
+  @media (prefers-reduced-motion: reduce) {
+    .irc-dot,
+    .irc-copy-btn,
+    .irc-tr,
+    .irc-copy-toast {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+    .irc-copy-btn:hover {
+      transform: none;
+    }
+  }
+</style>
+
+<script>
+  // Copy button — clipboard.writeText with toast feedback
+  // Uses data-copy-text attribute — no <, > operators risk
+  (function () {
+    var btn = document.querySelector('.irc-copy-btn');
+    if (!btn) return;
+    var toast = btn.closest('.irc-card-actions').querySelector('.irc-copy-toast');
+
+    btn.addEventListener('click', async function () {
+      var text = btn.getAttribute('data-copy-text') || '';
+      try {
+        await navigator.clipboard.writeText(text);
+        if (toast) {
+          toast.textContent = 'Convite copiado';
+          toast.classList.add('irc-toast-visible');
+          setTimeout(function () {
+            toast.classList.remove('irc-toast-visible');
+            setTimeout(function () { toast.textContent = ''; }, 250);
+          }, 2200);
+        }
+      } catch (_) {
+        // fallback: prompt
+        window.prompt('Copie o texto abaixo:', text);
+      }
+    });
+  })();
+</script>

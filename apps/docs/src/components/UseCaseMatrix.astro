@@ -1,0 +1,666 @@
+---
+/**
+ * UseCaseMatrix — Application-layer use-case catalog widget (v2)
+ *
+ * v2 changes:
+ *   - Added `desc` prop: one-line description per use case (muted text under name).
+ *     Serves human readers AND Claude Code agents reading the catalog as domain docs.
+ *   - Denser rows: vertical padding cut from 9px to 5px — more rows visible at once.
+ *   - Golden Circle (Why → How → What) intro block built into the component header.
+ *   - Grid updated to accommodate desc column expansion.
+ *
+ * Design decisions:
+ *   - Reuses EventStormingBoard color language: command = blue #5B9BD5,
+ *     query = green #82E0AA (read-model color) — same token for familiarity.
+ *   - Surface chips: filled/active (emerald) when present, muted/— when absent.
+ *     Label text is always present (not color-only) — WCAG 1.4.1 compliant.
+ *   - Use-case name in monospace (JetBrains Mono) — signals it's a code artifact.
+ *   - Desc text below name in muted 0.6875rem — readable but not competing with name.
+ *   - Group headers use the same tinted-bg card-elevation pattern as ES board.
+ *   - Row grid: [name+desc | type-pill | mcp | web | app] — 5-col auto layout,
+ *     collapses to 2-row stack on ≤640px (name+type / chips).
+ *   - Zero JavaScript, pure SSR HTML+CSS.
+ *   - Gen-UI overflow contract (heuristic #16): max-width 100% + overflow-x auto.
+ *
+ * References:
+ *   - Linear.app status badge pattern → type pills as pill + color accent
+ *   - EventStormingBoard color vocabulary (same project) → command/query colors
+ *   - Vercel docs table → sticky context header, dense but readable
+ *   - Stripe API docs → method name + short desc stacked in one cell (density w/o clutter)
+ */
+
+export interface UseCase {
+  name: string;
+  type: 'command' | 'query';
+  desc?: string;
+  surfaces: {
+    mcp?: string | true;
+    web?: string | true;
+    app?: string | true;
+  };
+}
+
+export interface Group {
+  context: string;
+  useCases: UseCase[];
+}
+
+export interface Props {
+  groups: Group[];
+}
+
+const { groups } = Astro.props;
+
+// Reuse EventStorming color tokens for type language consistency
+const TYPE_META = {
+  command: {
+    accent: '#5B9BD5',
+    bg: 'rgba(91, 155, 213, 0.13)',
+    text: '#bdd9f7',
+    label: 'Command',
+  },
+  query: {
+    accent: '#82E0AA',
+    bg: 'rgba(130, 224, 170, 0.12)',
+    text: '#b3f0cb',
+    label: 'Query',
+  },
+} as const;
+
+// Surface display config
+const SURFACE_META = {
+  mcp: { label: 'MCP', shortDesc: 'Tool' },
+  web: { label: 'Web', shortDesc: 'Web' },
+  app: { label: 'App', shortDesc: 'App' },
+} as const;
+
+function surfaceValue(val: string | true | undefined): string | null {
+  if (val === undefined || val === false) return null;
+  if (val === true) return null; // candidate, no name yet
+  return val as string;
+}
+
+function isPresent(val: string | true | undefined): boolean {
+  return val !== undefined && val !== false;
+}
+---
+
+<section
+  class="ucm-section"
+  role="region"
+  aria-label="Catálogo de Use Cases — Camada de Aplicação"
+>
+  {/* Golden Circle intro — Why / How / What */}
+  <div class="ucm-golden-circle" aria-label="Contexto da camada de aplicação">
+    <div class="ucm-gc-block ucm-gc-block--why">
+      <span class="ucm-gc-label">Por quê</span>
+      <p class="ucm-gc-text">O domínio precisa ser legível para humano <em>e</em> para o agente. Use cases semânticos = linguagem ubíqua que os dois entendem.</p>
+    </div>
+    <div class="ucm-gc-block ucm-gc-block--how">
+      <span class="ucm-gc-label">Como</span>
+      <p class="ucm-gc-text">A camada <code>@canna/app-services</code> expõe use cases; o MCP os expõe <strong>as-is</strong> — 1 use case = 1 tool; cada um aparece numa ou mais superfícies (MCP · Web · MCP App).</p>
+    </div>
+    <div class="ucm-gc-block ucm-gc-block--what">
+      <span class="ucm-gc-label">O quê</span>
+      <p class="ucm-gc-text">O catálogo abaixo — cada use case, o que faz, e onde é exposto.</p>
+    </div>
+  </div>
+
+  {/* Legend — above the matrix for discoverability */}
+  <div class="ucm-legend" aria-label="Legenda do catálogo">
+    <span class="ucm-legend-title">Legenda</span>
+
+    <span class="ucm-legend-item">
+      <span
+        class="ucm-type-pill"
+        style={`--ucm-type-accent: ${TYPE_META.command.accent}; --ucm-type-bg: ${TYPE_META.command.bg}; --ucm-type-text: ${TYPE_META.command.text};`}
+        aria-hidden="true"
+      >Command</span>
+      <span class="ucm-legend-desc">muda estado</span>
+    </span>
+
+    <span class="ucm-legend-item">
+      <span
+        class="ucm-type-pill"
+        style={`--ucm-type-accent: ${TYPE_META.query.accent}; --ucm-type-bg: ${TYPE_META.query.bg}; --ucm-type-text: ${TYPE_META.query.text};`}
+        aria-hidden="true"
+      >Query</span>
+      <span class="ucm-legend-desc">lê estado</span>
+    </span>
+
+    <span class="ucm-legend-sep" aria-hidden="true">·</span>
+
+    <span class="ucm-legend-item">
+      <span class="ucm-chip ucm-chip--active" aria-hidden="true">MCP</span>
+      <span class="ucm-legend-desc">exposto como tool (NL → chamada)</span>
+    </span>
+
+    <span class="ucm-legend-item">
+      <span class="ucm-chip ucm-chip--active" aria-hidden="true">Web</span>
+      <span class="ucm-legend-desc">superfície web própria (REST/página)</span>
+    </span>
+
+    <span class="ucm-legend-item">
+      <span class="ucm-chip ucm-chip--active" aria-hidden="true">App</span>
+      <span class="ucm-legend-desc">MCP App que renderiza (query) ou invoca (command)</span>
+    </span>
+
+    <span class="ucm-legend-item">
+      <span class="ucm-chip ucm-chip--muted" aria-hidden="true">—</span>
+      <span class="ucm-legend-desc">ausente / via chat NL</span>
+    </span>
+  </div>
+
+  {/* Matrix */}
+  <div class="ucm-matrix-wrap">
+    <div class="ucm-matrix" role="table" aria-label="Matriz de Use Cases">
+
+      {/* Column headers */}
+      <div class="ucm-header-row" role="row">
+        <div class="ucm-th ucm-th--name" role="columnheader">Use Case</div>
+        <div class="ucm-th ucm-th--type" role="columnheader">Tipo</div>
+        <div class="ucm-th ucm-th--surface" role="columnheader">MCP</div>
+        <div class="ucm-th ucm-th--surface" role="columnheader">Web</div>
+        <div class="ucm-th ucm-th--surface" role="columnheader">App</div>
+      </div>
+
+      {groups.map((group) => (
+        <>
+          {/* Group context header */}
+          <div class="ucm-group-header" role="row">
+            <div class="ucm-group-label" role="rowheader" aria-colspan={5}>
+              {group.context}
+            </div>
+          </div>
+
+          {/* Use-case rows */}
+          {group.useCases.map((uc) => {
+            const typeMeta = TYPE_META[uc.type];
+            const mcpPresent = isPresent(uc.surfaces.mcp);
+            const webPresent = isPresent(uc.surfaces.web);
+            const appPresent = isPresent(uc.surfaces.app);
+            const mcpVal = surfaceValue(uc.surfaces.mcp);
+            const webVal = surfaceValue(uc.surfaces.web);
+            const appVal = surfaceValue(uc.surfaces.app);
+
+            return (
+              <div class="ucm-row" role="row">
+                {/* Name + desc stacked */}
+                <div class="ucm-td ucm-td--name" role="cell">
+                  <code class="ucm-uc-name">{uc.name}</code>
+                  {uc.desc && <span class="ucm-uc-desc">{uc.desc}</span>}
+                </div>
+
+                {/* Type pill */}
+                <div class="ucm-td ucm-td--type" role="cell">
+                  <span
+                    class="ucm-type-pill"
+                    style={`--ucm-type-accent: ${typeMeta.accent}; --ucm-type-bg: ${typeMeta.bg}; --ucm-type-text: ${typeMeta.text};`}
+                    aria-label={`Tipo: ${typeMeta.label}`}
+                  >
+                    {typeMeta.label}
+                  </span>
+                </div>
+
+                {/* MCP chip */}
+                <div class="ucm-td ucm-td--surface" role="cell">
+                  {mcpPresent ? (
+                    <span class="ucm-chip ucm-chip--active" title={mcpVal ?? 'exposto como MCP tool'}>
+                      <span class="ucm-chip-label">MCP</span>
+                      {mcpVal && <span class="ucm-chip-name">{mcpVal}</span>}
+                      {!mcpVal && uc.surfaces.mcp === true && <span class="ucm-chip-name ucm-chip-name--candidate">candidato</span>}
+                    </span>
+                  ) : (
+                    <span class="ucm-chip ucm-chip--muted" aria-label="Não exposto via MCP">
+                      <span class="ucm-chip-label">MCP</span>
+                      <span class="ucm-chip-dash" aria-hidden="true">—</span>
+                    </span>
+                  )}
+                </div>
+
+                {/* Web chip */}
+                <div class="ucm-td ucm-td--surface" role="cell">
+                  {webPresent ? (
+                    <span class="ucm-chip ucm-chip--active" title={webVal ?? 'superfície web própria'}>
+                      <span class="ucm-chip-label">Web</span>
+                      {webVal && <span class="ucm-chip-name">{webVal}</span>}
+                    </span>
+                  ) : (
+                    <span class="ucm-chip ucm-chip--muted" aria-label="Sem superfície Web própria">
+                      <span class="ucm-chip-label">Web</span>
+                      <span class="ucm-chip-dash" aria-hidden="true">—</span>
+                    </span>
+                  )}
+                </div>
+
+                {/* App chip */}
+                <div class="ucm-td ucm-td--surface" role="cell">
+                  {appPresent ? (
+                    <span class="ucm-chip ucm-chip--active" title={appVal ?? 'MCP App — widget renderizado no agente'}>
+                      <span class="ucm-chip-label">App</span>
+                      {appVal && <span class="ucm-chip-name">{appVal}</span>}
+                      {!appVal && uc.surfaces.app === true && <span class="ucm-chip-name ucm-chip-name--candidate">candidato</span>}
+                    </span>
+                  ) : (
+                    <span class="ucm-chip ucm-chip--muted" aria-label="Sem MCP App">
+                      <span class="ucm-chip-label">App</span>
+                      <span class="ucm-chip-dash" aria-hidden="true">—</span>
+                    </span>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </>
+      ))}
+    </div>
+  </div>
+
+  {/* Caption */}
+  <p class="ucm-caption">
+    Use cases sem <code>App</code> ainda são acionados via chat NL (linguagem natural → tool call).
+    <code>App: candidato</code> = widget planejado, ainda não construído.
+    Use cases nomeados (ex: <code>DispensationForm</code>) já têm widget live.
+  </p>
+</section>
+
+<style>
+  /* ── Section wrapper ──────────────────────────────────────────── */
+  .ucm-section {
+    --ucm-bg: #0b1a15;
+    --ucm-border: rgba(16, 185, 129, 0.18);
+    --ucm-border-row: rgba(16, 185, 129, 0.08);
+    --ucm-muted: rgba(255, 255, 255, 0.38);
+    --ucm-text: var(--sl-color-text, #e2e8f0);
+
+    /* Emerald active chip */
+    --ucm-chip-active-bg: rgba(16, 185, 129, 0.15);
+    --ucm-chip-active-border: rgba(16, 185, 129, 0.35);
+    --ucm-chip-active-text: #6ee7b7;
+
+    /* Muted/absent chip */
+    --ucm-chip-muted-bg: rgba(255, 255, 255, 0.04);
+    --ucm-chip-muted-border: rgba(255, 255, 255, 0.1);
+    --ucm-chip-muted-text: rgba(255, 255, 255, 0.28);
+
+    margin: 0 0 2rem 0;
+    font-family: var(--sl-font, system-ui, sans-serif);
+  }
+
+  /* ── Golden Circle intro blocks ──────────────────────────────── */
+  .ucm-golden-circle {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+
+  .ucm-gc-block {
+    padding: 10px 14px;
+    border-radius: 8px;
+    border-left: 3px solid transparent;
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  .ucm-gc-block--why {
+    border-left-color: #f59e0b; /* amber — aspiration */
+    background: rgba(245, 158, 11, 0.06);
+  }
+
+  .ucm-gc-block--how {
+    border-left-color: #5B9BD5; /* blue — mechanism */
+    background: rgba(91, 155, 213, 0.06);
+  }
+
+  .ucm-gc-block--what {
+    border-left-color: #10b981; /* emerald — artifact */
+    background: rgba(16, 185, 129, 0.06);
+  }
+
+  .ucm-gc-label {
+    display: block;
+    font-size: 0.625rem;
+    font-weight: 800;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .ucm-gc-block--why .ucm-gc-label  { color: #fbbf24; }
+  .ucm-gc-block--how .ucm-gc-label  { color: #7db8e8; }
+  .ucm-gc-block--what .ucm-gc-label { color: #6ee7b7; }
+
+  .ucm-gc-text {
+    font-size: 0.75rem;
+    line-height: 1.45;
+    color: rgba(255, 255, 255, 0.72);
+    margin: 0;
+  }
+
+  .ucm-gc-text code {
+    font-family: var(--sl-font-mono, 'JetBrains Mono', ui-monospace, monospace);
+    font-size: 0.6875rem;
+    background: rgba(16, 185, 129, 0.10) !important;
+    color: #6ee7b7 !important;
+    border: 1px solid rgba(16, 185, 129, 0.2) !important;
+    padding: 0.05rem 0.25rem !important;
+    border-radius: 3px !important;
+  }
+
+  .ucm-gc-text em { color: rgba(255,255,255,0.9); font-style: italic; }
+  .ucm-gc-text strong { color: rgba(255,255,255,0.9); font-weight: 600; }
+
+  /* ── Legend ──────────────────────────────────────────────────── */
+  .ucm-legend {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 5px 12px;
+    margin-bottom: 12px;
+    padding: 9px 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--ucm-border);
+    border-radius: 8px;
+  }
+
+  .ucm-legend-title {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ucm-muted);
+    margin-right: 6px;
+    flex-shrink: 0;
+  }
+
+  .ucm-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .ucm-legend-desc {
+    font-size: 0.6875rem;
+    color: rgba(255, 255, 255, 0.5);
+    white-space: nowrap;
+  }
+
+  .ucm-legend-sep {
+    color: var(--ucm-muted);
+    font-size: 1rem;
+    line-height: 1;
+  }
+
+  /* ── Matrix outer wrap — gen-UI overflow contract #16 ────────── */
+  .ucm-matrix-wrap {
+    max-width: 100%;
+    overflow-x: auto;
+    background: var(--ucm-bg);
+    border: 1px solid var(--ucm-border);
+    border-radius: 12px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .ucm-matrix {
+    display: grid;
+    grid-template-columns: 1fr;
+    min-width: 580px;
+  }
+
+  /* ── Column header row ───────────────────────────────────────── */
+  .ucm-header-row {
+    display: grid;
+    grid-template-columns: 1fr 84px 108px 100px 108px;
+    padding: 0 14px;
+    border-bottom: 1px solid var(--ucm-border);
+    background: rgba(16, 185, 129, 0.05);
+  }
+
+  .ucm-th {
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ucm-muted);
+    padding: 8px 6px 8px 0;
+  }
+
+  .ucm-th--surface {
+    text-align: center;
+  }
+
+  /* ── Group header ─────────────────────────────────────────────── */
+  .ucm-group-header {
+    padding: 0;
+    border-bottom: 1px solid var(--ucm-border);
+    background: rgba(16, 185, 129, 0.04);
+  }
+
+  .ucm-group-label {
+    padding: 6px 14px 5px;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    color: #6ee7b7;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .ucm-group-label::before {
+    content: '';
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    background: #10b981;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ── Data rows — DENSER than v1 ──────────────────────────────── */
+  .ucm-row {
+    display: grid;
+    grid-template-columns: 1fr 84px 108px 100px 108px;
+    padding: 0 14px;
+    border-bottom: 1px solid var(--ucm-border-row);
+    align-items: center;
+    transition: background 120ms ease-out;
+  }
+
+  .ucm-row:last-child {
+    border-bottom: none;
+  }
+
+  .ucm-row:hover {
+    background: rgba(16, 185, 129, 0.04);
+  }
+
+  /* tighter vertical rhythm than v1 (was 9px → now 5px) */
+  .ucm-td {
+    padding: 5px 6px 5px 0;
+  }
+
+  .ucm-td--surface {
+    display: flex;
+    justify-content: center;
+  }
+
+  /* ── Use-case name + desc stacked ───────────────────────────── */
+  .ucm-td--name {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .ucm-uc-name {
+    font-family: var(--sl-font-mono, 'JetBrains Mono', ui-monospace, monospace);
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1.3;
+    background: transparent !important;
+    color: #e2e8f0 !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+
+  .ucm-uc-desc {
+    font-size: 0.6875rem;
+    color: rgba(255, 255, 255, 0.50);
+    line-height: 1.35;
+    font-style: normal;
+    /* prevent desc from expanding column if very long */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* ── Type pill ────────────────────────────────────────────────── */
+  .ucm-type-pill {
+    --ucm-type-accent: #888;
+    --ucm-type-bg: rgba(136,136,136,0.12);
+    --ucm-type-text: #ccc;
+
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: var(--ucm-type-bg);
+    border: 1px solid color-mix(in srgb, var(--ucm-type-accent) 40%, transparent);
+    font-size: 0.5625rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ucm-type-text);
+    white-space: nowrap;
+  }
+
+  /* ── Surface chip ─────────────────────────────────────────────── */
+  .ucm-chip {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    padding: 3px 7px;
+    border-radius: 6px;
+    min-width: 58px;
+    max-width: 96px;
+    text-align: center;
+    border: 1px solid transparent;
+  }
+
+  .ucm-chip--active {
+    background: var(--ucm-chip-active-bg);
+    border-color: var(--ucm-chip-active-border);
+  }
+
+  .ucm-chip--muted {
+    background: var(--ucm-chip-muted-bg);
+    border-color: var(--ucm-chip-muted-border);
+    opacity: 0.55;
+  }
+
+  .ucm-chip-label {
+    font-size: 0.5rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--ucm-chip-active-text);
+    line-height: 1;
+  }
+
+  .ucm-chip--muted .ucm-chip-label {
+    color: var(--ucm-chip-muted-text);
+  }
+
+  .ucm-chip-name {
+    font-family: var(--sl-font-mono, 'JetBrains Mono', ui-monospace, monospace);
+    font-size: 0.5rem;
+    font-weight: 500;
+    color: #6ee7b7;
+    line-height: 1.3;
+    word-break: break-all;
+    overflow-wrap: anywhere;
+  }
+
+  .ucm-chip-name--candidate {
+    color: rgba(16, 185, 129, 0.55);
+    font-style: italic;
+  }
+
+  .ucm-chip-dash {
+    font-size: 0.6875rem;
+    color: var(--ucm-chip-muted-text);
+    line-height: 1;
+  }
+
+  /* ── Caption ──────────────────────────────────────────────────── */
+  .ucm-caption {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.45);
+    margin-top: 10px;
+    line-height: 1.5;
+  }
+
+  .ucm-caption code {
+    font-family: var(--sl-font-mono, 'JetBrains Mono', ui-monospace, monospace);
+    font-size: 0.6875rem;
+    background: rgba(16, 185, 129, 0.10) !important;
+    color: #6ee7b7 !important;
+    border: 1px solid rgba(16, 185, 129, 0.2) !important;
+    padding: 0.1rem 0.3rem !important;
+    border-radius: 4px !important;
+  }
+
+  /* ── Mobile: stacked layout at ≤640px ───────────────────────── */
+  @media (max-width: 640px) {
+    .ucm-golden-circle {
+      grid-template-columns: 1fr;
+      gap: 6px;
+    }
+
+    .ucm-matrix {
+      min-width: unset;
+    }
+
+    .ucm-header-row {
+      display: none;
+    }
+
+    .ucm-row {
+      display: grid;
+      grid-template-columns: 1fr auto auto auto;
+      grid-template-rows: auto auto;
+      gap: 5px 6px;
+      padding: 8px 10px;
+    }
+
+    .ucm-td { padding: 0; }
+
+    .ucm-td--name  {
+      grid-column: 1;
+      grid-row: 1;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .ucm-td--type  { grid-column: 2 / 5; grid-row: 1; justify-self: end; display: flex; align-items: center; }
+    .ucm-td--surface:nth-child(3) { grid-column: 1; grid-row: 2; }
+    .ucm-td--surface:nth-child(4) { grid-column: 2; grid-row: 2; }
+    .ucm-td--surface:nth-child(5) { grid-column: 3; grid-row: 2; }
+
+    .ucm-chip {
+      min-width: 48px;
+    }
+
+    .ucm-uc-desc {
+      font-size: 0.625rem;
+    }
+  }
+
+  /* ── Reduced motion ───────────────────────────────────────────── */
+  @media (prefers-reduced-motion: reduce) {
+    .ucm-row {
+      transition: none;
+    }
+  }
+</style>

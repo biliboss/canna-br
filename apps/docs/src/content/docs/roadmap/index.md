@@ -11,70 +11,58 @@ Premissas regulatórias canalizadas em [Premissas Regulatórias](/regulatory-ass
 
 ---
 
-## v0.1 — Domain Blueprint (DONE 2026-06-08)
+## Fundações pré-0.1 (já feitas)
 
-| Capability | Valor | Done when |
+> Não são uma "versão entregue" — são o trabalho de base que habilita a v0.1.0. A numeração do roadmap reflete **valor entregue ao usuário**, não progresso interno de engenharia. Por isso esse trabalho não recebe número de release.
+
+| Fundação | Valor | Estado |
 |---|---|---|
-| Domain Model + Event Storming | Vocabulário compartilhado eng+compliance+jurídico | Docs site com 8 bounded contexts + 38 domain events mapeados |
+| Domain Model + Event Storming | Vocabulário compartilhado eng+compliance+jurídico | 8 bounded contexts + 38 domain events mapeados no docs site |
 | Research consolidado | Base de premissas auditável | Marco legal, SNGPC, sandbox, mercado, modelos internacionais |
-| OSS business model | Tese de viabilidade | AGPL-3 + managed hosting + Plausible como proxy |
+| OSS business model | Tese de viabilidade | AGPL-3 + managed hosting + analytics proxy |
+| Emmett kernel spike (`@canna/domain` + `@canna/event-store`) | Decider pattern + optimistic concurrency validados | In-memory + Postgres adapter verdes em PG real (parallel writers + stale version). É o **caminho self-host** (dual model com SurrealDB gerenciado) |
 
 ---
 
-## v0.2 — Domain Kernel + Spike Gate
+## v0.1.0 — Sistema Usável (já rodando)
 
-### v0.2.0a — Emmett in-memory event store (DONE)
+O sistema que **roda hoje**: cadastro e gestão de membros, dispensação com aprovação, rastreabilidade de lote, trilha de auditoria imutável, cotas por prescrição, criptografia por membro (LGPD), MCP server inline. **154/154 testes verdes. Live em cannabr.org.**
 
-| Capability | Valor | Done when |
+| Capability | Valor | Estado |
 |---|---|---|
-| `@canna/domain` TS puro | Feedback rápido | `pnpm verify` em < 5s; 50 vitest GIVEN/WHEN/THEN |
-| Membership decider | Estado de membro auditável | 8 eventos + 16 scenarios (success + rejection + transitions) |
-| Inventory decider | Estado de lote auditável | 7 eventos + 14 scenarios |
-| Dispensation use case | Core regulatório atômico | Cross-aggregate; 3-event single append + rejection events |
-| `@canna/event-store` Emmett in-memory | ES kernel validado | 8 specs incluindo parallel-writers optimistic concurrency |
-| `@canna/app-services` orchestration | Stream load → decide → append | 6 e2e specs incluindo concurrent same-lot dispensation |
+| Cadastro e gestão de membros | Associação opera membros no domínio | Membro Cadastrado → Suspenso → Reintegrado + listas escopadas por tenant |
+| Dispensação com aprovação RT | Operação regulatória auditada | Dispensação registrada + PendingAction aprovada pela RT antes de commit |
+| Rastreabilidade de lote | Cadeia de custódia auditável | Lote → Dispensação → Membro; relatório de rastreabilidade por lote |
+| Trilha de auditoria imutável | LGPD art. 37 + compliance | Append-only `audit_log`; UPDATE/DELETE bloqueados em produção |
+| Cotas por prescrição | Controle de dispensação seguro | Cota mensal derivada da prescrição; dispensação barra se cota excedida |
+| Criptografia por membro (LGPD) | Art. 11 — dado sensível protegido | DEK aleatória por membro criptografada com KEK da instância; rotação documentada |
+| MCP server inline | Agente acessa domain via tools | `apps/mcp` rodando junto ao `apps/api`; tools Nível 1–3 operacionais |
+| 154/154 testes verdes | Fundação verificada | Suite completa passa em CI; zero regressão em domínio + infra |
 
-### v0.2.0b — Emmett Postgres adapter (DONE)
-
-| Capability | Valor | Done when |
-|---|---|---|
-| `createPostgresEventStore()` | Production-grade backend | Mesma `CannaEventStore` interface; Pongo+pg pool |
-| testcontainers-postgres suite | Spike gate em PG real | 6 specs PG (append/read/aggregate/Date-revival/stale-version/parallel-writers) |
-| **ADR-001 spike gate PASSED** | Emmett oficial | Parallel writers + stale version + concurrent dispensation TODOS verdes em PG real |
-
-### v0.2.1 — Compliance Spine + MCP-First Surface (now → ago/2026)
-
-Objetivo: provar core loop em **uma** associação **através do agente**. Sem admin Next.js. Sem cultivo. Sem multi-tenant. Open WebUI + MCP server + MCP Apps básico fechando a entrega.
-
-| Capability | Valor | Done when |
-|---|---|---|
-| `apps/api` Fastify endpoints finos | Commands via HTTP (chamados por MCP) | POST /commands/register-member, /validate-prescription, /release-lot, /record-dispensation |
-| `@canna/read-models` Drizzle projections | Queries sem hit no event store | member-list, dispensation-history, inventory-summary, member-quota, inventory-lot |
-| Append-only audit log | Trilha imutável | PostgreSQL RULE bloqueia UPDATE/DELETE em `audit_log` |
-| `@canna/crypto` envelope encryption | LGPD Art. 11 | Per-member random DEK encrypted with Site KEK; rotação trimestral |
-| `@canna/sngpc` (mock) | XML schema pronto, submissão mockada | XSD válido; happy path + retry mock |
-| Login/TOTP/RBAC mínimo | Auth funcional | JWT + speakeasy; roles DISPENSADOR + RT + DPO; OAuth scopes mapped to canna roles |
-| **`apps/mcp` MCP server TypeScript** | Agente acessa domain | `@modelcontextprotocol/sdk` + `@modelcontextprotocol/ext-apps/server`; servido via stdio + SSE |
-| **MCP Tools Nível 1 (read)** | Federação/auditor consulta | `get_member`, `get_member_quota`, `list_available_lots`, `list_pending_compliance_items`, `generate_traceability_report`, `explain_compliance_gap` |
-| **MCP Tools Nível 2 (draft)** | Agente prepara, humano confirma | `draft_dispensation`, `draft_kpi_report`, `draft_inventory_adjustment` |
-| **MCP Tools Nível 3 (write w/ approval)** | Agente solicita, humano aprova | `request_record_dispensation`, `request_release_lot`, `request_submit_report`; cria PendingAction; approver registrado no evento |
-| **MCP Resources** | Read-only context | `canna://reports/kpi/current`, `canna://inventory/available-lots`, `canna://members/{id}/quota-summary`, `canna://dispensations/{id}/trace`, `canna://regulatory-assumptions` |
-| **MCP Prompts** | Workflows guiados | `prepare_monthly_board_report`, `investigate_inventory_discrepancy`, `review_sngpc_failures` |
-| **`packages/ui-apps/` MCP Apps básicos** | Telas operacionais dentro do chat | `MemberQuotaCardApp` (read-only), `TraceabilityTimelineApp` (read-only), `DispensationFormApp` (form → request Tool Nível 3 → PendingAction); ext-apps spec compliant |
-| **`apps/openapi-bridge` (mcpo)** | Hosts OpenAPI-only consomem | `mcpo` wrapper expõe MCP tools como OpenAPI; documentado mas opcional (Open WebUI v0.9.6+ fala MCP nativo) |
-| **Open WebUI sidecar OBRIGATÓRIO** | Primary product surface | docker-compose com `ghcr.io/open-webui/open-webui:v0.9.6` + Postgres backend; MCP server registrado via config file; OAuth 2.1 com scopes mapped; **Workspace Tools disabled** |
-| Pending Actions tool | Two-step approval via chat | Tool `list_pending_actions`/`approve_pending_action`/`reject_pending_action`; renderizado por `PendingActionApprovalApp` |
-| `@canna/sngpc` (real, async) | Submissão real ANVISA pós-aprovação | BullMQ job consumindo DispensationRecorded → gera XML → submete; falha não invalida dispensação |
-| Trace Report PDF | Evidência via tool | MCP tool `generate_traceability_report` retorna PDF render + link armazenado |
-| Export CSV/JSON LGPD Art. 18 V | Portabilidade | MCP tool `export_member_data` retorna bundle assinado |
-
-**Done when (release v0.2.1):** Associação piloto registra dispensação real via **Open WebUI chat**: dispensador pergunta ao agente, agente abre `DispensationFormApp`, dispensador confirma, sistema emite 3 eventos atômicos, RT aprova PendingAction no chat (ou via approval Tool), audit log registra approver. Sem clique em admin web tradicional.
+**Done (release v0.1.0):** sistema usável em produção. Operador provisiona associação via MCP Operacional; associação gerencia membros, registra dispensações com aprovação RT, consulta rastreabilidade e histórico de auditoria. Live em cannabr.org.
 
 ---
 
-## v0.3 — Pilot Expansion + LGPD Hardening (set/2026 → dez/2026)
+## v0.2 — Multi-tenant + Onboarding Self-serve
 
-Objetivo: 3–5 associações em produção piloto. Endurece spine + crypto + auditor read-only.
+Objetivo: **múltiplas associações isoladas** numa instância + **onboarding self-serve** (associação cria conta sem intervenção do operador). Aqui entram login multi-tenant (Zitadel Cloud · OIDC/PKCE), isolamento de streams por tenant e o fluxo completo de primeiro acesso via MCP App. Detalhamento (EventStorming + MCP Operacional + UseCaseMatrix + arquitetura): [v0.2 detalhada](/roadmap/v0-1-0/).
+
+| Capability | Valor | Done when |
+|---|---|---|
+| MCP Operacional interno (provisionamento) | Operador libera tenant sem formulário | `provision_association` + `seed_admin_user` (cred. temp · `must_change_credentials`); tenant isolado + namespace de streams |
+| Onboarding de primeiro acesso | Associação define seu próprio acesso real | MCP App `onboarding-credential-setup`: troca e-mail+senha, revoga credencial temporária |
+| Login multi-tenant (Zitadel Cloud · OIDC/PKCE · região EU) | Auth gerenciada, contexto isolado por tenant | Admin entra com sessão escopada ao tenant; sem auth self-built |
+| Isolamento por tenant | Dado de uma associação invisível para outra | Streams + read-models namespaced; teste cross-tenant nega acesso |
+| Dashboard básico do tenant | Visão operacional mínima | Read-model escopado ao tenant via SurrealDB LIVE SELECT (síncrono, sem bus assíncrono) |
+| Event store SurrealDB (gerenciado) | Trilha append-only por stream na infra viva | Adapter SurrealDB (`es_stream`/`es_event` + `ExpectedVersionConflictError`) atrás do port `CannaEventStore`, ns=canna na instância compartilhada |
+
+**Done when (release v0.2):** duas associações distintas fazem onboarding na mesma instância, cada uma loga no seu tenant, opera membros e vê apenas os seus dados. Nenhum vazamento entre tenants. Documentado para self-host e gerenciado.
+
+---
+
+## v0.3 — Pilot Hardening (RBAC / TOTP / consent / crypto-deletion / CSV)
+
+Objetivo: 3–5 associações em produção piloto. Endurece RBAC, TOTP, consentimento versionado, crypto-deletion e importação CSV.
 
 | Capability | Valor | Done when |
 |---|---|---|
@@ -114,7 +102,7 @@ Objetivo: SNGPC + SNCR real. Depende de schema/documentação Anvisa estável (S
 | `@canna/sngpc` (prod) | Submissão real Anvisa | XML validado contra XSD oficial; ambiente homologação Anvisa testado |
 | `@canna/sncr` adapter | Prescrição eletrônica oficial | API Anvisa integrada quando disponível; fallback registro manual |
 | Compliance Adapter Layer | Plugável | Interface comum; mocks e prod separados; schema versioning per release |
-| Retry/dead-letter queue | Submissão confiável | BullMQ retry exponencial; DLQ com alerta via MCP `list_sngpc_failures` |
+| Retry/dead-letter queue | Submissão confiável | Retry exponencial + DLQ sobre o bus NATS JetStream; alerta via MCP `list_sngpc_failures` |
 | Protocol log | Evidência imutável | Cada submissão Anvisa gera log com payload, response, timestamp |
 | **MCP Apps regulatórios** | Operação Anvisa via chat | `SngpcPendingApp`, `SncrSyncApp`, `ComplianceGapApp` |
 | REST API pública v1 | Integrações tradicionais | `/v1/`; OpenAPI publicado; API keys + IP allowlist por tenant |
@@ -131,9 +119,8 @@ Objetivo: produto completo. Cultivo, processing, lab, financeiro full. Federaç�
 | Processing | Transformação rastreável | ProcessingRun: input lots → output product lot. Massa/perdas registradas. |
 | Lab Sample + COA | Qualidade auditável | LabSample com COA; resultados vinculados ao lote |
 | CPC 29 / IAS 41 | Contabilidade ativo biológico | Fair value de planta por estágio; integração financeiro |
-| Multi-tenant | Hosting SaaS | Schema isolation + RLS; 5+ tenants em staging sem cross-leak |
-| Self-serve onboarding | Aquisição escalável | Associação cria conta + configura em < 30min sem intervenção |
-| Billing | Receita real | Stripe + NF-e via emissor externo |
+| Multi-tenant em escala | Hosting SaaS robusto | Isolamento de streams + RLS endurecidos; 50+ tenants em staging sem cross-leak (multi-tenant funcional desde v0.2; aqui = escala e hardening) |
+| Billing | Receita recorrente gerenciada | Stripe + NF-e via emissor externo; planos por tenant configuráveis via MCP Operacional |
 | Kamal deploy | Deploy sem downtime | `kamal deploy` < 5min single-tenant; multi-tenant orquestrado |
 | **Agent marketplace / federation** | Federação/contador/auditor conectam agentes próprios | Per-tenant OAuth scopes; auditor read-only event log; contador read-only financeiro; jurídico read-only dossier |
 | **MCP Apps avançados** | Operação full ERP via chat | `CultivationOverviewApp`, `LabResultsApp`, `FinanceDashboardApp`, `BatchTraceabilityApp` |

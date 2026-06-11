@@ -11,6 +11,8 @@ import { def as inventoryLotPicker } from "./widgets/admin/inventory-lot-picker.
 import { def as memberQuotaCard } from "./widgets/admin/member-quota-card.js";
 import { def as dispensationForm } from "./widgets/admin/dispensation-form.js";
 import { def as traceabilityTimeline } from "./widgets/admin/traceability-timeline.js";
+import { def as onboardingCredentialSetup } from "./widgets/admin/onboarding-credential-setup.js";
+import { def as memberRegistration } from "./widgets/admin/member-registration.js";
 // <mcp-apps:imports> — `library new` inserts new app imports above this line
 
 export const WIDGETS: WidgetDef[] = [
@@ -24,6 +26,10 @@ export const WIDGETS: WidgetDef[] = [
   memberQuotaCard,
   dispensationForm,
   traceabilityTimeline,
+  // onboarding
+  onboardingCredentialSetup,
+  // membership
+  memberRegistration,
   // <mcp-apps:widgets> — `library new` inserts new app entries above this line
 ];
 

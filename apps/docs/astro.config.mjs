@@ -2,6 +2,7 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import tailwindcss from '@tailwindcss/vite';
 import starlightBlog from 'starlight-blog';
+import mermaid from 'astro-mermaid';
 
 export default defineConfig({
   site: 'https://canna-br.fonsecagabriel.com.br',
@@ -13,6 +14,13 @@ export default defineConfig({
     plugins: [tailwindcss()],
   },
   integrations: [
+    // astro-mermaid renders ```mermaid fences client-side (no headless browser
+    // at build). MUST come BEFORE starlight. autoTheme follows Starlight's
+    // <html data-theme> → mermaid 'dark' theme on dark, 'default' on light.
+    mermaid({
+      theme: 'dark',
+      autoTheme: true,
+    }),
     starlight({
       plugins: [
         starlightBlog({
@@ -158,7 +166,13 @@ export default defineConfig({
             { label: 'Setor Público', link: '/business/setor-publico/' },
           ],
         },
-        { label: 'Roadmap', link: '/roadmap/' },
+        {
+          label: 'Roadmap',
+          items: [
+            { label: 'Visão Geral', translations: { en: 'Overview', es: 'Visión General' }, link: '/roadmap/' },
+            { label: 'v0.1.0 — Fundação Usável', translations: { en: 'v0.1.0 — Usable Foundation', es: 'v0.1.0 — Fundación Usable' }, link: '/roadmap/v0-1-0/' },
+          ],
+        },
         {
           label: 'Premissas Regulatórias',
           translations: { en: 'Regulatory Premises', es: 'Premisas Regulatorias' },
@@ -170,6 +184,9 @@ export default defineConfig({
           items: [
             { label: 'ADR-001 — Domain Kernel + Emmett', link: '/adr/0001-domain-kernel-emmett/' },
             { label: 'ADR-002 — MCP-First Surface', link: '/adr/0002-mcp-first-surface/' },
+            { label: 'ADR-003 — Event Store SurrealDB', link: '/adr/0003-stack-pivot-nats-surreal-dbos/' },
+            { label: 'ADR-004 — Simulação em VPS', link: '/adr/0004-simulation-vps/' },
+            { label: 'ADR-005 — Vídeo + Perguntas Públicas', link: '/adr/0005-video-candidatura-perguntas-publicas/' },
           ],
         },
         {
@@ -205,7 +222,14 @@ export default defineConfig({
             },
           ],
         },
-        { label: 'Releases', autogenerate: { directory: 'releases' } },
+        {
+          label: 'Releases',
+          items: [
+            { label: 'Apps v0.1.0', link: '/releases/apps-v0-1-0/' },
+            { label: 'v0.2.1 — Compliance Spine', link: '/releases/v0-2-1/' },
+            { label: 'v0.1.0 — Coordenação + Custo', link: '/releases/v0-1-0-coordenacao-metricas/' },
+          ],
+        },
       ],
     }),
   ],
