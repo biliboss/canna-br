@@ -1,11 +1,29 @@
+import { readFileSync } from "node:fs";
+import { createRequire } from "node:module";
+import { dirname, resolve } from "node:path";
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import {
   ListToolsRequestSchema,
   CallToolRequestSchema,
+  ListResourcesRequestSchema,
+  ReadResourceRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import type { CannaMcpDeps, ToolContext, ToolDefinition } from "./types.js";
 import { allTools } from "./tools/index.js";
+import { allManifests, manifestByUri } from "@canna/ui-apps";
 import { domainError, isDomainError } from "@canna/shared";
+
+const UI_APP_MIME = "text/html";
+
+// Root of the @canna/ui-apps package (parent of its src/index.ts entrypoint),
+// resolved at runtime so the built single-file widget bundles in dist/ load
+// regardless of cwd. htmlBundlePath in each manifest is relative to this root.
+const uiAppsRoot = dirname(
+  dirname(createRequire(import.meta.url).resolve("@canna/ui-apps")),
+);
+
+const readBundleHtml = (htmlBundlePath: string): string =>
+  readFileSync(resolve(uiAppsRoot, htmlBundlePath), "utf8");
 
 interface CreateServerResult {
   readonly server: Server;
@@ -31,7 +49,7 @@ const toToolListItem = (t: ToolDefinition<Record<string, unknown>>) => {
 export const createCannaMcpServer = (deps: CannaMcpDeps): CreateServerResult => {
   const server = new Server(
     { name: "canna-mcp", version: "0.1.0" },
-    { capabilities: { tools: {} } },
+    { capabilities: { tools: {}, resources: {} } },
   );
 
   const tools = new Map<string, ToolDefinition<Record<string, unknown>>>();
@@ -40,6 +58,34 @@ export const createCannaMcpServer = (deps: CannaMcpDeps): CreateServerResult => 
   server.setRequestHandler(ListToolsRequestSchema, async () => ({
     tools: allTools.map(toToolListItem),
   }));
+
+  server.setRequestHandler(ListResourcesRequestSchema, async () => ({
+    resources: allManifests.map((m) => ({
+      uri: m.resourceUri,
+      name: m.title,
+      description: m.description,
+      mimeType: UI_APP_MIME,
+    })),
+  }));
+
+  server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
+    const uri = request.params.uri;
+    const manifest = manifestByUri(uri);
+    if (manifest === undefined) {
+      throw domainError("RESOURCE_NOT_FOUND", "Unknown ui:// resource", {
+        uri,
+      });
+    }
+    return {
+      contents: [
+        {
+          uri,
+          mimeType: UI_APP_MIME,
+          text: readBundleHtml(manifest.htmlBundlePath),
+        },
+      ],
+    };
+  });
 
   server.setRequestHandler(CallToolRequestSchema, async (request, extra) => {
     const tool = tools.get(request.params.name);

@@ -19,6 +19,7 @@
     "@canna/domain": "workspace:*",
     "@canna/event-store": "workspace:*",
     "@canna/shared": "workspace:*",
+    "@canna/ui-apps": "workspace:*",
     "@modelcontextprotocol/sdk": "^1.0.4"
   },
   "devDependencies": {

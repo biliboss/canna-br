@@ -38,6 +38,14 @@ export const decide = (
     );
   }
 
+  if (cmd.approvedBy !== null && cmd.approvedBy === cmd.dispensedBy) {
+    return domainError(
+      "APPROVAL_SEGREGATION_VIOLATION",
+      "Approver cannot be the same person as Dispensador",
+      { userId: cmd.dispensedBy },
+    );
+  }
+
   if ((cmd.quantityG as number) <= 0) {
     return domainError(
       "QUANTITY_NON_POSITIVE",

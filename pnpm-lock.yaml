@@ -103,6 +103,9 @@ importers:
       '@canna/shared':
         specifier: workspace:*
         version: link:../../packages/shared
+      '@canna/ui-apps':
+        specifier: workspace:*
+        version: link:../../packages/ui-apps
       '@modelcontextprotocol/sdk':
         specifier: ^1.0.4
         version: 1.29.0(zod@4.4.3)

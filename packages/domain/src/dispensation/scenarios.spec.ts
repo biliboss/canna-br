@@ -319,6 +319,23 @@ describe("Dispensation / role + segregation", () => {
     expectError(r, "SEGREGATION_VIOLATION");
   });
 
+  it("approver == dispenser → APPROVAL_SEGREGATION_VIOLATION", () => {
+    const r = decide(
+      { ...baseRecord(), approvedBy: DISPENSER },
+      ctx(),
+    );
+    expectError(r, "APPROVAL_SEGREGATION_VIOLATION");
+  });
+
+  it("approver != dispenser → passes (control)", () => {
+    const r = decide(
+      { ...baseRecord(), approvedBy: APPROVER },
+      ctx(),
+    );
+    if (isDomainError(r)) throw new Error(`unexpected: ${r.code}`);
+    expect(r.length).toBe(3);
+  });
+
   it("non-positive quantity → QUANTITY_NON_POSITIVE", () => {
     const r = decide({ ...baseRecord(), quantityG: grams(0) }, ctx());
     expectError(r, "QUANTITY_NON_POSITIVE");

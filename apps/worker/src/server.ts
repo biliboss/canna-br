@@ -16,6 +16,7 @@ import { Queue, Worker } from "bullmq";
 import { createPostgresEventStore } from "@canna/event-store";
 import { submitMockSngpc, type MockSngpcAdapter } from "@canna/sngpc";
 import { createCannaWorker } from "./worker.js";
+import { DEFAULT_JOB_OPTIONS } from "./queue-config.js";
 import type {
   CannaQueues,
   SngpcSubmissionJob,
@@ -63,9 +64,22 @@ const main = async (): Promise<void> => {
     submitMockSngpc(xml, { failProbability: failProb, latencyMs, ...(opts ?? {}) });
 
   // Real BullMQ queues backed by Redis (Queue + Worker pair per queue).
-  const sngpcQueue = new Queue<SngpcSubmissionJob>("sngpc-submission", { connection });
-  const pdfQueue = new Queue<DispensationPdfJob>("dispensation-pdf", { connection });
-  const emailQueue = new Queue<MemberEmailJob>("member-email", { connection });
+  // `defaultJobOptions` (DEFAULT_JOB_OPTIONS) gives every job 3 attempts with
+  // exponential backoff (5s base) so a transient failure retries instead of
+  // permanently dead-lettering a regulatory SNGPC submission. Applied
+  // consistently to all three queues for durability.
+  const sngpcQueue = new Queue<SngpcSubmissionJob>("sngpc-submission", {
+    connection,
+    defaultJobOptions: DEFAULT_JOB_OPTIONS,
+  });
+  const pdfQueue = new Queue<DispensationPdfJob>("dispensation-pdf", {
+    connection,
+    defaultJobOptions: DEFAULT_JOB_OPTIONS,
+  });
+  const emailQueue = new Queue<MemberEmailJob>("member-email", {
+    connection,
+    defaultJobOptions: DEFAULT_JOB_OPTIONS,
+  });
 
   // BullMQ Queue → QueueLike adapter.
   //

@@ -2,6 +2,8 @@ import { describe, it, expect } from "vitest";
 import { createInMemoryEventStore } from "@canna/event-store";
 import { Members, Lots } from "@canna/app-services";
 import { isOk, quantityGrams, type ULID } from "@canna/shared";
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { createCannaMcpServer } from "./server.js";
 import { allTools } from "./tools/index.js";
 import type { ToolContext } from "./types.js";
@@ -213,5 +215,64 @@ describe("@canna/mcp / Nível 3 PendingAction stub", () => {
     };
     expect(data.pendingActionId).toMatch(/^pending:/);
     expect(data.status).toBe("PENDING_APPROVAL");
+  });
+});
+
+describe("@canna/mcp / MCP App resources (blocker #1)", () => {
+  const EXPECTED_URIS = [
+    "ui://member-quota-card/app.html",
+    "ui://traceability-timeline/app.html",
+    "ui://dispensation-form/app.html",
+    "ui://member-lifecycle-board/app.html",
+  ];
+
+  const connectClient = async () => {
+    const store = await setupStore();
+    const { server } = createCannaMcpServer({
+      store,
+      async resolveContext() {
+        return dispenserCtx(store);
+      },
+    });
+    const [clientTransport, serverTransport] =
+      InMemoryTransport.createLinkedPair();
+    const client = new Client({ name: "test-client", version: "0.0.0" });
+    await Promise.all([
+      server.connect(serverTransport),
+      client.connect(clientTransport),
+    ]);
+    return { client };
+  };
+
+  it("advertises the resources capability", async () => {
+    const { client } = await connectClient();
+    const caps = client.getServerCapabilities();
+    expect(caps?.resources).toBeDefined();
+  });
+
+  it("ListResources returns one resource per widget bundle (4 ui:// URIs)", async () => {
+    const { client } = await connectClient();
+    const { resources } = await client.listResources();
+    const uris = resources.map((r) => r.uri).sort();
+    expect(uris).toEqual([...EXPECTED_URIS].sort());
+    for (const r of resources) {
+      expect(r.mimeType).toBe("text/html");
+    }
+  });
+
+  it("ReadResource on a known URI returns non-empty HTML", async () => {
+    const { client } = await connectClient();
+    for (const uri of EXPECTED_URIS) {
+      const result = await client.readResource({ uri });
+      const first = result.contents[0];
+      expect(first).toBeDefined();
+      expect(first?.uri).toBe(uri);
+      expect(first?.mimeType).toBe("text/html");
+      if (first === undefined || !("text" in first)) {
+        throw new Error("expected text content");
+      }
+      expect(typeof first.text).toBe("string");
+      expect((first.text as string).length).toBeGreaterThan(0);
+    }
   });
 });
