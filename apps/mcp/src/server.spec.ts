@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { createInMemoryEventStore } from "@canna/event-store";
-import { Members, Lots } from "@canna/app-services";
+import { Members, Lots, Dispensations } from "@canna/app-services";
 import { isOk, quantityGrams, type ULID } from "@canna/shared";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
@@ -132,6 +132,46 @@ describe("@canna/mcp / get_member_quota tool", () => {
     expect(data.prescription?.monthlyQuotaG).toBe(30);
   });
 
+  it("surfaces real consumedG + remainingG after a dispensation (not 0)", async () => {
+    const store = await setupStore();
+    const ctx = dispenserCtx(store);
+
+    // Record a real dispensation so MemberQuotaConsumed lands on the
+    // association stream (quota cap is 30g; dispense 7g).
+    const recorded = await Dispensations.recordDispensation(
+      { store, responsavelTecnicoId: null, dispenserRole: "DISPENSADOR" },
+      {
+        type: "RecordDispensation",
+        dispensationId: "01HM0DISP0000000000000001" as ULID,
+        associationId: ASSOC,
+        memberId: MEMBER,
+        lotId: LOT,
+        quantityG: grams(7),
+        dispensedBy: DISPENSER,
+        approvedBy: null,
+        now: NOW,
+      },
+    );
+    if (!isOk(recorded)) {
+      throw new Error(`dispensation failed: ${JSON.stringify(recorded)}`);
+    }
+
+    const tool = allTools.find((t) => t.name === "get_member_quota");
+    if (tool === undefined) throw new Error("tool not found");
+    const result = await tool.handler({ memberId: MEMBER }, ctx);
+    expect(result.isError).not.toBe(true);
+    const data = JSON.parse(result.content[0]!.text) as {
+      consumedG: number;
+      remainingG: number;
+      prescription: { monthlyQuotaG: number } | null;
+    };
+    // The widget computes pct = consumed / cap — proving the bar is no
+    // longer stuck at 0%.
+    expect(data.consumedG).toBe(7);
+    expect(data.remainingG).toBe(23); // 30 cap - 7 consumed
+    expect(data.prescription?.monthlyQuotaG).toBe(30);
+  });
+
   it("returns MEMBER_NOT_FOUND for unknown member", async () => {
     const store = await setupStore();
     const ctx = dispenserCtx(store);
@@ -219,11 +259,14 @@ describe("@canna/mcp / Nível 3 PendingAction stub", () => {
 });
 
 describe("@canna/mcp / MCP App resources (blocker #1)", () => {
+  // member-lifecycle-board is withheld from the registry (Option B, blocker
+  // #6): no backing get_member_lifecycle tool / cross-member read-model
+  // exists, so the server (driven by @canna/ui-apps allManifests) serves only
+  // the 3 launchable widget bundles. Re-add its URI here once the board ships.
   const EXPECTED_URIS = [
     "ui://member-quota-card/app.html",
     "ui://traceability-timeline/app.html",
     "ui://dispensation-form/app.html",
-    "ui://member-lifecycle-board/app.html",
   ];
 
   const connectClient = async () => {
@@ -250,7 +293,7 @@ describe("@canna/mcp / MCP App resources (blocker #1)", () => {
     expect(caps?.resources).toBeDefined();
   });
 
-  it("ListResources returns one resource per widget bundle (4 ui:// URIs)", async () => {
+  it("ListResources returns one resource per launchable widget bundle (3 ui:// URIs)", async () => {
     const { client } = await connectClient();
     const { resources } = await client.listResources();
     const uris = resources.map((r) => r.uri).sort();

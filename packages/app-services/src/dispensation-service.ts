@@ -203,5 +203,24 @@ export const loadAssociationDispensations = async (
   return { events, currentStreamVersion };
 };
 
+/**
+ * Read-side query: grams consumed by a member in a given month, folded from the
+ * association `MemberQuotaConsumed` stream. This is the same accumulator the
+ * `member_quota` read-model projects, exposed for tools/UI that need the live
+ * consumed/remaining figures without re-running a full dispensation context.
+ *
+ * Returns `0g` when the member has no consumption recorded for the month.
+ */
+export const loadMemberQuotaConsumed = async (
+  store: CannaEventStore,
+  associationId: string,
+  memberId: string,
+  month: string,
+): Promise<QuantityGrams> => {
+  const { events } = await store.readStream(associationStream(associationId));
+  const projection = projectAssociationStream(events);
+  return projection.quotaConsumedByMemberMonth.get(`${memberId}|${month}`) ?? ZERO;
+};
+
 // Suppress unused warning if someone imports DomainError type
 export type _Reserved = DomainError;

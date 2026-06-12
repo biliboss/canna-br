@@ -1,5 +1,5 @@
-import { Members } from "@canna/app-services";
-import type { ULID } from "@canna/shared";
+import { Members, Dispensations } from "@canna/app-services";
+import { gramsToNumber, type ULID } from "@canna/shared";
 import type { ToolDefinition } from "../types.js";
 
 interface Args {
@@ -52,6 +52,23 @@ export const getMemberQuota: ToolDefinition<Args> = {
       args.month ??
       `${String(ctx.now.getUTCFullYear())}-${String(ctx.now.getUTCMonth() + 1).padStart(2, "0")}`;
 
+    // Live consumed grams folded from the association MemberQuotaConsumed
+    // stream (same accumulator as the `member_quota` read-model). Wires the
+    // MemberQuotaCard widget so the progress bar reflects real consumption
+    // instead of always rendering 0%.
+    const consumed = await Dispensations.loadMemberQuotaConsumed(
+      ctx.store,
+      state.associationId,
+      state.memberId,
+      month,
+    );
+    const consumedG = gramsToNumber(consumed);
+    const monthlyQuotaG = state.prescription?.monthlyQuotaG ?? null;
+    const remainingG =
+      monthlyQuotaG === null
+        ? null
+        : Math.max(0, gramsToNumber(monthlyQuotaG) - consumedG);
+
     return {
       content: [
         {
@@ -71,9 +88,8 @@ export const getMemberQuota: ToolDefinition<Args> = {
                     monthlyQuotaG: state.prescription.monthlyQuotaG,
                   },
             month,
-            // NOTE: actual consumed/remaining computed from association
-            // stream — surfaced by the MemberQuotaCardApp via a follow-up
-            // tool call. This tool returns the canonical member state only.
+            consumedG,
+            remainingG,
           }),
         },
       ],

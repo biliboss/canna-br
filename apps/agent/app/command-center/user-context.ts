@@ -335,7 +335,14 @@ export function useUserContext(): UserContext {
     [stats],
   );
 
-  const onboarding = useMemo(() => true, []);
+  // Onboarding is "in progress" until every default stage's predicate flips
+  // true. We derive the live stage index from `stats` over the canonical
+  // onboarding model and reduce it to a boolean via the pure `isOnboardingActive`
+  // helper (single source of the -1 == complete sentinel, shared with the coach).
+  const onboarding = useMemo(
+    () => isOnboardingActive(onboardingIndexFromStats(stats)),
+    [stats],
+  );
 
   return { stats, log, predict, currentStageIndex, onboarding, ready };
 }
@@ -356,4 +363,48 @@ export function onboardingIndex(
     if (!stages[i]!.doneWhen(stats)) return i;
   }
   return -1;
+}
+
+/**
+ * The canonical onboarding model, expressed purely over `UserStats` so the hook
+ * can compute "is the coach still teaching?" WITHOUT a config in scope. Each
+ * predicate mirrors a stage's `doneWhen` in command-center.config.ts:
+ *   0. run something            → launches >= 1
+ *   1. discover the palette      → openedPalette
+ *   2. discover notifications    → openedNotifications
+ *   3. spread your wings         → distinctApps >= 3
+ *
+ * Keep this in lock-step with the config's onboarding stages.
+ */
+export const ONBOARDING_PREDICATES: ReadonlyArray<(s: UserStats) => boolean> = [
+  (s) => s.launches >= 1,
+  (s) => s.openedPalette,
+  (s) => s.openedNotifications,
+  (s) => s.distinctApps >= 3,
+];
+
+/** Total number of onboarding stages in the canonical model. */
+export const ONBOARDING_TOTAL = ONBOARDING_PREDICATES.length;
+
+/**
+ * Pure: index of the first onboarding stage whose predicate is still false;
+ * -1 once every stage is satisfied. Same -1 == complete sentinel as
+ * `onboardingIndex`, but evaluated over the canonical stat-only model.
+ */
+export function onboardingIndexFromStats(stats: UserStats): number {
+  for (let i = 0; i < ONBOARDING_PREDICATES.length; i++) {
+    if (!ONBOARDING_PREDICATES[i]!(stats)) return i;
+  }
+  return -1;
+}
+
+/**
+ * Pure: is onboarding still in progress? True while stages remain (index in
+ * [0, total)); false once the user advanced past the last stage (index === -1,
+ * the completion sentinel). This is the single reduction of stage index → coach
+ * visibility, shared by the hook's `onboarding` flag and the OnboardingCoach
+ * (`if (stageIdx < 0) return null`).
+ */
+export function isOnboardingActive(stageIndex: number): boolean {
+  return stageIndex !== -1;
 }
