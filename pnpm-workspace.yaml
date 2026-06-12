@@ -1,6 +1,16 @@
 packages:
   - "apps/*"
-  - "!apps/agent"  # needs assistant-ui workspace pkgs published; runs from boilerplate for now
+  - "!apps/agent"  # excluded from workspace; deps vendored under apps/agent/vendor/ (Option B). Run standalone: cd apps/agent && pnpm install --ignore-workspace
   - "packages/*"
   - "tooling/*"
   - "ops/openwebui/scripts"
+
+# @event-driven-io/emmett-postgresql@0.42.3 imports @event-driven-io/dumbo but
+# omits it from its manifest (declares only emmett + pongo as peers), so pnpm
+# never links dumbo where emmett-postgresql can resolve it → every event-store
+# import crashes "Cannot find package '@event-driven-io/dumbo'". Patch the
+# manifest so dumbo is a real dependency. Remove if upstream fixes 0.42.x.
+packageExtensions:
+  "@event-driven-io/emmett-postgresql":
+    dependencies:
+      "@event-driven-io/dumbo": "0.12.7"

@@ -1,0 +1,28 @@
+"use client";
+import { useAuiState } from "@assistant-ui/store";
+//#region src/primitives/messagePart/useMessagePartImage.ts
+/**
+* @deprecated Use {@link useAuiState} to select and narrow `s.part`.
+* Return `null` for optional rendering, or throw inside the selector to
+* preserve the old hook's strict behavior.
+*
+* @example
+* ```tsx
+* const image = useAuiState((s) => {
+*   if (s.part.type !== "image") return null;
+*   return s.part;
+* });
+* ```
+*
+* See the {@link https://assistant-ui.com/docs/migrations/v0-12 migration guide}.
+*/
+const useMessagePartImage = () => {
+	return useAuiState((s) => {
+		if (s.part.type !== "image") throw new Error("MessagePartImage can only be used inside image message parts.");
+		return s.part;
+	});
+};
+//#endregion
+export { useMessagePartImage };
+
+//# sourceMappingURL=useMessagePartImage.js.map

@@ -7,6 +7,9 @@ out/
 
 # Build
 dist/
+# but DO commit vendored assistant-ui fork builds (Option B)
+!vendor/**/dist/
+!vendor/**/dist/**
 
 # TS
 *.tsbuildinfo

@@ -1,0 +1,11 @@
+import { SuggestionPrimitiveTitle } from "./suggestion/SuggestionTitle.js";
+import { SuggestionPrimitiveDescription } from "./suggestion/SuggestionDescription.js";
+import { SuggestionPrimitiveTrigger } from "./suggestion/SuggestionTrigger.js";
+
+//#region src/primitives/suggestion.d.ts
+declare namespace suggestion_d_exports {
+  export { SuggestionPrimitiveDescription as Description, SuggestionPrimitiveTitle as Title, SuggestionPrimitiveTrigger as Trigger };
+}
+//#endregion
+export { SuggestionPrimitiveDescription as Description, SuggestionPrimitiveTitle as Title, SuggestionPrimitiveTrigger as Trigger, suggestion_d_exports };
+//# sourceMappingURL=suggestion.d.ts.map

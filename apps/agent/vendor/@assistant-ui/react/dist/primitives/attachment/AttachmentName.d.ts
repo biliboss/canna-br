@@ -1,0 +1,10 @@
+import { FC } from "react";
+
+//#region src/primitives/attachment/AttachmentName.d.ts
+declare namespace AttachmentPrimitiveName {
+  type Props = Record<string, never>;
+}
+declare const AttachmentPrimitiveName: FC<AttachmentPrimitiveName.Props>;
+//#endregion
+export { AttachmentPrimitiveName };
+//# sourceMappingURL=AttachmentName.d.ts.map

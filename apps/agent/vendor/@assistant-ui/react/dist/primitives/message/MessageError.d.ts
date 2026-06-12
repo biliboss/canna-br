@@ -1,0 +1,7 @@
+import { FC, PropsWithChildren } from "react";
+
+//#region src/primitives/message/MessageError.d.ts
+declare const MessagePrimitiveError: FC<PropsWithChildren>;
+//#endregion
+export { MessagePrimitiveError };
+//# sourceMappingURL=MessageError.d.ts.map

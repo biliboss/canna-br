@@ -1,0 +1,7 @@
+import { AttachmentAdapter } from "@assistant-ui/core";
+
+//#region src/ui/utils/vercelAttachmentAdapter.d.ts
+declare const vercelAttachmentAdapter: AttachmentAdapter;
+//#endregion
+export { vercelAttachmentAdapter };
+//# sourceMappingURL=vercelAttachmentAdapter.d.ts.map

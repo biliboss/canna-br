@@ -1,0 +1,12 @@
+import { AttachmentPrimitiveRoot } from "./attachment/AttachmentRoot.js";
+import { AttachmentPrimitiveThumb } from "./attachment/AttachmentThumb.js";
+import { AttachmentPrimitiveName } from "./attachment/AttachmentName.js";
+import { AttachmentPrimitiveRemove } from "./attachment/AttachmentRemove.js";
+
+//#region src/primitives/attachment.d.ts
+declare namespace attachment_d_exports {
+  export { AttachmentPrimitiveName as Name, AttachmentPrimitiveRemove as Remove, AttachmentPrimitiveRoot as Root, AttachmentPrimitiveThumb as unstable_Thumb };
+}
+//#endregion
+export { AttachmentPrimitiveName as Name, AttachmentPrimitiveRemove as Remove, AttachmentPrimitiveRoot as Root, attachment_d_exports, AttachmentPrimitiveThumb as unstable_Thumb };
+//# sourceMappingURL=attachment.d.ts.map

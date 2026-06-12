@@ -1,0 +1,85 @@
+import { isJSONValue } from "../../utils/json/is-json.js";
+import { fromThreadMessageLike } from "../runtime-cores/external-store/ThreadMessageLike.js";
+//#region src/legacy-runtime/cloud/auiV0.ts
+function auiV0Encode(message) {
+	const status = message.status?.type === "running" ? {
+		type: "incomplete",
+		reason: "cancelled"
+	} : message.status;
+	return {
+		role: message.role,
+		content: message.content.map((part) => {
+			const type = part.type;
+			switch (type) {
+				case "text": return {
+					type: "text",
+					text: part.text
+				};
+				case "reasoning": return {
+					type: "reasoning",
+					text: part.text
+				};
+				case "source":
+					if (part.sourceType === "url") return {
+						type: "source",
+						sourceType: "url",
+						id: part.id,
+						url: part.url,
+						...part.title != null ? { title: part.title } : void 0,
+						...part.providerMetadata != null ? { providerMetadata: part.providerMetadata } : void 0
+					};
+					return {
+						type: "source",
+						sourceType: "document",
+						id: part.id,
+						title: part.title,
+						mediaType: part.mediaType,
+						...part.filename != null ? { filename: part.filename } : void 0,
+						...part.providerMetadata != null ? { providerMetadata: part.providerMetadata } : void 0
+					};
+				case "tool-call":
+					if (!isJSONValue(part.result)) console.warn(`tool-call result is not JSON! ${JSON.stringify(part)}`);
+					return {
+						type: "tool-call",
+						toolCallId: part.toolCallId,
+						toolName: part.toolName,
+						...JSON.stringify(part.args) === part.argsText ? { args: part.args } : { argsText: part.argsText },
+						...part.result ? { result: part.result } : void 0,
+						...part.isError ? { isError: true } : void 0
+					};
+				case "image": return {
+					type: "image",
+					image: part.image
+				};
+				case "file": return {
+					type: "file",
+					data: part.data,
+					mimeType: part.mimeType,
+					...part.filename ? { filename: part.filename } : void 0
+				};
+				default: throw new Error(`Message part type not supported by aui/v0: ${type}`);
+			}
+		}),
+		metadata: message.metadata,
+		...status ? { status } : void 0
+	};
+}
+function auiV0Decode(cloudMessage) {
+	const payload = cloudMessage.content;
+	const message = fromThreadMessageLike({
+		id: cloudMessage.id,
+		createdAt: cloudMessage.created_at,
+		...payload
+	}, cloudMessage.id, {
+		type: "complete",
+		reason: "unknown"
+	});
+	return {
+		parentId: cloudMessage.parent_id,
+		message
+	};
+}
+//#endregion
+export { auiV0Decode, auiV0Encode };
+
+//# sourceMappingURL=auiV0.js.map

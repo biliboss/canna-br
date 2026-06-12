@@ -1,0 +1,39 @@
+"use client";
+import { createStateHookForRuntime } from "../../context/react/utils/createStateHookForRuntime.js";
+import { useAui, useAuiState } from "@assistant-ui/store";
+//#region src/legacy-runtime/hooks/AttachmentContext.ts
+function useAttachmentRuntime(options) {
+	const aui = useAui();
+	const runtime = useAuiState(() => aui.attachment.source ? aui.attachment().__internal_getRuntime?.() ?? null : null);
+	if (!runtime && !options?.optional) throw new Error("AttachmentRuntime is not available");
+	return runtime;
+}
+function useThreadComposerAttachmentRuntime(options) {
+	const attachmentRuntime = useAttachmentRuntime(options);
+	if (!attachmentRuntime) return null;
+	if (attachmentRuntime.source !== "thread-composer") throw new Error("This component must be used within a thread's ComposerPrimitive.Attachments component.");
+	return attachmentRuntime;
+}
+function useEditComposerAttachmentRuntime(options) {
+	const attachmentRuntime = useAttachmentRuntime(options);
+	if (!attachmentRuntime) return null;
+	if (attachmentRuntime.source !== "edit-composer") throw new Error("This component must be used within a message's ComposerPrimitive.Attachments component.");
+	return attachmentRuntime;
+}
+function useMessageAttachmentRuntime(options) {
+	const attachmentRuntime = useAttachmentRuntime(options);
+	if (!attachmentRuntime) return null;
+	if (attachmentRuntime.source !== "message") throw new Error("This component must be used within a MessagePrimitive.Attachments component.");
+	return attachmentRuntime;
+}
+/**
+* @deprecated Use {@link useAuiState}: `useAuiState((s) => s.attachment)`. See the {@link https://assistant-ui.com/docs/migrations/v0-12 migration guide}.
+*/
+const useAttachment = createStateHookForRuntime(useAttachmentRuntime);
+const useThreadComposerAttachment = createStateHookForRuntime(useThreadComposerAttachmentRuntime);
+const useEditComposerAttachment = createStateHookForRuntime(useEditComposerAttachmentRuntime);
+const useMessageAttachment = createStateHookForRuntime(useMessageAttachmentRuntime);
+//#endregion
+export { useAttachment, useAttachmentRuntime, useEditComposerAttachment, useEditComposerAttachmentRuntime, useMessageAttachment, useMessageAttachmentRuntime, useThreadComposerAttachment, useThreadComposerAttachmentRuntime };
+
+//# sourceMappingURL=AttachmentContext.js.map

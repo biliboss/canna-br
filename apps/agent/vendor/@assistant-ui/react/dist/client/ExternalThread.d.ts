@@ -1,0 +1,32 @@
+import { ClientOutput } from "@assistant-ui/store";
+import { AppendMessage, ExternalThreadQueueAdapter, ThreadMessage } from "@assistant-ui/core";
+
+//#region src/client/ExternalThread.d.ts
+type ExternalThreadMessage = ThreadMessage & {
+  id: string;
+};
+type ExternalThreadProps = {
+  messages: readonly ExternalThreadMessage[];
+  isRunning?: boolean;
+  /**
+   * Whether sending new messages is currently disabled. When `true`, the
+   * thread composer's input remains usable but `send()` is a no-op and
+   * `composer.canSend` is `false`. Edit composers (saving message edits)
+   * intentionally ignore this flag.
+   */
+  isSendDisabled?: boolean;
+  /**
+   * Callback for new messages (non-queue runtimes).
+   * @note Unused when `queue` is provided — new messages are routed through `queue.enqueue` instead.
+   */
+  onNew?: (message: AppendMessage) => void;
+  onEdit?: (message: AppendMessage) => void;
+  onReload?: (parentId: string | null) => void;
+  onStartRun?: () => void;
+  onCancel?: () => void; /** Queue adapter for runtimes that support message queuing and steering. */
+  queue?: ExternalThreadQueueAdapter;
+};
+declare const ExternalThread: import("@assistant-ui/tap").Resource<ClientOutput<"thread">, [ExternalThreadProps]>;
+//#endregion
+export { ExternalThread, ExternalThreadMessage, ExternalThreadProps };
+//# sourceMappingURL=ExternalThread.d.ts.map

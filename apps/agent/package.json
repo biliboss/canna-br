@@ -12,9 +12,9 @@
   "dependencies": {
     "@ai-sdk/mcp": "^1.0.46",
     "@ai-sdk/openai": "^3.0.68",
-    "@assistant-ui/react": "link:../../../../.obsidian/99-development/mcp-app-base/packages/react",
-    "@assistant-ui/react-ai-sdk": "link:../../../../.obsidian/99-development/mcp-app-base/packages/react-ai-sdk",
-    "@assistant-ui/react-markdown": "link:../../../../.obsidian/99-development/mcp-app-base/packages/react-markdown",
+    "@assistant-ui/react": "file:./vendor/@assistant-ui/react",
+    "@assistant-ui/react-ai-sdk": "file:./vendor/@assistant-ui/react-ai-sdk",
+    "@assistant-ui/react-markdown": "file:./vendor/@assistant-ui/react-markdown",
     "@base-ui/react": "^1.5.0",
     "@hookform/resolvers": "^5.4.0",
     "@radix-ui/react-avatar": "^1.1.12",

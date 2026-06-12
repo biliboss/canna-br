@@ -1,0 +1,12 @@
+import { AssistantModalPrimitiveRoot } from "./assistantModal/AssistantModalRoot.js";
+import { AssistantModalPrimitiveTrigger } from "./assistantModal/AssistantModalTrigger.js";
+import { AssistantModalPrimitiveContent } from "./assistantModal/AssistantModalContent.js";
+import { AssistantModalPrimitiveAnchor } from "./assistantModal/AssistantModalAnchor.js";
+
+//#region src/primitives/assistantModal.d.ts
+declare namespace assistantModal_d_exports {
+  export { AssistantModalPrimitiveAnchor as Anchor, AssistantModalPrimitiveContent as Content, AssistantModalPrimitiveRoot as Root, AssistantModalPrimitiveTrigger as Trigger };
+}
+//#endregion
+export { AssistantModalPrimitiveAnchor as Anchor, AssistantModalPrimitiveContent as Content, AssistantModalPrimitiveRoot as Root, AssistantModalPrimitiveTrigger as Trigger, assistantModal_d_exports };
+//# sourceMappingURL=assistantModal.d.ts.map

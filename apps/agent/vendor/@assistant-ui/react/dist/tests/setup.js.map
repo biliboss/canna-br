@@ -1,0 +1,1 @@
+{"version":3,"file":"setup.js","names":[],"sources":["../../src/tests/setup.ts"],"sourcesContent":["// This file contains setup code for tests\nimport { vi } from \"vitest\";\n\n// Use Vitest's built-in to mock Date\nvi.setSystemTime(new Date(\"2023-01-01\"));\n"],"mappings":";;AAIA,GAAG,8BAAc,IAAI,KAAK,YAAY,CAAC"}
