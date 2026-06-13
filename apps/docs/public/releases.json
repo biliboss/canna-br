@@ -6,7 +6,7 @@
       "version": "v0.1.0",
       "status": "current",
       "date": "2026-06-11",
-      "headline": "Hardening em curso rumo a v0.1 funcional — 7 bloqueadores tratados (6 corrigidos + 1 retido por honestidade). Loop de chat ao vivo: widget renderiza INLINE no chat (Claude → tool → dado real 7g/23g); destravou 3 bugs reais. Resta o card popular os números (handoff assistant-ui em investigação)",
+      "headline": "v0.1 funcional ATINGIDO no caminho central — loop de chat validado ao vivo (chrome-devtools): pergunta no chat → agente chama tool do domínio → widget renderiza INLINE preenchido com dado real do Postgres (7g/30g, ACTIVE), zero erro de console. 7 bloqueadores + 5 bugs do loop ao vivo corrigidos. Deferidos: lifecycle-board vivo + OIDC real",
       "testCount": 216,
       "docsSlug": "/releases/v0-1-0-coordenacao-metricas/",
       "modules": [

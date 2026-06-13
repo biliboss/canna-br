@@ -21,7 +21,7 @@ title: Changelog
 
 ### QA
 - **Render de widget keyless — PASS.** Smoke chrome-devtools sem chave: `member-quota-card`, `traceability-timeline`, `dispensation-form` renderizam ao vivo, zero erro de console; `member-quota-card` mostra 7g/30g reais. Harness: `apps/mcp/scripts/qa-render-harness.ts`.
-- **Loop de chat completo — PARCIAL.** Ao vivo em chrome-devtools (apps/agent → apps/mcp HTTP, chave OpenRouter): mensagem → Claude chama `get_member_quota` → dado real Postgres (7g/23g) → **widget renderiza INLINE no chat**, zero erro de console. Destravou 3 bugs reais (transport stateless por-request, `_meta` slash-form, headers `x-canna-*`). **Resta:** card fica em "Loading" — handoff host→iframe do assistant-ui (instabilidade de args / `part.result`), em investigação.
+- **Loop de chat completo — PASS (end-to-end ao vivo).** chrome-devtools (apps/agent → apps/mcp HTTP, chave OpenRouter): mensagem → Claude chama `get_member_quota` → dado real Postgres → **widget renderiza INLINE preenchido** (7g/30g, ACTIVE), zero erro de console. Destravou 5 bugs reais: transport stateless por-request, `_meta` slash-form, headers `x-canna-*`, widgets liam `payload.type` em vez do `payload.method` do bridge JSON-RPC, e widgets não mandavam `notifications/initialized`. Todos corrigidos.
 - **Suíte: 216/216 verdes em 12 workspaces.**
 
 ## v0.1.0 — 2026-06-08
