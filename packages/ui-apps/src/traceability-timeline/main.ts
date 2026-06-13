@@ -50,10 +50,26 @@ const render = (data: TraceabilityPayload | null | undefined): void => {
 
 window.addEventListener("message", (e: MessageEvent) => {
   const payload = e.data as
-    | { type?: string; params?: { content?: ReadonlyArray<{ text?: string }> } }
+    | {
+        type?: string;
+        method?: string;
+        params?: {
+          structuredContent?: unknown;
+          content?: ReadonlyArray<{ text?: string }>;
+        };
+      }
     | null
     | undefined;
-  if (payload?.type !== "ui/notifications/tool-result") return;
+  if (!payload || typeof payload !== "object") return;
+  // assistant-ui host bridge keys the JSON-RPC envelope on `method`; preview
+  // harnesses may use `type`. Accept both.
+  const channel = payload.method ?? payload.type;
+  if (channel !== "ui/notifications/tool-result") return;
+  const structured = payload.params?.structuredContent;
+  if (structured && typeof structured === "object") {
+    render(structured as TraceabilityPayload);
+    return;
+  }
   const text = payload.params?.content?.[0]?.text;
   if (typeof text !== "string") return;
   try {
@@ -62,3 +78,13 @@ window.addEventListener("message", (e: MessageEvent) => {
     // ignore
   }
 });
+
+// Signal mount so the host flushes the queued tool result immediately.
+try {
+  window.parent.postMessage(
+    { jsonrpc: "2.0", method: "notifications/initialized" },
+    "*",
+  );
+} catch {
+  // standalone/preview.
+}

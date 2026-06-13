@@ -9,6 +9,7 @@ export {}; // mark as ES module so top-level `const` names don't leak globally
 
 interface ToolResultPayload {
   readonly type?: string;
+  readonly method?: string;
   readonly params?: { readonly content?: ReadonlyArray<{ readonly text?: string }> };
 }
 
@@ -57,9 +58,22 @@ submitBtn.addEventListener("click", () => {
 
 window.addEventListener("message", (e: MessageEvent) => {
   const payload = e.data as ToolResultPayload | null | undefined;
-  if (payload?.type !== "ui/notifications/tool-result") return;
-  const text = payload.params?.content?.[0]?.text;
+  // assistant-ui host bridge keys the JSON-RPC envelope on `method`; preview
+  // harnesses may use `type`. Accept both.
+  const channel = payload?.method ?? payload?.type;
+  if (channel !== "ui/notifications/tool-result") return;
+  const text = payload?.params?.content?.[0]?.text;
   previewEl.hidden = false;
   previewEl.textContent = text ?? JSON.stringify(e.data, null, 2);
   submitBtn.disabled = false;
 });
+
+// Signal mount so the host flushes the queued tool result immediately.
+try {
+  window.parent.postMessage(
+    { jsonrpc: "2.0", method: "notifications/initialized" },
+    "*",
+  );
+} catch {
+  // standalone/preview.
+}

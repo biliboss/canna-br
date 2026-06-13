@@ -57,11 +57,27 @@ const render = (data: MemberQuotaPayload | null | undefined): void => {
 
 window.addEventListener("message", (e: MessageEvent) => {
   const payload = e.data as
-    | { type?: string; params?: { content?: ReadonlyArray<{ text?: string }> } }
+    | {
+        type?: string;
+        method?: string;
+        params?: {
+          structuredContent?: unknown;
+          content?: ReadonlyArray<{ text?: string }>;
+        };
+      }
     | null
     | undefined;
   if (!payload || typeof payload !== "object") return;
-  if (payload.type !== "ui/notifications/tool-result") return;
+  // The assistant-ui host bridge is JSON-RPC: it keys the envelope on `method`.
+  // (Some hosts/preview harnesses use `type`.) Accept both.
+  const channel = payload.method ?? payload.type;
+  if (channel !== "ui/notifications/tool-result") return;
+  // structuredContent is the preferred data channel; fall back to text JSON.
+  const structured = payload.params?.structuredContent;
+  if (structured && typeof structured === "object") {
+    render(structured as MemberQuotaPayload);
+    return;
+  }
   const text = payload.params?.content?.[0]?.text;
   if (typeof text !== "string") return;
   try {
@@ -70,3 +86,15 @@ window.addEventListener("message", (e: MessageEvent) => {
     // ignore malformed payloads — host may emit partial frames during streaming.
   }
 });
+
+// Tell the host the widget is mounted so it flushes the queued tool result
+// immediately (otherwise the host waits out a ~5s init timeout). JSON-RPC
+// notification, no id. Safe no-op for preview harnesses that ignore it.
+try {
+  window.parent.postMessage(
+    { jsonrpc: "2.0", method: "notifications/initialized" },
+    "*",
+  );
+} catch {
+  // standalone/preview: no parent to notify.
+}
