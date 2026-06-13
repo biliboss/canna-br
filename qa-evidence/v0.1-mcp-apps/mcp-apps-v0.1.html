@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>canna-br v0.1 — MCP Apps (widgets inline)</title>
+<style>
+ :root{color-scheme:dark}
+ body{margin:0;background:#0d1117;color:#e6edf3;font:16px/1.55 -apple-system,Segoe UI,Roboto,sans-serif}
+ .wrap{max-width:980px;margin:0 auto;padding:40px 24px 80px}
+ h1{font-size:28px;margin:0 0 6px} .sub{color:#9ca3af;margin:0 0 26px}
+ video{width:100%;border:1px solid #30363d;border-radius:12px;background:#000;display:block}
+ h2{font-size:18px;margin:26px 0 10px}
+ .pill{display:inline-block;background:#1f6feb22;color:#58a6ff;border:1px solid #1f6feb55;border-radius:999px;padding:2px 10px;font-size:13px}
+ code{background:#161b22;border:1px solid #30363d;border-radius:6px;padding:1px 6px;font-size:14px}
+ table{border-collapse:collapse;width:100%;margin:14px 0}
+ td,th{border:1px solid #30363d;padding:9px 12px;text-align:left;font-size:14px;vertical-align:top}
+ th{background:#161b22} .ok{color:#4ade80;font-weight:600} .no{color:#f87171;font-weight:600} .warn{color:#fbbf24}
+ .card{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:18px 22px;margin:22px 0}
+</style></head><body><div class="wrap">
+ <span class="pill">canna-br · v0.1 · MCP Apps</span>
+ <h1>Widgets MCP renderizando inline no chat</h1>
+ <p class="sub">apps/agent (assistant-ui) → apps/mcp (StreamableHTTP) → bundles ui:// · Claude 3.5 Haiku · :3002</p>
+
+ <video controls autoplay muted loop playsinline src="mcp-apps-v0.1.mp4"></video>
+
+ <h2>Inventário de MCP Apps</h2>
+ <table>
+  <tr><th>Widget</th><th>Tool</th><th>Estado</th></tr>
+  <tr><td>member-quota-card</td><td><code>get_member_quota</code></td><td><span class="ok">Renderiza INLINE no chat ao vivo</span> — card 7g/30g, ACTIVE (no vídeo)</td></tr>
+  <tr><td>dispensation-form</td><td><code>draft_dispensation</code></td><td><span class="ok">Widget OK</span> (member + lote FIFO + qty + preview dry-run) — renderizado com payload real</td></tr>
+  <tr><td>traceability-timeline</td><td><code>get_traceability_report</code></td><td><span class="ok">Widget OK</span> — timeline (stub v0.2.1, vazio até read-models)</td></tr>
+  <tr><td>member-lifecycle-board</td><td>—</td><td><span class="no">__unavailable__</span> — retido por honestidade (agregado cross-member sem read-model; vira vivo com tool <code>get_member_lifecycle</code>)</td></tr>
+  <tr><td>inventory-lot-picker</td><td><code>list_available_lots</code></td><td><span class="warn">bundle não buildado</span> — tool aponta o ui://, widget pós-v0.1</td></tr>
+  <tr><td>pending-action-approval</td><td><code>request_record_dispensation</code></td><td><span class="warn">bundle não buildado</span> — pós-v0.1</td></tr>
+ </table>
+
+ <div class="card">
+  <h2 style="margin-top:0">Nota honesta — render inline ao vivo vs harness</h2>
+  <p><b>member-quota-card</b> foi capturado renderizando <b>INLINE no chat ao vivo</b> (iframe MCP App montado, dado real do Postgres). Os demais widgets aparecem renderizados <b>com payload real via harness</b> — porque o <span class="warn">trigger por linguagem-natural sofre flake intermitente</span>: o streaming de tool-args do AI SDK v6 + assistant-ui às vezes colapsa os argumentos para <code>{}</code> antes de chegar ao MCP (pior em tools multi-arg como dispensation). Os <b>widgets e os tools estão corretos</b> (bundles + handlers provados); o gargalo é a camada de streaming do host, rastreado para correção dedicada.</p>
+  <p>member-lifecycle-board é <b>honestamente withheld</b> — não finge render sem dado que o sustente.</p>
+ </div>
+</div></body></html>
