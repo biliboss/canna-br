@@ -14,6 +14,9 @@
 
 import MarketingNav from './MarketingNav.astro';
 import '../../styles/global.css';
+// @org/ui design system (vendored @0.3.0) — utilities + canna green theming
+import '../../lib/org-ui/ui.css';
+import '../../styles/ds-theme.css';
 
 interface Props {
   title: string;
@@ -126,6 +129,11 @@ const siteBase = 'https://canna-br.fonsecagabriel.com.br';
     </div>
   </footer>
 
+  <!-- @org/ui custom-element registration (vendored @0.3.0). Importing the
+       bundle registers ui-text/heading/badge/button + molecules globally. -->
+  <script>
+    import '../../lib/org-ui/org-ui.js';
+  </script>
 </body>
 </html>
 

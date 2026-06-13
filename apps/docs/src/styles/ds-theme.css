@@ -1,0 +1,23 @@
+/* ds-theme.css — per-project theming of @org/ui (vendored, src/lib/org-ui/ui.css).
+ *
+ * Canna brand = emerald green on slate dark. We ONLY override the --ui-* token
+ * vars on :root — no token rebuild, no Tailwind reprocessing. Must load AFTER
+ * ui.css (which defines the teal defaults). Wired via astro.config customCss +
+ * MarketingLayout import (after ui.css).
+ */
+:root {
+  /* primary accent: teal → canna emerald */
+  --ui-color-teal:      #10b981; /* emerald-500 */
+  --ui-color-on-teal:   #022c22; /* emerald-950 — text on primary */
+
+  /* surfaces aligned to canna slate dark (matches --sl-color-bg #020617) */
+  --ui-color-ink:       #020617; /* slate-950 page bg */
+  --ui-color-panel:     #0f172a; /* slate-900 card/panel */
+  --ui-color-panel-2:   #1e293b; /* slate-800 */
+  --ui-color-line:      #1e293b; /* slate-800 border */
+  --ui-color-line-hover:#334155; /* slate-700 */
+
+  /* keep neutrals (body/dim/muted/fg) — already read well on slate dark */
+  /* purple accent → emerald-300 to stay in-brand */
+  --ui-color-purple:    #6ee7b7; /* emerald-300 */
+}
