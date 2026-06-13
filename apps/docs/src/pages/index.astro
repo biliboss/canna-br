@@ -134,7 +134,7 @@ const description =
   <!-- ============================================================
        4 · MÓDULOS PRINCIPAIS
        ============================================================ -->
-  <section class="band band--alt">
+  <section id="modulos" class="band band--alt">
     <div class="wrap">
       <p class="eyebrow">O que o sistema cobre</p>
       <h2 class="section-title">Módulos principais</h2>
@@ -143,37 +143,14 @@ const description =
         começando pelo que mais pesa na operação diária.
       </p>
 
+      <!-- migrated to @org/ui: <ui-card> (was inline <article class="module">) -->
       <div class="modules">
-        <article class="module">
-          <h3>Membros e prescrições</h3>
-          <p>Cadastro dos associados, prescrições vigentes e cotas — sempre
-            atualizados, com histórico de cada mudança.</p>
-        </article>
-        <article class="module">
-          <h3>Dispensação</h3>
-          <p>Registro do que foi entregue, para quem e de qual lote, com a cota
-            verificada e o estoque atualizado no mesmo passo.</p>
-        </article>
-        <article class="module">
-          <h3>Rastreabilidade de lote</h3>
-          <p>Cadeia de custódia do lote à dispensação, com cada etapa registrada
-            de forma que dá para reconstruir qualquer caminho.</p>
-        </article>
-        <article class="module">
-          <h3>Trilha de auditoria</h3>
-          <p>Toda ação fica gravada de forma imutável. A prestação de contas
-            deixa de depender da memória de quem estava lá.</p>
-        </article>
-        <article class="module">
-          <h3>Governança operacional</h3>
-          <p>Papéis e permissões claros, com segregação de funções — cada pessoa
-            faz o que lhe cabe, e isso fica documentado.</p>
-        </article>
-        <article class="module">
-          <h3>Operação por conversa</h3>
-          <p>A equipe opera dentro de um chat assistido, sem precisar aprender
-            telas complexas nem manter TI dedicada.</p>
-        </article>
+        <ui-card title="Membros e prescrições">Cadastro dos associados, prescrições vigentes e cotas — sempre atualizados, com histórico de cada mudança.</ui-card>
+        <ui-card title="Dispensação">Registro do que foi entregue, para quem e de qual lote, com a cota verificada e o estoque atualizado no mesmo passo.</ui-card>
+        <ui-card title="Rastreabilidade de lote">Cadeia de custódia do lote à dispensação, com cada etapa registrada de forma que dá para reconstruir qualquer caminho.</ui-card>
+        <ui-card title="Trilha de auditoria">Toda ação fica gravada de forma imutável. A prestação de contas deixa de depender da memória de quem estava lá.</ui-card>
+        <ui-card title="Governança operacional">Papéis e permissões claros, com segregação de funções — cada pessoa faz o que lhe cabe, e isso fica documentado.</ui-card>
+        <ui-card title="Operação por conversa">A equipe opera dentro de um chat assistido, sem precisar aprender telas complexas nem manter TI dedicada.</ui-card>
       </div>
 
       <p class="band-foot">

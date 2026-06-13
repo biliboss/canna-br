@@ -1477,14 +1477,17 @@ var UiElement = class extends i4 {
     super(...arguments);
     /** Original innerHTML captured before Lit's first render. */
     this._content = "";
+    this._captured = false;
   }
   // ── light DOM ──────────────────────────────────────────────────────────────
   createRenderRoot() {
     return this;
   }
   connectedCallback() {
-    if (!this._content) {
+    if (!this._captured) {
+      this._captured = true;
       this._content = this.innerHTML;
+      this.replaceChildren();
     }
     super.connectedCallback();
   }
