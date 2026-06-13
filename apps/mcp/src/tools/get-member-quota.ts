@@ -56,13 +56,18 @@ export const getMemberQuota: ToolDefinition<Args> = {
     // stream (same accumulator as the `member_quota` read-model). Wires the
     // MemberQuotaCard widget so the progress bar reflects real consumption
     // instead of always rendering 0%.
-    const consumed = await Dispensations.loadMemberQuotaConsumed(
-      ctx.store,
-      state.associationId,
-      state.memberId,
-      month,
-    );
-    const consumedG = gramsToNumber(consumed);
+    // A member with no association has no dispensation stream to fold → 0g.
+    const consumedG =
+      state.associationId === null
+        ? 0
+        : gramsToNumber(
+            await Dispensations.loadMemberQuotaConsumed(
+              ctx.store,
+              state.associationId,
+              args.memberId as ULID,
+              month,
+            ),
+          );
     const monthlyQuotaG = state.prescription?.monthlyQuotaG ?? null;
     const remainingG =
       monthlyQuotaG === null

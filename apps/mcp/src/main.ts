@@ -44,58 +44,67 @@ const main = async (): Promise<void> => {
 
   const store = createPostgresEventStore({ connectionString: databaseUrl });
 
-  const { server } = createCannaMcpServer({
-    store,
-    async resolveContext(headers): Promise<ToolContext> {
-      const get = (k: string): string | undefined => {
-        const v = headers[k] ?? headers[k.toLowerCase()];
-        return typeof v === "string" && v.length > 0 ? v : undefined;
-      };
-      const userId = get("x-canna-user") ?? "anonymous";
-      const roleRaw = get("x-canna-role") ?? "GUEST";
-      const role: Role = isRole(roleRaw) ? roleRaw : "GUEST";
-      const associationId = get("x-canna-association") ?? "unknown";
-      const chatId = get("x-canna-chat");
-      const ctx: ToolContext = {
-        store,
-        userId,
-        role,
-        associationId,
-        now: new Date(),
-        ...(chatId !== undefined ? { chatId } : {}),
-      };
-      return ctx;
-    },
-  });
+  const resolveContext = async (
+    headers: http.IncomingHttpHeaders,
+  ): Promise<ToolContext> => {
+    const get = (k: string): string | undefined => {
+      const v = headers[k] ?? headers[k.toLowerCase()];
+      return typeof v === "string" && v.length > 0 ? v : undefined;
+    };
+    const userId = get("x-canna-user") ?? "anonymous";
+    const roleRaw = get("x-canna-role") ?? "GUEST";
+    const role: Role = isRole(roleRaw) ? roleRaw : "GUEST";
+    const associationId = get("x-canna-association") ?? "unknown";
+    const chatId = get("x-canna-chat");
+    const ctx: ToolContext = {
+      store,
+      userId,
+      role,
+      associationId,
+      now: new Date(),
+      ...(chatId !== undefined ? { chatId } : {}),
+    };
+    return ctx;
+  };
 
-  const transport = new StreamableHTTPServerTransport({
-    sessionIdGenerator: undefined, // stateless
-  });
-  await server.connect(transport);
-
+  // Stateless StreamableHTTP: the SDK transport binds to a single server
+  // lifecycle, so a shared transport reused across requests throws (the live
+  // bug that 500'd every real MCP client while the in-memory unit tests — which
+  // use a linked pair, not this HTTP host — stayed green). Create a fresh
+  // server + transport per request, tear them down on response close.
   const httpServer = http.createServer((req, res) => {
     if (req.url === "/health" && req.method === "GET") {
       res.writeHead(200, { "content-type": "application/json" });
       res.end(JSON.stringify({ ok: true, name: "canna-mcp", version: "0.2.1" }));
       return;
     }
-    void transport.handleRequest(req, res).catch((e: unknown) => {
-      process.stderr.write(`mcp transport error: ${String(e)}\n`);
-      if (!res.headersSent) {
-        res.writeHead(500, { "content-type": "application/json" });
-        res.end(JSON.stringify({ error: "INTERNAL" }));
+    void (async (): Promise<void> => {
+      const { server } = createCannaMcpServer({ store, resolveContext });
+      const transport = new StreamableHTTPServerTransport({
+        sessionIdGenerator: undefined, // stateless
+      });
+      res.on("close", () => {
+        void transport.close();
+        void server.close();
+      });
+      try {
+        await server.connect(transport);
+        await transport.handleRequest(req, res);
+      } catch (e: unknown) {
+        process.stderr.write(`mcp transport error: ${String(e)}\n`);
+        if (!res.headersSent) {
+          res.writeHead(500, { "content-type": "application/json" });
+          res.end(JSON.stringify({ error: "INTERNAL" }));
+        }
       }
-    });
+    })();
   });
 
-  const shutdown = async (signal: string): Promise<void> => {
+  const shutdown = (signal: string): void => {
     process.stderr.write(`canna-mcp shutdown signal=${signal}\n`);
+    // Per-request servers/transports are torn down on response close; just stop
+    // accepting new connections.
     httpServer.close();
-    try {
-      await server.close();
-    } catch {
-      // ignore
-    }
     process.exit(0);
   };
 

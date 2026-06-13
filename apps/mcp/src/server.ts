@@ -40,7 +40,12 @@ const toToolListItem = (t: ToolDefinition<Record<string, unknown>>) => {
   return {
     ...base,
     _meta: {
-      ui: { resourceUri: t.uiResourceUri },
+      // ext-apps spec key is SLASH-form "ui/resourceUri" (a flat key), NOT the
+      // nested dot form { ui: { resourceUri } }. The dot form produces ZERO
+      // console errors but the widget iframe NEVER renders — assistant-ui reads
+      // the slash key. (Caught by live chrome QA: tool returned data, answer was
+      // text-only, no inline widget.)
+      "ui/resourceUri": t.uiResourceUri,
       riskLevel: t.riskLevel,
     },
   };
@@ -147,6 +152,18 @@ export const createCannaMcpServer = (deps: CannaMcpDeps): CreateServerResult => 
 
     const args = (request.params.arguments ?? {}) as Record<string, unknown>;
     const result = await tool.handler(args, ctx);
+    // Surface the widget resource on the CALL RESULT too (slash-form key) — the
+    // host (assistant-ui) reads `_meta["ui/resourceUri"]` off the tool result to
+    // decide which ui:// app renders inline for THIS message. tools/list _meta
+    // wires discovery; the per-result _meta triggers the actual render.
+    if (tool.uiResourceUri !== undefined && result.isError !== true) {
+      const existingMeta =
+        (result as { _meta?: Record<string, unknown> })._meta ?? {};
+      return {
+        ...result,
+        _meta: { ...existingMeta, "ui/resourceUri": tool.uiResourceUri },
+      };
+    }
     return result;
   });
 

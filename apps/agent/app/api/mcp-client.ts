@@ -24,6 +24,15 @@ export function getMcpClient(): Promise<MCPClient> {
     transport: {
       type: "http",
       url: process.env.MCP_SERVER_URL ?? "http://localhost:3001",
+      // apps/mcp gates every tool by ctx.role (x-canna-role); absent headers
+      // default to GUEST and ALL tools 403. Until Zitadel OIDC lands (v0.1.x),
+      // pass the role/user/association as a dev stopgap from env so the chat
+      // can actually call tools. Real OAuth 2.1 token → claims replaces this.
+      headers: {
+        "x-canna-user": process.env.CANNA_USER ?? "admin",
+        "x-canna-role": process.env.CANNA_ROLE ?? "DIRETORIA",
+        "x-canna-association": process.env.CANNA_ASSOCIATION ?? "",
+      },
     },
   });
   return mcpClientPromise;
