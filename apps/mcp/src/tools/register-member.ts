@@ -19,7 +19,6 @@ import type { ToolDefinition } from "../types.js";
  */
 interface Args {
   readonly cpf: string;
-  readonly memberId?: string;
 }
 
 // Per-tenant CPF salt. v0.1 dev: single instance reads it from env (the API
@@ -42,10 +41,6 @@ export const registerMember: ToolDefinition<Args> = {
       cpf: {
         type: "string",
         description: "CPF do membro (com ou sem pontuação, ex: 123.456.789-00)",
-      },
-      memberId: {
-        type: "string",
-        description: "ULID opcional do membro; gerado automaticamente se omitido",
       },
     },
     required: ["cpf"],
@@ -84,7 +79,7 @@ export const registerMember: ToolDefinition<Args> = {
     }
 
     const cpfHash = await hashCpf(cpf, SITE_SALT);
-    const memberId = (args.memberId ?? systemIdGenerator.generate()) as ULID;
+    const memberId = systemIdGenerator.generate();
 
     const result = await Members.registerMember(ctx.store, {
       type: "RegisterMember",
