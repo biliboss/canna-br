@@ -96,6 +96,9 @@ importers:
       '@canna/app-services':
         specifier: workspace:*
         version: link:../../packages/app-services
+      '@canna/crypto':
+        specifier: workspace:*
+        version: link:../../packages/crypto
       '@canna/domain':
         specifier: workspace:*
         version: link:../../packages/domain

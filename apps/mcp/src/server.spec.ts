@@ -82,15 +82,16 @@ const dispenserCtx = (store: Awaited<ReturnType<typeof setupStore>>): ToolContex
 });
 
 describe("@canna/mcp / tool catalog", () => {
-  it("exposes 5 v0.2.1 tools (3 read + 1 draft + 1 write-with-approval)", () => {
-    expect(allTools).toHaveLength(5);
+  it("exposes 6 tools (3 read + 1 draft + 2 write: register_member + record-dispensation)", () => {
+    expect(allTools).toHaveLength(6);
     const byLevel = new Map<number, number>();
     for (const t of allTools) {
       byLevel.set(t.riskLevel, (byLevel.get(t.riskLevel) ?? 0) + 1);
     }
     expect(byLevel.get(1)).toBe(3);
     expect(byLevel.get(2)).toBe(1);
-    expect(byLevel.get(3)).toBe(1);
+    expect(byLevel.get(3)).toBe(2);
+    expect(allTools.map((t) => t.name)).toContain("register_member");
   });
 
   it("every tool has uiResourceUri pointing to a packages/ui-apps app", () => {
@@ -225,7 +226,7 @@ describe("@canna/mcp / RBAC enforcement", () => {
       },
     });
     expect(server).toBeDefined();
-    expect(tools.size).toBe(5);
+    expect(tools.size).toBe(6);
 
     // AUDITOR cannot call draft_dispensation (DISPENSADOR + RT only)
     const tool = tools.get("draft_dispensation");
@@ -317,5 +318,62 @@ describe("@canna/mcp / MCP App resources (blocker #1)", () => {
       expect(typeof first.text).toBe("string");
       expect((first.text as string).length).toBeGreaterThan(0);
     }
+  });
+});
+
+describe("@canna/mcp / register_member (v0.1 onboarding)", () => {
+  const connectAs = async (role: ToolContext["role"]) => {
+    const store = await setupStore();
+    const { server } = createCannaMcpServer({
+      store,
+      async resolveContext(): Promise<ToolContext> {
+        return { store, userId: ACTOR, role, associationId: ASSOC, now: NOW };
+      },
+    });
+    const [clientTransport, serverTransport] =
+      InMemoryTransport.createLinkedPair();
+    const client = new Client({ name: "test-client", version: "0.0.0" });
+    await Promise.all([
+      server.connect(serverTransport),
+      client.connect(clientTransport),
+    ]);
+    return { client };
+  };
+
+  const callResult = (res: unknown): Record<string, unknown> => {
+    const content = (res as { content: Array<{ text: string }> }).content;
+    return JSON.parse(content[0]?.text ?? "{}") as Record<string, unknown>;
+  };
+
+  it("DIRETORIA registers a member from a CPF → PENDING_CONSENT + generated ULID", async () => {
+    const { client } = await connectAs("DIRETORIA");
+    const res = await client.callTool({
+      name: "register_member",
+      arguments: { cpf: "123.456.789-09" },
+    });
+    const data = callResult(res);
+    expect(data.status).toBe("PENDING_CONSENT");
+    expect(typeof data.memberId).toBe("string");
+    expect((data.memberId as string).length).toBeGreaterThanOrEqual(26); // ULID
+    expect(data.nextStep).toBe("grant_consent");
+    expect(data.associationId).toBe(ASSOC);
+  });
+
+  it("rejects an invalid CPF (wrong digit count)", async () => {
+    const { client } = await connectAs("DIRETORIA");
+    const res = await client.callTool({
+      name: "register_member",
+      arguments: { cpf: "123" },
+    });
+    expect(callResult(res).error).toBe("INVALID_CPF");
+  });
+
+  it("AUDITOR cannot register a member (role gate)", async () => {
+    const { client } = await connectAs("AUDITOR");
+    const res = await client.callTool({
+      name: "register_member",
+      arguments: { cpf: "123.456.789-09" },
+    });
+    expect(callResult(res).error).toBe("ROLE_INSUFFICIENT");
   });
 });

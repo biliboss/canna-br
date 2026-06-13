@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@canna/app-services": "workspace:*",
+    "@canna/crypto": "workspace:*",
     "@canna/domain": "workspace:*",
     "@canna/event-store": "workspace:*",
     "@canna/shared": "workspace:*",

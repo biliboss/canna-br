@@ -4,6 +4,7 @@ import { listAvailableLots } from "./list-available-lots.js";
 import { getTraceabilityReport } from "./get-traceability-report.js";
 import { draftDispensation } from "./draft-dispensation.js";
 import { requestRecordDispensation } from "./request-record-dispensation.js";
+import { registerMember } from "./register-member.js";
 
 type AnyTool = ToolDefinition<Record<string, unknown>>;
 
@@ -14,6 +15,7 @@ export const allTools: readonly AnyTool[] = [
   getTraceabilityReport as unknown as AnyTool,
   // Nível 2 — draft (no state mutation)
   draftDispensation as unknown as AnyTool,
-  // Nível 3 — write with approval (PendingAction)
+  // Nível 3 — write
+  registerMember as unknown as AnyTool,
   requestRecordDispensation as unknown as AnyTool,
 ];
