@@ -31,10 +31,11 @@ const description =
         autorizada pode consultá-la.
       </p>
 
+      <!-- migrated to @org/ui: <ui-button href> (was <a class="btn">) -->
       <div class="hero-ctas">
-        <a href="/piloto/" class="btn btn-primary">Entrar como piloto</a>
-        <a href={APP_URL} class="btn btn-secondary">Ver demonstração</a>
-        <a href="/about/" class="btn btn-ghost">Ler documentação</a>
+        <ui-button href="/piloto/" tone="primary">Entrar como piloto</ui-button>
+        <ui-button href={APP_URL} tone="ghost">Ver demonstração</ui-button>
+        <ui-button href="/about/" tone="ghost">Ler documentação</ui-button>
       </div>
 
       <div class="hero-trust">
@@ -67,27 +68,12 @@ const description =
         ou para uma fiscalização, ela não existe.
       </p>
 
+      <!-- migrated to @org/ui: <ui-card> (was inline <div class="pain">) -->
       <div class="pains">
-        <div class="pain">
-          <h3>Rastreabilidade frágil</h3>
-          <p>Quem dispensou, para quem, quando e de qual lote? A resposta vive em
-            memória e em arquivos soltos — difícil de reconstruir sob pressão.</p>
-        </div>
-        <div class="pain">
-          <h3>Prestação de contas trabalhosa</h3>
-          <p>Montar um relatório confiável vira caça ao tesouro entre abas e
-            mensagens. Tempo da diretoria gasto em garimpo, não em decisão.</p>
-        </div>
-        <div class="pain">
-          <h3>Dados sensíveis sem controle</h3>
-          <p>Dados de saúde dos associados circulam em ferramentas que ninguém
-            consegue auditar — e a responsabilidade continua sendo da associação.</p>
-        </div>
-        <div class="pain">
-          <h3>Conhecimento que não fica</h3>
-          <p>Quando uma pessoa-chave sai, parte da operação sai junto. A
-            continuidade depende de quem lembra, não do sistema.</p>
-        </div>
+        <ui-card title="Rastreabilidade frágil">Quem dispensou, para quem, quando e de qual lote? A resposta vive em memória e em arquivos soltos — difícil de reconstruir sob pressão.</ui-card>
+        <ui-card title="Prestação de contas trabalhosa">Montar um relatório confiável vira caça ao tesouro entre abas e mensagens. Tempo da diretoria gasto em garimpo, não em decisão.</ui-card>
+        <ui-card title="Dados sensíveis sem controle">Dados de saúde dos associados circulam em ferramentas que ninguém consegue auditar — e a responsabilidade continua sendo da associação.</ui-card>
+        <ui-card title="Conhecimento que não fica">Quando uma pessoa-chave sai, parte da operação sai junto. A continuidade depende de quem lembra, não do sistema.</ui-card>
       </div>
     </div>
   </section>

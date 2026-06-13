@@ -1,8 +1,8 @@
-# Vendored `@org/ui` design system — `skill-web-components@0.3.0`
+# Vendored `@org/ui` design system — `skill-web-components@0.4.0`
 
 These files are a **vendored build** of the Lit + light-DOM + Tailwind-v4 design
 system from `~/src/skill-web-components` (repo `biliboss/skill-web-components`),
-tag `@org/ui@0.3.1`. Vendored (not an npm dep) because the package is private and
+tag `@org/ui@0.4.0`. Vendored (not an npm dep) because the package is private and
 uses internal `workspace:*` deps that don't resolve cross-repo yet.
 
 ## Files

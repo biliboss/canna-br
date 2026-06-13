@@ -1591,7 +1591,7 @@ var BUTTON_SIZE_CLASSES = {
 };
 function buttonClasses(tone = "primary", size = "md", disabled = false) {
   return [
-    "ui:rounded-md ui:font-semibold ui:cursor-pointer ui:inline-flex ui:items-center ui:gap-1",
+    "ui:rounded-md ui:font-semibold ui:cursor-pointer ui:inline-flex ui:items-center ui:justify-center ui:gap-1 ui:no-underline",
     BUTTON_TONE_CLASSES[tone] ?? BUTTON_TONE_CLASSES.primary,
     BUTTON_SIZE_CLASSES[size] ?? BUTTON_SIZE_CLASSES.md,
     disabled ? "ui:opacity-50 ui:cursor-not-allowed ui:pointer-events-none" : ""
@@ -1752,15 +1752,27 @@ var UiButton = class extends UiElement {
     this.tone = "primary";
     this.size = "md";
     this.disabled = false;
+    this.href = "";
+    this.target = "";
   }
   render() {
-    return b2`
-      <button
-        class=${buttonClasses(this.tone, this.size, this.disabled)}
-        ?disabled=${this.disabled}
+    const cls = buttonClasses(this.tone, this.size, this.disabled);
+    const inner = o6(this._content);
+    if (this.href) {
+      const rel = this.target === "_blank" ? "noopener noreferrer" : void 0;
+      return b2`<a
+        class=${cls}
+        href=${this.href}
+        target=${this.target || void 0}
+        rel=${rel}
         part="button"
-      >${o6(this._content)}</button>
-    `;
+      >${inner}</a>`;
+    }
+    return b2`<button
+      class=${cls}
+      ?disabled=${this.disabled}
+      part="button"
+    >${inner}</button>`;
   }
 };
 __decorateClass([
@@ -1772,6 +1784,12 @@ __decorateClass([
 __decorateClass([
   n4({ type: Boolean, reflect: true })
 ], UiButton.prototype, "disabled", 2);
+__decorateClass([
+  n4({ reflect: true })
+], UiButton.prototype, "href", 2);
+__decorateClass([
+  n4({ reflect: true })
+], UiButton.prototype, "target", 2);
 UiButton = __decorateClass([
   t3("ui-button")
 ], UiButton);
