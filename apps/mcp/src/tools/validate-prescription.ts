@@ -1,5 +1,5 @@
 import { Members } from "@canna/app-services";
-import { quantityGrams, systemIdGenerator, isOk, type ULID } from "@canna/shared";
+import { quantityGrams, systemIdGenerator, type ULID } from "@canna/shared";
 import type { ToolDefinition } from "../types.js";
 
 /**
@@ -68,7 +68,7 @@ export const validatePrescription: ToolDefinition<Args> = {
   uiResourceUri: "ui://member-quota-card/app.html",
   async handler(args, ctx) {
     const quotaResult = quantityGrams(args.monthlyQuotaG);
-    if (!isOk(quotaResult)) {
+    if (!quotaResult.ok) {
       return {
         isError: true,
         content: [
@@ -145,7 +145,7 @@ export const validatePrescription: ToolDefinition<Args> = {
       now: ctx.now,
     });
 
-    if (!isOk(result)) {
+    if (!result.ok) {
       return {
         isError: true,
         content: [
