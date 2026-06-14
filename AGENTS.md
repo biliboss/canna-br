@@ -145,6 +145,27 @@ A task is **not done** if typecheck, tests, or coverage fail.
 
 For domain-only changes, `pnpm test:domain` is sufficient and runs in seconds.
 
+### Done Gate — Full Validate Entrypoint
+
+For releases and integration tasks, the canonical done-gate is:
+
+```bash
+pnpm validate
+```
+
+This runs **in order** (each stage blocks the next on failure):
+
+1. **typecheck** — `pnpm typecheck` (tsc --noEmit across all workspaces)
+2. **test** — `pnpm test` (vitest across all workspaces)
+3. **ui-apps build** — `pnpm --filter @canna/ui-apps build` (single-file widget bundles)
+4. **MCP smoke** — `node scripts/validate-mcp-health.mjs` (~10s)
+   - Boots `apps/mcp` on port 3102 with a dummy DATABASE_URL (health + ListTools do not touch DB)
+   - Asserts `GET /health → {ok:true}`
+   - Sends MCP `initialize` + `tools/list`; asserts tool count == 12 (allTools in `apps/mcp/src/tools/index.ts`)
+   - Prints `[PASS]`/`[FAIL]` per stage; exits 0/1
+
+**If `pnpm validate` exits 0, the release is shippable.** Never declare a task done if this gate fails.
+
 ### Domain Scenario Coverage
 
 Line coverage is theater. What matters for `packages/domain`:
@@ -288,6 +309,7 @@ pnpm test:domain     # vitest run on @canna/domain
 pnpm test:watch      # vitest watch on @canna/domain
 pnpm typecheck       # tsc --noEmit across all packages (-r --if-present)
 pnpm verify          # typecheck + test (verify gate before declaring task done)
+pnpm validate        # typecheck + test + ui-apps build + MCP smoke (full done-gate, ~40s)
 pnpm build           # production build all workspaces
 pnpm preview         # preview production build of docs
 ```

@@ -15,7 +15,8 @@
     "test:domain": "pnpm --filter @canna/domain test",
     "test:watch": "pnpm --filter @canna/domain test:watch",
     "coverage": "pnpm --filter @canna/domain coverage",
-    "verify": "pnpm typecheck && pnpm test"
+    "verify": "pnpm typecheck && pnpm test",
+    "validate": "pnpm typecheck && pnpm test && pnpm --filter @canna/ui-apps build && node scripts/validate-mcp-health.mjs"
   },
   "devDependencies": {
     "typescript": "^5.9.3"
