@@ -82,16 +82,17 @@ const dispenserCtx = (store: Awaited<ReturnType<typeof setupStore>>): ToolContex
 });
 
 describe("@canna/mcp / tool catalog", () => {
-  it("exposes 6 tools (3 read + 1 draft + 2 write: register_member + record-dispensation)", () => {
-    expect(allTools).toHaveLength(6);
+  it("exposes 8 tools (3 read + 1 draft + 4 write: register_member + grant_consent + validate_prescription + record-dispensation)", () => {
+    expect(allTools).toHaveLength(8);
     const byLevel = new Map<number, number>();
     for (const t of allTools) {
       byLevel.set(t.riskLevel, (byLevel.get(t.riskLevel) ?? 0) + 1);
     }
     expect(byLevel.get(1)).toBe(3);
     expect(byLevel.get(2)).toBe(1);
-    expect(byLevel.get(3)).toBe(2);
+    expect(byLevel.get(3)).toBe(4);
     expect(allTools.map((t) => t.name)).toContain("register_member");
+    expect(allTools.map((t) => t.name)).toContain("grant_consent");
   });
 
   it("every tool has uiResourceUri pointing to a packages/ui-apps app", () => {
@@ -226,7 +227,7 @@ describe("@canna/mcp / RBAC enforcement", () => {
       },
     });
     expect(server).toBeDefined();
-    expect(tools.size).toBe(6);
+    expect(tools.size).toBe(8);
 
     // AUDITOR cannot call draft_dispensation (DISPENSADOR + RT only)
     const tool = tools.get("draft_dispensation");
