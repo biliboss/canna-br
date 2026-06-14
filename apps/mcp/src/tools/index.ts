@@ -5,6 +5,8 @@ import { getTraceabilityReport } from "./get-traceability-report.js";
 import { draftDispensation } from "./draft-dispensation.js";
 import { requestRecordDispensation } from "./request-record-dispensation.js";
 import { registerMember } from "./register-member.js";
+import { grantConsent } from "./grant-consent.js";
+import { validatePrescription } from "./validate-prescription.js";
 
 type AnyTool = ToolDefinition<Record<string, unknown>>;
 
@@ -17,5 +19,7 @@ export const allTools: readonly AnyTool[] = [
   draftDispensation as unknown as AnyTool,
   // Nível 3 — write
   registerMember as unknown as AnyTool,
+  grantConsent as unknown as AnyTool,
   requestRecordDispensation as unknown as AnyTool,
+  validatePrescription as unknown as AnyTool,
 ];
