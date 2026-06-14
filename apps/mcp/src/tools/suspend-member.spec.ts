@@ -1,12 +1,8 @@
 /**
- * grant_consent — in-process spec (bypasses LLM arg-collapse).
+ * suspend_member — in-process spec (bypasses LLM arg-collapse).
  *
  * Tests use InMemoryTransport so the full MCP tool pipeline executes
  * (RBAC gate → handler → domain → event-store) without a running server.
- * This is the same pattern used for register_member in server.spec.ts.
- *
- * Live HTTP smoke (requires server on :3001):
- *   pnpm --filter @canna/mcp exec tsx scripts/qa-call-grant-consent.ts
  */
 import { describe, it, expect } from "vitest";
 import { createInMemoryEventStore } from "@canna/event-store";
@@ -21,10 +17,10 @@ import type { ToolContext } from "../types.js";
 const ASSOC = "01HM0ASSOC0000000000000001" as ULID;
 const MEMBER = "01HM0MEMBER000000000000001" as ULID;
 const ACTOR = "01HM0ACTOR0000000000000001" as ULID;
-const NOW = new Date("2026-06-08T12:00:00Z");
+const NOW = new Date("2026-06-14T10:00:00Z");
 
-/** Setup store with a PENDING_CONSENT member ready for grant_consent. */
-const setupPendingStore = async () => {
+/** Setup store with an ACTIVE member ready for suspend_member. */
+const setupActiveStore = async () => {
   const store = createInMemoryEventStore();
   await Members.registerMember(store, {
     type: "RegisterMember",
@@ -34,11 +30,18 @@ const setupPendingStore = async () => {
     registeredBy: ACTOR,
     now: NOW,
   });
+  await Members.grantConsent(store, {
+    type: "GrantConsent",
+    memberId: MEMBER,
+    consentVersion: 1,
+    grantedBy: ACTOR,
+    now: NOW,
+  });
   return store;
 };
 
 const connectAs = async (role: ToolContext["role"]) => {
-  const store = await setupPendingStore();
+  const store = await setupActiveStore();
   const { server } = createCannaMcpServer({
     store,
     async resolveContext(): Promise<ToolContext> {
@@ -46,7 +49,7 @@ const connectAs = async (role: ToolContext["role"]) => {
     },
   });
   const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
-  const client = new Client({ name: "test-grant-consent", version: "0.0.0" });
+  const client = new Client({ name: "test-suspend-member", version: "0.0.0" });
   await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
   return { client, store };
 };
@@ -56,9 +59,9 @@ const parseResult = (res: unknown): Record<string, unknown> => {
   return JSON.parse(content[0]?.text ?? "{}") as Record<string, unknown>;
 };
 
-describe("@canna/mcp / grant_consent tool — catalog", () => {
-  it("grant_consent is registered in allTools at Nível 3", () => {
-    const tool = allTools.find((t) => t.name === "grant_consent");
+describe("@canna/mcp / suspend_member tool — catalog", () => {
+  it("suspend_member is registered in allTools at Nível 3", () => {
+    const tool = allTools.find((t) => t.name === "suspend_member");
     expect(tool).toBeDefined();
     expect(tool?.riskLevel).toBe(3);
     expect(tool?.allowedRoles).toContain("RESPONSAVEL_TECNICO");
@@ -78,80 +81,90 @@ describe("@canna/mcp / grant_consent tool — catalog", () => {
   });
 });
 
-describe("@canna/mcp / grant_consent tool — handler (bypasses LLM)", () => {
-  it("RESPONSAVEL_TECNICO grants consent → member transitions to ACTIVE", async () => {
+describe("@canna/mcp / suspend_member tool — handler (bypasses LLM)", () => {
+  it("RESPONSAVEL_TECNICO suspends ACTIVE member → status SUSPENDED", async () => {
     const { client } = await connectAs("RESPONSAVEL_TECNICO");
     const res = await client.callTool({
-      name: "grant_consent",
-      arguments: { memberId: MEMBER },
+      name: "suspend_member",
+      arguments: { memberId: MEMBER, reason: "Pendência documental" },
     });
     const data = parseResult(res);
-    expect(data.status).toBe("ACTIVE");
+    expect(data.status).toBe("SUSPENDED");
     expect(data.memberId).toBe(MEMBER);
-    expect(data.consentVersion).toBe(1);
-    expect(data.nextStep).toBe("validate_prescription");
+    expect(data.reason).toBe("Pendência documental");
+    expect(data.suspendedBy).toBe(ACTOR);
+    expect(data.nextStep).toBe("reinstate_member");
     expect(data.associationId).toBe(ASSOC);
   });
 
-  it("DIRETORIA grants consent with explicit consentVersion", async () => {
+  it("DIRETORIA can also suspend a member", async () => {
     const { client } = await connectAs("DIRETORIA");
     const res = await client.callTool({
-      name: "grant_consent",
-      arguments: { memberId: MEMBER, consentVersion: 1 },
+      name: "suspend_member",
+      arguments: { memberId: MEMBER, reason: "Irregularidade auditoria" },
     });
     const data = parseResult(res);
-    expect(data.status).toBe("ACTIVE");
-    expect(data.consentVersion).toBe(1);
+    expect(data.status).toBe("SUSPENDED");
   });
 
   it("rejects when memberId is empty string", async () => {
     const { client } = await connectAs("RESPONSAVEL_TECNICO");
     const res = await client.callTool({
-      name: "grant_consent",
-      arguments: { memberId: "" },
+      name: "suspend_member",
+      arguments: { memberId: "", reason: "Motivo qualquer" },
     });
     const data = parseResult(res);
     expect(data.error).toBe("MISSING_MEMBER_ID");
   });
 
-  it("surfaces domain error MEMBER_NOT_REGISTERED for unknown memberId", async () => {
+  it("rejects when reason is empty string", async () => {
     const { client } = await connectAs("RESPONSAVEL_TECNICO");
     const res = await client.callTool({
-      name: "grant_consent",
-      arguments: { memberId: "01HM0UNKNOWN0000000000001" },
+      name: "suspend_member",
+      arguments: { memberId: MEMBER, reason: "" },
     });
     const data = parseResult(res);
-    expect(data.error).toBe("MEMBER_NOT_REGISTERED");
+    expect(data.error).toBe("MISSING_REASON");
   });
 
-  it("surfaces domain error CONSENT_ALREADY_GRANTED on duplicate consent", async () => {
-    // First grant — should succeed
+  it("surfaces domain error MEMBER_NOT_ACTIVE when member is already SUSPENDED", async () => {
     const { client } = await connectAs("RESPONSAVEL_TECNICO");
+    // First suspend
     await client.callTool({
-      name: "grant_consent",
-      arguments: { memberId: MEMBER, consentVersion: 1 },
+      name: "suspend_member",
+      arguments: { memberId: MEMBER, reason: "First suspension" },
     });
-    // Second grant at the same version — domain rejects
+    // Second suspend on already SUSPENDED member
     const res = await client.callTool({
-      name: "grant_consent",
-      arguments: { memberId: MEMBER, consentVersion: 1 },
+      name: "suspend_member",
+      arguments: { memberId: MEMBER, reason: "Second suspension attempt" },
     });
     const data = parseResult(res);
-    expect(data.error).toBe("CONSENT_ALREADY_GRANTED");
+    expect(data.error).toBe("MEMBER_NOT_ACTIVE");
   });
 
-  it("AUDITOR cannot grant consent (RBAC gate)", async () => {
+  it("surfaces domain error MEMBER_NOT_ACTIVE for unregistered memberId", async () => {
+    const { client } = await connectAs("RESPONSAVEL_TECNICO");
+    const res = await client.callTool({
+      name: "suspend_member",
+      arguments: { memberId: "01HM0UNKNOWN0000000000001", reason: "Test" },
+    });
+    const data = parseResult(res);
+    expect(data.error).toBe("MEMBER_NOT_ACTIVE");
+  });
+
+  it("AUDITOR cannot suspend member (RBAC gate)", async () => {
     const { client } = await connectAs("AUDITOR");
     const res = await client.callTool({
-      name: "grant_consent",
-      arguments: { memberId: MEMBER },
+      name: "suspend_member",
+      arguments: { memberId: MEMBER, reason: "Tentativa indevida" },
     });
     const data = parseResult(res);
     expect(data.error).toBe("ROLE_INSUFFICIENT");
   });
 
   it("rejects when no association context", async () => {
-    const store = await setupPendingStore();
+    const store = await setupActiveStore();
     const { server } = createCannaMcpServer({
       store,
       async resolveContext(): Promise<ToolContext> {
@@ -168,8 +181,8 @@ describe("@canna/mcp / grant_consent tool — handler (bypasses LLM)", () => {
     const client = new Client({ name: "test-no-assoc", version: "0.0.0" });
     await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
     const res = await client.callTool({
-      name: "grant_consent",
-      arguments: { memberId: MEMBER },
+      name: "suspend_member",
+      arguments: { memberId: MEMBER, reason: "Test" },
     });
     const data = parseResult(res);
     expect(data.error).toBe("NO_ASSOCIATION_CONTEXT");

@@ -84,15 +84,15 @@ const dispenserCtx = (store: Awaited<ReturnType<typeof setupStore>>): ToolContex
 });
 
 describe("@canna/mcp / tool catalog", () => {
-  it("exposes 9 tools (4 read + 1 draft + 4 write: register_member + grant_consent + validate_prescription + record-dispensation)", () => {
-    expect(allTools).toHaveLength(9);
+  it("exposes 12 tools (5 read + 1 draft + 6 write: register_member + grant_consent + validate_prescription + record-dispensation + suspend_member + reinstate_member)", () => {
+    expect(allTools).toHaveLength(12);
     const byLevel = new Map<number, number>();
     for (const t of allTools) {
       byLevel.set(t.riskLevel, (byLevel.get(t.riskLevel) ?? 0) + 1);
     }
-    expect(byLevel.get(1)).toBe(4);
+    expect(byLevel.get(1)).toBe(5);
     expect(byLevel.get(2)).toBe(1);
-    expect(byLevel.get(3)).toBe(4);
+    expect(byLevel.get(3)).toBe(6);
     expect(allTools.map((t) => t.name)).toContain("register_member");
     expect(allTools.map((t) => t.name)).toContain("grant_consent");
     expect(allTools.map((t) => t.name)).toContain("find_member_by_cpf");
@@ -230,7 +230,7 @@ describe("@canna/mcp / RBAC enforcement", () => {
       },
     });
     expect(server).toBeDefined();
-    expect(tools.size).toBe(9);
+    expect(tools.size).toBe(12);
 
     // AUDITOR cannot call draft_dispensation (DISPENSADOR + RT only)
     const tool = tools.get("draft_dispensation");
