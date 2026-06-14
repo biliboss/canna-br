@@ -7,7 +7,10 @@
  * - Clerk.dev: illustrated empty states, emotional weight in auth/onboarding surfaces
  * - Anthropic.com: humanist warm-dark palette, serif/sans pairing, trust-building tone
  *
- * All colors: OKLCH perceptually uniform ramps.
+ * Heading/text/badge/button: @org/ui atoms (ui-heading / ui-text / ui-badge / ui-button).
+ * Registered globally by MarketingLayout via lib/org-ui/org-ui.js.
+ * Themed emerald via ds-theme.css (--ui-color-teal → #10b981, --ui-color-purple → #6ee7b7).
+ *
  * Motion: entrance 200ms cubic-bezier(0.16,1,0.3,1), hover 150ms ease-out — prefers-reduced-motion respected.
  * Fonts: Geist (Google CDN via @font-face below) + Caveat for signature handwritten style.
  */
@@ -94,10 +97,10 @@ const shareText = shareTextLines.join("\n");
   class="invitation-card"
   aria-label={"Convite para " + name + " — papel: " + role}
 >
-  <!-- Eyebrow mono label -->
-  <p class="ic-eyebrow" aria-label="Círculo principal, convite pessoal">
+  <!-- Eyebrow mono label — @org/ui badge, tone="theme" → --ui-color-purple → emerald-300 via ds-theme -->
+  <ui-badge tone="theme" class="ic-eyebrow" aria-label="Círculo principal, convite pessoal">
     Círculo Principal &nbsp;·&nbsp; Convite Pessoal
-  </p>
+  </ui-badge>
 
   <div class="ic-layout">
     <!-- Left column: avatar + affiliations -->
@@ -139,11 +142,11 @@ const shareText = shareTextLines.join("\n");
         </a>
       )}
 
-      <!-- Affiliations chips -->
+      <!-- Affiliations chips — @org/ui badge tone="tag" (dim/muted, panel bg) -->
       {affiliations.length > 0 && (
         <div class="ic-affiliations" role="list" aria-label="Filiações e grupos">
           {affiliations.map((a) => (
-            <span class="ic-chip" role="listitem">{a}</span>
+            <ui-badge tone="tag" role="listitem">{a}</ui-badge>
           ))}
         </div>
       )}
@@ -151,25 +154,25 @@ const shareText = shareTextLines.join("\n");
 
     <!-- Right column: main content -->
     <div class="ic-right">
-      <!-- Name headline -->
-      <h3 class="ic-name">{name}</h3>
+      <!-- Name headline — @org/ui heading level=3 -->
+      <ui-heading level="3" class="ic-name">{name}</ui-heading>
 
-      <!-- Role pill -->
+      <!-- Role row: badge pill + subtitle -->
       <div class="ic-role-row">
-        <span class="ic-role-pill" aria-label={"Papel proposto: " + role}>
-          {role}
-        </span>
+        <!-- @org/ui badge tone="num" → teal bg (emerald via ds-theme) with emerald text -->
+        <ui-badge tone="num" aria-label={"Papel proposto: " + role}>{role}</ui-badge>
         {roleSubtitle && (
           <span class="ic-role-subtitle">{roleSubtitle}</span>
         )}
       </div>
 
-      <!-- Bio prose -->
-      <p class="ic-bio">{bio}</p>
+      <!-- Bio prose — @org/ui text tone="body" -->
+      <ui-text tone="body" class="ic-bio">{bio}</ui-text>
 
       <!-- Why you section -->
       <div class="ic-why-block">
-        <p class="ic-why-label">Por que você</p>
+        <!-- @org/ui badge tone="tag" as section label -->
+        <ui-badge tone="tag" class="ic-why-label">Por que você</ui-badge>
         <ul class="ic-why-list" role="list">
           {whyYou.map((item) => (
             <li class="ic-why-item" role="listitem">
@@ -180,23 +183,25 @@ const shareText = shareTextLines.join("\n");
         </ul>
       </div>
 
-      <!-- CTA row -->
+      <!-- CTA row — @org/ui button atoms -->
       <div class="ic-cta-row">
-        <a
+        <!-- Primary CTA: tone="primary" → bg-teal (emerald via ds-theme), text-on-teal -->
+        <ui-button
           href={ctaHref}
+          tone="primary"
+          size="md"
           class="ic-cta-primary"
           aria-label={cta + " — papel: " + role}
-        >
-          {cta}
-        </a>
-        <a
+        >{cta}</ui-button>
+        <!-- Secondary CTA: tone="ghost" → transparent + border -->
+        <ui-button
           href={ctaSecondaryHref}
+          tone="ghost"
+          size="md"
           class="ic-cta-secondary"
           aria-label={ctaSecondaryLabel}
-        >
-          {ctaSecondaryLabel}
-        </a>
-        <!-- Share / copy-to-WhatsApp button -->
+        >{ctaSecondaryLabel}</ui-button>
+        <!-- Share / copy-to-WhatsApp button (custom — no atom covers this behavior) -->
         <div class="ic-share-wrap">
           <button
             type="button"
@@ -242,14 +247,8 @@ const shareText = shareTextLines.join("\n");
 
   /* ================================================================
      TOKEN RAMP (OKLCH — perceptually uniform)
-     --ic-bg:           dark elevated card (Linear pattern: L+0.03 over page)
-     --ic-border:       emerald at low chroma, subtle
-     --ic-border-hover: emerald accent on hover
-     --ic-emerald-500:  oklch(0.72 0.17 162) — primary emerald
-     --ic-emerald-300:  oklch(0.84 0.13 162) — light emerald
-     --ic-text-muted:   oklch(0.60 0.025 220) — slate-ish muted text
-     --ic-text-body:    oklch(0.78 0.02 220)  — readable body
-     --ic-chip-bg:      oklch(0.20 0.02 220 / 0.6) — chip surface
+     Colors consumed by layout-only rules below.
+     Atom colors (heading/text/badge/button) come from ui.css + ds-theme.css.
   ================================================================ */
   .invitation-card {
     --ic-bg:             oklch(0.12 0.015 250);
@@ -257,11 +256,8 @@ const shareText = shareTextLines.join("\n");
     --ic-border:         oklch(0.45 0.10 162 / 0.35);
     --ic-border-hover:   oklch(0.72 0.17 162 / 0.70);
     --ic-glow:           oklch(0.72 0.17 162 / 0.12);
-    --ic-emerald-500:    oklch(0.72 0.17 162);
     --ic-emerald-300:    oklch(0.84 0.13 162);
     --ic-emerald-900:    oklch(0.28 0.07 162);
-    --ic-text-name:      oklch(0.97 0.005 220);
-    --ic-text-body:      oklch(0.78 0.02 220);
     --ic-text-muted:     oklch(0.58 0.022 220);
     --ic-text-micro:     oklch(0.48 0.018 220);
     --ic-chip-bg:        oklch(0.20 0.015 220 / 0.70);
@@ -313,16 +309,15 @@ const shareText = shareTextLines.join("\n");
   }
 
   /* ================================================================
-     EYEBROW
+     EYEBROW — layout spacing only (color/font from ui-badge tone="theme")
   ================================================================ */
-  .ic-eyebrow {
+  ui-badge.ic-eyebrow {
+    display: block;
+    margin: 0 0 clamp(1rem, 2.5vw, 1.5rem) 0;
     font-family: ui-monospace, "JetBrains Mono", monospace;
     font-size: clamp(0.6rem, 0.55rem + 0.3vw, 0.72rem);
-    font-weight: 700;
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: var(--ic-emerald-500);
-    margin: 0 0 clamp(1rem, 2.5vw, 1.5rem) 0;
     opacity: 0.85;
   }
 
@@ -433,29 +428,16 @@ const shareText = shareTextLines.join("\n");
   }
 
   .ic-linkedin:focus-visible {
-    outline: 2px solid var(--ic-emerald-500);
+    outline: 2px solid oklch(0.72 0.17 162);
     outline-offset: 2px;
   }
 
-  /* Affiliations chips */
+  /* Affiliations chips — layout only; chip color from ui-badge tone="tag" */
   .ic-affiliations {
     display: flex;
     flex-direction: column;
     gap: 0.4rem;
     width: 100%;
-  }
-
-  .ic-chip {
-    display: inline-block;
-    font-size: clamp(0.62rem, 0.58rem + 0.2vw, 0.7rem);
-    font-family: ui-monospace, monospace;
-    color: var(--ic-text-muted);
-    background: var(--ic-chip-bg);
-    border: 1px solid var(--ic-chip-border);
-    border-radius: 6px;
-    padding: 0.25rem 0.6rem;
-    line-height: 1.4;
-    word-break: break-word;
   }
 
   /* ================================================================
@@ -467,36 +449,20 @@ const shareText = shareTextLines.join("\n");
     gap: clamp(0.75rem, 1.5vw, 1.1rem);
   }
 
-  /* Name — XL, white, tight tracking */
-  .ic-name {
+  /* Name heading — layout sizing only; font-weight/color from ui-heading level="3" */
+  ui-heading.ic-name {
+    display: block;
     font-size: clamp(1.6rem, 1.4rem + 1.2vw, 2.4rem);
-    font-weight: 700;
-    color: var(--ic-text-name);
     letter-spacing: -0.04em;
     line-height: 1.1;
-    margin: 0;
-    font-family: -apple-system, "Inter", "Segoe UI", sans-serif;
   }
 
-  /* Role row: pill + subtitle */
+  /* Role row: badge pill + subtitle */
   .ic-role-row {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
     gap: 0.6rem;
-  }
-
-  .ic-role-pill {
-    display: inline-block;
-    padding: 0.3rem 0.9rem;
-    border-radius: 999px;
-    font-size: clamp(0.72rem, 0.68rem + 0.2vw, 0.82rem);
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    /* Emerald pill — solid, high contrast: text is near-black on emerald */
-    background: oklch(0.72 0.17 162);
-    color: oklch(0.10 0.03 162);
-    /* WCAG contrast: oklch(0.10) on oklch(0.72 0.17) ≈ 7.8:1 AAA */
   }
 
   .ic-role-subtitle {
@@ -505,13 +471,11 @@ const shareText = shareTextLines.join("\n");
     font-style: italic;
   }
 
-  /* Bio */
-  .ic-bio {
-    font-size: clamp(0.875rem, 0.84rem + 0.2vw, 1rem);
-    color: var(--ic-text-body);
-    line-height: 1.7;
+  /* Bio — max-width layout constraint; color/size from ui-text tone="body" */
+  ui-text.ic-bio {
+    display: block;
     max-width: 65ch;
-    margin: 0;
+    line-height: 1.7;
   }
 
   /* Why you block */
@@ -521,13 +485,13 @@ const shareText = shareTextLines.join("\n");
     margin-top: 0.25rem;
   }
 
-  .ic-why-label {
+  /* Why you label — layout spacing; color from ui-badge tone="tag" */
+  ui-badge.ic-why-label {
+    display: block;
     font-family: ui-monospace, monospace;
     font-size: 0.65rem;
-    font-weight: 700;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--ic-emerald-500);
     margin: 0 0 0.6rem 0;
     opacity: 0.8;
   }
@@ -546,19 +510,19 @@ const shareText = shareTextLines.join("\n");
     align-items: baseline;
     gap: 0.6rem;
     font-size: clamp(0.82rem, 0.78rem + 0.2vw, 0.9rem);
-    color: var(--ic-text-body);
+    color: oklch(0.78 0.02 220);
     line-height: 1.55;
   }
 
   .ic-why-marker {
-    color: var(--ic-emerald-500);
+    color: oklch(0.72 0.17 162);
     font-size: 0.65rem;
     flex-shrink: 0;
     margin-top: 0.15em;
     opacity: 0.85;
   }
 
-  /* CTA row */
+  /* CTA row — layout only; button styles from ui-button atoms */
   .ic-cta-row {
     display: flex;
     flex-wrap: wrap;
@@ -567,57 +531,11 @@ const shareText = shareTextLines.join("\n");
     margin-top: 0.5rem;
   }
 
-  .ic-cta-primary {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.75rem 1.75rem;
-    border-radius: 999px;
-    background: oklch(0.72 0.17 162);
-    color: oklch(0.08 0.02 162);
-    font-weight: 700;
-    font-size: clamp(0.82rem, 0.78rem + 0.2vw, 0.9rem);
-    text-decoration: none;
-    letter-spacing: 0.01em;
-    /* min 44px touch target */
+  /* Ensure ui-button atoms hit 44px touch target */
+  ui-button.ic-cta-primary,
+  ui-button.ic-cta-secondary {
     min-height: 44px;
-    transition: background 0.15s var(--ic-motion-state), transform 0.15s var(--ic-motion-state), box-shadow 0.15s var(--ic-motion-state);
-  }
-
-  .ic-cta-primary:hover {
-    background: oklch(0.80 0.15 162);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 20px oklch(0.72 0.17 162 / 0.35);
-  }
-
-  .ic-cta-primary:focus-visible {
-    outline: 2px solid oklch(0.97 0.005 220);
-    outline-offset: 3px;
-  }
-
-  .ic-cta-secondary {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.75rem 1.5rem;
     border-radius: 999px;
-    border: 1px solid oklch(0.45 0.10 162 / 0.5);
-    color: var(--ic-emerald-300);
-    font-size: clamp(0.78rem, 0.74rem + 0.2vw, 0.875rem);
-    font-weight: 500;
-    text-decoration: none;
-    min-height: 44px;
-    transition: background 0.15s var(--ic-motion-state), border-color 0.15s var(--ic-motion-state);
-  }
-
-  .ic-cta-secondary:hover {
-    background: oklch(0.72 0.17 162 / 0.08);
-    border-color: oklch(0.65 0.14 162 / 0.7);
-  }
-
-  .ic-cta-secondary:focus-visible {
-    outline: 2px solid var(--ic-emerald-500);
-    outline-offset: 2px;
   }
 
   /* Signature */
@@ -689,7 +607,7 @@ const shareText = shareTextLines.join("\n");
       box-shadow 0.15s var(--ic-motion-state);
   }
 
-  /* ≥640px: expand to icon + label */
+  /* >=640px: expand to icon + label */
   @media (min-width: 640px) {
     .ic-cta-share {
       width: auto;
@@ -723,7 +641,7 @@ const shareText = shareTextLines.join("\n");
   }
 
   .ic-cta-share:focus-visible {
-    outline: 2px solid var(--ic-emerald-500);
+    outline: 2px solid oklch(0.72 0.17 162);
     outline-offset: 2px;
   }
 
@@ -763,8 +681,6 @@ const shareText = shareTextLines.join("\n");
   @media (prefers-reduced-motion: reduce) {
     .invitation-card,
     .ic-avatar-ring,
-    .ic-cta-primary,
-    .ic-cta-secondary,
     .ic-cta-share,
     .ic-linkedin {
       animation-duration: 0.01ms !important;
@@ -773,7 +689,6 @@ const shareText = shareTextLines.join("\n");
     .invitation-card:hover {
       transform: none;
     }
-    .ic-cta-primary:hover,
     .ic-cta-share:hover {
       transform: none;
     }
