@@ -7,6 +7,8 @@ import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { createCannaMcpServer } from "./server.js";
 import { allTools } from "./tools/index.js";
 import type { ToolContext } from "./types.js";
+import { createInMemoryStore } from "@canna/read-models";
+import { hashCpf } from "@canna/crypto";
 
 const ASSOC = "01HM0ASSOC0000000000000001" as ULID;
 const MEMBER = "01HM0MEMBER000000000000001" as ULID;
@@ -82,17 +84,18 @@ const dispenserCtx = (store: Awaited<ReturnType<typeof setupStore>>): ToolContex
 });
 
 describe("@canna/mcp / tool catalog", () => {
-  it("exposes 8 tools (3 read + 1 draft + 4 write: register_member + grant_consent + validate_prescription + record-dispensation)", () => {
-    expect(allTools).toHaveLength(8);
+  it("exposes 9 tools (4 read + 1 draft + 4 write: register_member + grant_consent + validate_prescription + record-dispensation)", () => {
+    expect(allTools).toHaveLength(9);
     const byLevel = new Map<number, number>();
     for (const t of allTools) {
       byLevel.set(t.riskLevel, (byLevel.get(t.riskLevel) ?? 0) + 1);
     }
-    expect(byLevel.get(1)).toBe(3);
+    expect(byLevel.get(1)).toBe(4);
     expect(byLevel.get(2)).toBe(1);
     expect(byLevel.get(3)).toBe(4);
     expect(allTools.map((t) => t.name)).toContain("register_member");
     expect(allTools.map((t) => t.name)).toContain("grant_consent");
+    expect(allTools.map((t) => t.name)).toContain("find_member_by_cpf");
   });
 
   it("every tool has uiResourceUri pointing to a packages/ui-apps app", () => {
@@ -227,7 +230,7 @@ describe("@canna/mcp / RBAC enforcement", () => {
       },
     });
     expect(server).toBeDefined();
-    expect(tools.size).toBe(8);
+    expect(tools.size).toBe(9);
 
     // AUDITOR cannot call draft_dispensation (DISPENSADOR + RT only)
     const tool = tools.get("draft_dispensation");
@@ -376,5 +379,112 @@ describe("@canna/mcp / register_member (v0.1 onboarding)", () => {
       arguments: { cpf: "123.456.789-09" },
     });
     expect(callResult(res).error).toBe("ROLE_INSUFFICIENT");
+  });
+});
+
+describe("@canna/mcp / find_member_by_cpf (Nível 1 — recover memberId)", () => {
+  const SITE_SALT = process.env.CANNA_CPF_SALT ?? "canna-dev-site-salt";
+  const KNOWN_CPF = "123.456.789-09";
+
+  const setupWithReadModel = async () => {
+    const store = createInMemoryEventStore();
+    const readModelStore = createInMemoryStore();
+
+    // Register via tool so cpfHash is seeded with the same SITE_SALT
+    const cpfHash = await hashCpf(KNOWN_CPF, SITE_SALT);
+    const memberId = MEMBER;
+    await Members.registerMember(store, {
+      type: "RegisterMember",
+      memberId,
+      associationId: ASSOC,
+      cpfHash,
+      registeredBy: ACTOR,
+      now: NOW,
+    });
+    // Manually seed the read-model store (mirrors what the projection subscriber
+    // would do in production after receiving the MemberRegistered event).
+    readModelStore.upsertMember({
+      memberId,
+      associationId: ASSOC,
+      cpfHash,
+      status: "PENDING_CONSENT",
+      consentVersion: null,
+      createdAt: NOW,
+      updatedAt: NOW,
+    });
+
+    return { store, readModelStore };
+  };
+
+  it("returns memberId + PENDING_CONSENT when CPF matches", async () => {
+    const { store, readModelStore } = await setupWithReadModel();
+    const tool = allTools.find((t) => t.name === "find_member_by_cpf");
+    if (tool === undefined) throw new Error("tool not found");
+    const ctx: ToolContext = {
+      store,
+      readModelStore,
+      userId: ACTOR,
+      role: "DISPENSADOR",
+      associationId: ASSOC,
+      now: NOW,
+    };
+    const result = await tool.handler({ cpf: KNOWN_CPF }, ctx);
+    expect(result.isError).not.toBe(true);
+    const data = JSON.parse(result.content[0]!.text) as Record<string, unknown>;
+    expect(data.memberId).toBe(MEMBER);
+    expect(data.status).toBe("PENDING_CONSENT");
+    expect(data.nextStep).toBe("grant_consent");
+    expect(data).not.toHaveProperty("cpf");
+    expect(data).not.toHaveProperty("cpfHash");
+  });
+
+  it("returns MEMBER_NOT_FOUND for unknown CPF", async () => {
+    const { store, readModelStore } = await setupWithReadModel();
+    const tool = allTools.find((t) => t.name === "find_member_by_cpf");
+    if (tool === undefined) throw new Error("tool not found");
+    const ctx: ToolContext = {
+      store,
+      readModelStore,
+      userId: ACTOR,
+      role: "DISPENSADOR",
+      associationId: ASSOC,
+      now: NOW,
+    };
+    const result = await tool.handler({ cpf: "999.999.999-99" }, ctx);
+    const data = JSON.parse(result.content[0]!.text) as Record<string, unknown>;
+    expect(data.error).toBe("MEMBER_NOT_FOUND");
+  });
+
+  it("returns INVALID_CPF for malformed input", async () => {
+    const { store, readModelStore } = await setupWithReadModel();
+    const tool = allTools.find((t) => t.name === "find_member_by_cpf");
+    if (tool === undefined) throw new Error("tool not found");
+    const ctx: ToolContext = {
+      store,
+      readModelStore,
+      userId: ACTOR,
+      role: "DISPENSADOR",
+      associationId: ASSOC,
+      now: NOW,
+    };
+    const result = await tool.handler({ cpf: "12345" }, ctx);
+    const data = JSON.parse(result.content[0]!.text) as Record<string, unknown>;
+    expect(data.error).toBe("INVALID_CPF");
+  });
+
+  it("returns READ_MODEL_STORE_UNAVAILABLE when readModelStore is not provided", async () => {
+    const { store } = await setupWithReadModel();
+    const tool = allTools.find((t) => t.name === "find_member_by_cpf");
+    if (tool === undefined) throw new Error("tool not found");
+    const ctx: ToolContext = {
+      store,
+      userId: ACTOR,
+      role: "DISPENSADOR",
+      associationId: ASSOC,
+      now: NOW,
+    };
+    const result = await tool.handler({ cpf: KNOWN_CPF }, ctx);
+    const data = JSON.parse(result.content[0]!.text) as Record<string, unknown>;
+    expect(data.error).toBe("READ_MODEL_STORE_UNAVAILABLE");
   });
 });

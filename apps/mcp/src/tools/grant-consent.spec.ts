@@ -66,13 +66,13 @@ describe("@canna/mcp / grant_consent tool — catalog", () => {
     expect(tool?.uiResourceUri).toBe("ui://member-quota-card/app.html");
   });
 
-  it("allTools now has 8 tools (3 read + 1 draft + 4 write)", () => {
-    expect(allTools).toHaveLength(8);
+  it("allTools now has 9 tools (4 read + 1 draft + 4 write)", () => {
+    expect(allTools).toHaveLength(9);
     const byLevel = new Map<number, number>();
     for (const t of allTools) {
       byLevel.set(t.riskLevel, (byLevel.get(t.riskLevel) ?? 0) + 1);
     }
-    expect(byLevel.get(1)).toBe(3);
+    expect(byLevel.get(1)).toBe(4);
     expect(byLevel.get(2)).toBe(1);
     expect(byLevel.get(3)).toBe(4);
   });

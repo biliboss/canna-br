@@ -1,5 +1,6 @@
 import type { ToolDefinition } from "../types.js";
 import { getMemberQuota } from "./get-member-quota.js";
+import { findMemberByCpf } from "./find-member-by-cpf.js";
 import { listAvailableLots } from "./list-available-lots.js";
 import { getTraceabilityReport } from "./get-traceability-report.js";
 import { draftDispensation } from "./draft-dispensation.js";
@@ -13,6 +14,7 @@ type AnyTool = ToolDefinition<Record<string, unknown>>;
 export const allTools: readonly AnyTool[] = [
   // Nível 1 — read-only
   getMemberQuota as unknown as AnyTool,
+  findMemberByCpf as unknown as AnyTool,
   listAvailableLots as unknown as AnyTool,
   getTraceabilityReport as unknown as AnyTool,
   // Nível 2 — draft (no state mutation)

@@ -19,6 +19,7 @@
     "@canna/crypto": "workspace:*",
     "@canna/domain": "workspace:*",
     "@canna/event-store": "workspace:*",
+    "@canna/read-models": "workspace:*",
     "@canna/shared": "workspace:*",
     "@canna/ui-apps": "workspace:*",
     "@modelcontextprotocol/sdk": "^1.0.4"

@@ -20,6 +20,12 @@ import type {
 export interface ReadModelStore {
   upsertMember(row: NewMemberRow): void;
   getMember(memberId: string): NewMemberRow | undefined;
+  /**
+   * Look up a member by the LGPD-safe cpfHash scoped to an association.
+   * Returns undefined when no row matches (member not registered or cpfHash
+   * belongs to a different association).
+   */
+  getMemberByCpfHash(cpfHash: string, associationId: string): NewMemberRow | undefined;
 
   upsertPrescription(row: NewPrescriptionRow): void;
   getPrescription(prescriptionId: string): NewPrescriptionRow | undefined;
@@ -70,6 +76,14 @@ export const createInMemoryStore = (): ReadModelStore => {
     },
     getMember(memberId) {
       return members.get(memberId);
+    },
+    getMemberByCpfHash(cpfHash, associationId) {
+      for (const row of members.values()) {
+        if (row.cpfHash === cpfHash && row.associationId === associationId) {
+          return row;
+        }
+      }
+      return undefined;
     },
 
     upsertPrescription(row) {
