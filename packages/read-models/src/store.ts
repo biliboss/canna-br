@@ -5,6 +5,7 @@ import type {
   NewMemberQuotaRow,
   NewMemberRow,
   NewPrescriptionRow,
+  MemberStatusValue,
 } from "./schema/index.js";
 
 /**
@@ -26,6 +27,14 @@ export interface ReadModelStore {
    * belongs to a different association).
    */
   getMemberByCpfHash(cpfHash: string, associationId: string): NewMemberRow | undefined;
+  /**
+   * Return all member rows for a given association, optionally filtered to a
+   * single MemberStatus. Used by `get_members_by_status` (lifecycle board).
+   */
+  listMembersByStatus(
+    associationId: string,
+    status?: MemberStatusValue,
+  ): readonly NewMemberRow[];
 
   upsertPrescription(row: NewPrescriptionRow): void;
   getPrescription(prescriptionId: string): NewPrescriptionRow | undefined;
@@ -84,6 +93,15 @@ export const createInMemoryStore = (): ReadModelStore => {
         }
       }
       return undefined;
+    },
+    listMembersByStatus(associationId, status) {
+      const result: NewMemberRow[] = [];
+      for (const row of members.values()) {
+        if (row.associationId !== associationId) continue;
+        if (status !== undefined && row.status !== status) continue;
+        result.push(row);
+      }
+      return result;
     },
 
     upsertPrescription(row) {

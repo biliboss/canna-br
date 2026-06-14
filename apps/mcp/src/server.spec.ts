@@ -264,14 +264,13 @@ describe("@canna/mcp / Nível 3 PendingAction stub", () => {
 });
 
 describe("@canna/mcp / MCP App resources (blocker #1)", () => {
-  // member-lifecycle-board is withheld from the registry (Option B, blocker
-  // #6): no backing get_member_lifecycle tool / cross-member read-model
-  // exists, so the server (driven by @canna/ui-apps allManifests) serves only
-  // the 3 launchable widget bundles. Re-add its URI here once the board ships.
+  // member-lifecycle-board now backed by get_members_by_status (Nível 1) —
+  // re-added to the registry alongside the other 3 launchable widget bundles.
   const EXPECTED_URIS = [
     "ui://member-quota-card/app.html",
     "ui://traceability-timeline/app.html",
     "ui://dispensation-form/app.html",
+    "ui://member-lifecycle-board/app.html",
   ];
 
   const connectClient = async () => {

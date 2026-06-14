@@ -9,6 +9,7 @@ import {
 // advertise an App whose primaryToolName is not a real, registered tool.
 const KNOWN_TOOL_NAMES = new Set([
   "get_member_quota",
+  "get_members_by_status",
   "list_available_lots",
   "generate_traceability_report",
   "draft_dispensation",
@@ -16,13 +17,14 @@ const KNOWN_TOOL_NAMES = new Set([
 ]);
 
 describe("@canna/ui-apps / registry", () => {
-  it("ships 3 launchable MCP Apps (lifecycle board withheld — no backing tool)", () => {
-    expect(allManifests).toHaveLength(3);
+  it("ships 4 launchable MCP Apps (incl. member-lifecycle-board)", () => {
+    expect(allManifests).toHaveLength(4);
     const ids = allManifests.map((m) => m.id);
     expect(ids).toEqual([
       "member-quota-card",
       "traceability-timeline",
       "dispensation-form",
+      "member-lifecycle-board",
     ]);
   });
 
@@ -61,6 +63,9 @@ describe("@canna/ui-apps / registry", () => {
     expect(manifestByUri("ui://dispensation-form/app.html")?.primaryToolName).toBe(
       "draft_dispensation",
     );
+    expect(manifestByUri("ui://member-lifecycle-board/app.html")?.primaryToolName).toBe(
+      "get_members_by_status",
+    );
   });
 
   it("DispensationForm declares secondary tools incl. request_record_dispensation (Level 3)", () => {
@@ -70,24 +75,20 @@ describe("@canna/ui-apps / registry", () => {
     expect(m?.riskLevel).toBe(3);
   });
 
-  it("MemberLifecycleBoard is NOT launchable until its backing tool ships", () => {
-    // Option B: the board renders an aggregate of all members by MemberStatus,
-    // but no `get_member_lifecycle` tool / cross-member read-model exists yet.
-    // It must not be advertised as launchable (would point at the wrong tool).
-    expect(manifestByUri("ui://member-lifecycle-board/app.html")).toBeUndefined();
-    expect(allManifests.map((m) => m.id)).not.toContain("member-lifecycle-board");
+  it("MemberLifecycleBoard is now launchable — backed by get_members_by_status", () => {
+    const m = manifestByUri("ui://member-lifecycle-board/app.html");
+    expect(m).toBeDefined();
+    expect(m?.id).toBe("member-lifecycle-board");
+    expect(m?.primaryToolName).toBe("get_members_by_status");
+    expect(m?.riskLevel).toBe(1);
   });
 
-  it("MemberLifecycleBoard manifest names no phantom tool (sentinel until backing tool ships)", () => {
-    // blocker #6: the manifest is still exported (package public API) but must
-    // NOT claim a tool that does not exist. Previously it pointed at
-    // `get_member_quota` (wrong payload) then `get_member_lifecycle` (phantom).
-    // It now carries an explicit __unavailable__ sentinel, never a real tool
-    // name, so no consumer of the exported manifest calls a non-existent tool.
+  it("MemberLifecycleBoard manifest no longer carries the __unavailable__ sentinel", () => {
     const m = memberLifecycleBoardManifest;
     expect(m.id).toBe("member-lifecycle-board");
-    expect(KNOWN_TOOL_NAMES.has(m.primaryToolName)).toBe(false);
-    expect(m.primaryToolName.startsWith("__unavailable__:")).toBe(true);
+    expect(m.primaryToolName.startsWith("__unavailable__:")).toBe(false);
+    expect(m.primaryToolName).toBe("get_members_by_status");
+    expect(KNOWN_TOOL_NAMES.has(m.primaryToolName)).toBe(true);
   });
 
   it("unknown URI returns undefined", () => {
