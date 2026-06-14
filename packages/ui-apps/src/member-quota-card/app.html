@@ -30,20 +30,41 @@
         text-transform: uppercase; letter-spacing: .08em; font-weight: 700; }
       .recent ul { margin: 0; padding: 0; list-style: none; }
       .recent li { padding: 4px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+      /* No-prescription state — shown when prescription is null or status is PENDING_CONSENT */
+      .no-prescription { display: none; margin-top: 10px; padding: 10px 12px;
+        border: 1px solid var(--border); border-radius: 6px;
+        background: var(--mcp-app-bg-secondary, #1c1917); }
+      .no-prescription .np-label { font-size: 11px; color: var(--muted);
+        text-transform: uppercase; letter-spacing: .08em; font-weight: 700; margin-bottom: 4px; }
+      .no-prescription .np-message { font-size: 12px; color: var(--fg); }
+      .no-prescription .np-next { margin-top: 6px; font-size: 11px; color: var(--warn);
+        font-family: ui-monospace, monospace; }
+      /* Quota view hidden while no-prescription panel is active */
+      .card[data-state="no-prescription"] #quota-view { display: none; }
+      .card[data-state="no-prescription"] .no-prescription { display: block; }
     </style>
   </head>
   <body>
     <div id="root" class="card">
       <div class="title" id="title">Loading member quota…</div>
       <div class="status" id="status"></div>
-      <div class="bar"><div class="fill" id="fill" style="width: 0%"></div></div>
-      <div class="row">
-        <span id="consumed">— g</span>
-        <span id="cap" class="meta">of — g</span>
+      <!-- No-prescription state (prescription null or PENDING_CONSENT) -->
+      <div class="no-prescription" id="no-prescription">
+        <div class="np-label">sem prescrição validada</div>
+        <div class="np-message" id="np-member-status"></div>
+        <div class="np-next">próximo passo: validate_prescription</div>
       </div>
-      <div class="recent">
-        <h3>Recent dispensations</h3>
-        <ul id="recent"></ul>
+      <!-- Normal quota view (hidden when no prescription) -->
+      <div id="quota-view">
+        <div class="bar"><div class="fill" id="fill" style="width: 0%"></div></div>
+        <div class="row">
+          <span id="consumed">— g</span>
+          <span id="cap" class="meta">of — g</span>
+        </div>
+        <div class="recent">
+          <h3>Recent dispensations</h3>
+          <ul id="recent"></ul>
+        </div>
       </div>
     </div>
     <script type="module" src="./main.ts"></script>

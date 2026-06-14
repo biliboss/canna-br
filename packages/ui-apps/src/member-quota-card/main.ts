@@ -17,7 +17,16 @@ interface MemberQuotaPayload {
   readonly memberId?: string;
   readonly status?: string;
   readonly consumedG?: number;
-  readonly prescription?: { readonly monthlyQuotaG?: number };
+  /**
+   * null when the member has no active prescription (e.g. status PENDING_CONSENT).
+   * Absent (undefined) means the field was not included — treated as "no prescription" too.
+   */
+  readonly prescription?: {
+    readonly monthlyQuotaG?: number;
+    readonly prescriptionId?: string;
+    readonly validFrom?: string;
+    readonly validUntil?: string;
+  } | null;
   readonly recent?: readonly RecentDispensation[];
 }
 
@@ -27,15 +36,36 @@ const byId = <T extends HTMLElement = HTMLElement>(id: string): T => {
   return el as T;
 };
 
+const root = byId("root");
 const titleEl = byId("title");
 const statusEl = byId("status");
+const noPrescriptionEl = byId("no-prescription");
+const npMemberStatusEl = byId("np-member-status");
 const fill = byId("fill");
 const consumedEl = byId("consumed");
 const capEl = byId("cap");
 const recentList = byId<HTMLUListElement>("recent");
 
-const render = (data: MemberQuotaPayload | null | undefined): void => {
-  if (!data) return;
+/**
+ * Returns true when the payload represents a member with no active prescription.
+ * This covers both:
+ *   - status === "PENDING_CONSENT" (member awaiting consent, no prescription yet)
+ *   - prescription === null (explicit null from the tool — validated but no Rx attached)
+ */
+const hasNoPrescription = (data: MemberQuotaPayload): boolean =>
+  data.status === "PENDING_CONSENT" || data.prescription === null || data.prescription === undefined;
+
+const renderNoPrescription = (data: MemberQuotaPayload): void => {
+  root.dataset["state"] = "no-prescription";
+  titleEl.textContent = data.memberId ?? "Member";
+  statusEl.textContent = `Status: ${data.status ?? "—"}`;
+  npMemberStatusEl.textContent = `membro ${data.status ?? "sem status"} — sem prescrição validada`;
+  // Ensure the no-prescription panel itself is visible (CSS [data-state] handles quota-view)
+  noPrescriptionEl.style.display = "block";
+};
+
+const renderQuota = (data: MemberQuotaPayload): void => {
+  root.removeAttribute("data-state");
   titleEl.textContent = data.memberId ?? "Member";
   statusEl.textContent = `Status: ${data.status ?? "—"}`;
   const cap = data.prescription?.monthlyQuotaG ?? 0;
@@ -52,6 +82,15 @@ const render = (data: MemberQuotaPayload | null | undefined): void => {
     const lotShort = d.lotId ? d.lotId.slice(0, 8) : "?";
     li.textContent = `${d.date} — ${d.quantityG} g (lot ${lotShort})`;
     recentList.appendChild(li);
+  }
+};
+
+const render = (data: MemberQuotaPayload | null | undefined): void => {
+  if (!data) return;
+  if (hasNoPrescription(data)) {
+    renderNoPrescription(data);
+  } else {
+    renderQuota(data);
   }
 };
 
