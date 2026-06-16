@@ -146,7 +146,7 @@ Não incluir no plano de DR.
 ## Future — Kamal v2 deploy
 
 v0.2.1.x cut: portar este compose pra `config/deploy.yml` Kamal e shippar em
-`canna.fonsecagabriel.com.br` (VPS 62.171.145.76). Ver `Kamal.deploy.notes.md`
+`api.cannabr.org` (VPS 62.171.145.76). Ver `Kamal.deploy.notes.md`
 para o plano completo. Reusa pattern do `langfuse-fonsecagabriel`.
 
 ---

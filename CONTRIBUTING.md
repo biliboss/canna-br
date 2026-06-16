@@ -4,7 +4,7 @@ Pré-código (v0.2.x → v0.3): contribuições via co-design com associações 
 
 ## Canais
 
-- Aplicar como piloto: https://canna-br.fonsecagabriel.com.br/open/seed-associations/
+- Aplicar como piloto: https://cannabr.org/open/seed-associations/
 - Issues: bugs do site, gaps de docs, propostas regulatórias
 - Discussions: arquitetura, ADRs, integrações MCP
 

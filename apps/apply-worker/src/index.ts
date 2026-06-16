@@ -7,7 +7,7 @@ interface Env {
 }
 
 const CORS = {
-  'Access-Control-Allow-Origin': 'https://canna-br.fonsecagabriel.com.br',
+  'Access-Control-Allow-Origin': 'https://cannabr.org',
   'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type',
 };

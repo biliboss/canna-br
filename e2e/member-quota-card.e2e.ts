@@ -2,7 +2,7 @@
  * PRODUCTION e2e harness — member-quota-card.
  *
  * Proves, against the LIVE MCP server (CANNA_MCP_URL, default
- * https://mcp.canna.fonsecagabriel.com.br), that:
+ * https://mcp.cannabr.org), that:
  *   1. the prod tool get_member_quota returns REAL remainingG for the seed member;
  *   2. tools/list advertises the widget with the SLASH-form _meta["ui/resourceUri"]
  *      (the ext-apps routing key — dot-form is the live-only bug → this is the guard);

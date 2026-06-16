@@ -83,7 +83,7 @@ function Shell({ suggestions = [], docsHref, commandCenter }: ShellProps) {
             <BreadcrumbList>
               <BreadcrumbItem className="hidden md:block">
                 <BreadcrumbLink
-                  href="https://canna-br.fonsecagabriel.com.br"
+                  href="https://cannabr.org"
                   target="_blank"
                   rel="noopener noreferrer"
                 >

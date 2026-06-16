@@ -4,9 +4,9 @@
 # This file is here for the *alternative* path where Caddy is the edge
 # (e.g. if migrating away from kamal-proxy or for the dev VPS).
 #
-# Wildcard cert for *.fonsecagabriel.com.br assumed.
+# Wildcard cert for *.cannabr.org assumed.
 
-canna.fonsecagabriel.com.br {
+api.cannabr.org {
 	reverse_proxy 127.0.0.1:3000  # apps/api
 
 	encode gzip zstd
@@ -27,7 +27,7 @@ canna.fonsecagabriel.com.br {
 	}
 }
 
-webui.canna.fonsecagabriel.com.br {
+app.cannabr.org {
 	reverse_proxy 127.0.0.1:8080  # Open WebUI
 
 	encode gzip zstd
@@ -53,7 +53,7 @@ webui.canna.fonsecagabriel.com.br {
 	}
 }
 
-mcp.canna.fonsecagabriel.com.br {
+mcp.cannabr.org {
 	reverse_proxy 127.0.0.1:3001  # apps/mcp HTTP/SSE (v0.2.1.x)
 
 	encode gzip zstd

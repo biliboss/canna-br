@@ -10,7 +10,7 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 
 export const MCP_URL =
-  process.env.CANNA_MCP_URL ?? "https://mcp.canna.fonsecagabriel.com.br";
+  process.env.CANNA_MCP_URL ?? "https://mcp.cannabr.org";
 const MEMBER = process.env.CANNA_TEST_MEMBER_ID ?? "01HM0MEMBER000000000000001";
 const ASSOC =
   process.env.CANNA_TEST_ASSOCIATION ?? "01HM0ASSOC0000000000000001";
