@@ -23,7 +23,13 @@ export async function POST(req: Request) {
     return Response.json({ error: "Missing method" }, { status: 400 });
   }
 
-  const client = await getMcpClient();
+  let client: Awaited<ReturnType<typeof getMcpClient>>;
+  try {
+    client = await getMcpClient();
+  } catch (e) {
+    const message = e instanceof Error ? e.message : String(e);
+    return Response.json({ error: message }, { status: 503 });
+  }
 
   try {
     switch (method) {
