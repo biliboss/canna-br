@@ -73,7 +73,7 @@ const shareTextLines = [
   `Oi ${firstName},`,
   ``,
   `Esse convite é seu — está na landing pública do canna-br:`,
-  `https://canna-br.fonsecagabriel.com.br/#circulo-convites-${slug}`,
+  `https://cannabr.org/#circulo-convites-${slug}`,
   ``,
   `Papel proposto: ${role}`,
   ...(roleSubtitle ? [roleSubtitle] : []),
@@ -84,7 +84,7 @@ const shareTextLines = [
   ...whyYou.slice(0, 3).map((w) => `• ${w}`),
   ``,
   `Se aceitar, responde por este email: gabriel@devmagic.com.br`,
-  `Se quiser ler antes: canna-br.fonsecagabriel.com.br/open/perguntas/`,
+  `Se quiser ler antes: cannabr.org/open/perguntas/`,
   ``,
   `— Gabriel`,
 ];
@@ -209,7 +209,7 @@ const shareText = shareTextLines.join("\n");
             aria-label={"Copiar p/ WhatsApp — convite de " + name}
             data-share-title={"Convite canna-br — " + name}
             data-share-text={shareText}
-            data-share-url={"https://canna-br.fonsecagabriel.com.br/#circulo-convites-" + slug}
+            data-share-url={"https://cannabr.org/#circulo-convites-" + slug}
           >
             <!-- WhatsApp-ish icon: speech bubble with phone silhouette (no brand lock-in) -->
             <svg class="ic-share-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">

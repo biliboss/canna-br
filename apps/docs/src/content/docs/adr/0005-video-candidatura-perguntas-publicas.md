@@ -261,7 +261,7 @@ Candidatura vídeo → Gabriel responde (personalizado) → associação entra n
   │      privacidade (link)                 │
   │  [ ] Consinto que minha pergunta e      │
   │      a resposta sejam publicadas em     │
-  │      canna-br.fonsecagabriel.com.br    │
+  │      cannabr.org    │
   │                                         │
   │  [Enviar] (disabled até ambos checked)  │
   └─────────────────────────────────────────┘

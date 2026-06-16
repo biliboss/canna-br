@@ -5,7 +5,7 @@ import starlightBlog from 'starlight-blog';
 import mermaid from 'astro-mermaid';
 
 export default defineConfig({
-  site: 'https://canna-br.fonsecagabriel.com.br',
+  site: 'https://cannabr.org',
   server: {
     port: 4335,
     host: '127.0.0.1',
@@ -33,7 +33,7 @@ export default defineConfig({
             gabriel: {
               name: 'Gabriel Fonseca',
               title: 'Fundador · canna-br',
-              url: 'https://canna-br.fonsecagabriel.com.br/about/',
+              url: 'https://cannabr.org/about/',
             },
           },
         }),
@@ -57,11 +57,11 @@ export default defineConfig({
         // MarketingLayout and don't go through this head.
         {
           tag: 'meta',
-          attrs: { property: 'og:image', content: 'https://canna-br.fonsecagabriel.com.br/og-default.png' },
+          attrs: { property: 'og:image', content: 'https://cannabr.org/og-default.png' },
         },
         {
           tag: 'meta',
-          attrs: { name: 'twitter:image', content: 'https://canna-br.fonsecagabriel.com.br/og-default.png' },
+          attrs: { name: 'twitter:image', content: 'https://cannabr.org/og-default.png' },
         },
         {
           tag: 'link',
