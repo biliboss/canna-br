@@ -1,0 +1,78 @@
+# lefthook.yml — quality gates, trunk-only main.
+#
+# These are GATES: exit≠0 BLOCKS the commit/push (that is the goal).
+# Distinct from Claude Code lifecycle hooks (Stop/PreTool), which are OPTIMISTIC
+# and never block a turn. See [[feedback-quality-gates-trunk-only]] vs
+# [[feedback-claude-code-hooks-optimistic]].
+#
+# Install (idempotent): pnpm gates:install   (→ lefthook install)
+# Contract self-check:   pnpm gates:verify    (→ node scripts/assert-gates.mjs)
+
+pre-commit:
+  parallel: false
+  commands:
+    01-main-guard:
+      run: |
+        branch="$(git rev-parse --abbrev-ref HEAD)"
+        if [ "$branch" != "main" ]; then
+          echo "✗ trunk-only: commits só na main (branch atual: $branch)" >&2
+          exit 1
+        fi
+    02-typecheck:
+      # Code packages only (positive-select; @canna/agent is already outside the
+      # pnpm workspace). @canna/docs runs `astro check` which is slow AND crashes
+      # (SIGABRT) — too heavy for a per-commit gate and it would trap the pipeline;
+      # public docs are guarded by 03-no-infra-host instead. The `!pkg` exclusion
+      # filter does NOT reliably exclude under `pnpm -r`, so we enumerate.
+      # @types/node is pinned to ^22 (root pnpm.overrides) so apps/mcp typechecks
+      # green on any local node, matching the deploy target.
+      run: pnpm --filter='./packages/*' --filter='@canna/api' --filter='@canna/mcp' --filter='@canna/worker' --if-present typecheck
+    03-no-infra-host-in-public-docs:
+      # [[feedback-no-infra-hosts-public-docs]] — infra host = org-secret, NUNCA
+      # no docsite público. Falha se um arquivo staged sob apps/docs/src/ vazar.
+      glob: "apps/docs/src/**/*"
+      run: |
+        leak="$(grep -l "fonsecagabriel" {staged_files} 2>/dev/null || true)"
+        if [ -n "$leak" ]; then
+          echo "✗ host infra 'fonsecagabriel' vazou em doc público:" >&2
+          echo "$leak" >&2
+          exit 1
+        fi
+
+post-commit:
+  # Observabilidade do trio backlog→code→green. Roda PÓS-commit (não pode
+  # bloquear); best-effort, sempre exit 0.
+  commands:
+    flow-log:
+      run: |
+        sha="$(git rev-parse --short HEAD 2>/dev/null || echo '?')"
+        subj="$(git log -1 --pretty=%s 2>/dev/null || echo '?')"
+        ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+        mkdir -p .canna 2>/dev/null || true
+        echo "$ts $sha $subj" >> .canna/flow.log 2>/dev/null || true
+        exit 0
+
+pre-push:
+  parallel: false
+  commands:
+    01-main-guard:
+      run: |
+        branch="$(git rev-parse --abbrev-ref HEAD)"
+        if [ "$branch" != "main" ]; then
+          echo "✗ trunk-only: push só da main (branch atual: $branch)" >&2
+          exit 1
+        fi
+    02-test:
+      run: pnpm -r --if-present test
+    03-build-widgets:
+      run: pnpm --filter @canna/ui-apps build
+    04-smoke-prod:
+      # SMOKE de PRODUÇÃO — [[feedback-test-in-production]]. app.cannabr.org deve
+      # responder 200 ou o push é BLOQUEADO.
+      run: |
+        code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 10 https://app.cannabr.org/health || echo 000)"
+        if [ "$code" != "200" ]; then
+          echo "✗ smoke prod: app.cannabr.org/health = $code (esperado 200)" >&2
+          exit 1
+        fi
+        echo "✓ smoke prod app.cannabr.org/health = 200"

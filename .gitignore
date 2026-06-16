@@ -41,3 +41,6 @@ ops/openwebui/smoke/
 
 # Private working drafts — invitation plans, thesis iterations (never publish)
 apps/docs/_drafts/
+
+# post-commit flow log (quality-gates)
+.canna/

@@ -18,15 +18,23 @@
     "verify": "pnpm typecheck && pnpm test",
     "validate": "pnpm typecheck && pnpm test && pnpm --filter @canna/ui-apps build && node scripts/validate-mcp-health.mjs",
     "test:e2e:prod": "playwright test",
-    "test:e2e:prod:list": "playwright test --list"
+    "test:e2e:prod:list": "playwright test --list",
+    "gates:install": "lefthook install",
+    "gates:verify": "node scripts/assert-gates.mjs"
   },
   "devDependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
     "@playwright/test": "^1.61.0",
+    "lefthook": "^2.1.9",
     "typescript": "^5.9.3"
   },
   "engines": {
     "node": ">=20.11",
     "pnpm": ">=10"
+  },
+  "pnpm": {
+    "overrides": {
+      "@types/node": "22.19.20"
+    }
   }
 }
