@@ -45,12 +45,17 @@ for u in https://mcp.cannabr.org/health https://api.cannabr.org/health \
   printf "%-45s " "$u"; curl -sS -o /dev/null -w "%{http_code}\n" --max-time 12 "$u"
 done
 
-# DIAGNOSIS (2026-06-16): mcp.cannabr.org/health == 200, but the MCP `initialize`
-# POST returns 500 text/plain (empty body, no app log) — and it does so EVEN when
-# hitting the container directly (proxy bypassed). So it is NOT a kamal-proxy
-# text/event-stream issue (green's hypothesis is refuted): the deployed image
-# (localhost:5555/canna-stack:v0.2.1.1, built 2026-06-09) is STALE. The fix
-# (commit 56f538a "fix(mcp): live chat-loop — per-request transport ...") is in
-# local HEAD but unshipped. Closing the loop requires a FRESH `kamal deploy` of
-# canna-stack-mcp (then re-run this script to re-point IPs). Deferred: deploys
-# [unverified] WIP + needs DATABASE_URL/JWT_SECRET/etc secrets (location TBD).
+# DIAGNOSIS (2026-06-16): the MCP `initialize` POST returned 500 text/plain even
+# container-direct (proxy bypassed) — NOT a kamal-proxy event-stream issue
+# (green's hypothesis refuted). Root cause: STALE deployed image
+# (canna-stack:v0.2.1.1, built 2026-06-09) predating fix 56f538a
+# ("fix(mcp): live chat-loop — per-request transport + _meta slash + auth headers").
+#
+# RESOLVED (2026-06-16, same day): tar-piped main (794ecff, fix included) → docker
+# build on VPS → canna-stack:v0.2.1.2 → swapped ONLY the canna-stack-mcp-v0211
+# container (env preserved, old renamed for rollback then removed) → re-pointed this
+# route to the new IP. VERIFIED LIVE: https://mcp.cannabr.org initialize → 200
+# text/event-stream, tools/list → 12 tools. kamal build push stays blocked on this
+# VPS (SSH port-forward) — direct docker build + run is the deploy path. To redeploy:
+# scp build context, `docker build -t localhost:5555/canna-stack:vX .`, swap container,
+# re-run this script for the fresh IP.
