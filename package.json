@@ -16,9 +16,13 @@
     "test:watch": "pnpm --filter @canna/domain test:watch",
     "coverage": "pnpm --filter @canna/domain coverage",
     "verify": "pnpm typecheck && pnpm test",
-    "validate": "pnpm typecheck && pnpm test && pnpm --filter @canna/ui-apps build && node scripts/validate-mcp-health.mjs"
+    "validate": "pnpm typecheck && pnpm test && pnpm --filter @canna/ui-apps build && node scripts/validate-mcp-health.mjs",
+    "test:e2e:prod": "playwright test",
+    "test:e2e:prod:list": "playwright test --list"
   },
   "devDependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "@playwright/test": "^1.61.0",
     "typescript": "^5.9.3"
   },
   "engines": {
