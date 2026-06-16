@@ -1,6 +1,6 @@
 # Architecture
 
-Documentação canônica viva em https://canna-br.fonsecagabriel.com.br/build/
+Documentação canônica viva em https://cannabr.org/build/
 
 - Big Picture: /build/big-picture/
 - Stack: /build/stack/

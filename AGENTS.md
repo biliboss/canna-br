@@ -10,10 +10,10 @@ package_manager: pnpm
 branch: feature/mcp-first-pivot (NÃO merged main per Mission Mode directive)
 tags: [v0.1.0, v0.2.1, v0.2.1.1, v0.2.1.2]
 production_urls:
-  api: https://canna.fonsecagabriel.com.br
-  webui: https://webui.canna.fonsecagabriel.com.br
-  mcp: https://mcp.canna.fonsecagabriel.com.br
-deploy_target: canna.fonsecagabriel.com.br (Kamal v2 LIVE 2026-06-08, VPS 62.171.145.76 shared c/ Langfuse, wildcard DNS)
+  api: https://api.cannabr.org
+  webui: https://app.cannabr.org
+  mcp: https://mcp.cannabr.org
+deploy_target: api.cannabr.org (Kamal v2 LIVE 2026-06-08, VPS 62.171.145.76 shared c/ Langfuse, wildcard DNS)
 deploy_evidence: ops/openwebui/kamal/smoke-v0.2.1.1/ (7 screenshots + 3 health JSONs + admin-credentials.txt gitignored)
 admin_credentials: ops/openwebui/kamal/smoke-v0.2.1.1/admin-credentials.txt (gitignored, mode 600 — admin@canna.local)
 site_url: http://localhost:4335
@@ -24,9 +24,9 @@ site_url: http://localhost:4335
 OSS cannabis association management system for Brazil, RDC 1.014/2026 sandbox. Self-hosted. AGPL-3.0 + CLA. DDD-designed + event-sourced kernel + **MCP-first agentic surface**.
 
 **Current status (v0.2.1.2 LIVE 2026-06-08):** 3 production URLs serving 200 via Kamal v2 on VPS 62.171.145.76:
-- `canna.fonsecagabriel.com.br/health` → apps/api Fastify
-- `webui.canna.fonsecagabriel.com.br/health` → Open WebUI v0.9.6 (MCP server `canna-dispensations` registered)
-- `mcp.canna.fonsecagabriel.com.br/health` → apps/mcp StreamableHTTP
+- `api.cannabr.org/health` → apps/api Fastify
+- `app.cannabr.org/health` → Open WebUI v0.9.6 (MCP server `canna-dispensations` registered)
+- `mcp.cannabr.org/health` → apps/mcp StreamableHTTP
 
 12 workspaces, 154/154 tests green. Branch `feature/mcp-first-pivot` + tags pushed origin; **NOT merged main** per Mission Mode directive — Gabriel revisa em batch antes do merge.
 
@@ -42,7 +42,7 @@ Previous phases:
 - v0.2.0b — Emmett Postgres adapter validated via testcontainers (6 PG specs green)
 - v0.2.1 — 7 sub-agent fanout (apps/api + read-models + crypto + ops/openwebui + worker+sngpc + ui-apps singlefile + OWUI smoke) tagged 2026-06-08
 - v0.2.1.1 — server.ts entrypoints + Kamal scaffold + OWUI seed script + ADR-002 smoke + RELEASE_NOTES, tagged 2026-06-08
-- v0.2.1.2 — DEPLOY LIVE on canna.fonsecagabriel.com.br, tagged 2026-06-08
+- v0.2.1.2 — DEPLOY LIVE on api.cannabr.org, tagged 2026-06-08
 
 ---
 

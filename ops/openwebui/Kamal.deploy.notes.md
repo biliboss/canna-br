@@ -1,4 +1,4 @@
-# Kamal v2 deploy plan — canna OWUI on `canna.fonsecagabriel.com.br`
+# Kamal v2 deploy plan — canna OWUI on `api.cannabr.org`
 
 **Target cut**: v0.2.1.x (após v0.2.1 estabilizar local com docker compose).
 
@@ -8,11 +8,11 @@ _memory/project-langfuse.md).
 ## Topology
 
 - **VPS**: 62.171.145.76 (Contabo, compartilhada com Langfuse)
-- **DNS**: wildcard `*.fonsecagabriel.com.br` já apontando — sem DNS extra
+- **DNS**: wildcard `*.cannabr.org` já apontando — sem DNS extra
 - **Hostnames**:
-  - `canna.fonsecagabriel.com.br` → `apps/api` (REST + GraphQL + L4 TOTP)
-  - `webui.canna.fonsecagabriel.com.br` → Open WebUI
-  - `mcp.canna.fonsecagabriel.com.br` → `apps/mcp` SSE/HTTP (após cut stdio→HTTP)
+  - `api.cannabr.org` → `apps/api` (REST + GraphQL + L4 TOTP)
+  - `app.cannabr.org` → Open WebUI
+  - `mcp.cannabr.org` → `apps/mcp` SSE/HTTP (após cut stdio→HTTP)
 - **Proxy**: kamal-proxy (default, port 80/443) — coexiste com Langfuse pelas portas
   pq cada app sobe seu próprio kamal-proxy? **REVISAR**: provavelmente queremos
   Caddy host-level fazendo fan-out, com Kamal `proxy.host` apontando pro upstream
@@ -53,7 +53,7 @@ ops/openwebui/
 2. `kamal setup` — primeira deploy provisiona Docker, proxy, accessories
 3. `kamal deploy --version 0.2.1` — subsequentes
 4. `kamal proxy reboot --rolling` se touch no proxy
-5. Smoke: `curl -fsS https://webui.canna.fonsecagabriel.com.br/health`
+5. Smoke: `curl -fsS https://app.cannabr.org/health`
 6. SSO: trocar `ENABLE_PASSWORD_FORM=False` + wire Authentik secrets via `kamal secrets push`
 
 ## Open questions (parking lot)

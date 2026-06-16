@@ -1,13 +1,13 @@
 # canna-oss Open WebUI — Caddy reverse proxy example
 #
-# Wildcard cert for *.fonsecagabriel.com.br is assumed (Let's Encrypt DNS-01
+# Wildcard cert for *.cannabr.org is assumed (Let's Encrypt DNS-01
 # via Caddy's tls block, or pre-issued). Drop this snippet into the host
 # Caddyfile alongside other apps on VPS 62.171.145.76.
 #
-# Subdomain reservation: `canna.fonsecagabriel.com.br` is the production
-# canna-api host; `webui.canna.fonsecagabriel.com.br` fronts OWUI.
+# Subdomain reservation: `api.cannabr.org` is the production
+# canna-api host; `app.cannabr.org` fronts OWUI.
 
-webui.canna.fonsecagabriel.com.br {
+app.cannabr.org {
 	reverse_proxy 127.0.0.1:8080
 
 	encode gzip zstd
