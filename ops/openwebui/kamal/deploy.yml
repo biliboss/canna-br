@@ -115,35 +115,5 @@ accessories:
     directories:
       - canna_redis_data:/data
 
-  openwebui:
-    image: ghcr.io/open-webui/open-webui:v0.9.6
-    host: 62.171.145.76
-    proxy:
-      ssl: true
-      app_port: 8080
-      healthcheck:
-        path: /health
-        interval: 10
-        timeout: 60
-      hosts:
-        - app.cannabr.org
-    env:
-      clear:
-        ENABLE_PASSWORD_FORM: "True"
-        ENABLE_SIGNUP: "True"
-        ENABLE_KB_EXEC: "False"
-        ENABLE_COMMUNITY_SHARING: "False"
-        ENABLE_MESSAGE_RATING: "True"
-        SCARF_NO_ANALYTICS: "true"
-        DO_NOT_TRACK: "true"
-        ANONYMIZED_TELEMETRY: "false"
-        MCP_INITIALIZE_TIMEOUT: "30000"
-        CHAT_RESPONSE_MAX_TOOL_CALL_ITERATIONS: "256"
-        UVICORN_WORKERS: "2"
-        WEBUI_URL: https://app.cannabr.org
-      secret:
-        - WEBUI_DATABASE_URL
-        - WEBUI_REDIS_URL
-        - WEBUI_SECRET_KEY
-    directories:
-      - canna_webui_data:/app/backend/data
+  # openwebui removed 2026-06-17 — replaced by canna-agent (ops/agent/kamal/deploy.yml)
+  # app.cannabr.org now served by @canna/agent (Next 16 + assistant-ui).

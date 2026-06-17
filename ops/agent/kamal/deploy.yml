@@ -1,0 +1,64 @@
+# canna-br — Kamal v2 deploy config for @canna/agent (assistant-ui chat surface)
+# Target:  VPS 62.171.145.76 (shared w/ canna-stack + Langfuse)
+# DNS:     app.cannabr.org (wildcard *.cannabr.org)
+# Replaces: openwebui accessory (removed from ops/openwebui/kamal/deploy.yml)
+#
+# Build context: apps/agent/ (standalone — workspace-excluded, vendor/ committed)
+# Image: node:22-alpine standalone Next.js output, PORT 3002.
+#
+# REUSE PATTERNS (feedback-kamal-v2-gotchas):
+#   - registry.server: localhost:5555 → skips docker login
+#   - deploy_timeout: 240
+#   - SSH via IP
+#   - env.clear does NOT expand $VAR
+
+service: canna-agent
+image: canna-agent
+
+servers:
+  web:
+    hosts:
+      - 62.171.145.76
+    proxy:
+      ssl: true
+      app_port: 3002
+      healthcheck:
+        path: /health
+        interval: 10
+        timeout: 60
+      hosts:
+        - app.cannabr.org
+
+registry:
+  server: localhost:5555
+  username: kamal
+  password:
+    - KAMAL_REGISTRY_PASSWORD
+
+builder:
+  arch: amd64
+  remote: ssh://root@62.171.145.76
+  # Build context is apps/agent/ — standalone build, no repo root needed.
+  dockerfile: apps/agent/Dockerfile
+  context: apps/agent
+  args:
+    NODE_VERSION: "22"
+
+deploy_timeout: 240
+drain_timeout: 30
+
+env:
+  clear:
+    NODE_ENV: production
+    MCP_ENABLED: "1"
+    # MCP server on the same VPS — use Docker bridge IP or internal service name.
+    # canna-stack mcp role listens on :3001 internally; expose via kamal network
+    # or hardcode the VPS private IP. Use 127.0.0.1 because the builder runs
+    # on the same host (both in kamal network); revisit if separated.
+    MCP_SERVER_URL: http://127.0.0.1:3001
+    NEXT_PUBLIC_DOCS_URL: https://docs.cannabr.org
+    # Basic-auth gate — unset in .env.secret to disable (dev mode).
+    AGENT_BASIC_AUTH_USER: canna
+  secret:
+    - AGENT_BASIC_AUTH_PASS
+    - OPENROUTER_API_KEY

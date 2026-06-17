@@ -1,21 +1,20 @@
 ---
 project: canna-oss
 repo: /Users/billiboss/.obsidian/99-development/canna-oss
-current_phase: v0.2.1.2-LIVE
-current_focus: post-deploy polish + LLM API key wiring no OWUI + MCP App inline render validation
-surface_pivot: MCP-first (ADR-002 — 2026-06-08). Open WebUI + MCP server + MCP Apps substitui admin Next.js. NO apps/admin no roadmap.
+current_phase: assistant-ui-pivot
+current_focus: deploy apps/agent em app.cannabr.org (substituindo Open WebUI)
+surface_pivot: MCP-first (ADR-002 — 2026-06-08). apps/agent (Next 16 + assistant-ui) substitui Open WebUI. NO apps/admin no roadmap.
 do_not_start:
   - apps/admin (Ideas Park; substituído por MCP Apps)
 package_manager: pnpm
-branch: feature/mcp-first-pivot (NÃO merged main per Mission Mode directive)
+branch: main
 tags: [v0.1.0, v0.2.1, v0.2.1.1, v0.2.1.2]
 production_urls:
   api: https://api.cannabr.org
-  webui: https://app.cannabr.org
+  agent: https://app.cannabr.org
   mcp: https://mcp.cannabr.org
-deploy_target: api.cannabr.org (Kamal v2 LIVE 2026-06-08, VPS 62.171.145.76 shared c/ Langfuse, wildcard DNS)
-deploy_evidence: ops/openwebui/kamal/smoke-v0.2.1.1/ (7 screenshots + 3 health JSONs + admin-credentials.txt gitignored)
-admin_credentials: ops/openwebui/kamal/smoke-v0.2.1.1/admin-credentials.txt (gitignored, mode 600 — admin@canna.local)
+deploy_target: api.cannabr.org + app.cannabr.org (Kamal v2 LIVE 2026-06-08, VPS 62.171.145.76)
+agent_deploy_config: ops/agent/kamal/deploy.yml (canna-agent service, substituiu openwebui accessory)
 site_url: http://localhost:4335
 ---
 
@@ -23,10 +22,12 @@ site_url: http://localhost:4335
 
 OSS cannabis association management system for Brazil, RDC 1.014/2026 sandbox. Self-hosted. AGPL-3.0 + CLA. DDD-designed + event-sourced kernel + **MCP-first agentic surface**.
 
-**Current status (v0.2.1.2 LIVE 2026-06-08):** 3 production URLs serving 200 via Kamal v2 on VPS 62.171.145.76:
-- `api.cannabr.org/health` → apps/api Fastify
-- `app.cannabr.org/health` → Open WebUI v0.9.6 (MCP server `canna-dispensations` registered)
-- `mcp.cannabr.org/health` → apps/mcp StreamableHTTP
+**Current status (assistant-ui-pivot 2026-06-17):** Substituindo Open WebUI por apps/agent (Next 16 + assistant-ui):
+- `api.cannabr.org/health` → apps/api Fastify (LIVE)
+- `app.cannabr.org` → **apps/agent** (Next 16 + assistant-ui — deploy pendente via ops/agent/kamal/deploy.yml)
+- `mcp.cannabr.org/health` → apps/mcp StreamableHTTP (LIVE)
+
+Open WebUI removido do Kamal config (era accessory em ops/openwebui/kamal/deploy.yml).
 
 12 workspaces, 154/154 tests green. Branch `feature/mcp-first-pivot` + tags pushed origin; **NOT merged main** per Mission Mode directive — Gabriel revisa em batch antes do merge.
 
