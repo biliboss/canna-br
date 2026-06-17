@@ -1225,6 +1225,32 @@ html, body {
   gap: var(--space-2);
 }
 
+/* ── lifecycle action buttons (role-gated) ───────────────────────────────── */
+.aui-cardlet__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: var(--space-2);
+}
+.aui-action {
+  font: inherit;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  line-height: 1;
+  padding: 5px 9px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--foreground);
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+.aui-action:hover { background: var(--muted, #27272a); }
+.aui-action:focus-visible { outline: 2px solid var(--ring, var(--fl-2)); outline-offset: 1px; }
+.aui-action[disabled] { opacity: 0.45; cursor: not-allowed; }
+.aui-action--danger { border-color: var(--destructive, #ef4444); color: var(--destructive, #ef4444); }
+.aui-action--danger:hover { background: color-mix(in srgb, var(--destructive, #ef4444) 14%, transparent); }
+
 
 </style>
 </head>
@@ -1241,7 +1267,7 @@ html, body {
 <div class="aui-board" id="board"></div>
   </div>
 </main>
-<script>window.__DATA__ = {"columns":[{"key":"PENDING_CONSENT","title":"Aguardando Consentimento","wipLimit":5},{"key":"ACTIVE","title":"Ativo","wipLimit":null},{"key":"SUSPENDED","title":"Suspenso","wipLimit":null},{"key":"CONSENT_REVOKED","title":"Consentimento Revogado","wipLimit":null},{"key":"ANONYMIZED","title":"Anonimizado","wipLimit":null}],"cards":[{"id":"MBR-2400","alias":"P. H. Nunes","cpfSuffix":"d4d5d4","status":"PENDING_CONSENT","daysInStatus":30,"cos":"expedite"},{"id":"MBR-2401","alias":"F. G. Rodrigues","cpfSuffix":"790ac1","status":"PENDING_CONSENT","daysInStatus":19,"cos":"standard"},{"id":"MBR-2402","alias":"R. T. Santos","cpfSuffix":"fa656c","status":"PENDING_CONSENT","daysInStatus":33,"cos":"expedite"},{"id":"MBR-2403","alias":"M. R. Souza","cpfSuffix":"4df3a1","status":"PENDING_CONSENT","daysInStatus":30,"cos":"expedite"},{"id":"MBR-2404","alias":"V. D. Teixeira","cpfSuffix":"91f925","status":"PENDING_CONSENT","daysInStatus":4,"cos":"standard"},{"id":"MBR-2405","alias":"B. A. Pereira","cpfSuffix":"6151f1","status":"PENDING_CONSENT","daysInStatus":6,"cos":"standard"},{"id":"MBR-2406","alias":"A. S. Oliveira","cpfSuffix":"2a687c","status":"ACTIVE","daysInStatus":138,"cos":"standard"},{"id":"MBR-2407","alias":"I. R. Macedo","cpfSuffix":"a65671","status":"ACTIVE","daysInStatus":73,"cos":"standard"},{"id":"MBR-2408","alias":"C. F. Lima","cpfSuffix":"ac5f64","status":"ACTIVE","daysInStatus":35,"cos":"standard"},{"id":"MBR-2409","alias":"E. B. Fonseca","cpfSuffix":"e73343","status":"ACTIVE","daysInStatus":23,"cos":"standard"},{"id":"MBR-2410","alias":"S. L. Moraes","cpfSuffix":"45a895","status":"ACTIVE","daysInStatus":120,"cos":"standard"},{"id":"MBR-2411","alias":"T. E. Barbosa","cpfSuffix":"5d85f8","status":"SUSPENDED","daysInStatus":13,"cos":"standard","reason":"Quota mensal excedida","blocked":true,"blockReason":"Quota mensal excedida"},{"id":"MBR-2412","alias":"D. C. Carvalho","cpfSuffix":"2ca3ee","status":"SUSPENDED","daysInStatus":48,"cos":"standard","reason":"Pendência documental (RT)","blocked":true,"blockReason":"Pendência documental (RT)"},{"id":"MBR-2413","alias":"L. M. Costa","cpfSuffix":"f02687","status":"SUSPENDED","daysInStatus":44,"cos":"standard","reason":"Pendência documental (RT)","blocked":true,"blockReason":"Pendência documental (RT)"},{"id":"MBR-2414","alias":"H. M. Araújo","cpfSuffix":"8b2489","status":"CONSENT_REVOKED","daysInStatus":28,"cos":"fixed-date","reason":"Solicitação do titular"},{"id":"MBR-2415","alias":"N. O. Cardoso","cpfSuffix":"6c359b","status":"ANONYMIZED","daysInStatus":82,"cos":"standard"}],"counts":{"PENDING_CONSENT":6,"ACTIVE":5,"SUSPENDED":3,"CONSENT_REVOKED":1,"ANONYMIZED":1},"total":16,"blockedCount":3,"expediteCount":3,"overCols":[{"key":"PENDING_CONSENT","title":"Aguardando Consentimento","count":6,"limit":5}],"consentExpediteDays":21};</script>
+<script>window.__DATA__ = {"columns":[{"key":"PENDING_CONSENT","title":"Aguardando Consentimento","wipLimit":5},{"key":"ACTIVE","title":"Ativo","wipLimit":null},{"key":"SUSPENDED","title":"Suspenso","wipLimit":null},{"key":"CONSENT_REVOKED","title":"Consentimento Revogado","wipLimit":null},{"key":"ANONYMIZED","title":"Anonimizado","wipLimit":null}],"cards":[{"id":"MBR-2400","alias":"P. H. Nunes","cpfSuffix":"d4d5d4","status":"PENDING_CONSENT","daysInStatus":30,"cos":"expedite"},{"id":"MBR-2401","alias":"F. G. Rodrigues","cpfSuffix":"790ac1","status":"PENDING_CONSENT","daysInStatus":19,"cos":"standard"},{"id":"MBR-2402","alias":"R. T. Santos","cpfSuffix":"fa656c","status":"PENDING_CONSENT","daysInStatus":33,"cos":"expedite"},{"id":"MBR-2403","alias":"M. R. Souza","cpfSuffix":"4df3a1","status":"PENDING_CONSENT","daysInStatus":30,"cos":"expedite"},{"id":"MBR-2404","alias":"V. D. Teixeira","cpfSuffix":"91f925","status":"PENDING_CONSENT","daysInStatus":4,"cos":"standard"},{"id":"MBR-2405","alias":"B. A. Pereira","cpfSuffix":"6151f1","status":"PENDING_CONSENT","daysInStatus":6,"cos":"standard"},{"id":"MBR-2406","alias":"A. S. Oliveira","cpfSuffix":"2a687c","status":"ACTIVE","daysInStatus":138,"cos":"standard"},{"id":"MBR-2407","alias":"I. R. Macedo","cpfSuffix":"a65671","status":"ACTIVE","daysInStatus":73,"cos":"standard"},{"id":"MBR-2408","alias":"C. F. Lima","cpfSuffix":"ac5f64","status":"ACTIVE","daysInStatus":35,"cos":"standard"},{"id":"MBR-2409","alias":"E. B. Fonseca","cpfSuffix":"e73343","status":"ACTIVE","daysInStatus":23,"cos":"standard"},{"id":"MBR-2410","alias":"S. L. Moraes","cpfSuffix":"45a895","status":"ACTIVE","daysInStatus":120,"cos":"standard"},{"id":"MBR-2411","alias":"T. E. Barbosa","cpfSuffix":"5d85f8","status":"SUSPENDED","daysInStatus":13,"cos":"standard","reason":"Quota mensal excedida","blocked":true,"blockReason":"Quota mensal excedida"},{"id":"MBR-2412","alias":"D. C. Carvalho","cpfSuffix":"2ca3ee","status":"SUSPENDED","daysInStatus":48,"cos":"standard","reason":"Pendência documental (RT)","blocked":true,"blockReason":"Pendência documental (RT)"},{"id":"MBR-2413","alias":"L. M. Costa","cpfSuffix":"f02687","status":"SUSPENDED","daysInStatus":44,"cos":"standard","reason":"Pendência documental (RT)","blocked":true,"blockReason":"Pendência documental (RT)"},{"id":"MBR-2414","alias":"H. M. Araújo","cpfSuffix":"8b2489","status":"CONSENT_REVOKED","daysInStatus":28,"cos":"fixed-date","reason":"Solicitação do titular"},{"id":"MBR-2415","alias":"N. O. Cardoso","cpfSuffix":"6c359b","status":"ANONYMIZED","daysInStatus":82,"cos":"standard"}],"counts":{"PENDING_CONSENT":6,"ACTIVE":5,"SUSPENDED":3,"CONSENT_REVOKED":1,"ANONYMIZED":1},"total":16,"blockedCount":3,"expediteCount":3,"overCols":[{"key":"PENDING_CONSENT","title":"Aguardando Consentimento","count":6,"limit":5}],"consentExpediteDays":21,"viewerRole":"DIRETORIA"};</script>
 <script>(function () {
   var NS = 'http://www.w3.org/2000/svg';
 
@@ -1731,6 +1757,66 @@ function render(data) {
       }
 
       cardEl.appendChild(meta);
+
+      // ── lifecycle transition actions (role-gated) ──
+      // viewerRole arrives in the tool payload (data.viewerRole). When absent,
+      // NO action buttons render (fail-closed) — the assistant can still be
+      // asked for detail by clicking the card.
+      // TODO(cb-lifecycle-board-actions): have get_members_by_status emit
+      // structuredContent.viewerRole (from ctx role) so live host calls gate.
+      var viewerRole = data.viewerRole || null;
+      // allowedRoles mirror the MCP tool definitions (apps/mcp/src/tools/*).
+      var ACTIONS_BY_STATUS = {
+        'PENDING_CONSENT': [
+          { tool: 'grant_consent', label: 'Registrar consentimento', roles: ['RESPONSAVEL_TECNICO', 'DIRETORIA'] }
+        ],
+        'ACTIVE': [
+          { tool: 'suspend_member', label: 'Suspender', roles: ['RESPONSAVEL_TECNICO', 'DIRETORIA'], needsReason: true },
+          { tool: 'revoke_consent', label: 'Revogar consentimento', roles: ['RESPONSAVEL_TECNICO', 'DIRETORIA', 'DPO'], danger: true },
+          { tool: 'anonymize_member', label: 'Anonimizar', roles: ['DPO', 'DIRETORIA'], danger: true }
+        ],
+        'SUSPENDED': [
+          { tool: 'reinstate_member', label: 'Reativar', roles: ['RESPONSAVEL_TECNICO', 'DIRETORIA'] },
+          { tool: 'anonymize_member', label: 'Anonimizar', roles: ['DPO', 'DIRETORIA'], danger: true }
+        ],
+        'CONSENT_REVOKED': [
+          { tool: 'anonymize_member', label: 'Anonimizar', roles: ['DPO', 'DIRETORIA'], danger: true }
+        ]
+        // ANONYMIZED = terminal, no transitions.
+      };
+      var actionDefs = (ACTIONS_BY_STATUS[c.status] || []).filter(function (a) {
+        return viewerRole && a.roles.indexOf(viewerRole) !== -1;
+      });
+      if (actionDefs.length) {
+        var actions = document.createElement('div');
+        actions.className = 'aui-cardlet__actions';
+        actionDefs.forEach(function (a) {
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'aui-action' + (a.danger ? ' aui-action--danger' : '');
+          btn.textContent = a.label;
+          btn.setAttribute('data-tool', a.tool);
+          btn.setAttribute('data-member', c.id);
+          btn.addEventListener('click', function (ev) {
+            ev.stopPropagation();
+            var args = { memberId: c.id };
+            if (a.needsReason) {
+              var r = (typeof window.prompt === 'function')
+                ? window.prompt('Motivo da ' + a.label.toLowerCase() + ' (' + c.alias + '):')
+                : null;
+              if (r == null || !String(r).trim()) return;
+              args.reason = String(r).trim();
+            }
+            try {
+              if (window.AuiBridge && typeof window.AuiBridge.callTool === 'function') {
+                window.AuiBridge.callTool(a.tool, args);
+              }
+            } catch (e) { /* AuiBridge absent in raw preview */ }
+          });
+          actions.appendChild(btn);
+        });
+        cardEl.appendChild(actions);
+      }
 
       // ── interaction: ask the assistant for this associate's detail ──
       var ask = function () {
