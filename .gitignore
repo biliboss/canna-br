@@ -44,3 +44,6 @@ apps/docs/_drafts/
 
 # post-commit flow log (quality-gates)
 .canna/
+
+# generated coverage gate artifact (cb-pre-push-gate-full-suite)
+releases/coverage.json

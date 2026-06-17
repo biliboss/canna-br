@@ -415,9 +415,24 @@ importers:
         specifier: workspace:*
         version: link:../../packages/shared
     devDependencies:
+      '@canna/domain':
+        specifier: workspace:*
+        version: link:../../packages/domain
+      '@canna/read-models':
+        specifier: workspace:*
+        version: link:../../packages/read-models
       '@canna/tsconfig':
         specifier: workspace:*
         version: link:../tsconfig
+      '@electric-sql/pglite':
+        specifier: ^0.5.3
+        version: 0.5.3
+      '@vitest/coverage-v8':
+        specifier: ^2.1.9
+        version: 2.1.9(vitest@2.1.9(@types/node@22.19.20)(jsdom@29.1.1)(lightningcss@1.32.0))
+      drizzle-orm:
+        specifier: ^0.36.0
+        version: 0.36.4(@cloudflare/workers-types@4.20260610.1)(@electric-sql/pglite@0.5.3)(@opentelemetry/api@1.9.1)(@types/pg@8.20.0)(@types/react@19.2.17)(pg@8.21.0)(react@19.2.7)
       typescript:
         specifier: ^5.9.3
         version: 5.9.3

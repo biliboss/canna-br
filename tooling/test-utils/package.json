@@ -21,8 +21,11 @@
   },
   "devDependencies": {
     "@canna/domain": "workspace:*",
+    "@canna/read-models": "workspace:*",
     "@canna/tsconfig": "workspace:*",
+    "@electric-sql/pglite": "^0.5.3",
     "@vitest/coverage-v8": "^2.1.9",
+    "drizzle-orm": "^0.36.0",
     "typescript": "^5.9.3",
     "vitest": "^2.1.9"
   }

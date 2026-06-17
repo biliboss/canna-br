@@ -62,6 +62,10 @@ pre-push:
           echo "✗ trunk-only: push só da main (branch atual: $branch)" >&2
           exit 1
         fi
+    02-validate-typecheck:
+      # Full-suite typecheck gate (mirrors `pnpm validate:typecheck`). Catches
+      # type breaks across every workspace package before they hit the trunk.
+      run: pnpm validate:typecheck
     02-test:
       run: pnpm -r --if-present test
     03-build-widgets:
@@ -76,3 +80,8 @@ pre-push:
           exit 1
         fi
         echo "✓ smoke prod app.cannabr.org/health = 200"
+    05-coverage-gate:
+      # cb-pre-push-gate-full-suite — run domain coverage, emit
+      # releases/coverage.json, and BLOCK the push if line coverage drops below
+      # COVERAGE_FLOOR (default 90; baseline at introduction was 93.61%).
+      run: pnpm coverage:report
