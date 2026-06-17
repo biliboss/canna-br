@@ -6,3 +6,9 @@ export {
   auditLogKey,
   type ReadModelStore,
 } from "./store.js";
+export {
+  createPostgresStore,
+  createPostgresStoreFromConnectionString,
+  type ReadModelQuery,
+  type AnyPgDatabase,
+} from "./pg-store.js";
