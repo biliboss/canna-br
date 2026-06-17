@@ -48,6 +48,30 @@ export const createCannaApi = async (
     origin: deps.corsOrigin ?? false,
   });
 
+  // Entry-point trace: one structured span per request (method, route, status,
+  // latency). level=error for 5xx so log pipelines can alert. Best-effort —
+  // wrapped so an instrumentation fault never breaks a request. Mirrors the MCP
+  // host's per-tool span; both feed the same observability story.
+  app.addHook("onResponse", async (req, reply) => {
+    try {
+      const status = reply.statusCode;
+      process.stderr.write(
+        `${JSON.stringify({
+          kind: "api.request.span",
+          level: status >= 500 ? "error" : "info",
+          method: req.method,
+          route: req.routeOptions?.url ?? req.url,
+          status,
+          latencyMs: Math.round(reply.elapsedTime),
+          ok: status < 500,
+          ts: new Date().toISOString(),
+        })}\n`,
+      );
+    } catch {
+      /* telemetry must never break a request */
+    }
+  });
+
   await registerHealthRoutes(app, deps);
   await registerCommandRoutes(app, deps);
   await registerAdminRoutes(app, deps);

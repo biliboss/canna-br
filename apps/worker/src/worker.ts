@@ -79,11 +79,49 @@ export const createCannaWorker = (deps: CreateCannaWorkerDeps): CannaWorker => {
 
   let started = false;
 
+  // Entry-point trace for jobs: time each processor, emit one structured span
+  // per job (queue, latency, ok). level=error on failure so log pipelines can
+  // alert. Best-effort — the span emit is wrapped and never alters job control
+  // flow (errors re-throw so BullMQ retry/DLQ still triggers). Mirrors the MCP
+  // host's per-tool span.
+  const traced =
+    <J, R>(queue: string, fn: (job: J) => Promise<R>) =>
+    (job: J): Promise<R> => {
+      const start = Date.now();
+      const emit = (ok: boolean, error?: string): void => {
+        try {
+          process.stderr.write(
+            `${JSON.stringify({
+              kind: "worker.job.span",
+              level: ok ? "info" : "error",
+              queue,
+              latencyMs: Date.now() - start,
+              ok,
+              error,
+              ts: new Date().toISOString(),
+            })}\n`,
+          );
+        } catch {
+          /* telemetry must never break a job */
+        }
+      };
+      // Run fn, return its promise UNCHANGED to the queue (the span observer is
+      // attached to a separate branch so it adds zero microtask hops to the
+      // job's own resolution path — the processor behaves byte-identically to
+      // the unwrapped fn). Best-effort, never alters control flow.
+      const p = fn(job);
+      void p.then(
+        () => emit(true),
+        (e: unknown) => emit(false, e instanceof Error ? e.message : String(e)),
+      );
+      return p;
+    };
+
   const start = (): void => {
     if (started) return;
-    deps.queues.sngpcSubmission.process(sngpcSubmission);
-    deps.queues.dispensationPdf.process(dispensationPdf);
-    deps.queues.memberEmail.process(memberEmail);
+    deps.queues.sngpcSubmission.process(traced("sngpc-submission", sngpcSubmission));
+    deps.queues.dispensationPdf.process(traced("dispensation-pdf", dispensationPdf));
+    deps.queues.memberEmail.process(traced("member-email", memberEmail));
     started = true;
   };
 

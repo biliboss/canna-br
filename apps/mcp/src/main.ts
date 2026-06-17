@@ -92,7 +92,21 @@ const main = async (): Promise<void> => {
         await server.connect(transport);
         await transport.handleRequest(req, res);
       } catch (e: unknown) {
-        process.stderr.write(`mcp transport error: ${String(e)}\n`);
+        // Structured 5xx log — level=error so it is filterable in any log
+        // pipeline; tags carry method/url for triage. (Sentry is a wire-opt:
+        // set SENTRY_DSN to forward — TODO add @sentry/node init here once a
+        // DSN exists; for now structured stderr is the always-on sink.)
+        process.stderr.write(
+          `${JSON.stringify({
+            level: "error",
+            kind: "mcp.http.5xx",
+            method: req.method,
+            url: req.url,
+            error: e instanceof Error ? e.message : String(e),
+            stack: e instanceof Error ? e.stack : undefined,
+            ts: new Date().toISOString(),
+          })}\n`,
+        );
         if (!res.headersSent) {
           res.writeHead(500, { "content-type": "application/json" });
           res.end(JSON.stringify({ error: "INTERNAL" }));

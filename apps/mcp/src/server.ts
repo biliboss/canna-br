@@ -12,6 +12,7 @@ import type { CannaMcpDeps, ToolContext, ToolDefinition } from "./types.js";
 import { allTools } from "./tools/index.js";
 import { allManifests, manifestByUri } from "@canna/ui-apps";
 import { domainError, isDomainError } from "@canna/shared";
+import { traceToolCall, recordErrorSpan } from "./telemetry.js";
 
 const UI_APP_MIME = "text/html";
 
@@ -118,6 +119,12 @@ export const createCannaMcpServer = (deps: CannaMcpDeps): CreateServerResult => 
       ctx = await deps.resolveContext(headers);
     } catch (e) {
       const err = e instanceof Error ? e.message : String(e);
+      recordErrorSpan({
+        tool: tool.name,
+        role: "UNKNOWN",
+        associationId: "",
+        error: "AUTH_FAILED",
+      });
       return {
         isError: true,
         content: [
@@ -135,6 +142,13 @@ export const createCannaMcpServer = (deps: CannaMcpDeps): CreateServerResult => 
         role: ctx.role,
       });
       void isDomainError(e); // satisfy import
+      recordErrorSpan({
+        tool: tool.name,
+        role: ctx.role,
+        associationId: ctx.associationId,
+        userId: ctx.userId,
+        error: "ROLE_INSUFFICIENT",
+      });
       return {
         isError: true,
         content: [
@@ -151,7 +165,15 @@ export const createCannaMcpServer = (deps: CannaMcpDeps): CreateServerResult => 
     }
 
     const args = (request.params.arguments ?? {}) as Record<string, unknown>;
-    const result = await tool.handler(args, ctx);
+    const result = await traceToolCall(
+      {
+        tool: tool.name,
+        role: ctx.role,
+        associationId: ctx.associationId,
+        userId: ctx.userId,
+      },
+      () => tool.handler(args, ctx),
+    );
     // Surface the widget resource on the CALL RESULT too (slash-form key) — the
     // host (assistant-ui) reads `_meta["ui/resourceUri"]` off the tool result to
     // decide which ui:// app renders inline for THIS message. tools/list _meta
