@@ -84,17 +84,19 @@ const dispenserCtx = (store: Awaited<ReturnType<typeof setupStore>>): ToolContex
 });
 
 describe("@canna/mcp / tool catalog", () => {
-  it("exposes 12 tools (5 read + 1 draft + 6 write: register_member + grant_consent + validate_prescription + record-dispensation + suspend_member + reinstate_member)", () => {
-    expect(allTools).toHaveLength(12);
+  it("exposes 14 tools (5 read + 1 draft + 8 write: register_member + grant_consent + validate_prescription + record-dispensation + suspend_member + reinstate_member + revoke_consent + anonymize_member)", () => {
+    expect(allTools).toHaveLength(14);
     const byLevel = new Map<number, number>();
     for (const t of allTools) {
       byLevel.set(t.riskLevel, (byLevel.get(t.riskLevel) ?? 0) + 1);
     }
     expect(byLevel.get(1)).toBe(5);
     expect(byLevel.get(2)).toBe(1);
-    expect(byLevel.get(3)).toBe(6);
+    expect(byLevel.get(3)).toBe(8);
     expect(allTools.map((t) => t.name)).toContain("register_member");
     expect(allTools.map((t) => t.name)).toContain("grant_consent");
+    expect(allTools.map((t) => t.name)).toContain("revoke_consent");
+    expect(allTools.map((t) => t.name)).toContain("anonymize_member");
     expect(allTools.map((t) => t.name)).toContain("find_member_by_cpf");
   });
 
@@ -230,7 +232,7 @@ describe("@canna/mcp / RBAC enforcement", () => {
       },
     });
     expect(server).toBeDefined();
-    expect(tools.size).toBe(12);
+    expect(tools.size).toBe(14);
 
     // AUDITOR cannot call draft_dispensation (DISPENSADOR + RT only)
     const tool = tools.get("draft_dispensation");

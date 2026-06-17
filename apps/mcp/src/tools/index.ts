@@ -11,6 +11,8 @@ import { grantConsent } from "./grant-consent.js";
 import { validatePrescription } from "./validate-prescription.js";
 import { suspendMember } from "./suspend-member.js";
 import { reinstateMember } from "./reinstate-member.js";
+import { revokeConsent } from "./revoke-consent.js";
+import { anonymizeMember } from "./anonymize-member.js";
 
 type AnyTool = ToolDefinition<Record<string, unknown>>;
 
@@ -30,4 +32,6 @@ export const allTools: readonly AnyTool[] = [
   validatePrescription as unknown as AnyTool,
   suspendMember as unknown as AnyTool,
   reinstateMember as unknown as AnyTool,
+  revokeConsent as unknown as AnyTool,
+  anonymizeMember as unknown as AnyTool,
 ];
