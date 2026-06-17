@@ -18,6 +18,10 @@
 import http from "node:http";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { createPostgresEventStore } from "@canna/event-store";
+import {
+  createPostgresStoreFromConnectionString,
+  type ReadModelQuery,
+} from "@canna/read-models";
 import { createCannaMcpServer } from "./server.js";
 import type { Role, ToolContext } from "./types.js";
 
@@ -44,6 +48,18 @@ const main = async (): Promise<void> => {
 
   const store = createPostgresEventStore({ connectionString: databaseUrl });
 
+  // Read-model query surface: in production the same Postgres instance backs
+  // the Drizzle projections, so the query tools read from it. Built once and
+  // shared across requests (it owns a pg Pool). Fails closed — if the adapter
+  // cannot be built we leave it undefined and tools return
+  // READ_MODEL_STORE_UNAVAILABLE rather than crashing the host.
+  let readModelStore: ReadModelQuery | undefined;
+  try {
+    readModelStore = await createPostgresStoreFromConnectionString(databaseUrl);
+  } catch (e: unknown) {
+    process.stderr.write(`read-model store unavailable: ${String(e)}\n`);
+  }
+
   const resolveContext = async (
     headers: http.IncomingHttpHeaders,
   ): Promise<ToolContext> => {
@@ -62,6 +78,7 @@ const main = async (): Promise<void> => {
       role,
       associationId,
       now: new Date(),
+      ...(readModelStore !== undefined ? { readModelStore } : {}),
       ...(chatId !== undefined ? { chatId } : {}),
     };
     return ctx;

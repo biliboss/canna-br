@@ -9,6 +9,7 @@ export {
 export {
   createPostgresStore,
   createPostgresStoreFromConnectionString,
+  asyncReadModel,
   type ReadModelQuery,
   type AnyPgDatabase,
 } from "./pg-store.js";

@@ -6,7 +6,7 @@
  */
 import { describe, it, expect } from "vitest";
 import { createInMemoryEventStore } from "@canna/event-store";
-import { createInMemoryStore } from "@canna/read-models";
+import { asyncReadModel, createInMemoryStore } from "@canna/read-models";
 import { Members } from "@canna/app-services";
 import { type ULID } from "@canna/shared";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
@@ -23,7 +23,8 @@ const NOW = new Date("2026-06-14T10:00:00Z");
 
 const setupStore = async () => {
   const store = createInMemoryEventStore();
-  const readModelStore = createInMemoryStore();
+  const seedStore = createInMemoryStore();
+  const readModelStore = asyncReadModel(seedStore);
 
   // Register two members: A stays PENDING_CONSENT, B gets consent granted
   await Members.registerMember(store, {
@@ -53,7 +54,7 @@ const setupStore = async () => {
   });
 
   // Sync read-model: upsert both members manually (projection applied on registration/consent)
-  readModelStore.upsertMember({
+  seedStore.upsertMember({
     memberId: MEMBER_A,
     associationId: ASSOC,
     cpfHash: "sha256:aaa",
@@ -63,7 +64,7 @@ const setupStore = async () => {
     updatedAt: NOW,
   });
 
-  readModelStore.upsertMember({
+  seedStore.upsertMember({
     memberId: MEMBER_B,
     associationId: ASSOC,
     cpfHash: "sha256:bbb",

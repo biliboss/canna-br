@@ -111,7 +111,7 @@ export const getMembersByStatus: ToolDefinition<Args> = {
       };
     }
 
-    const rows = ctx.readModelStore.listMembersByStatus(
+    const rows = await ctx.readModelStore.listMembersByStatus(
       ctx.associationId,
       statusFilter,
     );

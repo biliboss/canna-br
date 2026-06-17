@@ -1,5 +1,5 @@
 import type { CannaEventStore } from "@canna/event-store";
-import type { ReadModelStore } from "@canna/read-models";
+import type { ReadModelQuery } from "@canna/read-models";
 
 export type Role =
   | "DISPENSADOR"
@@ -14,11 +14,12 @@ export interface ToolContext {
   readonly store: CannaEventStore;
   /**
    * Read-model store — available when the MCP host is wired with a
-   * `ReadModelStore` implementation (e.g. in-memory for tests, Drizzle+Postgres
-   * for production). Optional: tools that need read-model queries MUST check
-   * for its presence and handle the absent case gracefully.
+   * `ReadModelQuery` implementation (async; Drizzle+Postgres in production, an
+   * `asyncReadModel`-wrapped in-memory store for tests/dev). Optional: tools
+   * that need read-model queries MUST check for its presence and handle the
+   * absent case gracefully.
    */
-  readonly readModelStore?: ReadModelStore;
+  readonly readModelStore?: ReadModelQuery;
   readonly userId: string;
   readonly role: Role;
   readonly associationId: string;

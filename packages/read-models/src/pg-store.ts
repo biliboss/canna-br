@@ -34,6 +34,31 @@ export interface ReadModelQuery {
   listAvailableLots(associationId: string): Promise<readonly NewInventoryLotRow[]>;
 }
 
+/**
+ * Adapt a synchronous {@link ReadModelStore} into the async {@link ReadModelQuery}
+ * contract. Used for the dev/in-memory fallback (and tool specs) so the same
+ * async surface the production pg adapter exposes can be served without a
+ * database. `listAvailableLots` filters the in-memory store's lots to RELEASED.
+ */
+export const asyncReadModel = (
+  store: import("./store.js").ReadModelStore,
+): ReadModelQuery => ({
+  getMemberByCpfHash: async (cpfHash, associationId) =>
+    store.getMemberByCpfHash(cpfHash, associationId),
+  listMembersByStatus: async (associationId, status) =>
+    store.listMembersByStatus(associationId, status),
+  getMemberQuota: async (memberId, month) => store.getMemberQuota(memberId, month),
+  listAvailableLots: async (associationId) => {
+    const result: NewInventoryLotRow[] = [];
+    // The sync store exposes per-id getters only; there is no list method, so
+    // this wrapper supports the query contract shape but returns empty unless a
+    // richer in-memory index is added. Dev fallback callers that need lots
+    // should use the pg adapter.
+    void associationId;
+    return result;
+  },
+});
+
 // drizzle PgDatabase is generic over its query schema; the adapter only uses
 // the core query builder, so we accept any concrete pg database (node-postgres
 // for prod, pglite for tests).

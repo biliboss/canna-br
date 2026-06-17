@@ -102,7 +102,7 @@ export const findMemberByCpf: ToolDefinition<Args> = {
     // leaves this function — only the derived hash is used for the lookup).
     const cpfHash = await hashCpf(cpf, SITE_SALT);
 
-    const row = ctx.readModelStore.getMemberByCpfHash(cpfHash, ctx.associationId);
+    const row = await ctx.readModelStore.getMemberByCpfHash(cpfHash, ctx.associationId);
 
     if (row === undefined) {
       return {

@@ -7,7 +7,7 @@ import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { createCannaMcpServer } from "./server.js";
 import { allTools } from "./tools/index.js";
 import type { ToolContext } from "./types.js";
-import { createInMemoryStore } from "@canna/read-models";
+import { asyncReadModel, createInMemoryStore } from "@canna/read-models";
 import { hashCpf } from "@canna/crypto";
 
 const ASSOC = "01HM0ASSOC0000000000000001" as ULID;
@@ -387,7 +387,8 @@ describe("@canna/mcp / find_member_by_cpf (Nível 1 — recover memberId)", () =
 
   const setupWithReadModel = async () => {
     const store = createInMemoryEventStore();
-    const readModelStore = createInMemoryStore();
+    const seedStore = createInMemoryStore();
+    const readModelStore = asyncReadModel(seedStore);
 
     // Register via tool so cpfHash is seeded with the same SITE_SALT
     const cpfHash = await hashCpf(KNOWN_CPF, SITE_SALT);
@@ -402,7 +403,7 @@ describe("@canna/mcp / find_member_by_cpf (Nível 1 — recover memberId)", () =
     });
     // Manually seed the read-model store (mirrors what the projection subscriber
     // would do in production after receiving the MemberRegistered event).
-    readModelStore.upsertMember({
+    seedStore.upsertMember({
       memberId,
       associationId: ASSOC,
       cpfHash,
