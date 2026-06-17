@@ -154,6 +154,9 @@ importers:
       '@canna/event-store':
         specifier: workspace:*
         version: link:../../packages/event-store
+      '@canna/read-models':
+        specifier: workspace:*
+        version: link:../../packages/read-models
       '@canna/shared':
         specifier: workspace:*
         version: link:../../packages/shared

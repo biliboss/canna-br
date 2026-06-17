@@ -9,12 +9,15 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "start": "node --experimental-strip-types src/server.ts",
+    "start:projection": "node --experimental-strip-types src/projection-worker.ts"
   },
   "dependencies": {
     "@canna/app-services": "workspace:*",
     "@canna/domain": "workspace:*",
     "@canna/event-store": "workspace:*",
+    "@canna/read-models": "workspace:*",
     "@canna/sngpc": "workspace:*",
     "@canna/shared": "workspace:*",
     "bullmq": "^5.34.0"

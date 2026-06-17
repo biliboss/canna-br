@@ -13,3 +13,8 @@ export {
   type ReadModelQuery,
   type AnyPgDatabase,
 } from "./pg-store.js";
+export {
+  applyEventsToPg,
+  createPgProjectorFromConnectionString,
+  deterministicAuditUuid,
+} from "./pg-projector.js";
