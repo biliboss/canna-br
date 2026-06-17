@@ -121,7 +121,7 @@ const ThreadRoot: FC<{ isEmpty: boolean }> = ({ isEmpty }) => {
       >
         <div
           className={cn(
-            "mx-auto flex w-full max-w-(--thread-max-width) flex-1 flex-col px-4 pt-4",
+            "mx-auto flex w-full max-w-(--thread-max-width) flex-1 flex-col px-4 pt-4 pb-4",
             isEmpty && "justify-center",
           )}
         >
@@ -131,27 +131,23 @@ const ThreadRoot: FC<{ isEmpty: boolean }> = ({ isEmpty }) => {
 
           <div
             data-slot="aui_message-group"
-            className="mb-14 flex flex-col gap-y-6 empty:hidden"
+            className="flex flex-col gap-y-6 empty:hidden"
           >
             <ThreadPrimitive.Messages>
               {() => <ThreadMessage />}
             </ThreadPrimitive.Messages>
           </div>
-
-          <ThreadPrimitive.ViewportFooter
-            className={cn(
-              "aui-thread-viewport-footer bg-background flex flex-col gap-4 overflow-visible pb-4 md:pb-6",
-              !isEmpty && "sticky bottom-0 mt-auto rounded-t-xl",
-            )}
-          >
-            <ThreadScrollToBottom />
-            <Composer />
-            <AuiIf condition={(s) => isNewChatView(s) && s.composer.isEmpty}>
-              <ThreadSuggestions />
-            </AuiIf>
-          </ThreadPrimitive.ViewportFooter>
         </div>
       </ThreadPrimitive.Viewport>
+
+      {/* Composer fixed outside the scroll viewport — always visible */}
+      <div className="bg-background relative mx-auto w-full max-w-(--thread-max-width) flex-none px-4 pb-4 md:pb-6">
+        <ThreadScrollToBottom />
+        <Composer />
+        <AuiIf condition={(s) => isNewChatView(s) && s.composer.isEmpty}>
+          <ThreadSuggestions />
+        </AuiIf>
+      </div>
     </ThreadPrimitive.Root>
   );
 };
