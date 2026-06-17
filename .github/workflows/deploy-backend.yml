@@ -177,11 +177,17 @@ jobs:
           [ "$fail" = 0 ] || { echo "::error::health smoke failed"; exit 1; }
 
       - name: MCP tools/list count + 1 tool invoke
+        # The server answers a bare POST tools/list WITHOUT a full MCP initialize
+        # handshake (verified locally 2026-06-17 against the same apps/mcp server
+        # via e2e/lib/local-mcp-harness.sh) and replies SSE-framed
+        # (`event: message\ndata: {…}`). The invoke needs BOTH x-canna-role AND
+        # x-canna-association headers (missing assoc → NO_ASSOCIATION_CONTEXT,
+        # isError:true), and we assert isError is NOT true — presence of "result"
+        # alone is a false-pass because errors are returned inside a result too.
         run: |
           BASE=https://mcp.cannabr.org
-          # MCP StreamableHTTP: initialize → tools/list → one tools/call.
-          # tools/list must advertise >= the expected tool count; the invoke
-          # proves the write/read path is wired, not just that the port is open.
+          ASSOC="${CANNA_TEST_ASSOCIATION:-01HM0ASSOC0000000000000001}"
+
           tools="$(curl -sS --max-time 20 -X POST "$BASE/mcp" \
             -H 'content-type: application/json' \
             -H 'accept: application/json, text/event-stream' \
@@ -194,7 +200,12 @@ jobs:
             -H 'content-type: application/json' \
             -H 'accept: application/json, text/event-stream' \
             -H 'x-canna-role: RESPONSAVEL_TECNICO' \
+            -H "x-canna-association: ${ASSOC}" \
             -d '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"get_members_by_status","arguments":{"status":"ACTIVE"}}}')"
+          echo "invoke: ${invoke}"
           echo "$invoke" | grep -q '"result"' \
-            || { echo "::error::tool invoke returned no result: $invoke"; exit 1; }
+            || { echo "::error::tool invoke returned no JSON-RPC result: $invoke"; exit 1; }
+          # reject a tool-level error envelope (isError:true inside result)
+          echo "$invoke" | grep -q '"isError":true' \
+            && { echo "::error::tool invoke returned an error result: $invoke"; exit 1; }
           echo "tool invoke OK"

@@ -66,6 +66,13 @@ ssh root@$VPS 'docker exec kamal-proxy kamal-proxy deploy canna-mcp-org \
   --health-check-path /health --deploy-timeout 30s'
 ```
 
+**Precondition — per-role env files on the VPS.** The `deploy-backend.yml`
+workflow runs each role with `--env-file /srv/canna/<role>.env` (e.g.
+`/srv/canna/mcp.env`, `/srv/canna/api.env`, `/srv/canna/worker.env`). These hold
+`DATABASE_URL`, `REDIS_URL`, `JWT_SECRET`, `SITE_KEK_SEED`, etc. and must exist on
+the host BEFORE a deploy — `docker run --env-file` fails hard if the file is
+missing. They are NOT in the repo (secrets). Create them once on the VPS.
+
 See `ops/openwebui/kamal/add-cannabr-routes.sh` for the route-pinning helper and
 `ops/agent/kamal/deploy-agent.sh` for the fully-scripted agent equivalent.
 
