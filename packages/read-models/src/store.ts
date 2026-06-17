@@ -44,6 +44,11 @@ export interface ReadModelStore {
 
   upsertInventoryLot(row: NewInventoryLotRow): void;
   getInventoryLot(lotId: string): NewInventoryLotRow | undefined;
+  /**
+   * Return all RELEASED lots for an association. Used by `list_available_lots`
+   * (DispensationFormApp lot picker) on the in-memory / dev fallback path.
+   */
+  listAvailableLots(associationId: string): readonly NewInventoryLotRow[];
 
   upsertDispensation(row: NewDispensationRow): void;
   getDispensation(dispensationId: string): NewDispensationRow | undefined;
@@ -123,6 +128,15 @@ export const createInMemoryStore = (): ReadModelStore => {
     },
     getInventoryLot(lotId) {
       return inventoryLots.get(lotId);
+    },
+    listAvailableLots(associationId) {
+      const result: NewInventoryLotRow[] = [];
+      for (const row of inventoryLots.values()) {
+        if (row.associationId === associationId && row.status === "RELEASED") {
+          result.push(row);
+        }
+      }
+      return result;
     },
 
     upsertDispensation(row) {

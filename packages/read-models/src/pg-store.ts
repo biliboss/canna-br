@@ -48,15 +48,8 @@ export const asyncReadModel = (
   listMembersByStatus: async (associationId, status) =>
     store.listMembersByStatus(associationId, status),
   getMemberQuota: async (memberId, month) => store.getMemberQuota(memberId, month),
-  listAvailableLots: async (associationId) => {
-    const result: NewInventoryLotRow[] = [];
-    // The sync store exposes per-id getters only; there is no list method, so
-    // this wrapper supports the query contract shape but returns empty unless a
-    // richer in-memory index is added. Dev fallback callers that need lots
-    // should use the pg adapter.
-    void associationId;
-    return result;
-  },
+  listAvailableLots: async (associationId) =>
+    store.listAvailableLots(associationId),
 });
 
 // drizzle PgDatabase is generic over its query schema; the adapter only uses
