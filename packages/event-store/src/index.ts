@@ -13,3 +13,8 @@ export {
   createRawPostgresEventStore,
 } from "./postgres.js";
 export { wrapEmmettStore } from "./wrap.js";
+export {
+  readAllEvents,
+  createPostgresEventReader,
+  type SqlQueryable,
+} from "./read-all.js";

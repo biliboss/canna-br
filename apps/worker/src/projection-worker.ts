@@ -17,25 +17,26 @@
  *
  * Health: GET /health → 200 on `PORT` (default 3003).
  *
- * ─── RUNTIME GAP (TODO) ──────────────────────────────────────────────────────
- * `CannaEventStore` only exposes per-stream reads (`readStream(streamId)`); it
- * has NO global "read all events" surface. A full-replay projector needs to
- * enumerate every event across every stream in emission order. That global
- * reader is NOT yet implemented here. To run against prod you must add ONE of:
- *   (a) a `readAllEvents()` method on the event store that reads Emmett's
- *       `emt_messages` table ordered by `global_position`, mapping each row
- *       back to a `DomainEvent` (type, streamId from metadata.cannaStreamId,
- *       occurredAt from metadata.occurredAt, payload from data); OR
- *   (b) an Emmett projection/subscription hook (consumer with a stored
- *       checkpoint) that pushes events to `applyEventsToPg` incrementally —
- *       note incremental mode needs the persisted audit guard, not fold-from-
- *       empty, for the quota accumulator.
- * Until then this worker boots healthy and exposes the wired projector via
- * `runProjectionPass(events)` but performs no automatic replay on its own.
+ * ─── GLOBAL REPLAY (wired) ───────────────────────────────────────────────────
+ * `CannaEventStore` only exposes per-stream reads (`readStream(streamId)`), so
+ * a full-replay projector needs a global enumerator. That is now provided by
+ * `@canna/event-store` `createPostgresEventReader` / `readAllEvents`, which
+ * reads Emmett's `emt_messages` table (default partition, committed,
+ * non-archived) ordered by `(transaction_id, global_position)` and maps each
+ * row back to a `DomainEvent`. `runProjectionPass()` chains:
+ *   readAllEvents()  ->  applyEventsToPg(events)
+ * It is a FULL idempotent fold (re-running = no-op; quota SET-not-add; audit
+ * deduped by deterministic v5 UUID), so it is safe to call on an interval. The
+ * event reader and read-model projector share the SAME `DATABASE_URL`.
+ *
+ * Replay cadence: a pass runs once on boot, then every `PROJECTION_INTERVAL_MS`
+ * (default 5000ms; set to 0 to disable the timer and run only on boot).
  */
 import http from "node:http";
-import type { DomainEvent } from "@canna/shared";
-import { createPgProjectorFromConnectionString } from "@canna/read-models";
+import {
+  createPgProjectorFromConnectionString,
+} from "@canna/read-models";
+import { createPostgresEventReader } from "@canna/event-store";
 
 const env = (k: string): string | undefined => process.env[k];
 
@@ -50,18 +51,32 @@ const main = async (): Promise<void> => {
   const host = env("HOST") ?? "0.0.0.0";
 
   const projector = await createPgProjectorFromConnectionString(databaseUrl);
+  const reader = await createPostgresEventReader(databaseUrl);
 
   /**
-   * Apply a concrete, ordered event batch to the read model. This is the wired
-   * seam the global reader (TODO above) will call once enumeration lands; it is
-   * already idempotent and integration-tested via pglite.
+   * Full idempotent replay: enumerate every committed event, fold it into the
+   * read-model tables. Re-running is a no-op (proven in
+   * `@canna/read-models` `pg-projector.spec.ts` and the event->projection->query
+   * e2e in `@canna/event-store` `loop-e2e.spec.ts`).
    */
-  const runProjectionPass = async (
-    events: readonly DomainEvent<string, unknown>[],
-  ): Promise<void> => {
+  const runProjectionPass = async (): Promise<void> => {
+    const events = await reader.readAllEvents();
     await projector.applyEventsToPg(events);
   };
-  void runProjectionPass; // exposed for the global reader / tests; no auto-replay yet
+
+  const intervalMs = Number(env("PROJECTION_INTERVAL_MS") ?? "5000");
+  let timer: NodeJS.Timeout | undefined;
+  const tick = (): void => {
+    runProjectionPass().catch((err) => {
+      process.stderr.write(`projection pass failed: ${String(err)}\n`);
+    });
+  };
+  // Run once on boot, then on an interval (unless disabled with 0).
+  tick();
+  if (intervalMs > 0) {
+    timer = setInterval(tick, intervalMs);
+    timer.unref();
+  }
 
   const httpServer = http.createServer((req, res) => {
     if (req.url === "/health" && req.method === "GET") {
@@ -80,8 +95,10 @@ const main = async (): Promise<void> => {
     if (shuttingDown) return;
     shuttingDown = true;
     process.stderr.write(`canna-projection-worker shutdown signal=${signal}\n`);
+    if (timer !== undefined) clearInterval(timer);
     httpServer.close();
     await projector.close();
+    await reader.close();
     process.exit(0);
   };
   process.on("SIGINT", () => void shutdown("SIGINT"));
