@@ -1,4 +1,4 @@
-import { describe, it } from "vitest";
+import { describe, it, expect } from "vitest";
 import { domainError, isOk, quantityGrams, type ULID } from "@canna/shared";
 import { scenario } from "@canna/test-utils";
 import { decide } from "./decide.js";
@@ -339,5 +339,103 @@ describe("Inventory / Quarantine & Recall", () => {
       },
       domainError("LOT_ALREADY_RECALLED", "ignored"),
     );
+  });
+
+  it("rejects quarantine of nonexistent lot → LOT_NOT_FOUND", () => {
+    run(
+      [],
+      {
+        type: "QuarantineLot",
+        lotId: LOT_ID,
+        reason: "x",
+        quarantinedBy: ACTOR,
+        now: NOW,
+      },
+      domainError("LOT_NOT_FOUND", "ignored"),
+    );
+  });
+
+  it("rejects quarantine of RECALLED lot → LOT_TERMINAL_STATE", () => {
+    run(
+      [lotCreated(), lotReleased(), lotRecalled()],
+      {
+        type: "QuarantineLot",
+        lotId: LOT_ID,
+        reason: "x",
+        quarantinedBy: ACTOR,
+        now: NOW,
+      },
+      domainError("LOT_TERMINAL_STATE", "ignored"),
+    );
+  });
+
+  it("rejects quarantine of EXHAUSTED lot → LOT_TERMINAL_STATE", () => {
+    // deduct entire lot → EXHAUSTED
+    run(
+      [lotCreated(30), lotReleased(), lotDeducted(30, 30, 0), lotExhausted()],
+      {
+        type: "QuarantineLot",
+        lotId: LOT_ID,
+        reason: "x",
+        quarantinedBy: ACTOR,
+        now: NOW,
+      },
+      domainError("LOT_TERMINAL_STATE", "ignored"),
+    );
+  });
+
+  it("rejects recall of nonexistent lot → LOT_NOT_FOUND", () => {
+    run(
+      [],
+      {
+        type: "RecallLot",
+        lotId: LOT_ID,
+        reason: "x",
+        recalledBy: ACTOR,
+        now: NOW,
+      },
+      domainError("LOT_NOT_FOUND", "ignored"),
+    );
+  });
+});
+
+describe("Inventory / evolve idempotence & terminal transitions", () => {
+  const fold = (events: readonly InventoryEvent[]) =>
+    events.reduce((s, e) => evolve(s, e), emptyLotState);
+
+  it("LotReleased applied twice converges (AVAILABLE)", () => {
+    const once = fold([lotCreated(100), lotReleased()]);
+    const twice = evolve(once, lotReleased());
+    expect(once).toEqual(twice);
+    expect(once.status).toBe("AVAILABLE");
+  });
+
+  it("LotRecalled applied twice converges (RECALLED, terminal)", () => {
+    const once = fold([lotCreated(), lotReleased(), lotRecalled()]);
+    const twice = evolve(once, lotRecalled());
+    expect(once).toEqual(twice);
+    expect(once.status).toBe("RECALLED");
+  });
+
+  it("LotExhausted applied twice converges (EXHAUSTED, terminal)", () => {
+    const once = fold([lotCreated(30), lotReleased(), lotDeducted(30, 30, 0), lotExhausted()]);
+    const twice = evolve(once, lotExhausted());
+    expect(once).toEqual(twice);
+    expect(once.status).toBe("EXHAUSTED");
+  });
+
+  it("LotInsufficientQuantity does not mutate state", () => {
+    const before = fold([lotCreated(10), lotReleased()]);
+    const after = evolve(before, lotInsufficient(25, 10));
+    expect(after).toEqual(before);
+    expect(after.quantityG).toBe(before.quantityG);
+  });
+
+  it("LotQuarantined re-applied to AVAILABLE converges to QUARANTINED", () => {
+    const available = fold([lotCreated(), lotReleased()]);
+    const q1 = evolve(available, lotQuarantined("a"));
+    const q2 = evolve(q1, lotQuarantined("b"));
+    expect(q1).toEqual(q2);
+    expect(q1.status).toBe("QUARANTINED");
   });
 });
