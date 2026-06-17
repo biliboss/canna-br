@@ -1,5 +1,5 @@
 import type * as React from "react";
-import { MessagesSquare } from "lucide-react";
+import Image from "next/image";
 import { GitHubIcon } from "@/components/icons/github";
 import {
   Sidebar,
@@ -24,16 +24,22 @@ export function ThreadListSidebar({
             <SidebarMenuItem>
               <SidebarMenuButton size="lg" asChild>
                 <a
-                  href="https://assistant-ui.com"
+                  href="https://cannabr.org"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <div className="aui-sidebar-header-icon-wrapper bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                    <MessagesSquare className="aui-sidebar-header-icon size-4" />
+                  <div className="aui-sidebar-header-icon-wrapper flex aspect-square size-8 items-center justify-center rounded-lg overflow-hidden">
+                    <Image
+                      src="/favicon.svg"
+                      alt="canna-br logo"
+                      width={32}
+                      height={32}
+                      className="aui-sidebar-header-icon size-8"
+                    />
                   </div>
                   <div className="aui-sidebar-header-heading me-6 flex flex-col gap-0.5 leading-none">
                     <span className="aui-sidebar-header-title font-semibold">
-                      assistant-ui
+                      canna-br
                     </span>
                   </div>
                 </a>
