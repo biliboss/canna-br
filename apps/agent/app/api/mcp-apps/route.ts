@@ -23,12 +23,27 @@ export async function POST(req: Request) {
     return Response.json({ error: "Missing method" }, { status: 400 });
   }
 
+  // Gap #4 (mcp-apps degrade): the MCP host can be down (cold start, deploy,
+  // network). Obtaining the client must NOT bubble a raw 500 to the widget —
+  // degrade gracefully with a structured 503 the host can surface as "service
+  // unavailable, retry" instead of a stack trace. Proven by route.degrade.test.mts.
   let client: Awaited<ReturnType<typeof getMcpClient>>;
   try {
     client = await getMcpClient();
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
-    return Response.json({ error: message }, { status: 503 });
+    return Response.json(
+      {
+        jsonrpc: "2.0",
+        id: rpcId,
+        error: {
+          code: -32001,
+          message: "MCP host unavailable",
+          data: { reason: message, retryable: true },
+        },
+      },
+      { status: 503 },
+    );
   }
 
   try {
