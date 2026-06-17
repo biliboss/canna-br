@@ -62,10 +62,22 @@ export const createSngpcSubmissionProcessor = (deps: SngpcProcessorDeps) => {
   return async (
     job: SngpcSubmissionJob,
   ): Promise<SngpcSubmissionResult> => {
-    const { events } = await Dispensations.loadAssociationDispensations(
+    const loaded = await Dispensations.loadAssociationDispensations(
       deps.store,
       job.associationId,
     );
+    if (!loaded.ok) {
+      const detail = `Failed to read association stream for ${job.dispensationId}: ${loaded.error.message}`;
+      audit({
+        queue: "sngpc-submission",
+        dispensationId: job.dispensationId,
+        outcome: "error",
+        detail,
+        at: now(),
+      });
+      throw new Error(detail);
+    }
+    const { events } = loaded.value;
     const recorded = findRecorded(events, job.dispensationId);
     if (recorded === undefined) {
       const detail = `DispensationRecorded ${job.dispensationId} not found in association:${job.associationId}`;

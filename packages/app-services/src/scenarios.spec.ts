@@ -22,6 +22,25 @@ const grams = (n: number) => {
   return r.value;
 };
 
+/** Unwrap the `QueryResult` envelope from `loadAssociationDispensations`. */
+const loadEvents = async (store: ReturnType<typeof createInMemoryEventStore>) => {
+  const r = await Dispensations.loadAssociationDispensations(store, ASSOC);
+  if (!r.ok) throw new Error(`load failed: ${r.error.message}`);
+  return r.value.events;
+};
+
+/**
+ * Fixture: builds a fully-onboarded member + a released lot in a fresh
+ * in-memory store, leaving the system ready to record dispensations.
+ *
+ * Resulting state:
+ *  - member MEMBER → ACTIVE, consent granted, prescription valid 2026-06→2026-12
+ *    with `monthlyQuotaG` (default 30g) monthly quota;
+ *  - lot LOT → AVAILABLE (released w/ CoA), `lotInitialG` (default 100g) on hand.
+ *
+ * @param monthlyQuotaG member's validated monthly prescription quota, in grams.
+ * @param lotInitialG   lot's initial available quantity, in grams.
+ */
 const setupMemberAndLot = async (
   monthlyQuotaG = 30,
   lotInitialG = 100,
@@ -125,10 +144,7 @@ describe("end-to-end / happy path dispensation", () => {
     }
 
     // Association stream has 3 events appended
-    const { events: assocEvents } = await Dispensations.loadAssociationDispensations(
-      store,
-      ASSOC,
-    );
+    const assocEvents = await loadEvents(store);
     expect(assocEvents).toHaveLength(3);
   });
 
@@ -167,11 +183,17 @@ describe("end-to-end / happy path dispensation", () => {
     );
     expect(isOk(second)).toBe(true);
     if (isOk(second)) {
-      const quotaEvent = second.value.events[1] as {
-        payload: { quotaBeforeG: number; quotaAfterG: number };
-      };
-      expect(quotaEvent.payload.quotaBeforeG).toBe(20);
-      expect(quotaEvent.payload.quotaAfterG).toBe(5);
+      // Narrow on the discriminant instead of casting — this reads
+      // quotaBeforeG/quotaAfterG through the real domain event type, so a
+      // shape change in MemberQuotaConsumed breaks this test at compile time.
+      const quotaEvent = second.value.events.find(
+        (e) => e.type === "MemberQuotaConsumed",
+      );
+      expect(quotaEvent?.type).toBe("MemberQuotaConsumed");
+      if (quotaEvent?.type === "MemberQuotaConsumed") {
+        expect(quotaEvent.payload.quotaBeforeG).toBe(20);
+        expect(quotaEvent.payload.quotaAfterG).toBe(5);
+      }
     }
   });
 });
@@ -218,8 +240,7 @@ describe("end-to-end / quota exceeded", () => {
     }
 
     // Quota event recorded in association stream for audit
-    const { events: assocEvents } =
-      await Dispensations.loadAssociationDispensations(store, ASSOC);
+    const assocEvents = await loadEvents(store);
     const types = assocEvents.map((e) => e.type);
     expect(types).toContain("QuotaExceededAttempt");
   });
@@ -337,8 +358,7 @@ describe("spike gate / optimistic concurrency on association stream", () => {
       expect(losers).toHaveLength(1);
 
       // Association stream contains: 1× happy path (3 events) + 1× rejection (1 event)
-      const { events: assocEvents } =
-        await Dispensations.loadAssociationDispensations(store, ASSOC);
+      const assocEvents = await loadEvents(store);
       const recorded = assocEvents.filter((e) => e.type === "DispensationRecorded");
       const deductions = assocEvents.filter(
         (e) => e.type === "LotQuantityDeducted",

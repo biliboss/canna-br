@@ -5,11 +5,12 @@ import {
 } from "@canna/shared";
 import type { CannaEventStore } from "@canna/event-store";
 import { Membership } from "@canna/domain";
-import type { CommandResult } from "./result.js";
+import { expectedVersionFor, type CommandResult } from "./result.js";
 
 const streamId = (memberId: string) => `member:${memberId}`;
 
-const aggregate = async (
+/** Fold the member event stream back into current aggregate state. */
+const reconstitute = async (
   store: CannaEventStore,
   memberId: string,
 ): Promise<{
@@ -31,13 +32,13 @@ const handle = async (
   memberId: string,
   cmd: Membership.MemberCommand,
 ): Promise<CommandResult<Membership.MemberEvent>> => {
-  const { state, version } = await aggregate(store, memberId);
+  const { state, version } = await reconstitute(store, memberId);
   const result = Membership.decide(cmd, state);
   if (isDomainError(result)) {
     return err(result);
   }
   const stream = streamId(memberId);
-  const expectedVersion = state.status === "EMPTY" ? "none" : version;
+  const expectedVersion = expectedVersionFor(state.status, version);
   const appended = await store.appendToStream<Membership.MemberEvent>(
     stream,
     result,
@@ -82,4 +83,4 @@ export const anonymizeMember = (
 ) => handle(store, cmd.memberId, cmd);
 
 export const loadMemberState = (store: CannaEventStore, memberId: string) =>
-  aggregate(store, memberId);
+  reconstitute(store, memberId);
