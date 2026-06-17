@@ -241,8 +241,8 @@ describe("@canna/mcp / RBAC enforcement", () => {
   });
 });
 
-describe("@canna/mcp / Nível 3 PendingAction stub", () => {
-  it("request_record_dispensation returns pendingActionId without mutating stream", async () => {
+describe("@canna/mcp / Nível 3 request_record_dispensation (real write)", () => {
+  it("records a real dispensation and appends events to the association stream", async () => {
     const store = await setupStore();
     const ctx = dispenserCtx(store);
     const tool = allTools.find((t) => t.name === "request_record_dispensation");
@@ -257,11 +257,18 @@ describe("@canna/mcp / Nível 3 PendingAction stub", () => {
       ctx,
     );
     const data = JSON.parse(result.content[0]!.text) as {
-      pendingActionId: string;
       status: string;
+      dispensationId: string;
+      emittedEvents: string[];
     };
-    expect(data.pendingActionId).toMatch(/^pending:/);
-    expect(data.status).toBe("PENDING_APPROVAL");
+    expect(data.status).toBe("RECORDED");
+    expect(data.dispensationId.length).toBeGreaterThanOrEqual(26); // ULID
+    expect(data.emittedEvents).toContain("DispensationRecorded");
+    expect(data.emittedEvents).toContain("MemberQuotaConsumed");
+
+    // The events really landed — stream is no longer empty (stub mutated nothing).
+    const { events } = await store.readStream(`association:${ASSOC}:dispensations`);
+    expect(events.map((e) => e.type)).toContain("MemberQuotaConsumed");
   });
 });
 
