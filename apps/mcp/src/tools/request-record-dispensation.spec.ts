@@ -32,7 +32,30 @@ const MEMBER = "01HM0MEMBER000000000000001" as ULID;
 const LOT = "01HM0LOT000000000000000001" as ULID;
 const DISPENSER = "01HM0DISP0000000000000001" as ULID;
 const RT_USER = "01HM0RT0000000000000000001" as ULID;
+const APPROVER = "01HM0APPR0V0000000000000001" as ULID;
 const NOW = new Date("2026-06-14T10:00:00Z");
+
+/** Helper: full RDC 1.014 flow — DISPENSADOR requests, distinct RT approves. */
+const requestThenApprove = async (
+  store: ReturnType<typeof createInMemoryEventStore>,
+  quantityG: number,
+) => {
+  const requester = await connectAs("DISPENSADOR", store, DISPENSER);
+  const reqRes = await requester.callTool({
+    name: "request_record_dispensation",
+    arguments: { associationId: ASSOC, memberId: MEMBER, lotId: LOT, quantityG },
+  });
+  const reqData = JSON.parse(
+    (reqRes as { content: Array<{ text: string }> }).content[0]?.text ?? "{}",
+  ) as Record<string, unknown>;
+  const dispensationId = reqData.dispensationId as string;
+  const approver = await connectAs("RESPONSAVEL_TECNICO", store, APPROVER);
+  const apprRes = await approver.callTool({
+    name: "approve_dispensation",
+    arguments: { associationId: ASSOC, dispensationId },
+  });
+  return { reqData, apprRes, dispensationId };
+};
 
 const gramsValue = (n: number) => {
   const r = quantityGrams(n);
@@ -107,11 +130,12 @@ const seedStore = async () => {
 const connectAs = async (
   role: ToolContext["role"],
   store: ReturnType<typeof createInMemoryEventStore>,
+  userId: string = DISPENSER,
 ) => {
   const { server } = createCannaMcpServer({
     store,
     async resolveContext(): Promise<ToolContext> {
-      return { store, userId: DISPENSER, role, associationId: ASSOC, now: NOW };
+      return { store, userId, role, associationId: ASSOC, now: NOW };
     },
   });
   const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
@@ -160,8 +184,8 @@ describe("request_record_dispensation — catalog", () => {
   });
 });
 
-describe("request_record_dispensation — handler (bypasses LLM)", () => {
-  it("DISPENSADOR records a real dispensation → events appended", async () => {
+describe("RDC 1.014 two-step approval gate (bypasses LLM)", () => {
+  it("(a) DISPENSADOR requests → PENDING_APPROVAL, quota NOT consumed yet", async () => {
     const store = await seedStore();
     const client = await connectAs("DISPENSADOR", store);
 
@@ -177,24 +201,59 @@ describe("request_record_dispensation — handler (bypasses LLM)", () => {
     });
     const data = parse(res);
 
+    expect(data.status).toBe("PENDING_APPROVAL");
+    expect(data.emittedEvents).toEqual(["DispensationRequested"]);
+
+    // Only the request event landed — no quota/lot mutation.
+    const disp = await store.readStream(`association:${ASSOC}:dispensations`);
+    expect(disp.events.map((e) => e.type)).toEqual(["DispensationRequested"]);
+  });
+
+  it("(b) the SAME DISPENSADOR who requested cannot approve → segregation denied", async () => {
+    const store = await seedStore();
+    const requester = await connectAs("DISPENSADOR", store, DISPENSER);
+    const reqRes = await requester.callTool({
+      name: "request_record_dispensation",
+      arguments: { associationId: ASSOC, memberId: MEMBER, lotId: LOT, quantityG: 10 },
+    });
+    const dispensationId = parse(reqRes).dispensationId as string;
+
+    // Same identity (DISPENSER), but now carrying an approver role.
+    const selfApprover = await connectAs("RESPONSAVEL_TECNICO", store, DISPENSER);
+    const apprRes = await selfApprover.callTool({
+      name: "approve_dispensation",
+      arguments: { associationId: ASSOC, dispensationId },
+    });
+    expect(parse(apprRes).error).toBe("APPROVAL_SEGREGATION_VIOLATION");
+
+    // Quota still untouched — no recording happened.
+    const disp = await store.readStream(`association:${ASSOC}:dispensations`);
+    expect(disp.events.map((e) => e.type)).toEqual(["DispensationRequested"]);
+  });
+
+  it("(c) a DISTINCT RT approves → RECORDED, quota consumed", async () => {
+    const store = await seedStore();
+    const { apprRes } = await requestThenApprove(store, 10);
+    const data = parse(apprRes);
+
     expect(data.status).toBe("RECORDED");
-    expect(data.memberId).toBe(MEMBER);
+    expect(data.approvedBy).toBe(APPROVER);
     expect(data.emittedEvents).toEqual([
       "DispensationRecorded",
       "MemberQuotaConsumed",
       "LotQuantityDeducted",
     ]);
 
-    // Events really landed in the event store.
     const disp = await store.readStream(`association:${ASSOC}:dispensations`);
     expect(disp.events.map((e) => e.type)).toEqual([
+      "DispensationRequested",
       "DispensationRecorded",
       "MemberQuotaConsumed",
       "LotQuantityDeducted",
     ]);
   });
 
-  it("AUDITOR cannot record (RBAC gate)", async () => {
+  it("AUDITOR cannot request (RBAC gate)", async () => {
     const store = await seedStore();
     const client = await connectAs("AUDITOR", store);
     const res = await client.callTool({
@@ -204,28 +263,36 @@ describe("request_record_dispensation — handler (bypasses LLM)", () => {
     expect(parse(res).error).toBe("ROLE_INSUFFICIENT");
   });
 
-  it("surfaces QuotaExceededAttempt as REJECTED (no recording)", async () => {
+  it("DISPENSADOR cannot approve (RBAC gate on approve tool)", async () => {
     const store = await seedStore();
-    const client = await connectAs("DISPENSADOR", store);
-    const res = await client.callTool({
+    const requester = await connectAs("DISPENSADOR", store, DISPENSER);
+    const reqRes = await requester.callTool({
       name: "request_record_dispensation",
-      arguments: { associationId: ASSOC, memberId: MEMBER, lotId: LOT, quantityG: 999 },
+      arguments: { associationId: ASSOC, memberId: MEMBER, lotId: LOT, quantityG: 10 },
     });
-    const data = parse(res);
+    const dispensationId = parse(reqRes).dispensationId as string;
+    // Another dispensador tries to approve.
+    const other = await connectAs("DISPENSADOR", store, APPROVER);
+    const apprRes = await other.callTool({
+      name: "approve_dispensation",
+      arguments: { associationId: ASSOC, dispensationId },
+    });
+    expect(parse(apprRes).error).toBe("ROLE_INSUFFICIENT");
+  });
+
+  it("surfaces QuotaExceededAttempt as REJECTED at approval (no recording)", async () => {
+    const store = await seedStore();
+    const { apprRes } = await requestThenApprove(store, 999);
+    const data = parse(apprRes);
     expect(data.status).toBe("REJECTED");
     expect(data.reason).toBe("QuotaExceededAttempt");
   });
 });
 
 describe("request_record_dispensation → member_quota projection (pglite)", () => {
-  it("dispensation → dispensations row + member_quota.consumed_g increments", async () => {
+  it("approved dispensation → dispensations row + member_quota.consumed_g increments", async () => {
     const store = await seedStore();
-    const client = await connectAs("DISPENSADOR", store);
-
-    await client.callTool({
-      name: "request_record_dispensation",
-      arguments: { associationId: ASSOC, memberId: MEMBER, lotId: LOT, quantityG: 10 },
-    });
+    await requestThenApprove(store, 10);
 
     const events = await collectAllEvents(store);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -246,11 +313,7 @@ describe("request_record_dispensation → member_quota projection (pglite)", () 
 
   it("is idempotent: re-applying the same log does NOT double-count", async () => {
     const store = await seedStore();
-    const client = await connectAs("DISPENSADOR", store);
-    await client.callTool({
-      name: "request_record_dispensation",
-      arguments: { associationId: ASSOC, memberId: MEMBER, lotId: LOT, quantityG: 10 },
-    });
+    await requestThenApprove(store, 10);
 
     const events = await collectAllEvents(store);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
