@@ -12,6 +12,7 @@
  * Both targets run header-auth (prod stub / local JWT-unset dev mode), so the
  * same x-canna-* headers drive both.
  */
+import { createHmac } from "node:crypto";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 
@@ -50,6 +51,17 @@ export interface ToolCall {
    * must not be the same person as the requester.
    */
   readonly user?: string;
+  /**
+   * Signed HS256 Bearer token. When set, sent as `Authorization: Bearer <t>`.
+   * Required against an auth-enforcing MCP (prod: JWT_SECRET set). Use
+   * {@link signToken} to mint one.
+   */
+  readonly bearer?: string;
+  /**
+   * Omit the x-canna-* stub headers entirely (simulate an unidentified caller).
+   * Used by the auth e2e to prove a request with NO credential is denied.
+   */
+  readonly noStubHeaders?: boolean;
 }
 
 export interface ToolResult {
@@ -69,14 +81,16 @@ export interface ToolResult {
  * matches the tool gate exactly.
  */
 export async function call(c: ToolCall): Promise<ToolResult> {
-  const transport = new StreamableHTTPClientTransport(new URL(MCP_URL), {
-    requestInit: {
-      headers: {
+  const headers: Record<string, string> = c.noStubHeaders
+    ? {}
+    : {
         "x-canna-user": c.user ?? USER,
         "x-canna-role": c.role ?? "DIRETORIA",
         "x-canna-association": SEED.association,
-      },
-    },
+      };
+  if (c.bearer) headers["Authorization"] = `Bearer ${c.bearer}`;
+  const transport = new StreamableHTTPClientTransport(new URL(MCP_URL), {
+    requestInit: { headers },
   });
   const client = new Client({ name: "canna-e2e-journey", version: "0.0.0" });
   await client.connect(transport);
@@ -99,6 +113,33 @@ export async function call(c: ToolCall): Promise<ToolResult> {
   } finally {
     await client.close();
   }
+}
+
+/**
+ * Mint a signed HS256 Bearer for the auth-enforcing MCP. Mirrors
+ * apps/mcp/src/auth.ts signHs256 (same header/claims/base64url) so the e2e
+ * proves the real verification path. Secret read by the caller from env
+ * (CANNA_MCP_JWT_SECRET) — never hardcode the secret in a test.
+ */
+export function signToken(
+  secret: string,
+  claims: { sub: string; role: Role; associationId: string; ttlSeconds?: number },
+  now: number = Date.now(),
+): string {
+  const enc = (o: unknown): string =>
+    Buffer.from(JSON.stringify(o), "utf8").toString("base64url");
+  const iat = Math.floor(now / 1000);
+  const header = { alg: "HS256", typ: "JWT" };
+  const payload = {
+    sub: claims.sub,
+    role: claims.role,
+    associationId: claims.associationId,
+    iat,
+    exp: iat + (claims.ttlSeconds ?? 300),
+  };
+  const signingInput = `${enc(header)}.${enc(payload)}`;
+  const sig = createHmac("sha256", secret).update(signingInput).digest("base64url");
+  return `${signingInput}.${sig}`;
 }
 
 /** Generate a syntactically valid, unique-ish CPF (11 digits) for fresh members. */

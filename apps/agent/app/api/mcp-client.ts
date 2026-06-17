@@ -5,8 +5,12 @@ import {
 } from "@ai-sdk/mcp";
 import type { ToolSet } from "ai";
 
-let mcpClientPromise: ReturnType<typeof createMCPClient> | null = null;
-let cachedTools: ToolSet | null = null;
+// NOTE: the MCP client is NOT cached. In production the auth header carries a
+// short-lived (5-min) signed JWT; a cached singleton would freeze ONE token and
+// keep sending it after expiry → every later tool-call fails AUTH_FAILED (the
+// regression the wave.11 chat-toolcall e2e caught). Mint a fresh client (and
+// thus a fresh token via mcpHeaders()) per request — correctness over a small
+// perf win on a stateless transport.
 
 /**
  * Mint a short-lived HS256 JWT for the MCP host. Mirrors `signHs256` in
@@ -61,7 +65,8 @@ function mcpHeaders(): Record<string, string> {
  * (Note: apps/mcp does not mount at /mcp — the root path handles all requests.)
  */
 export function getMcpClient(): Promise<MCPClient> {
-  mcpClientPromise ??= createMCPClient({
+  // Fresh client per call → mcpHeaders() mints a fresh, unexpired token.
+  return createMCPClient({
     transport: {
       type: "http",
       url: process.env.MCP_SERVER_URL ?? "http://localhost:3001",
@@ -71,12 +76,10 @@ export function getMcpClient(): Promise<MCPClient> {
       headers: mcpHeaders(),
     },
   });
-  return mcpClientPromise;
 }
 
 export async function getMcpTools(): Promise<ToolSet> {
-  if (cachedTools) return cachedTools;
+  // Not cached: the client carrying the (expiring) token must be fresh too.
   const client = await getMcpClient();
-  cachedTools = (await client.tools()) as ToolSet;
-  return cachedTools;
+  return (await client.tools()) as ToolSet;
 }
