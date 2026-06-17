@@ -1,3 +1,4 @@
+import { createHmac } from "node:crypto";
 import {
   experimental_createMCPClient as createMCPClient,
   type MCPClient,
@@ -6,6 +7,46 @@ import type { ToolSet } from "ai";
 
 let mcpClientPromise: ReturnType<typeof createMCPClient> | null = null;
 let cachedTools: ToolSet | null = null;
+
+/**
+ * Mint a short-lived HS256 JWT for the MCP host. Mirrors `signHs256` in
+ * @canna/mcp (apps/mcp/src/auth.ts) — kept inline so this Next app does not
+ * pull the whole MCP/pg package into its bundle. Server-side only: JWT_SECRET
+ * lives in the route runtime, never shipped to the browser.
+ */
+function signMcpToken(secret: string): string {
+  const b64 = (o: unknown) =>
+    Buffer.from(JSON.stringify(o)).toString("base64url");
+  const iat = Math.floor(Date.now() / 1000);
+  const header = b64({ alg: "HS256", typ: "JWT" });
+  const payload = b64({
+    sub: process.env.CANNA_USER ?? "admin",
+    role: process.env.CANNA_ROLE ?? "DIRETORIA",
+    associationId: process.env.CANNA_ASSOCIATION ?? "unknown",
+    iat,
+    exp: iat + 300,
+  });
+  const sig = createHmac("sha256", secret)
+    .update(`${header}.${payload}`)
+    .digest("base64url");
+  return `${header}.${payload}.${sig}`;
+}
+
+function mcpHeaders(): Record<string, string> {
+  const secret = process.env.JWT_SECRET;
+  if (secret !== undefined && secret.length > 0) {
+    // Production: the MCP server verifies this token and derives role/user/
+    // association from the SIGNED claims. Raw x-canna-* headers are ignored.
+    return { authorization: `Bearer ${signMcpToken(secret)}` };
+  }
+  // Dev: no issuer configured — legacy header stub (MCP server runs in dev
+  // header-auth mode when its own JWT_SECRET is also unset).
+  return {
+    "x-canna-user": process.env.CANNA_USER ?? "admin",
+    "x-canna-role": process.env.CANNA_ROLE ?? "DIRETORIA",
+    "x-canna-association": process.env.CANNA_ASSOCIATION ?? "",
+  };
+}
 
 /**
  * Singleton MCP client pointing at apps/mcp (canna-br's StreamableHTTP server).
@@ -24,15 +65,10 @@ export function getMcpClient(): Promise<MCPClient> {
     transport: {
       type: "http",
       url: process.env.MCP_SERVER_URL ?? "http://localhost:3001",
-      // apps/mcp gates every tool by ctx.role (x-canna-role); absent headers
-      // default to GUEST and ALL tools 403. Until Zitadel OIDC lands (v0.1.x),
-      // pass the role/user/association as a dev stopgap from env so the chat
-      // can actually call tools. Real OAuth 2.1 token → claims replaces this.
-      headers: {
-        "x-canna-user": process.env.CANNA_USER ?? "admin",
-        "x-canna-role": process.env.CANNA_ROLE ?? "DIRETORIA",
-        "x-canna-association": process.env.CANNA_ASSOCIATION ?? "",
-      },
+      // apps/mcp derives role/user/association from a VERIFIED JWT when
+      // JWT_SECRET is set (production); a forged raw x-canna-role can no longer
+      // escalate. In dev (no JWT_SECRET) it falls back to the header stub.
+      headers: mcpHeaders(),
     },
   });
   return mcpClientPromise;

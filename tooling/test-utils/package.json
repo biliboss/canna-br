@@ -12,13 +12,17 @@
     "./agent-reporter": "./src/agent-reporter.ts"
   },
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@canna/shared": "workspace:*"
   },
   "devDependencies": {
+    "@canna/domain": "workspace:*",
     "@canna/tsconfig": "workspace:*",
+    "@vitest/coverage-v8": "^2.1.9",
     "typescript": "^5.9.3",
     "vitest": "^2.1.9"
   }

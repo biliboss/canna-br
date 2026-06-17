@@ -23,18 +23,9 @@ import {
   type ReadModelQuery,
 } from "@canna/read-models";
 import { createCannaMcpServer } from "./server.js";
-import type { Role, ToolContext } from "./types.js";
+import { makeResolveContext } from "./auth.js";
 
 const env = (k: string): string | undefined => process.env[k];
-
-const isRole = (s: string): s is Role =>
-  s === "DISPENSADOR" ||
-  s === "RESPONSAVEL_TECNICO" ||
-  s === "DIRETORIA" ||
-  s === "DPO" ||
-  s === "AUDITOR" ||
-  s === "FEDERATION" ||
-  s === "GUEST";
 
 const main = async (): Promise<void> => {
   const databaseUrl = env("DATABASE_URL");
@@ -60,29 +51,22 @@ const main = async (): Promise<void> => {
     process.stderr.write(`read-model store unavailable: ${String(e)}\n`);
   }
 
-  const resolveContext = async (
-    headers: http.IncomingHttpHeaders,
-  ): Promise<ToolContext> => {
-    const get = (k: string): string | undefined => {
-      const v = headers[k] ?? headers[k.toLowerCase()];
-      return typeof v === "string" && v.length > 0 ? v : undefined;
-    };
-    const userId = get("x-canna-user") ?? "anonymous";
-    const roleRaw = get("x-canna-role") ?? "GUEST";
-    const role: Role = isRole(roleRaw) ? roleRaw : "GUEST";
-    const associationId = get("x-canna-association") ?? "unknown";
-    const chatId = get("x-canna-chat");
-    const ctx: ToolContext = {
-      store,
-      userId,
-      role,
-      associationId,
-      now: new Date(),
-      ...(readModelStore !== undefined ? { readModelStore } : {}),
-      ...(chatId !== undefined ? { chatId } : {}),
-    };
-    return ctx;
-  };
+  // Auth gate: when JWT_SECRET is set (production), every request MUST present
+  // a valid `Authorization: Bearer <jwt>` and the role/userId/associationId are
+  // derived from the VERIFIED claims — a raw `x-canna-role` header is ignored
+  // and can NOT escalate. When JWT_SECRET is unset (dev/local), the legacy
+  // header stub is used so local dev and tests work without an issuer.
+  const jwtSecret = env("JWT_SECRET");
+  if (jwtSecret === undefined || jwtSecret.length === 0) {
+    process.stderr.write(
+      "WARN: JWT_SECRET unset — running in DEV header-auth mode (insecure; forged x-canna-role is trusted). Set JWT_SECRET in production.\n",
+    );
+  }
+  const resolveContext = makeResolveContext({
+    store,
+    ...(readModelStore !== undefined ? { readModelStore } : {}),
+    ...(jwtSecret !== undefined ? { jwtSecret } : {}),
+  });
 
   // Stateless StreamableHTTP: the SDK transport binds to a single server
   // lifecycle, so a shared transport reused across requests throws (the live
