@@ -151,6 +151,9 @@ export const getMembersByStatus: ToolDefinition<Args> = {
             statusFilter: statusFilter ?? null,
             totalCount: rows.length,
             grouped,
+            // viewerRole drives role-gated lifecycle action buttons in the
+            // member-lifecycle-board widget (fail-closed when absent).
+            viewerRole: ctx.role,
           }),
         },
       ],
