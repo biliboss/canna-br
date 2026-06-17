@@ -16,7 +16,8 @@
     "test:watch": "pnpm --filter @canna/domain test:watch",
     "coverage": "pnpm --filter @canna/domain coverage",
     "verify": "pnpm typecheck && pnpm test",
-    "validate": "pnpm typecheck && pnpm test && pnpm --filter @canna/ui-apps build && node scripts/validate-mcp-health.mjs",
+    "validate:typecheck": "pnpm --filter @canna/shared --filter @canna/domain --filter @canna/event-store --filter @canna/read-models --filter @canna/crypto --filter @canna/sngpc --filter @canna/app-services --filter @canna/ui-apps --filter @canna/mcp --filter @canna/api --filter @canna/worker --filter @canna/test-utils --if-present typecheck",
+    "validate": "pnpm validate:typecheck && pnpm test && pnpm --filter @canna/ui-apps build && node scripts/validate-mcp-health.mjs",
     "test:e2e:prod": "playwright test",
     "test:e2e:prod:list": "playwright test --list",
     "gates:install": "lefthook install",
@@ -26,6 +27,7 @@
     "@modelcontextprotocol/sdk": "^1.29.0",
     "@playwright/test": "^1.61.0",
     "lefthook": "^2.1.9",
+    "tsx": "^4.22.4",
     "typescript": "^5.9.3"
   },
   "engines": {
@@ -35,6 +37,9 @@
   "pnpm": {
     "overrides": {
       "@types/node": "22.19.20"
-    }
+    },
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
   }
 }

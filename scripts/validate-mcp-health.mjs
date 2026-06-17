@@ -173,11 +173,17 @@ async function main() {
   // DATABASE_URL set to a dummy value — health + ListTools don't hit DB.
   // Postgres connection is lazy (Emmett / Pongo only connects on first query).
   const mcpEntry = resolve(ROOT, "apps/mcp/src/main.ts");
-  info(`booting MCP server: ${mcpEntry} on port ${MCP_PORT}`);
+  // Boot via tsx (esbuild-backed TS runner). `node --experimental-strip-types`
+  // does NOT rewrite `.js` import specifiers to their `.ts` source under
+  // Node >=23 (works in the Node 22.12 prod Docker image, breaks locally on
+  // newer Node). tsx resolves them, so the smoke is runtime-independent.
+  const require = createRequire(import.meta.url);
+  const tsxCli = require.resolve("tsx/cli");
+  info(`booting MCP server via tsx: ${mcpEntry} on port ${MCP_PORT}`);
 
   const child = spawn(
     "node",
-    ["--experimental-strip-types", mcpEntry],
+    [tsxCli, mcpEntry],
     {
       env: {
         ...process.env,
