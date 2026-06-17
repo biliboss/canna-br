@@ -87,7 +87,12 @@ fi
 run "docker rename ${IMAGE}-latest ${PREV_CONTAINER} 2>/dev/null || true"
 run "docker stop ${PREV_CONTAINER} 2>/dev/null || true"
 
+# GOTCHA: must attach to the `kamal` Docker network at run time — kamal-proxy
+# lives on 172.18.x (kamal net) and can only reach the container by its kamal-net
+# IP. Default bridge (172.17.x) is unreachable from the proxy → 30s healthcheck
+# timeout on the route wire. `--network kamal` here avoids a manual connect.
 run "docker run -d --name ${IMAGE}-latest --restart=unless-stopped \
+  --network kamal \
   -p 127.0.0.1:${CONTAINER_PORT}:${CONTAINER_PORT} \
   -e NODE_ENV=production \
   -e MCP_ENABLED=1 \
@@ -116,7 +121,8 @@ run "docker rm -f ${PREV_CONTAINER} 2>/dev/null || true"
 # 5. Wire kamal-proxy route for app.cannabr.org
 # ──────────────────────────────────────────────────────────────────────────────
 echo "[5/5] Wiring kamal-proxy route app.cannabr.org → 127.0.0.1:${CONTAINER_PORT}..."
-AGENT_IP="$(run "docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ${IMAGE}-latest")"
+# Use the kamal-net IP specifically (container may be on multiple networks).
+AGENT_IP="$(run "docker inspect -f '{{.NetworkSettings.Networks.kamal.IPAddress}}' ${IMAGE}-latest")"
 
 run "docker exec kamal-proxy kamal-proxy deploy canna-agent-org \
   --target ${AGENT_IP}:${CONTAINER_PORT} --host app.cannabr.org --tls \
