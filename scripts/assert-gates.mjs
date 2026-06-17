@@ -28,6 +28,7 @@ const must = [
   ["main-only guard", /rev-parse --abbrev-ref HEAD/],
   ["typecheck gate", /typecheck/],
   ["prod smoke (app.cannabr.org/health → 200)", /app\.cannabr\.org\/health/],
+  ["e2e pre-merge gate", /test:e2e:gate/],
 ];
 
 const missing = must.filter(([, re]) => !re.test(yml)).map(([name]) => name);

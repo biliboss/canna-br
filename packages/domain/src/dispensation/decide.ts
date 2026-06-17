@@ -5,7 +5,11 @@ import {
   isOk,
   subtractGrams,
 } from "@canna/shared";
-import type { RecordDispensation } from "./commands.js";
+import type {
+  ApproveDispensation,
+  RecordDispensation,
+  RequestDispensation,
+} from "./commands.js";
 import type { DispensationEvent } from "./events.js";
 import type { DispensationContext } from "./state.js";
 
@@ -222,4 +226,94 @@ export const decide = (
   ];
 
   return events;
+};
+
+/**
+ * RDC 1.014 — Step 1. A DISPENSADOR requests a dispensation. Light validation
+ * only: role + positive quantity + member-context match. Quota/inventory are
+ * deliberately NOT checked here (they are re-validated at approval time against
+ * the stream version actually appended to). Emits a single
+ * `DispensationRequested` event that consumes NOTHING.
+ */
+export const decideRequest = (
+  cmd: RequestDispensation,
+  ctx: DispensationContext,
+): readonly DispensationEvent[] | DomainError => {
+  if (ctx.dispenserRole !== "DISPENSADOR") {
+    return domainError(
+      "ROLE_INSUFFICIENT",
+      "Only DISPENSADOR can request a dispensation",
+      { role: ctx.dispenserRole },
+    );
+  }
+
+  if ((cmd.quantityG as number) <= 0) {
+    return domainError(
+      "QUANTITY_NON_POSITIVE",
+      "Dispensation quantity must be > 0",
+      { quantityG: cmd.quantityG as number },
+    );
+  }
+
+  if (ctx.member.memberId !== cmd.memberId) {
+    return domainError(
+      "MEMBER_NOT_FOUND",
+      "Member context does not match command memberId",
+    );
+  }
+
+  if (ctx.member.status === "EMPTY" || ctx.member.status === "PENDING_CONSENT") {
+    return domainError("MEMBER_NOT_ACTIVE", "Member is not ACTIVE", {
+      status: ctx.member.status,
+    });
+  }
+
+  return [
+    event("DispensationRequested", streamId(cmd.associationId), cmd.now, {
+      dispensationId: cmd.dispensationId,
+      associationId: cmd.associationId,
+      memberRef: cmd.memberId,
+      inventoryLotRef: cmd.lotId,
+      quantityG: cmd.quantityG,
+      requestedBy: cmd.requestedBy,
+    }),
+  ];
+};
+
+/**
+ * RDC 1.014 — Step 2. A distinct approver (RT/DIRETORIA) effects a pending
+ * request. The original request (member/lot/quantity/requester) is recovered
+ * from `ctx.pendingRequest` — NEVER from approver input — so the segregation
+ * guard compares the true requester against the approver. All quota/inventory/
+ * prescription validation is delegated to the legacy effect decider with
+ * `dispensedBy = requester` and `approvedBy = approver`, so the existing
+ * `APPROVAL_SEGREGATION_VIOLATION` guard fires when they are the same identity.
+ */
+export const decideApprove = (
+  cmd: ApproveDispensation,
+  ctx: DispensationContext,
+): readonly DispensationEvent[] | DomainError => {
+  const pending = ctx.pendingRequest;
+  if (pending == null || pending.dispensationId !== cmd.dispensationId) {
+    return domainError(
+      "PENDING_DISPENSATION_NOT_FOUND",
+      "No pending dispensation request found for this id",
+      { dispensationId: cmd.dispensationId },
+    );
+  }
+
+  return decide(
+    {
+      type: "RecordDispensation",
+      dispensationId: pending.dispensationId as RecordDispensation["dispensationId"],
+      associationId: cmd.associationId,
+      memberId: pending.memberId as RecordDispensation["memberId"],
+      lotId: pending.lotId as RecordDispensation["lotId"],
+      quantityG: pending.quantityG,
+      dispensedBy: pending.requestedBy as RecordDispensation["dispensedBy"],
+      approvedBy: cmd.approvedBy,
+      now: cmd.now,
+    },
+    ctx,
+  );
 };

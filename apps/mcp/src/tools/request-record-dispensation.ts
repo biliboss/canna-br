@@ -13,28 +13,26 @@ interface Args {
 }
 
 /**
- * Nível 3 — WRITE. Records a dispensation for real: loads Member + Lot + Quota
- * context, runs the `RecordDispensation` decider, and atomically appends the
- * emitted events (DispensationRecorded + MemberQuotaConsumed +
- * LotQuantityDeducted) to the association stream via the
- * `Dispensations.recordDispensation` app-service.
- *
- * APPROVAL GATE — KNOWN GAP (wave.6): a separate two-step approval flow
- * (PendingAction + `approve_pending_action`) does NOT exist yet, so this tool
- * records directly. `approvedBy` is therefore `null` and the domain's
- * approval-segregation guard (which only fires when `approvedBy` is non-null)
- * does not engage. A lone DISPENSADOR can self-dispense without a separate
- * approver. The RDC1.014 self-approval guard is deferred to a future PR.
+ * Nível 3 — WRITE. RDC 1.014 Step 1 (REQUEST). A DISPENSADOR *requests* a
+ * dispensation: loads Member context, runs the `decideRequest` decider, and
+ * appends a single `DispensationRequested` event to the association stream via
+ * `Dispensations.requestDispensation`. This does NOT consume quota nor deduct
+ * inventory — the dispensation stays PENDING until a DISTINCT approver
+ * (RESPONSAVEL_TECNICO | DIRETORIA) calls `approve_dispensation`. Segregation
+ * of duties (RDC 1.014) is enforced at approval time by comparing the stored
+ * requester identity against the approver — the requester can NEVER approve
+ * their own request.
  */
 export const requestRecordDispensation: ToolDefinition<Args> = {
   name: "request_record_dispensation",
-  title: "Record Dispensation",
+  title: "Request Dispensation (pending approval)",
   description:
-    "Registra uma dispensação real: aplica o decider RecordDispensation e " +
-    "anexa atomicamente DispensationRecorded + MemberQuotaConsumed + " +
-    "LotQuantityDeducted ao stream da associação (ou o evento de rejeição " +
-    "QuotaExceededAttempt | LotInsufficientQuantity). A cota do membro é " +
-    "deduzida via projeção member_quota. Role: DISPENSADOR.",
+    "RDC 1.014 — SOLICITA uma dispensação (passo 1 de 2). Registra um " +
+    "DispensationRequested PENDENTE: NÃO consome cota nem deduz estoque. " +
+    "A dispensação só é efetivada quando um aprovador DISTINTO " +
+    "(RESPONSAVEL_TECNICO ou DIRETORIA) chamar approve_dispensation. " +
+    "Segregação de função: o solicitante não pode aprovar a própria. " +
+    "Role: DISPENSADOR.",
   riskLevel: 3,
   allowedRoles: ["DISPENSADOR"],
   inputSchema: {
@@ -82,23 +80,19 @@ export const requestRecordDispensation: ToolDefinition<Args> = {
     const dispensationId = (args.dispensationId ??
       systemIdGenerator.generate()) as ULID;
 
-    const result = await Dispensations.recordDispensation(
+    const result = await Dispensations.requestDispensation(
       {
         store: ctx.store,
-        // No separate Responsável Técnico resolved in this surface yet, so the
-        // segregation-of-duties guard against the RT is not engaged here.
-        responsavelTecnicoId: null,
         dispenserRole: ctx.role === "DISPENSADOR" ? "DISPENSADOR" : "OTHER",
       },
       {
-        type: "RecordDispensation",
+        type: "RequestDispensation",
         dispensationId,
         associationId: args.associationId as ULID,
         memberId: args.memberId as ULID,
         lotId: args.lotId as ULID,
         quantityG: qty.value,
-        dispensedBy: ctx.userId as ULID,
-        approvedBy: null,
+        requestedBy: ctx.userId as ULID,
         now: ctx.now,
       },
     );
@@ -119,49 +113,26 @@ export const requestRecordDispensation: ToolDefinition<Args> = {
       };
     }
 
-    const recorded = result.value.events.find(
-      (e) => e.type === "DispensationRecorded",
-    );
-
-    // The decider may emit a rejection event (QuotaExceededAttempt |
-    // LotInsufficientQuantity) instead of a recording. Those still append
-    // (audit trail) but the dispensation did NOT happen — surface clearly.
-    if (!recorded) {
-      const rejection = result.value.events[0];
-      return {
-        isError: true,
-        content: [
-          {
-            type: "text",
-            text: JSON.stringify({
-              status: "REJECTED",
-              reason: rejection?.type ?? "UNKNOWN",
-              dispensationId,
-              memberId: args.memberId,
-              lotId: args.lotId,
-            }),
-          },
-        ],
-      };
-    }
-
     return {
       content: [
         {
           type: "text",
           text: JSON.stringify({
-            status: "RECORDED",
+            status: "PENDING_APPROVAL",
             dispensationId,
             associationId: ctx.associationId,
             memberId: args.memberId,
             lotId: args.lotId,
             quantityG: args.quantityG,
-            dispensedBy: ctx.userId,
+            requestedBy: ctx.userId,
             justification: args.justification,
             emittedEvents: result.value.events.map((e) => e.type),
-            nextStep: "get_member_quota",
+            nextStep: "approve_dispensation",
             message:
-              "Dispensação registrada. Cota do membro deduzida — consulte get_member_quota.",
+              "Dispensação SOLICITADA e pendente de aprovação (RDC 1.014). " +
+              "Cota NÃO foi consumida. Um aprovador distinto " +
+              "(RESPONSAVEL_TECNICO ou DIRETORIA) deve chamar approve_dispensation " +
+              `com dispensationId=${dispensationId}. O próprio solicitante não pode aprovar.`,
           }),
         },
       ],

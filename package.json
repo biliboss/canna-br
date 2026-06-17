@@ -23,6 +23,7 @@
     "validate": "pnpm validate:typecheck && pnpm test && pnpm --filter @canna/ui-apps build && node scripts/validate-mcp-health.mjs",
     "test:e2e:prod": "playwright test",
     "test:e2e:prod:list": "playwright test --list",
+    "test:e2e:gate": "bash e2e/lib/run-gate.sh",
     "gates:install": "lefthook install",
     "gates:verify": "node scripts/assert-gates.mjs"
   },

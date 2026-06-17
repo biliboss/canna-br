@@ -1,0 +1,200 @@
+name: Deploy Backend
+
+# ── cb-ci-build-deploy-pipeline (wave.9) ────────────────────────────────────────
+# BACKUP automation for the docker-direct backend deploy. lefthook is the PRIMARY
+# gate (trunk-only + typecheck + test + build + prod-smoke + e2e gate, all local);
+# this workflow is the convenience automation that reproduces the manual
+# tar-pipe → build-on-VPS → run → wire-route deploy described in
+# ops/docker/DEPLOY.md, so a merge to main can ship the backend roles without a
+# human running the steps by hand. It is NOT the source of truth and a runner
+# outage must not block development (lefthook already guards the trunk).
+#
+# Build path: kamal build-push is blocked on this VPS, so the runner does NOT
+# build a registry image. It tar-pipes the build context to the VPS and runs
+# `docker build` THERE, exactly like ops/agent/kamal/deploy-agent.sh.
+#
+# ⚠️  UNVERIFIED-IN-THIS-COMMIT: this YAML is syntax/actionlint-clean but has NOT
+#     been dispatched on a runner here (it needs the DEPLOY_* secrets + the VPS).
+#     It is runner-only-provable. The e2e gate and prod smoke ARE proven locally
+#     via lefthook (see lefthook.yml 06-e2e-gate + 04-smoke-prod).
+#
+# ⚠️  BLAST-RADIUS: NEVER `kamal proxy reboot` — the proxy is shared across ~15 apps.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/api/**'
+      - 'apps/mcp/**'
+      - 'apps/worker/**'
+      - 'packages/**'
+      - 'Dockerfile'
+      - 'docker-compose.yml'
+      - '.github/workflows/deploy-backend.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-backend-${{ github.ref }}
+  cancel-in-progress: false # backend deploys must not be cancelled mid-cutover
+
+jobs:
+  # ── 1. Which apps changed? (path-filter monorepo) ─────────────────────────────
+  changes:
+    name: Detect changed roles
+    runs-on: ubuntu-latest
+    outputs:
+      mcp: ${{ steps.filter.outputs.mcp }}
+      api: ${{ steps.filter.outputs.api }}
+      worker: ${{ steps.filter.outputs.worker }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            shared: &shared
+              - 'packages/**'
+              - 'Dockerfile'
+              - 'docker-compose.yml'
+            mcp:
+              - *shared
+              - 'apps/mcp/**'
+            api:
+              - *shared
+              - 'apps/api/**'
+            worker:
+              - *shared
+              - 'apps/worker/**'
+
+  # ── 2. Build the single image ON the VPS + run each changed role ──────────────
+  deploy:
+    name: Build + deploy (docker-direct)
+    needs: changes
+    if: ${{ needs.changes.outputs.mcp == 'true' || needs.changes.outputs.api == 'true' || needs.changes.outputs.worker == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+      DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+      DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+      IMAGE_TAG: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Write SSH key
+        run: |
+          install -m 600 /dev/null /tmp/deploy_key
+          echo "$DEPLOY_SSH_KEY" > /tmp/deploy_key
+          echo "SSH_CMD=ssh -i /tmp/deploy_key -o StrictHostKeyChecking=accept-new -o BatchMode=yes" >> "$GITHUB_ENV"
+
+      # tar-pipe build context → build ON the VPS (kamal build-push is blocked).
+      - name: Tar-pipe + docker build on VPS
+        run: |
+          tar -czf - \
+            --exclude='node_modules' \
+            --exclude='**/.next' \
+            --exclude='**/dist' \
+            . | $SSH_CMD "${DEPLOY_USER}@${DEPLOY_HOST}" \
+              "rm -rf /tmp/canna-build && mkdir -p /tmp/canna-build && tar -xzf - -C /tmp/canna-build"
+          $SSH_CMD "${DEPLOY_USER}@${DEPLOY_HOST}" \
+            "docker build -t canna-br:${IMAGE_TAG} -t canna-br:latest /tmp/canna-build && rm -rf /tmp/canna-build"
+
+      # Graceful per-role cutover. DATABASE_URL/REDIS_URL/etc come from the
+      # role's existing container env on the VPS (we re-use the running env file).
+      - name: Deploy mcp role
+        if: ${{ needs.changes.outputs.mcp == 'true' }}
+        run: |
+          $SSH_CMD "${DEPLOY_USER}@${DEPLOY_HOST}" "bash -s ${IMAGE_TAG}" <<'REMOTE'
+            set -euo pipefail
+            TAG="$1"; ROLE=mcp; PORT=3001; ENTRY="tsx apps/mcp/src/main.ts"; SVC=canna-stack-mcp
+            docker rename "$SVC" "${SVC}-prev" 2>/dev/null || true
+            docker stop "${SVC}-prev" 2>/dev/null || true
+            docker run -d --name "$SVC" --restart=unless-stopped --network kamal \
+              -p "127.0.0.1:${PORT}:${PORT}" --env-file "/srv/canna/${ROLE}.env" \
+              "canna-br:${TAG}" $ENTRY
+            for i in $(seq 1 12); do
+              docker exec "$SVC" wget -qO- "http://127.0.0.1:${PORT}/health" >/dev/null 2>&1 && break
+              [ "$i" = 12 ] && { echo "mcp unhealthy"; exit 1; }; sleep 5
+            done
+            docker rm -f "${SVC}-prev" 2>/dev/null || true
+          REMOTE
+
+      - name: Deploy api role
+        if: ${{ needs.changes.outputs.api == 'true' }}
+        run: |
+          $SSH_CMD "${DEPLOY_USER}@${DEPLOY_HOST}" "bash -s ${IMAGE_TAG}" <<'REMOTE'
+            set -euo pipefail
+            TAG="$1"; ROLE=api; PORT=3000; ENTRY="tsx apps/api/src/server.ts"; SVC=canna-stack-api
+            docker rename "$SVC" "${SVC}-prev" 2>/dev/null || true
+            docker stop "${SVC}-prev" 2>/dev/null || true
+            docker run -d --name "$SVC" --restart=unless-stopped --network kamal \
+              -p "127.0.0.1:${PORT}:${PORT}" --env-file "/srv/canna/${ROLE}.env" \
+              "canna-br:${TAG}" $ENTRY
+            for i in $(seq 1 12); do
+              docker exec "$SVC" wget -qO- "http://127.0.0.1:${PORT}/health" >/dev/null 2>&1 && break
+              [ "$i" = 12 ] && { echo "api unhealthy"; exit 1; }; sleep 5
+            done
+            docker rm -f "${SVC}-prev" 2>/dev/null || true
+          REMOTE
+
+      - name: Deploy worker role
+        if: ${{ needs.changes.outputs.worker == 'true' }}
+        run: |
+          $SSH_CMD "${DEPLOY_USER}@${DEPLOY_HOST}" "bash -s ${IMAGE_TAG}" <<'REMOTE'
+            set -euo pipefail
+            TAG="$1"; ROLE=worker; ENTRY="tsx apps/worker/src/server.ts"; SVC=canna-stack-worker
+            docker rename "$SVC" "${SVC}-prev" 2>/dev/null || true
+            docker stop "${SVC}-prev" 2>/dev/null || true
+            docker run -d --name "$SVC" --restart=unless-stopped --network kamal \
+              --env-file "/srv/canna/${ROLE}.env" "canna-br:${TAG}" $ENTRY
+            sleep 5
+            docker exec "$SVC" wget -qO- "http://127.0.0.1:3002/health" >/dev/null 2>&1 \
+              || { echo "worker unhealthy"; exit 1; }
+            docker rm -f "${SVC}-prev" 2>/dev/null || true
+          REMOTE
+
+      - name: Scrub SSH key
+        if: always()
+        run: rm -f /tmp/deploy_key
+
+  # ── 3. Post-deploy smoke gate (ship-only-tested) ──────────────────────────────
+  #    /health + MCP tools/list count + 1 tool invoke against the public hosts.
+  smoke:
+    name: Post-deploy smoke
+    needs: [changes, deploy]
+    if: ${{ always() && needs.deploy.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Health endpoints
+        run: |
+          fail=0
+          for u in https://api.cannabr.org/health https://mcp.cannabr.org/health; do
+            code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 15 "$u" || echo 000)"
+            echo "$u -> $code"
+            [ "$code" = 200 ] || fail=1
+          done
+          [ "$fail" = 0 ] || { echo "::error::health smoke failed"; exit 1; }
+
+      - name: MCP tools/list count + 1 tool invoke
+        run: |
+          BASE=https://mcp.cannabr.org
+          # MCP StreamableHTTP: initialize → tools/list → one tools/call.
+          # tools/list must advertise >= the expected tool count; the invoke
+          # proves the write/read path is wired, not just that the port is open.
+          tools="$(curl -sS --max-time 20 -X POST "$BASE/mcp" \
+            -H 'content-type: application/json' \
+            -H 'accept: application/json, text/event-stream' \
+            -d '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}' \
+            | grep -o '"name"' | wc -l | tr -d ' ')"
+          echo "tools advertised: ${tools}"
+          [ "${tools:-0}" -ge 10 ] || { echo "::error::tools/list count ${tools} < 10"; exit 1; }
+
+          invoke="$(curl -sS --max-time 20 -X POST "$BASE/mcp" \
+            -H 'content-type: application/json' \
+            -H 'accept: application/json, text/event-stream' \
+            -H 'x-canna-role: RESPONSAVEL_TECNICO' \
+            -d '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"get_members_by_status","arguments":{"status":"ACTIVE"}}}')"
+          echo "$invoke" | grep -q '"result"' \
+            || { echo "::error::tool invoke returned no result: $invoke"; exit 1; }
+          echo "tool invoke OK"

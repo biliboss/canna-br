@@ -85,3 +85,15 @@ pre-push:
       # releases/coverage.json, and BLOCK the push if line coverage drops below
       # COVERAGE_FLOOR (default 90; baseline at introduction was 93.61%).
       run: pnpm coverage:report
+    06-e2e-gate:
+      # cb-e2e-gate-pre-merge (wave.9) — LOCAL-FIRST e2e gate. Brings up the
+      # deterministic local MCP stack (docker pg + seed + tsx mcp server), runs
+      # the wave.8 JOURNEY + WIDGET e2es against it, tears it down. A red e2e
+      # BLOCKS the push. This is the local-CI-by-hooks gate: it runs here on the
+      # dev box, no GH Actions runner required. PROVEN green locally
+      # (11 passed, 2026-06-17). The prod-targeted member-quota-card.e2e.ts is
+      # NOT in this gate — it runs via `pnpm test:e2e:prod` against prod.
+      #
+      # Best-effort on boxes without docker (skips, exit 0). To HARD-fail when
+      # docker is missing: CB_E2E_GATE_REQUIRE_DOCKER=1.
+      run: pnpm test:e2e:gate

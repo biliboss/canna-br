@@ -1,5 +1,24 @@
 import type { DomainEvent, QuantityGrams, ULID } from "@canna/shared";
 
+/**
+ * RDC 1.014 — a dispensation has been REQUESTED and is PENDING approval. No
+ * quota is consumed and no inventory is deducted by this event; it only records
+ * the intent + the requester identity, which the approval step reads back to
+ * enforce segregation of duties. The `projectAssociationStream` quota/lot
+ * accumulators intentionally ignore this event type.
+ */
+export type DispensationRequested = DomainEvent<
+  "DispensationRequested",
+  {
+    readonly dispensationId: ULID;
+    readonly associationId: ULID;
+    readonly memberRef: ULID;
+    readonly inventoryLotRef: ULID;
+    readonly quantityG: QuantityGrams;
+    readonly requestedBy: ULID;
+  }
+>;
+
 export type DispensationRecorded = DomainEvent<
   "DispensationRecorded",
   {
@@ -61,6 +80,7 @@ export type LotInsufficientForDispensation = DomainEvent<
 >;
 
 export type DispensationEvent =
+  | DispensationRequested
   | DispensationRecorded
   | MemberQuotaConsumed
   | LotQuantityDeductedByDispensation

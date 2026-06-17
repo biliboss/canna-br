@@ -6,7 +6,7 @@ import {
   quantityGrams,
   type ULID,
 } from "@canna/shared";
-import { decide } from "./decide.js";
+import { decide, decideApprove, decideRequest } from "./decide.js";
 import type { DispensationContext } from "./state.js";
 import type { MemberState } from "../membership/state.js";
 import type { LotState } from "../inventory/state.js";
@@ -373,4 +373,92 @@ describe("Dispensation / concurrent same-lot semantics", () => {
       expectRejectionEvent(second, "LotInsufficientQuantity");
     },
   );
+});
+
+describe("RDC 1.014 — two-step approval gate (request → approve)", () => {
+  const pending = (requestedBy = DISPENSER) => ({
+    dispensationId: DISP_ID as string,
+    memberId: MEMBER_ID as string,
+    lotId: LOT_ID as string,
+    quantityG: grams(5),
+    requestedBy: requestedBy as string,
+  });
+
+  it("(a) DISPENSADOR requests → DispensationRequested, consumes NOTHING", () => {
+    const result = decideRequest(
+      {
+        type: "RequestDispensation",
+        dispensationId: DISP_ID,
+        associationId: ASSOC_ID,
+        memberId: MEMBER_ID,
+        lotId: LOT_ID,
+        quantityG: grams(5),
+        requestedBy: DISPENSER,
+        now: NOW,
+      },
+      ctx(),
+    );
+    if (isDomainError(result)) throw new Error(`unexpected error ${result.code}`);
+    // Single event, NO quota/lot deduction events.
+    expect(result.map((e) => e.type)).toEqual(["DispensationRequested"]);
+  });
+
+  it("(b) the SAME user who requested tries to approve → APPROVAL_SEGREGATION_VIOLATION", () => {
+    const result = decideApprove(
+      {
+        type: "ApproveDispensation",
+        dispensationId: DISP_ID,
+        associationId: ASSOC_ID,
+        approvedBy: DISPENSER, // same identity as requester
+        now: NOW,
+      },
+      ctx({
+        // approver carries RT role but IS the dispenser identity-wise
+        dispenserRole: "DISPENSADOR",
+        responsavelTecnicoId: null,
+        pendingRequest: pending(DISPENSER),
+      }),
+    );
+    expectError(result, "APPROVAL_SEGREGATION_VIOLATION");
+  });
+
+  it("(c) a DISTINCT approver effects it → DispensationRecorded + quota consumed + lot deducted", () => {
+    const result = decideApprove(
+      {
+        type: "ApproveDispensation",
+        dispensationId: DISP_ID,
+        associationId: ASSOC_ID,
+        approvedBy: APPROVER, // distinct from requester
+        now: NOW,
+      },
+      ctx({
+        dispenserRole: "DISPENSADOR",
+        responsavelTecnicoId: null,
+        pendingRequest: pending(DISPENSER),
+      }),
+    );
+    if (isDomainError(result)) throw new Error(`unexpected error ${result.code}`);
+    expect(result.map((e) => e.type)).toEqual([
+      "DispensationRecorded",
+      "MemberQuotaConsumed",
+      "LotQuantityDeducted",
+    ]);
+    const recorded = result[0] as { payload: { approvedBy: string; dispensedBy: string } };
+    expect(recorded.payload.approvedBy).toBe(APPROVER);
+    expect(recorded.payload.dispensedBy).toBe(DISPENSER);
+  });
+
+  it("approve with no pending request → PENDING_DISPENSATION_NOT_FOUND", () => {
+    const result = decideApprove(
+      {
+        type: "ApproveDispensation",
+        dispensationId: DISP_ID,
+        associationId: ASSOC_ID,
+        approvedBy: APPROVER,
+        now: NOW,
+      },
+      ctx({ pendingRequest: null }),
+    );
+    expectError(result, "PENDING_DISPENSATION_NOT_FOUND");
+  });
 });

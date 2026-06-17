@@ -18,6 +18,22 @@ export interface DispensationContext {
   readonly quotaConsumedThisMonthG: QuantityGrams;
   readonly dispenserRole: "DISPENSADOR" | "RESPONSAVEL_TECNICO" | "ADMIN" | "OTHER";
   readonly responsavelTecnicoId: string | null;
+  /**
+   * Pending request recovered from the stored `DispensationRequested` event,
+   * present only on the approval path (`decideApprove`). Carries the original
+   * requester identity so the approval segregation guard compares against the
+   * real requester, never approver-supplied input. `null` when the requested
+   * dispensation does not exist (or was already effected).
+   */
+  readonly pendingRequest?: PendingDispensationRequest | null;
+}
+
+export interface PendingDispensationRequest {
+  readonly dispensationId: string;
+  readonly memberId: string;
+  readonly lotId: string;
+  readonly quantityG: QuantityGrams;
+  readonly requestedBy: string;
 }
 
 export const emptyDispensationContext = (

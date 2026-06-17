@@ -6,6 +6,7 @@ import { listAvailableLots } from "./list-available-lots.js";
 import { getTraceabilityReport } from "./get-traceability-report.js";
 import { draftDispensation } from "./draft-dispensation.js";
 import { requestRecordDispensation } from "./request-record-dispensation.js";
+import { approveDispensation } from "./approve-dispensation.js";
 import { registerMember } from "./register-member.js";
 import { grantConsent } from "./grant-consent.js";
 import { validatePrescription } from "./validate-prescription.js";
@@ -29,6 +30,7 @@ export const allTools: readonly AnyTool[] = [
   registerMember as unknown as AnyTool,
   grantConsent as unknown as AnyTool,
   requestRecordDispensation as unknown as AnyTool,
+  approveDispensation as unknown as AnyTool,
   validatePrescription as unknown as AnyTool,
   suspendMember as unknown as AnyTool,
   reinstateMember as unknown as AnyTool,

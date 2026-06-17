@@ -84,15 +84,16 @@ const dispenserCtx = (store: Awaited<ReturnType<typeof setupStore>>): ToolContex
 });
 
 describe("@canna/mcp / tool catalog", () => {
-  it("exposes 14 tools (5 read + 1 draft + 8 write: register_member + grant_consent + validate_prescription + record-dispensation + suspend_member + reinstate_member + revoke_consent + anonymize_member)", () => {
-    expect(allTools).toHaveLength(14);
+  it("exposes 15 tools (5 read + 1 draft + 9 write: register_member + grant_consent + validate_prescription + request-record-dispensation + approve_dispensation + suspend_member + reinstate_member + revoke_consent + anonymize_member)", () => {
+    expect(allTools).toHaveLength(15);
     const byLevel = new Map<number, number>();
     for (const t of allTools) {
       byLevel.set(t.riskLevel, (byLevel.get(t.riskLevel) ?? 0) + 1);
     }
     expect(byLevel.get(1)).toBe(5);
     expect(byLevel.get(2)).toBe(1);
-    expect(byLevel.get(3)).toBe(8);
+    expect(byLevel.get(3)).toBe(9);
+    expect(allTools.map((t) => t.name)).toContain("approve_dispensation");
     expect(allTools.map((t) => t.name)).toContain("register_member");
     expect(allTools.map((t) => t.name)).toContain("grant_consent");
     expect(allTools.map((t) => t.name)).toContain("revoke_consent");
@@ -232,7 +233,7 @@ describe("@canna/mcp / RBAC enforcement", () => {
       },
     });
     expect(server).toBeDefined();
-    expect(tools.size).toBe(14);
+    expect(tools.size).toBe(15);
 
     // AUDITOR cannot call draft_dispensation (DISPENSADOR + RT only)
     const tool = tools.get("draft_dispensation");
@@ -241,8 +242,8 @@ describe("@canna/mcp / RBAC enforcement", () => {
   });
 });
 
-describe("@canna/mcp / Nível 3 request_record_dispensation (real write)", () => {
-  it("records a real dispensation and appends events to the association stream", async () => {
+describe("@canna/mcp / Nível 3 request_record_dispensation (RDC 1.014 — request only)", () => {
+  it("requests a PENDING dispensation: appends DispensationRequested, consumes no quota", async () => {
     const store = await setupStore();
     const ctx = dispenserCtx(store);
     const tool = allTools.find((t) => t.name === "request_record_dispensation");
@@ -261,14 +262,14 @@ describe("@canna/mcp / Nível 3 request_record_dispensation (real write)", () =>
       dispensationId: string;
       emittedEvents: string[];
     };
-    expect(data.status).toBe("RECORDED");
+    expect(data.status).toBe("PENDING_APPROVAL");
     expect(data.dispensationId.length).toBeGreaterThanOrEqual(26); // ULID
-    expect(data.emittedEvents).toContain("DispensationRecorded");
-    expect(data.emittedEvents).toContain("MemberQuotaConsumed");
+    expect(data.emittedEvents).toEqual(["DispensationRequested"]);
 
-    // The events really landed — stream is no longer empty (stub mutated nothing).
+    // Only the request landed — NO quota consumption until a distinct approver acts.
     const { events } = await store.readStream(`association:${ASSOC}:dispensations`);
-    expect(events.map((e) => e.type)).toContain("MemberQuotaConsumed");
+    expect(events.map((e) => e.type)).toEqual(["DispensationRequested"]);
+    expect(events.map((e) => e.type)).not.toContain("MemberQuotaConsumed");
   });
 });
 

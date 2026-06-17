@@ -164,6 +164,29 @@ services:
     command: ["tsx", "apps/worker/src/server.ts"]
     networks: [canna]
 
+  # --- canna-projection-worker: read-model applier (role = projection-worker)
+  # Folds the Emmett event log into the Postgres read-model tables that power the
+  # observe-side MCP tools (get_members_by_status, list_available_lots). WITHOUT
+  # this lane those tables only reflect the seed projection — freshly-registered
+  # members never surface there (see e2e/register-member.e2e.ts NOTE). It is the
+  # async-projection half of the sync/async boundary (ADR-001); side-effect-free.
+  # Opt-in profile until the read-side is promoted to a required prod role.
+  projection-worker:
+    <<: *canna-image
+    container_name: canna-projection-worker
+    restart: unless-stopped
+    profiles: ["projection"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-canna}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-canna}
+      PORT: "3002"
+      HOST: 0.0.0.0
+    # tsx for the same `.js`->`.ts` specifier-resolution reason as mcp/worker.
+    command: ["tsx", "apps/worker/src/projection-worker.ts"]
+    networks: [canna]
+
   # --- canna-agent: Next.js / assistant-ui chat ---------------------------
   # NOT built by the root Dockerfile: apps/agent is excluded from the pnpm
   # workspace and depends on unpublished `link:` packages OUTSIDE this repo

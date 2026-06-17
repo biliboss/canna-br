@@ -32,6 +32,8 @@ const ZERO = (() => {
 interface DispensationProjection {
   readonly quotaConsumedByMemberMonth: ReadonlyMap<string, QuantityGrams>;
   readonly lotQuantityDeducted: ReadonlyMap<string, QuantityGrams>;
+  /** Requested-but-not-yet-effected dispensations, keyed by dispensationId. */
+  readonly pendingRequests: ReadonlyMap<string, Dispensation.PendingDispensationRequest>;
 }
 
 // Type-guards bound to the NAMED domain event types (Dispensation.*). This is
@@ -51,11 +53,20 @@ const isLotQuantityDeducted = (
 ): e is Dispensation.LotQuantityDeductedByDispensation =>
   e.type === "LotQuantityDeducted";
 
+const isDispensationRequested = (
+  e: DomainEvent<string, unknown>,
+): e is Dispensation.DispensationRequested => e.type === "DispensationRequested";
+
+const isDispensationRecorded = (
+  e: DomainEvent<string, unknown>,
+): e is Dispensation.DispensationRecorded => e.type === "DispensationRecorded";
+
 const projectAssociationStream = (
   events: readonly DomainEvent<string, unknown>[],
 ): DispensationProjection => {
   const quota = new Map<string, QuantityGrams>();
   const lot = new Map<string, QuantityGrams>();
+  const pending = new Map<string, Dispensation.PendingDispensationRequest>();
   for (const e of events) {
     if (isMemberQuotaConsumed(e)) {
       const key = `${e.payload.memberId}|${e.payload.month}`;
@@ -66,23 +77,50 @@ const projectAssociationStream = (
     if (isLotQuantityDeducted(e)) {
       const prev = lot.get(e.payload.lotId) ?? ZERO;
       lot.set(e.payload.lotId, addGrams(prev, e.payload.quantityG));
+      continue;
+    }
+    if (isDispensationRequested(e)) {
+      pending.set(e.payload.dispensationId, {
+        dispensationId: e.payload.dispensationId,
+        memberId: e.payload.memberRef,
+        lotId: e.payload.inventoryLotRef,
+        quantityG: e.payload.quantityG,
+        requestedBy: e.payload.requestedBy,
+      });
+      continue;
+    }
+    if (isDispensationRecorded(e)) {
+      // Effected → no longer pending.
+      pending.delete(e.payload.dispensationId);
     }
   }
   return {
     quotaConsumedByMemberMonth: quota,
     lotQuantityDeducted: lot,
+    pendingRequests: pending,
   };
 };
 
+interface ContextTarget {
+  readonly associationId: string;
+  readonly memberId: string;
+  readonly lotId: string;
+  readonly now: Date;
+}
+
 const buildContext = async (
   store: CannaEventStore,
-  cmd: Dispensation.RecordDispensation,
+  cmd: ContextTarget,
   responsavelTecnicoId: string | null,
   dispenserRole: "DISPENSADOR" | "RESPONSAVEL_TECNICO" | "ADMIN" | "OTHER",
 ): Promise<{
   readonly ctx: Dispensation.DispensationContext;
   readonly streamVersion: bigint;
   readonly month: string;
+  readonly pendingRequests: ReadonlyMap<
+    string,
+    Dispensation.PendingDispensationRequest
+  >;
 }> => {
   const month = monthOf(cmd.now);
 
@@ -137,7 +175,12 @@ const buildContext = async (
     responsavelTecnicoId,
   };
 
-  return { ctx, streamVersion: currentStreamVersion, month };
+  return {
+    ctx,
+    streamVersion: currentStreamVersion,
+    month,
+    pendingRequests: projection.pendingRequests,
+  };
 };
 
 export interface RecordDispensationDeps {
@@ -200,6 +243,157 @@ export const recordDispensation = async (
     domainError(
       "STREAM_CONFLICT_EXHAUSTED",
       `Failed to append dispensation after ${String(maxRetries)} retries`,
+      { dispensationId: cmd.dispensationId, associationId: cmd.associationId },
+    ),
+  );
+};
+
+export interface RequestDispensationDeps {
+  readonly store: CannaEventStore;
+  readonly dispenserRole: "DISPENSADOR" | "RESPONSAVEL_TECNICO" | "ADMIN" | "OTHER";
+  readonly maxRetries?: number;
+}
+
+/**
+ * RDC 1.014 — Step 1. Records a PENDING dispensation request (no quota/lot
+ * mutation). Light validation via `decideRequest`; appends a single
+ * `DispensationRequested` event under optimistic concurrency.
+ */
+export const requestDispensation = async (
+  deps: RequestDispensationDeps,
+  cmd: Dispensation.RequestDispensation,
+): Promise<CommandResult<Dispensation.DispensationEvent>> => {
+  const maxRetries = deps.maxRetries ?? 3;
+  let attempt = 0;
+
+  while (attempt <= maxRetries) {
+    const { ctx, streamVersion } = await buildContext(
+      deps.store,
+      cmd,
+      null,
+      deps.dispenserRole,
+    );
+
+    const result = Dispensation.decideRequest(cmd, ctx);
+    if (isDomainError(result)) {
+      return err(result);
+    }
+
+    const stream = associationStream(cmd.associationId);
+    const expectedVersion = streamVersion === 0n ? ("none" as const) : streamVersion;
+
+    try {
+      const appended = await deps.store.appendToStream<Dispensation.DispensationEvent>(
+        stream,
+        result,
+        expectedVersion,
+      );
+      return ok({ events: result, nextVersion: appended.nextExpectedVersion });
+    } catch (e) {
+      if (e instanceof StreamVersionConflictError) {
+        attempt += 1;
+        continue;
+      }
+      throw e;
+    }
+  }
+
+  return err(
+    domainError(
+      "STREAM_CONFLICT_EXHAUSTED",
+      `Failed to request dispensation after ${String(maxRetries)} retries`,
+      { dispensationId: cmd.dispensationId, associationId: cmd.associationId },
+    ),
+  );
+};
+
+export interface ApproveDispensationDeps {
+  readonly store: CannaEventStore;
+  /** Role of the approver — RBAC is enforced at the tool layer; the domain
+   * effect runs as the original DISPENSADOR. */
+  readonly approverRole: "RESPONSAVEL_TECNICO" | "DIRETORIA";
+  readonly maxRetries?: number;
+}
+
+/**
+ * RDC 1.014 — Step 2. A distinct approver effects a pending request. The
+ * original request (member/lot/quantity/requester) is recovered from the
+ * stored `DispensationRequested` event in the stream — never from caller input.
+ * Segregation is enforced in `decideApprove` (delegates to the effect decider
+ * with `dispensedBy = requester`, `approvedBy = approver`). On success appends
+ * DispensationRecorded + MemberQuotaConsumed + LotQuantityDeducted atomically.
+ */
+export const approveDispensation = async (
+  deps: ApproveDispensationDeps,
+  cmd: Dispensation.ApproveDispensation,
+): Promise<CommandResult<Dispensation.DispensationEvent>> => {
+  const maxRetries = deps.maxRetries ?? 3;
+  let attempt = 0;
+
+  while (attempt <= maxRetries) {
+    // Peek the pending request first to discover member/lot for the context load.
+    const { events: streamEvents } = await deps.store.readStream(
+      associationStream(cmd.associationId),
+    );
+    const pending = projectAssociationStream(streamEvents).pendingRequests.get(
+      cmd.dispensationId,
+    );
+    if (pending == null) {
+      return err(
+        domainError(
+          "PENDING_DISPENSATION_NOT_FOUND",
+          "No pending dispensation request found for this id",
+          { dispensationId: cmd.dispensationId },
+        ),
+      );
+    }
+
+    const { ctx, streamVersion, pendingRequests } = await buildContext(
+      deps.store,
+      {
+        associationId: cmd.associationId,
+        memberId: pending.memberId,
+        lotId: pending.lotId,
+        now: cmd.now,
+      },
+      // Effect runs as the original DISPENSADOR (segregation is by identity).
+      null,
+      "DISPENSADOR",
+    );
+
+    const effectCtx: Dispensation.DispensationContext = {
+      ...ctx,
+      pendingRequest: pendingRequests.get(cmd.dispensationId) ?? null,
+    };
+
+    const result = Dispensation.decideApprove(cmd, effectCtx);
+    if (isDomainError(result)) {
+      return err(result);
+    }
+
+    const stream = associationStream(cmd.associationId);
+    const expectedVersion = streamVersion === 0n ? ("none" as const) : streamVersion;
+
+    try {
+      const appended = await deps.store.appendToStream<Dispensation.DispensationEvent>(
+        stream,
+        result,
+        expectedVersion,
+      );
+      return ok({ events: result, nextVersion: appended.nextExpectedVersion });
+    } catch (e) {
+      if (e instanceof StreamVersionConflictError) {
+        attempt += 1;
+        continue;
+      }
+      throw e;
+    }
+  }
+
+  return err(
+    domainError(
+      "STREAM_CONFLICT_EXHAUSTED",
+      `Failed to approve dispensation after ${String(maxRetries)} retries`,
       { dispensationId: cmd.dispensationId, associationId: cmd.associationId },
     ),
   );

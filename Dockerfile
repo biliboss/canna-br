@@ -1,17 +1,25 @@
 # canna-br — single-image monorepo build for the v0.1.0 self-host stack.
 #
-# ONE OCI image carries all three TypeScript backend roles (api / mcp / worker).
-# Each compose service runs the same image and overrides CMD to pick its role
-# (Gabriel's "1 image, CMD per role" Kamal/compose pattern).
+# ONE OCI image carries the TypeScript backend roles. Each service runs the same
+# image and overrides CMD to pick its role (Gabriel's "1 image, CMD per role"
+# Kamal/compose pattern). Roles:
+#   api               — REST Fastify, :3000
+#   mcp               — MCP StreamableHTTP, :3001
+#   worker            — BullMQ side-effects (SNGPC/PDF/email), health :3002
+#   projection-worker — read-model applier (event log → Postgres read models),
+#                       health :3002. NEW role; wire it when the read-model
+#                       projection lane must run (see ops/docker/DEPLOY.md).
 #
 #   docker build -t canna-br:0.1.0 .
-#   docker run --rm canna-br:0.1.0 tsx apps/api/src/server.ts      # api    (3000)
-#   docker run --rm canna-br:0.1.0 tsx apps/mcp/src/main.ts        # mcp    (3001)
-#   docker run --rm canna-br:0.1.0 tsx apps/worker/src/server.ts   # worker (health 3002)
+#   docker run --rm canna-br:0.1.0 tsx apps/api/src/server.ts               # api
+#   docker run --rm canna-br:0.1.0 tsx apps/mcp/src/main.ts                 # mcp
+#   docker run --rm canna-br:0.1.0 tsx apps/worker/src/server.ts            # worker
+#   docker run --rm canna-br:0.1.0 tsx apps/worker/src/projection-worker.ts # projection-worker
 #
-# All three roles run via tsx: the mcp/worker sources import siblings with `.js`
-# specifiers that resolve to `.ts` on disk, which plain `node --experimental-
-# strip-types` does NOT rewrite — only tsx does.
+# ALL roles run via tsx — NEVER `node --experimental-strip-types`. The sources
+# import siblings with `.js` specifiers that resolve to `.ts` on disk, which plain
+# `node --experimental-strip-types` does NOT rewrite (it would crashloop on a
+# missing-module resolve) — only tsx rewrites those specifiers.
 #
 # NOTE: apps/agent (Next.js / assistant-ui chat) is NOT built here. It depends on
 # unpublished `link:` packages that live OUTSIDE this repo
@@ -46,7 +54,7 @@ RUN pnpm install --frozen-lockfile \
 
 # ---------------------------------------------------------------------------
 # Stage 3 — build: bring in app sources and run the workspace build.
-# The api/mcp/worker apps run TypeScript directly (tsx / --experimental-strip-types),
+# The api/mcp/worker apps run TypeScript directly via tsx (not strip-types),
 # so `pnpm -r build` only compiles packages that declare a build script; it is a
 # no-op for apps with no build step. `|| true` keeps the image building even if a
 # package has no build script.
@@ -67,7 +75,8 @@ ENV NODE_ENV=production \
     HOST=0.0.0.0
 WORKDIR /app
 
-# tsx for the api role; mcp/worker use node --experimental-strip-types.
+# tsx for EVERY role (api / mcp / worker / projection-worker) — see header note;
+# plain node --experimental-strip-types does not resolve the `.js`→`.ts` specifiers.
 RUN npm install -g tsx@4.19.2
 
 # Non-root runtime user.
