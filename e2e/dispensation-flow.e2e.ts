@@ -31,6 +31,9 @@ test.beforeAll(() => {
 
 const QUOTA_G = 30;
 const DISPENSE_G = 5;
+// Distinct actor for RDC1.014 approval segregation — must differ from the
+// default requester identity (the DISPENSADOR who requests).
+const APPROVER = "01HZAPPROVERE2E000000000002";
 
 test("dispensation: validate → dispense → consumed rises + remaining falls", async () => {
   // onboard a fresh ACTIVE member
@@ -71,8 +74,9 @@ test("dispensation: validate → dispense → consumed rises + remaining falls",
   expect(q0.payload["consumedG"]).toBe(0);
   expect(q0.payload["remainingG"]).toBe(QUOTA_G);
 
-  // dispense from the seeded RELEASED lot
-  const d1 = await call({
+  // RDC1.014 two-step: DISPENSADOR REQUESTS (no quota consumed yet) → distinct
+  // RT/DIRETORIA APPROVES → RECORDED + quota consumed. (approval gate 064f3cd)
+  const req1 = await call({
     name: "request_record_dispensation",
     arguments: {
       associationId: SEED.association,
@@ -83,8 +87,35 @@ test("dispensation: validate → dispense → consumed rises + remaining falls",
     },
     role: "DISPENSADOR",
   });
-  expect(d1.isError, d1.text).toBe(false);
-  expect(d1.payload["status"]).toBe("RECORDED");
+  expect(req1.isError, req1.text).toBe(false);
+  expect(req1.payload["status"]).toBe("PENDING_APPROVAL");
+  const dispensationId = req1.payload["dispensationId"] as string;
+
+  // request alone consumes NOTHING (segregation: effect happens at approval)
+  const qPending = await call({
+    name: "get_member_quota",
+    arguments: { memberId },
+    role: "DISPENSADOR",
+  });
+  expect(qPending.payload["consumedG"], "pending request consumes nothing").toBe(0);
+
+  // segregation: the requesting DISPENSADOR cannot approve their own request
+  const selfApprove = await call({
+    name: "approve_dispensation",
+    arguments: { associationId: SEED.association, dispensationId },
+    role: "DISPENSADOR",
+  });
+  expect(selfApprove.isError, "self-approval must be denied").toBe(true);
+
+  // distinct approver (RT) effects it → RECORDED + quota consumed
+  const appr1 = await call({
+    name: "approve_dispensation",
+    arguments: { associationId: SEED.association, dispensationId },
+    role: "RESPONSAVEL_TECNICO",
+    user: APPROVER,
+  });
+  expect(appr1.isError, appr1.text).toBe(false);
+  expect(appr1.payload["status"]).toBe("RECORDED");
 
   const q1 = await call({
     name: "get_member_quota",
@@ -94,29 +125,34 @@ test("dispensation: validate → dispense → consumed rises + remaining falls",
   expect(q1.payload["consumedG"]).toBe(DISPENSE_G);
   expect(q1.payload["remainingG"]).toBe(QUOTA_G - DISPENSE_G);
 
-  // second identical dispensation: NO idempotency dedupe → consumes again
-  const d2 = await call({
+  // a second, distinct request→approve cycle accumulates (separate dispensation)
+  const req2 = await call({
     name: "request_record_dispensation",
     arguments: {
       associationId: SEED.association,
       memberId,
       lotId: SEED.lot,
       quantityG: DISPENSE_G,
-      justification: "wave.8 e2e dispensation (repeat)",
+      justification: "wave.8 e2e dispensation (second cycle)",
     },
     role: "DISPENSADOR",
   });
-  expect(d2.isError, d2.text).toBe(false);
-  expect(d2.payload["status"]).toBe("RECORDED");
+  expect(req2.isError, req2.text).toBe(false);
+  const dispensationId2 = req2.payload["dispensationId"] as string;
+  const appr2 = await call({
+    name: "approve_dispensation",
+    arguments: { associationId: SEED.association, dispensationId: dispensationId2 },
+    role: "RESPONSAVEL_TECNICO",
+    user: APPROVER,
+  });
+  expect(appr2.isError, appr2.text).toBe(false);
+  expect(appr2.payload["status"]).toBe("RECORDED");
 
   const q2 = await call({
     name: "get_member_quota",
     arguments: { memberId },
     role: "DISPENSADOR",
   });
-  expect(
-    q2.payload["consumedG"],
-    "no dedupe: repeat dispensation accumulates",
-  ).toBe(DISPENSE_G * 2);
+  expect(q2.payload["consumedG"]).toBe(DISPENSE_G * 2);
   expect(q2.payload["remainingG"]).toBe(QUOTA_G - DISPENSE_G * 2);
 });

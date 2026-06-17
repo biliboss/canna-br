@@ -32,12 +32,24 @@ export type Role =
   | "DIRETORIA";
 
 const USER = "01HZACTORE2E0000000000001";
+/**
+ * Distinct second actor. RDC1.014 two-person segregation requires the approver
+ * of a dispensation to be a DIFFERENT person from the requester — pass
+ * `user: APPROVER_USER` on approve_dispensation calls.
+ */
+export const APPROVER_USER = "01HZACTORE2E0000000000002";
 
 export interface ToolCall {
   readonly name: string;
   readonly arguments?: Record<string, unknown>;
   /** Role header for THIS call (tool role gate). Default DIRETORIA. */
   readonly role?: Role;
+  /**
+   * User identity for THIS call. Default USER. Override when a flow needs a
+   * DISTINCT actor — e.g. RDC1.014 approval segregation, where the approver
+   * must not be the same person as the requester.
+   */
+  readonly user?: string;
 }
 
 export interface ToolResult {
@@ -60,7 +72,7 @@ export async function call(c: ToolCall): Promise<ToolResult> {
   const transport = new StreamableHTTPClientTransport(new URL(MCP_URL), {
     requestInit: {
       headers: {
-        "x-canna-user": USER,
+        "x-canna-user": c.user ?? USER,
         "x-canna-role": c.role ?? "DIRETORIA",
         "x-canna-association": SEED.association,
       },
