@@ -25,6 +25,7 @@
     "@modelcontextprotocol/sdk": "^1.0.4"
   },
   "devDependencies": {
+    "@canna/test-utils": "workspace:*",
     "@canna/tsconfig": "workspace:*",
     "@electric-sql/pglite": "^0.5.3",
     "drizzle-orm": "^0.36.0",
