@@ -29,6 +29,9 @@ const SYSTEM = [
 const DOCS_HREF =
   process.env.NEXT_PUBLIC_DOCS_URL ?? "http://127.0.0.1:4336/apps/";
 
+// When server has a key configured, hide the BYOK field entirely.
+const HAS_SERVER_KEY = process.env.NEXT_PUBLIC_HAS_SERVER_KEY === "1";
+
 export function Playground() {
   const [model, setModel] = useState(MODELS[0]!.id);
   const [keyInput, setKeyInput] = useState("");
@@ -37,7 +40,7 @@ export function Playground() {
   useEffect(() => {
     try {
       const m = localStorage.getItem("aui-model");
-      const k = localStorage.getItem("aui-key") ?? "";
+      const k = HAS_SERVER_KEY ? "" : (localStorage.getItem("aui-key") ?? "");
       if (m) setModel(m);
       setKeyInput(k);
       setApplied({ model: m || MODELS[0]!.id, apiKey: k });
@@ -49,14 +52,14 @@ export function Playground() {
   const apply = () => {
     try {
       localStorage.setItem("aui-model", model);
-      localStorage.setItem("aui-key", keyInput);
+      if (!HAS_SERVER_KEY) localStorage.setItem("aui-key", keyInput);
     } catch {
       /* ignore */
     }
-    setApplied({ model, apiKey: keyInput.trim() });
+    setApplied({ model, apiKey: HAS_SERVER_KEY ? "" : keyInput.trim() });
   };
 
-  const dirty = model !== applied.model || keyInput.trim() !== applied.apiKey;
+  const dirty = model !== applied.model || (!HAS_SERVER_KEY && keyInput.trim() !== applied.apiKey);
 
   return (
     <div className="flex h-dvh flex-col">
@@ -79,14 +82,16 @@ export function Playground() {
             </option>
           ))}
         </select>
-        <input
-          type="password"
-          value={keyInput}
-          onChange={(e) => setKeyInput(e.target.value)}
-          placeholder="sk-or-…  (sua OpenRouter key — opcional em dev)"
-          aria-label="OpenRouter API key"
-          className="w-72 rounded-md border bg-transparent px-2 py-1"
-        />
+        {!HAS_SERVER_KEY && (
+          <input
+            type="password"
+            value={keyInput}
+            onChange={(e) => setKeyInput(e.target.value)}
+            placeholder="sk-or-…  (sua OpenRouter key — opcional em dev)"
+            aria-label="OpenRouter API key"
+            className="w-72 rounded-md border bg-transparent px-2 py-1"
+          />
+        )}
         <button
           onClick={apply}
           disabled={!dirty}

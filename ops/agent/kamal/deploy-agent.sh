@@ -62,7 +62,10 @@ if [[ "${ROUTE_ONLY}" != "--route-only" ]]; then
     . | run "mkdir -p /tmp/canna-agent-build && tar -xzf - -C /tmp/canna-agent-build"
 
   echo "[3/5] Building Docker image on VPS..."
-  run "docker build -t ${IMAGE}:${VERSION} /tmp/canna-agent-build && rm -rf /tmp/canna-agent-build"
+  run "docker build \
+    --build-arg NEXT_PUBLIC_HAS_SERVER_KEY=1 \
+    --build-arg NEXT_PUBLIC_DOCS_URL=${NEXT_PUBLIC_DOCS_URL:-https://docs.cannabr.org} \
+    -t ${IMAGE}:${VERSION} /tmp/canna-agent-build && rm -rf /tmp/canna-agent-build"
 fi
 
 # ──────────────────────────────────────────────────────────────────────────────

@@ -57,6 +57,7 @@ env:
     # on the same host (both in kamal network); revisit if separated.
     MCP_SERVER_URL: http://127.0.0.1:3001
     NEXT_PUBLIC_DOCS_URL: https://docs.cannabr.org
+    NEXT_PUBLIC_HAS_SERVER_KEY: "1"
     # Basic-auth gate — unset in .env.secret to disable (dev mode).
     AGENT_BASIC_AUTH_USER: canna
   secret:

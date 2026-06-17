@@ -20,6 +20,11 @@ COPY package.json pnpm-lock.yaml ./
 COPY vendor ./vendor
 RUN pnpm install --ignore-workspace --frozen-lockfile
 COPY . .
+# Build-time public env vars (baked into the Next.js bundle).
+ARG NEXT_PUBLIC_HAS_SERVER_KEY=""
+ARG NEXT_PUBLIC_DOCS_URL=""
+ENV NEXT_PUBLIC_HAS_SERVER_KEY=$NEXT_PUBLIC_HAS_SERVER_KEY \
+    NEXT_PUBLIC_DOCS_URL=$NEXT_PUBLIC_DOCS_URL
 RUN pnpm build
 
 # ---- runtime ----
