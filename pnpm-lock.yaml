@@ -133,6 +133,9 @@ importers:
         specifier: ^1.0.4
         version: 1.29.0(zod@4.4.3)
     devDependencies:
+      '@canna/test-utils':
+        specifier: workspace:*
+        version: link:../../tooling/test-utils
       '@canna/tsconfig':
         specifier: workspace:*
         version: link:../../tooling/tsconfig
