@@ -83,3 +83,74 @@ export async function getMcpTools(): Promise<ToolSet> {
   const client = await getMcpClient();
   return (await client.tools()) as ToolSet;
 }
+
+// --- OKF domain knowledge ----------------------------------------------------
+// The MCP server (apps/mcp) serves the curated OKF bundle as resources under
+// `okf://domain/<slug>` (RDC 1.014 segregation, member lifecycle, monthly quota,
+// roles glossary). We inject this KNOWLEDGE next to the TOOLS so the agent can
+// answer domain questions grounded in the bundle — not from the model's memory.
+//
+// Only these key concepts are injected (kept lean so the context window is not
+// blown). The index/log meta-docs are skipped.
+const OKF_SCHEME = "okf://domain/";
+const OKF_KEY_SLUGS = [
+  "rdc-1014-segregation",
+  "member-lifecycle",
+  "monthly-quota",
+  "roles-glossary",
+] as const;
+
+/**
+ * Fetch the OKF domain bundle from the MCP server and render it as a single
+ * curated context block for the system prompt. Mints a fresh client (fresh
+ * token — same no-singleton rule as the tools path). Degrades gracefully: if
+ * the MCP server is down or a resource is missing, returns whatever was read
+ * (possibly ""), never throws — a dead MCP must not 500 the chat.
+ */
+export async function getOkfContext(): Promise<string> {
+  let client: MCPClient | undefined;
+  try {
+    client = await getMcpClient();
+    const { resources } = await client.listResources();
+    const okfUris = new Set(
+      resources
+        .map((r) => r.uri)
+        .filter((uri) =>
+          OKF_KEY_SLUGS.some((slug) => uri === `${OKF_SCHEME}${slug}`),
+        ),
+    );
+
+    const blocks: string[] = [];
+    for (const uri of okfUris) {
+      try {
+        const { contents } = await client.readResource({ uri });
+        for (const c of contents) {
+          const text = (c as { text?: string }).text;
+          if (typeof text === "string" && text.length > 0) {
+            blocks.push(text.trim());
+          }
+        }
+      } catch {
+        // skip a single unreadable resource; keep the rest
+      }
+    }
+
+    if (blocks.length === 0) return "";
+    return [
+      "## Conhecimento de domínio (OKF) — base autoritativa",
+      "Use o conhecimento abaixo como FONTE DE VERDADE para perguntas de regra/compliance/processo.",
+      "Ele vem do bundle OKF curado da associação (RDC, ciclo de vida, cota, papéis).",
+      "",
+      blocks.join("\n\n---\n\n"),
+    ].join("\n");
+  } catch {
+    // MCP unreachable → no grounding this turn, but the chat still works.
+    return "";
+  } finally {
+    try {
+      await client?.close();
+    } catch {
+      /* best-effort */
+    }
+  }
+}

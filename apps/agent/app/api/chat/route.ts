@@ -7,7 +7,7 @@ import {
   convertToModelMessages,
   type UIMessage,
 } from "ai";
-import { getMcpTools } from "../mcp-client";
+import { getMcpTools, getOkfContext } from "../mcp-client";
 
 const DEFAULT_MODEL = process.env.MODEL_ID ?? "google/gemini-2.5-flash-lite";
 const MCP_ENABLED = process.env.MCP_ENABLED === "1";
@@ -21,6 +21,18 @@ async function getMCPTools(): Promise<ToolSet> {
   } catch (e) {
     console.warn("Failed to connect to MCP server:", e);
     return {};
+  }
+}
+
+// Pull the OKF domain bundle (knowledge) to ground the model alongside tools.
+// Gated on the same MCP_ENABLED flag; degrades to "" if the server is down.
+async function getOkfGrounding(): Promise<string> {
+  if (!MCP_ENABLED) return "";
+  try {
+    return await getOkfContext();
+  } catch (e) {
+    console.warn("Failed to load OKF domain context:", e);
+    return "";
   }
 }
 
@@ -69,12 +81,21 @@ export async function POST(req: Request) {
   });
   const modelId = model?.trim() || DEFAULT_MODEL;
 
-  const mcpTools = await getMCPTools();
+  const [mcpTools, okfContext] = await Promise.all([
+    getMCPTools(),
+    getOkfGrounding(),
+  ]);
+
+  // Inject OKF knowledge ahead of any client-supplied system prompt. `system`
+  // may be undefined (e.g. the e2e POSTs only `messages`) — filter(Boolean)
+  // keeps the join clean and never grounds with literal "undefined".
+  const groundedSystem =
+    [okfContext, system].filter(Boolean).join("\n\n") || undefined;
 
   const result = streamText({
     model: openrouter(modelId),
     messages: await convertToModelMessages(messages),
-    system,
+    system: groundedSystem,
     tools: {
       ...filterLlmVisibleTools(mcpTools),
       ...frontendTools(tools ?? {}),
