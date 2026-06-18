@@ -97,3 +97,9 @@ pre-push:
       # Best-effort on boxes without docker (skips, exit 0). To HARD-fail when
       # docker is missing: CB_E2E_GATE_REQUIRE_DOCKER=1.
       run: pnpm test:e2e:gate
+    07-okf-gate:
+      # cb-w12 Camada OKF — OKF (Open Knowledge Format v0.1) conformance gate
+      # over the apps/docs/okf/ knowledge bundle: E1 (frontmatter parseável),
+      # E2 (type não-vazio), E3 (index.md/log.md estruturais). Non-conformant
+      # bundle BLOCKS the push. Pure bash, no deps. See apps/docs/okf/index.md.
+      run: bash scripts/validate-okf.sh
