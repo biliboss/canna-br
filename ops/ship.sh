@@ -72,13 +72,38 @@ docker exec kamal-proxy kamal-proxy deploy canna-mcp-org --target \${IP}:3001 --
 echo "  mcp live: \$NEW @ \$IP"
 EOF
 
-# ── 4. agent (getOkfContext) — reuse the proven agent deploy script ──
-echo "[4/4] cutover canna-agent (getOkfContext) via deploy-agent.sh"
-if [ -x "$REPO_ROOT/ops/agent/kamal/deploy-agent.sh" ]; then
-  bash "$REPO_ROOT/ops/agent/kamal/deploy-agent.sh" || echo "WARN: agent deploy returned non-zero — check manually"
-else
-  echo "  (deploy-agent.sh not executable/found — agent rebuild skipped; run it manually)"
-fi
+# ── 4. cutover canna-agent (getOkfContext) — rollback-safe, PRESERVE live env ──
+# Do NOT use ops/agent/kamal/deploy-agent.sh: it predates the auth work and does
+# not set JWT_SECRET / CANNA_* — rebuilding via it would drop the agent's signing
+# env and break MCP auth. Instead reuse the RUNNING agent's env (already correct:
+# JWT_SECRET == mcp's, CANNA_ROLE/USER/ASSOCIATION, MCP_SERVER_URL=container-name).
+echo "[4/4] cutover canna-agent (getOkfContext) — preserve live env"
+echo "[4a] tar-pipe agent build context → VPS"
+tar -czf - -C "$REPO_ROOT/apps/agent" \
+  --exclude="node_modules" --exclude=".next" . \
+  | run "rm -rf /tmp/canna-agent-ship && mkdir -p /tmp/canna-agent-ship && tar -xzf - -C /tmp/canna-agent-ship && echo ok-agent-ctx"
+run "cd /tmp/canna-agent-ship && docker build -t canna-agent:${TAG} . 2>&1 | tail -2 && rm -rf /tmp/canna-agent-ship"
+run bash -s <<EOF
+set -uo pipefail
+PREV=\$(docker ps --filter 'name=canna-agent-latest' --format '{{.Names}}' | head -1)
+[ -z "\$PREV" ] && { echo "ERR: no running agent container"; exit 1; }
+docker inspect "\$PREV" --format '{{range .Config.Env}}{{println .}}{{end}}' \
+  | grep -E '^(NODE_ENV|MCP_SERVER_URL|MCP_ENABLED|JWT_SECRET|OPENROUTER_API_KEY|AGENT_BASIC_AUTH_USER|AGENT_BASIC_AUTH_PASS|NEXT_PUBLIC_DOCS_URL|CANNA_)' > /tmp/agent.env
+docker rename canna-agent-latest canna-agent-prev
+docker stop canna-agent-prev >/dev/null
+docker run -d --name canna-agent-latest --restart=unless-stopped --network kamal \
+  -p 127.0.0.1:3002:3002 --env-file /tmp/agent.env canna-agent:${TAG}
+for i in \$(seq 1 24); do
+  st=\$(docker inspect -f '{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' canna-agent-latest 2>/dev/null)
+  [ "\$st" = healthy ] && { echo "  agent healthy"; break; }
+  [ \$i -eq 24 ] && { echo "ERR agent health timeout st=\$st — rollback"; docker rm -f canna-agent-latest; docker rename canna-agent-prev canna-agent-latest; docker start canna-agent-latest; IP=\$(docker inspect -f '{{.NetworkSettings.Networks.kamal.IPAddress}}' canna-agent-latest); docker exec kamal-proxy kamal-proxy deploy canna-app-org --target \${IP}:3002 --host app.cannabr.org --tls --health-check-path /health; exit 1; }
+  sleep 3
+done
+IP=\$(docker inspect -f '{{.NetworkSettings.Networks.kamal.IPAddress}}' canna-agent-latest)
+docker exec kamal-proxy kamal-proxy deploy canna-app-org --target \${IP}:3002 --host app.cannabr.org --tls --health-check-path /health --deploy-timeout 30s
+docker rm -f canna-agent-prev 2>/dev/null || true
+echo "  agent live @ \$IP"
+EOF
 
 verify
 echo "✓ ship ${VER}: mcp+agent cutover done. Review verify output."
