@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# bin/ship — canna-br CI→CD ring in one command, NO vendor.
+#
+#   1. git push origin main   → fires the lefthook PRE-PUSH gate (7 rings:
+#      typecheck · test · build-widgets · smoke-prod · coverage · e2e-gate ·
+#      okf-gate). A red gate ABORTS the push → deploy never runs. (CI ring)
+#   2. ops/ship.sh <version>  → build + rollback-safe cutover on the VPS. (CD ring)
+#
+# Git has no client-side post-push hook, so the CD ring is an explicit script
+# chained after a clean push — the canonical local-CI-by-hooks shape
+# (see manager dev-patterns-pool #64). Trunk-only: always ships main.
+#
+# Usage:  bin/ship <version>          e.g. bin/ship v0.2.1.5
+#         bin/ship <version> --no-push   (deploy only; gate already passed)
+
+set -euo pipefail
+
+VER="${1:?usage: bin/ship <version>  (e.g. v0.2.1.5)}"
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+
+if [ "${2:-}" != "--no-push" ]; then
+  echo "▶ CI ring: git push origin main (runs pre-push gate)"
+  git -C "$ROOT" push origin main
+fi
+
+echo "▶ CD ring: ops/ship.sh ${VER}"
+bash "$ROOT/ops/ship.sh" "$VER"
