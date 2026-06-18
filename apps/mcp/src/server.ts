@@ -1,6 +1,7 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import {
   ListToolsRequestSchema,
@@ -15,6 +16,47 @@ import { domainError, isDomainError } from "@canna/shared";
 import { traceToolCall, recordErrorSpan } from "./telemetry.js";
 
 const UI_APP_MIME = "text/html";
+const OKF_MIME = "text/markdown";
+const OKF_SCHEME = "okf://domain/";
+
+// OKF domain knowledge bundle (`okf/domain/*.md` at the monorepo root). The
+// agent consumes this curated knowledge alongside the tools, served as MCP
+// resources (not tools). mcp runs `src/` directly via --experimental-strip-types
+// (no dist), so import.meta.url resolves to the real source path in both the
+// InMemoryTransport spec and the prod container. apps/mcp/src → ../../../okf/domain.
+// Container note: Dockerfile MUST `COPY okf/ ./okf/` for this path to resolve.
+const okfDomainDir = resolve(
+  dirname(fileURLToPath(import.meta.url)),
+  "../../../okf/domain",
+);
+
+// Slugs are discovered dynamically at boot — the content lane owns okf/domain
+// and may add concepts; a readdir means we never break when they do.
+const okfSlugs: ReadonlyArray<string> = (() => {
+  try {
+    return readdirSync(okfDomainDir)
+      .filter((f) => f.endsWith(".md"))
+      .map((f) => f.replace(/\.md$/, ""))
+      .sort();
+  } catch {
+    return [];
+  }
+})();
+
+const okfUri = (slug: string): string => `${OKF_SCHEME}${slug}`;
+const okfSlugFromUri = (uri: string): string | undefined =>
+  uri.startsWith(OKF_SCHEME) ? uri.slice(OKF_SCHEME.length) : undefined;
+
+const readOkfMarkdown = (slug: string): string =>
+  readFileSync(resolve(okfDomainDir, `${slug}.md`), "utf8");
+
+const okfResourceListItems = () =>
+  okfSlugs.map((slug) => ({
+    uri: okfUri(slug),
+    name: `OKF · ${slug}`,
+    description: `Conhecimento de domínio OKF (canna-br): ${slug}`,
+    mimeType: OKF_MIME,
+  }));
 
 // Root of the @canna/ui-apps package (parent of its src/index.ts entrypoint),
 // resolved at runtime so the built single-file widget bundles in dist/ load
@@ -66,16 +108,36 @@ export const createCannaMcpServer = (deps: CannaMcpDeps): CreateServerResult => 
   }));
 
   server.setRequestHandler(ListResourcesRequestSchema, async () => ({
-    resources: allManifests.map((m) => ({
-      uri: m.resourceUri,
-      name: m.title,
-      description: m.description,
-      mimeType: UI_APP_MIME,
-    })),
+    resources: [
+      // ui:// widget bundles (MCP-apps) — rendered inline by the host.
+      ...allManifests.map((m) => ({
+        uri: m.resourceUri,
+        name: m.title,
+        description: m.description,
+        mimeType: UI_APP_MIME,
+      })),
+      // okf://domain/<slug> — curated domain knowledge the agent reads as text.
+      ...okfResourceListItems(),
+    ],
   }));
 
   server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
     const uri = request.params.uri;
+
+    // OKF domain knowledge resource — branch on scheme BEFORE the ui:// lookup
+    // so okf:// uris don't fall through to RESOURCE_NOT_FOUND.
+    const okfSlug = okfSlugFromUri(uri);
+    if (okfSlug !== undefined) {
+      if (!okfSlugs.includes(okfSlug)) {
+        throw domainError("RESOURCE_NOT_FOUND", "Unknown okf:// resource", {
+          uri,
+        });
+      }
+      return {
+        contents: [{ uri, mimeType: OKF_MIME, text: readOkfMarkdown(okfSlug) }],
+      };
+    }
+
     const manifest = manifestByUri(uri);
     if (manifest === undefined) {
       throw domainError("RESOURCE_NOT_FOUND", "Unknown ui:// resource", {

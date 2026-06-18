@@ -18,6 +18,10 @@ RUN pnpm install --frozen-lockfile --filter @canna/mcp...
 
 COPY apps/mcp/ ./apps/mcp/
 
+# OKF domain knowledge bundle — served by the MCP server as okf://domain/<slug>
+# resources. server.ts resolves apps/mcp/src → ../../../okf/domain, i.e. /app/okf/domain.
+COPY okf/ ./okf/
+
 RUN pnpm prune --prod || true
 
 # ---- runtime ----

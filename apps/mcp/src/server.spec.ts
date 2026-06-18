@@ -307,12 +307,15 @@ describe("@canna/mcp / MCP App resources (blocker #1)", () => {
     expect(caps?.resources).toBeDefined();
   });
 
-  it("ListResources returns one resource per launchable widget bundle (3 ui:// URIs)", async () => {
+  it("ListResources returns one resource per launchable widget bundle (4 ui:// URIs)", async () => {
     const { client } = await connectClient();
     const { resources } = await client.listResources();
-    const uris = resources.map((r) => r.uri).sort();
+    // Scope to the ui:// subset — OKF domain resources (okf://) are listed
+    // ALONGSIDE the widgets and must not affect this assertion.
+    const uiResources = resources.filter((r) => r.uri.startsWith("ui://"));
+    const uris = uiResources.map((r) => r.uri).sort();
     expect(uris).toEqual([...EXPECTED_URIS].sort());
-    for (const r of resources) {
+    for (const r of uiResources) {
       expect(r.mimeType).toBe("text/html");
     }
   });
@@ -331,6 +334,74 @@ describe("@canna/mcp / MCP App resources (blocker #1)", () => {
       expect(typeof first.text).toBe("string");
       expect((first.text as string).length).toBeGreaterThan(0);
     }
+  });
+});
+
+describe("@canna/mcp / OKF domain knowledge resources (cb-w13)", () => {
+  // The 6 .md concepts in okf/domain/, exposed as okf://domain/<slug>.
+  const EXPECTED_OKF_URIS = [
+    "okf://domain/index",
+    "okf://domain/log",
+    "okf://domain/member-lifecycle",
+    "okf://domain/monthly-quota",
+    "okf://domain/rdc-1014-segregation",
+    "okf://domain/roles-glossary",
+  ];
+
+  const connectClient = async () => {
+    const store = await setupStore();
+    const { server } = createCannaMcpServer({
+      store,
+      async resolveContext() {
+        return dispenserCtx(store);
+      },
+    });
+    const [clientTransport, serverTransport] =
+      InMemoryTransport.createLinkedPair();
+    const client = new Client({ name: "test-client", version: "0.0.0" });
+    await Promise.all([
+      server.connect(serverTransport),
+      client.connect(clientTransport),
+    ]);
+    return { client };
+  };
+
+  it("ListResources includes every OKF domain concept (okf:// URIs, text/markdown)", async () => {
+    const { client } = await connectClient();
+    const { resources } = await client.listResources();
+    const okf = resources.filter((r) => r.uri.startsWith("okf://"));
+    const uris = okf.map((r) => r.uri).sort();
+    expect(uris).toEqual([...EXPECTED_OKF_URIS].sort());
+    for (const r of okf) {
+      expect(r.mimeType).toBe("text/markdown");
+    }
+  });
+
+  it("ReadResource on rdc-1014-segregation returns the real .md content", async () => {
+    const { client } = await connectClient();
+    const result = await client.readResource({
+      uri: "okf://domain/rdc-1014-segregation",
+    });
+    const first = result.contents[0];
+    expect(first).toBeDefined();
+    expect(first?.uri).toBe("okf://domain/rdc-1014-segregation");
+    expect(first?.mimeType).toBe("text/markdown");
+    if (first === undefined || !("text" in first)) {
+      throw new Error("expected text content");
+    }
+    const text = first.text as string;
+    // Real substrings from okf/domain/rdc-1014-segregation.md — proves the
+    // bundle is read off disk, not a placeholder.
+    expect(text).toContain("RDC 1.014 — Segregação de função");
+    expect(text).toContain("solicita");
+    expect(text).toContain("request_record_dispensation");
+  });
+
+  it("ReadResource on an unknown okf:// slug throws RESOURCE_NOT_FOUND", async () => {
+    const { client } = await connectClient();
+    await expect(
+      client.readResource({ uri: "okf://domain/does-not-exist" }),
+    ).rejects.toThrow();
   });
 });
 
