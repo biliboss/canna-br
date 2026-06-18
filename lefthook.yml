@@ -102,4 +102,6 @@ pre-push:
       # over the apps/docs/okf/ knowledge bundle: E1 (frontmatter parseável),
       # E2 (type não-vazio), E3 (index.md/log.md estruturais). Non-conformant
       # bundle BLOCKS the push. Pure bash, no deps. See apps/docs/okf/index.md.
-      run: bash scripts/validate-okf.sh
+      # Two bundles: apps/docs/okf (docsite layer, w12) + okf/domain (domain
+      # knowledge served via MCP, w13). Both must be conformant.
+      run: bash scripts/validate-okf.sh && bash scripts/validate-okf.sh okf/domain
