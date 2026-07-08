@@ -1,3 +1,4 @@
+import { execSync } from "node:child_process";
 import { afterAll, beforeAll, describe, it, expect } from "vitest";
 import { PostgreSqlContainer, type StartedPostgreSqlContainer } from "@testcontainers/postgresql";
 import { event, type DomainEvent } from "@canna/shared";
@@ -41,7 +42,24 @@ const dockerEnvDisabled =
   process.env["CANNA_SKIP_PG_TESTS"] === "1" ||
   process.env["CI_NO_DOCKER"] === "1";
 
-describe.skipIf(dockerEnvDisabled)("postgres event store (testcontainers)", () => {
+const dockerAvailable = (): boolean => {
+  try {
+    execSync("docker info", { stdio: "ignore" });
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+const dockerUp = !dockerEnvDisabled && dockerAvailable();
+
+if (!dockerUp && process.env["CANNA_REQUIRE_PG_TESTS"] === "1") {
+  throw new Error(
+    "[postgres.spec] docker unavailable and CANNA_REQUIRE_PG_TESTS=1 — failing hard (unset to skip instead)",
+  );
+}
+
+describe.skipIf(dockerEnvDisabled || !dockerUp)("postgres event store (testcontainers)", () => {
   let pg: StartedPostgreSqlContainer | null = null;
   let rawStore: EmmettPgEventStore | null = null;
   let store: CannaEventStore | null = null;
@@ -66,10 +84,9 @@ describe.skipIf(dockerEnvDisabled)("postgres event store (testcontainers)", () =
     if (pg !== null) await pg.stop();
   }, 60_000);
 
-  it.runIf(true)("appends + reads against real Postgres", async () => {
+  it("appends + reads against real Postgres", async () => {
     if (store === null) {
-      console.warn("Docker not available; passing through.");
-      return;
+      throw new Error("postgres container failed to start in beforeAll");
     }
     const stream = uniq("counter");
     await store.appendToStream(stream, [counted(stream, 5), counted(stream, 3)]);
@@ -81,7 +98,9 @@ describe.skipIf(dockerEnvDisabled)("postgres event store (testcontainers)", () =
   });
 
   it("aggregates state from PG stream", async () => {
-    if (store === null) return;
+    if (store === null) {
+      throw new Error("postgres container failed to start in beforeAll");
+    }
     const stream = uniq("counter");
     await store.appendToStream(stream, [
       counted(stream, 10),
@@ -97,14 +116,18 @@ describe.skipIf(dockerEnvDisabled)("postgres event store (testcontainers)", () =
   });
 
   it("readStream on non-existent stream returns empty + streamExists=false", async () => {
-    if (store === null) return;
+    if (store === null) {
+      throw new Error("postgres container failed to start in beforeAll");
+    }
     const r = await store.readStream(uniq("nonexistent"));
     expect(r.events).toEqual([]);
     expect(r.streamExists).toBe(false);
   });
 
   it("revives Date fields in payload from PG", async () => {
-    if (store === null) return;
+    if (store === null) {
+      throw new Error("postgres container failed to start in beforeAll");
+    }
     type WithDate = DomainEvent<"WithDate", { readonly when: Date }>;
     const stream = uniq("with-date");
     const at = new Date("2026-06-08T12:00:00Z");
@@ -127,7 +150,9 @@ describe.skipIf(dockerEnvDisabled)("postgres event store (testcontainers)", () =
   // writer concurrency below, which is what the ADR-001 spike gate requires.
 
   it("stale bigint expectedVersion throws conflict", async () => {
-    if (store === null) return;
+    if (store === null) {
+      throw new Error("postgres container failed to start in beforeAll");
+    }
     const stream = uniq("concurrency");
     const first = await store.appendToStream(stream, [counted(stream, 1)]);
     const stale = first.nextExpectedVersion;
@@ -140,7 +165,9 @@ describe.skipIf(dockerEnvDisabled)("postgres event store (testcontainers)", () =
   it(
     "spike gate: two parallel writers — exactly one wins, second retries with fresh version (PG-backed)",
     async () => {
-      if (store === null) return;
+      if (store === null) {
+        throw new Error("postgres container failed to start in beforeAll");
+      }
       const stream = uniq("spike");
 
       await store.appendToStream(stream, [counted(stream, 1)]);
