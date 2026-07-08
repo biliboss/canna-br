@@ -60,10 +60,12 @@ pre-push:
   parallel: false
   commands:
     01-main-guard:
+      # Mesma exceção agent/* do pre-commit (decisão Gabriel, 2026-07-08) —
+      # sem isso o worker commita mas nunca consegue dar push pra abrir o PR.
       run: |
         branch="$(git rev-parse --abbrev-ref HEAD)"
-        if [ "$branch" != "main" ]; then
-          echo "✗ trunk-only: push só da main (branch atual: $branch)" >&2
+        if [ "$branch" != "main" ] && [[ "$branch" != agent/* ]]; then
+          echo "✗ trunk-only: push só da main ou agent/* (branch atual: $branch)" >&2
           exit 1
         fi
     02-validate-typecheck:
