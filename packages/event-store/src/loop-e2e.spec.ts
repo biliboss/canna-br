@@ -1,3 +1,4 @@
+import { execSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
@@ -54,6 +55,23 @@ const dockerDisabled =
   process.env["CANNA_SKIP_PG_TESTS"] === "1" ||
   process.env["CI_NO_DOCKER"] === "1";
 
+const dockerAvailable = (): boolean => {
+  try {
+    execSync("docker info", { stdio: "ignore" });
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+const dockerUp = !dockerDisabled && dockerAvailable();
+
+if (!dockerUp && process.env["CANNA_REQUIRE_PG_TESTS"] === "1") {
+  throw new Error(
+    "[loop-e2e.spec] docker unavailable and CANNA_REQUIRE_PG_TESTS=1 — failing hard (unset to skip instead)",
+  );
+}
+
 const startContainer = async (): Promise<StartedPostgreSqlContainer | null> => {
   try {
     return await new PostgreSqlContainer("postgres:16-alpine").start();
@@ -64,7 +82,7 @@ const startContainer = async (): Promise<StartedPostgreSqlContainer | null> => {
   }
 };
 
-describe.skipIf(dockerDisabled)("event -> projection -> query (real PG e2e)", () => {
+describe.skipIf(dockerDisabled || !dockerUp)("event -> projection -> query (real PG e2e)", () => {
   let pg: StartedPostgreSqlContainer | null = null;
   let rawStore: EmmettPgEventStore | null = null;
   let store: CannaEventStore | null = null;
@@ -115,8 +133,7 @@ describe.skipIf(dockerDisabled)("event -> projection -> query (real PG e2e)", ()
 
   it("publishes real events, projects them, and the query tool returns the real member", async () => {
     if (store === null || pool === null || query === null) {
-      console.warn("[loop-e2e] Docker not available; passing through.");
-      return;
+      throw new Error("postgres container/read-model setup failed in beforeAll");
     }
 
     // 1. REAL events via the app-service command handlers.
