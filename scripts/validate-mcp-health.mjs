@@ -21,8 +21,20 @@ import { fileURLToPath } from "node:url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, "..");
 
-// Must stay in sync with apps/mcp/src/tools/index.ts allTools array length.
-const EXPECTED_TOOL_COUNT = 12;
+// Derived from apps/mcp/src/tools/index.ts allTools — the single source of truth —
+// via tsx below, instead of a hardcoded number that silently drifts.
+const { allTools } = await (async () => {
+  const require = createRequire(import.meta.url);
+  const tsxEsm = require.resolve("tsx/esm/api");
+  const { register } = await import(tsxEsm);
+  const unregister = register();
+  try {
+    return await import(resolve(ROOT, "apps/mcp/src/tools/index.ts"));
+  } finally {
+    unregister();
+  }
+})();
+const EXPECTED_TOOL_COUNT = allTools.length;
 const MCP_PORT = 3102; // use distinct port so we don't collide with a running server
 const MCP_HOST = "127.0.0.1";
 const BASE = `http://${MCP_HOST}:${MCP_PORT}`;
