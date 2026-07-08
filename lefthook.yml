@@ -12,10 +12,14 @@ pre-commit:
   parallel: false
   commands:
     01-main-guard:
+      # Exceção decidida por Gabriel (2026-07-08): branches agent/* (frota de
+      # workers issue-fix) podem commitar localmente pra abrir PR + review;
+      # tudo fora de main/agent/* continua bloqueado. Merge pra main segue
+      # exigindo review humano — este gate é só sobre commit local.
       run: |
         branch="$(git rev-parse --abbrev-ref HEAD)"
-        if [ "$branch" != "main" ]; then
-          echo "✗ trunk-only: commits só na main (branch atual: $branch)" >&2
+        if [ "$branch" != "main" ] && [[ "$branch" != agent/* ]]; then
+          echo "✗ trunk-only: commits só na main ou agent/* (branch atual: $branch)" >&2
           exit 1
         fi
     02-typecheck:
